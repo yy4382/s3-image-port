@@ -11,30 +11,62 @@
                     <p>Drag and drop files to here to upload.</p>
                 </template>
             </FileUpload>
+            <TabView v-if="uploadedLinksFormatted.links.length !== 0">
+                <TabPanel header="Links">
+                    <ul>
+                        <li v-for="link in uploadedLinksFormatted.links" :key="link">
+                            <a :href="link" target="_blank">{{ link }}</a>
+                        </li>
+                    </ul>
+                </TabPanel>
+                <TabPanel header="Markdown">
+                    <ul>
+                        <li v-for="link in uploadedLinksFormatted.markdown" :key="link">
+                            <p>{{ link }}</p>
+                        </li>
+                    </ul>
+                </TabPanel>
+            </TabView>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useToast } from "primevue/usetoast";
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { type Settings } from "~/types";
+interface ImageLink {
+    link: string;
+    name: string;
+}
 const toast = useToast();
 const category = ref("");
 const categories = ["i", "title", "category", "date"];
 const items = ref([]);
+const uploadedLinks: Ref<ImageLink[]> = ref([]);
+const uploadedLinksFormatted = computed(() => ({
+    links: uploadedLinks.value.map(link => link.link),
+    markdown: uploadedLinks.value.map(link => `![${link.name}](${link.link})`)
+}));
 
-
-const onAdvancedUpload = () => {
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-};
 const search = () => { }
-function genKey(name: string) {
-    return category.value + "/" + DateTime.now().toFormat("yyyy/LL/dd") + "/" + name;
+
+function genKey(file: File) {
+    const now = DateTime.now();
+    const today_start = now.startOf("day");
+    const interval = Interval.fromDateTimes(today_start, now);
+    const fileExt = file.name.split(".").pop();
+    const filename = `${interval.length("milliseconds").toString(36)}-${Math.random().toString(36).substring(2, 4)}.${fileExt}`;
+    return category.value + "/" + DateTime.now().toFormat("yyyy/LL/dd") + "/" + filename;
 }
+
 const uploadHandler = (e: any) => {
-    const files = e.files;
+    if (!category.value) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Please select a category', life: 3000 });
+        return;
+    }
+    const files = e.files as File[];
     const s3Settings: Settings = JSON.parse(localStorage.getItem("settings") || "{}");
     const client = new S3Client({
         region: s3Settings.region,
@@ -45,17 +77,19 @@ const uploadHandler = (e: any) => {
         endpoint: s3Settings.endpoint,
     });
     const bucket = s3Settings.bucket;
-    const upload = new PutObjectCommand({
-        Bucket: bucket,
-        Key: genKey(files[0].name),
-        Body: files[0],
-    });
-    client.send(upload).then((data) => {
-        console.log(data);
-        toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-    }).catch((error) => {
-        console.error(error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'File Upload Failed', life: 3000 });
-    });
+    for (const file of files) {
+        const upload = new PutObjectCommand({
+            Bucket: bucket,
+            Key: genKey(file),
+            Body: file,
+        });
+        client.send(upload).then((data) => {
+            toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+            uploadedLinks.value.push(({ link: `${s3Settings.endpoint}/${bucket}/${upload.input.Key}`, name: file.name }));
+        }).catch((error) => {
+            console.error(error);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'File Upload Failed', life: 3000 });
+        });
+    }
 }
 </script>
