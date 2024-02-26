@@ -48,7 +48,7 @@
 import { ref } from "vue";
 import { type Settings, DEFAULT_SETTINGS, convertType } from "../types";
 const s3Settings = ref<Settings>(DEFAULT_SETTINGS);
-onBeforeMount(() => {
+onMounted(() => {
   s3Settings.value = Object.assign(
     {},
     DEFAULT_SETTINGS,
