@@ -22,18 +22,18 @@
           <p>Drag and drop files to here to upload.</p>
         </template>
       </FileUpload>
-      <TabView v-if="uploadedLinksFormatted.links.length !== 0">
+      <TabView v-if="uploadedLinksFormatted.length !== 0">
         <TabPanel header="Links">
           <ul>
-            <li v-for="link in uploadedLinksFormatted.links" :key="link">
-              <a :href="link" target="_blank">{{ link }}</a>
+            <li v-for="link in uploadedLinksFormatted" :key="link.link">
+              <a :href="link.link" target="_blank">{{ link.link }}</a>
             </li>
           </ul>
         </TabPanel>
         <TabPanel header="Markdown">
           <ul>
-            <li v-for="link in uploadedLinksFormatted.markdown" :key="link">
-              <p>{{ link }}</p>
+            <li v-for="link in uploadedLinksFormatted" :key="link.link">
+              <a :href="link.link" target="_blank">{{ link.markdown }}</a>
             </li>
           </ul>
         </TabPanel>
@@ -55,10 +55,12 @@ const toast = useToast();
 const category = ref("");
 const categories: Ref<string[]> = ref([]);
 const uploadedLinks: Ref<ImageLink[]> = ref([]);
-const uploadedLinksFormatted = computed(() => ({
-  links: uploadedLinks.value.map((link) => link.link),
-  markdown: uploadedLinks.value.map((link) => `![${link.name}](${link.link})`),
-}));
+const uploadedLinksFormatted = computed(() =>
+  uploadedLinks.value.map((link) => ({
+    link: link.link,
+    markdown: `![${link.name}](${link.link})`,
+  }))
+);
 
 onBeforeMount(() => {
   categories.value = JSON.parse(
