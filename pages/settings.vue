@@ -1,5 +1,5 @@
 <template>
-  <Card style="width: 25em" class="m-auto">
+  <Card class="w-96 m-auto">
     <template #title>
       <h2>Settings</h2>
     </template>
@@ -37,7 +37,19 @@
           />
           <label for="secretAccKey">Secret Access Key</label>
         </FloatLabel>
-        <Dropdown v-model="s3Settings.convert" :options="convertType" />
+        <div class="flex flex-col">
+          <label
+            class="ml-3 -translate-y-1 text-[rgb(var(--surface-900)/0.6)] text-sm"
+            for="convert"
+          >
+            Convert to
+          </label>
+          <Dropdown
+            id="convert"
+            v-model="s3Settings.convert"
+            :options="convertType"
+          />
+        </div>
         <Button label="Submit" @click="save" />
       </div>
     </template>
