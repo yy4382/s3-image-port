@@ -10,14 +10,14 @@
           <div
             v-for="photo in categorizedPhotos[category].slice(
               curFirst[category],
-              curFirst[category] + 10,
+              curFirst[category] + 9,
             )"
           >
             <PhotoCard :photo="photo" />
           </div>
         </div>
         <Paginator
-          :rows="10"
+          :rows="9"
           :totalRecords="categorizedPhotos[category].length"
           v-model:first="curFirst[category]"
           template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
