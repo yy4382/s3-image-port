@@ -16,7 +16,7 @@
         </a>
       </template>
     </Menubar>
-    <NuxtPage />
+    <NuxtPage class="flex-grow" />
     <FooterComp />
   </div>
 </template>
