@@ -1,6 +1,11 @@
 <template>
   <div class="mx-4">
-    <Button label="Refresh" icon="pi pi-refresh" @click="listPhotos" class="mb-4" />
+    <Button
+      label="Refresh"
+      icon="pi pi-refresh"
+      @click="listPhotos"
+      class="mb-4"
+    />
     <TabView>
       <TabPanel
         v-for="category in Object.keys(categorizedPhotos)"
@@ -14,7 +19,7 @@
               curFirst[category] + 9,
             )"
           >
-            <PhotoCard :photo="photo" />
+            <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
           </div>
         </div>
         <Paginator
@@ -29,53 +34,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { ref, onMounted, type Ref, computed } from "vue";
 import { type Photo, type Settings, DEFAULT_SETTINGS } from "../types";
-interface s3Photo {
-  Key: string;
-  LastModified: Date;
-  ETag: string;
-  Size: number;
-  StorageClass: string;
-}
-const categories = ref([] as string[]);
-const photos = ref([] as Photo[]);
-const categorizedPhotos: Ref<Record<string, Photo[]>> = ref({});
 
 const s3Settings: Ref<Settings> = ref(DEFAULT_SETTINGS);
+const photos = ref([] as Photo[]);
+const categories = ref([] as string[]);
+const categorizedPhotos: Ref<Record<string, Photo[]>> = ref({});
 
 const curFirst: Ref<Record<string, number>> = ref({});
-watch(categories, (newVal) => {
-  localStorage.setItem("image_categories", JSON.stringify(categories.value));
-});
-function newClient() {
-  return new S3Client({
-    region: s3Settings.value.region,
-    credentials: {
-      accessKeyId: s3Settings.value.accKeyId,
-      secretAccessKey: s3Settings.value.secretAccKey,
-    },
-    endpoint: s3Settings.value.endpoint,
-  });
-}
 
 async function listPhotos() {
-  const client = newClient();
-  const command = new ListObjectsV2Command({
-    Bucket: s3Settings.value.bucket,
-  });
-  const response = await client.send(command);
-  photos.value = (response.Contents as s3Photo[])
-    .map((photo: s3Photo) => {
-      return {
-        Key: photo.Key,
-        LastModified: photo.LastModified,
-        category: photo.Key.split("/")[0],
-        url: `${s3Settings.value.endpoint}/${s3Settings.value.bucket}/${photo.Key}`,
-      };
-    })
-    .filter((photo) => !photo.Key.endsWith("/")) as Photo[];
+  photos.value = await listObj(s3Settings.value);
   categories.value = Array.from(
     new Set(photos.value.map((photo) => photo.category)),
   );
@@ -88,6 +57,9 @@ async function listPhotos() {
   curFirst.value = Object.fromEntries(
     categories.value.map((category) => [category, 0]),
   );
+}
+async function deletePhoto(key:string) {
+  await deleteObj(key, s3Settings.value).then(() => listPhotos()).catch(console.error);
 }
 
 onBeforeMount(async () => {

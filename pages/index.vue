@@ -131,24 +131,11 @@ const uploadHandler = async (e: any) => {
   const s3Settings: Settings = JSON.parse(
     localStorage.getItem("settings") || "{}",
   );
-  const client = new S3Client({
-    region: s3Settings.region,
-    credentials: {
-      accessKeyId: s3Settings.accKeyId,
-      secretAccessKey: s3Settings.secretAccKey,
-    },
-    endpoint: s3Settings.endpoint,
-  });
-  const bucket = s3Settings.bucket;
+
   for (const file of files) {
     const converted = await convert(file, s3Settings.convert);
-    const upload = new PutObjectCommand({
-      Bucket: bucket,
-      Key: genKey(file, s3Settings.convert),
-      Body: converted,
-    });
-    client
-      .send(upload)
+    const key = genKey(file, s3Settings.convert);
+    uploadObj(converted, key, s3Settings)
       .then((data) => {
         toast.add({
           severity: "info",
@@ -157,7 +144,7 @@ const uploadHandler = async (e: any) => {
           life: 3000,
         });
         uploadedLinks.value.push({
-          link: `${s3Settings.endpoint}/${bucket}/${upload.input.Key}`,
+          link: `${s3Settings.endpoint}/${s3Settings.bucket}/${key}`,
           name: file.name,
         });
       })

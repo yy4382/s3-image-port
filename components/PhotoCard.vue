@@ -18,11 +18,11 @@
     </Image>
     <div class="flex justify-between items-center gap-2">
       <div class="flex flex-col justify-between gap-1">
-        <Chip class="text-sm" >
+        <Chip class="text-sm" v-tooltip="`Upload Date`">
           <i class="pi pi-cloud-upload mr-1" />
           {{ photo.Key.split("/").slice(1, -1).join("-") }}
         </Chip>
-        <Chip class="text-sm" >
+        <Chip class="text-sm" v-tooltip="`Last Modified`">
           <i class="pi pi-pencil mr-1" />
           {{ DateTime.fromJSDate(photo.LastModified).toFormat("yyyy-LL-dd") }}
         </Chip>
@@ -34,6 +34,12 @@
           class="p-button-info"
           @click="copy(photo, $event)"
         />
+        <Button
+          aria-label="Delete"
+          icon="pi pi-trash"
+          class="p-button-danger"
+          @click="$emit('deletePhoto',photo.Key)"
+        />
       </div>
     </div>
   </div>
@@ -41,13 +47,20 @@
 
 <script setup lang="ts">
 import { DateTime } from "luxon";
-import { type Photo } from "../types";
+import { type Photo, type Settings, DEFAULT_SETTINGS } from "../types";
 import Tooltip from "primevue/tooltip";
 defineProps<{
   photo: Photo;
 }>();
+const s3Settings: Ref<Settings> = ref(DEFAULT_SETTINGS);
+onBeforeMount(async () => {
+  s3Settings.value = localStorage.getItem("settings")
+    ? JSON.parse(localStorage.getItem("settings") || "{}")
+    : DEFAULT_SETTINGS;
+});
 const vTooltip = Tooltip;
 function copy(photo: Photo, event: MouseEvent) {
   navigator.clipboard.writeText(photo.url);
 }
+
 </script>
