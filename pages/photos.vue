@@ -58,8 +58,10 @@ async function listPhotos() {
     categories.value.map((category) => [category, 0]),
   );
 }
-async function deletePhoto(key:string) {
-  await deleteObj(key, s3Settings.value).then(() => listPhotos()).catch(console.error);
+async function deletePhoto(key: string) {
+  await deleteObj(key, s3Settings.value)
+    .then(() => listPhotos())
+    .catch(console.error);
 }
 
 onBeforeMount(async () => {

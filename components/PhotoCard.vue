@@ -38,7 +38,7 @@
           aria-label="Delete"
           icon="pi pi-trash"
           class="p-button-danger"
-          @click="$emit('deletePhoto',photo.Key)"
+          @click="$emit('deletePhoto', photo.Key)"
         />
       </div>
     </div>
@@ -62,5 +62,4 @@ const vTooltip = Tooltip;
 function copy(photo: Photo, event: MouseEvent) {
   navigator.clipboard.writeText(photo.url);
 }
-
 </script>
