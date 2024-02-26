@@ -1,75 +1,22 @@
-# Nuxt 3 Minimal Starter
+# S3 Image Port
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+> [!TIP]
+> Under early and rapid development...
 
-## Setup
+If using S3 for image hosting, this is a frontend to manage your images in a S3 (or S3 compatible) bucket.
 
-Make sure to install the dependencies:
+This website directly communicate with the bucket using S3 APIs, so a server (or a container) is not needed.
 
-```bash
-# npm
-npm install
+Considering to add some server side functions such as detecting duplicated images in the bucket. However, I will keep these functions simple so that they can be executed on edge(such as Vercel).
 
-# pnpm
-pnpm install
+## Features
 
-# yarn
-yarn install
+- Upload multiple images.
+- Convert to jpg or webp before upload.
+- Categorize images.
+- List and preview images in bucket.
+- Delete images.
 
-# bun
-bun install
-```
+## Requirements
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+The directories of the s3 bucket should be `/${category}/${year}/${month}/${day}/filename`. Errors may occur if the directory structure violate this pattern, since i haven't write any code for error handle.
