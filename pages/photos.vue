@@ -1,12 +1,13 @@
 <template>
-  <div>
-    <TabView class="mx-4 rounded-lg">
+  <div class="mx-4">
+    <Button label="Refresh" icon="pi pi-refresh" @click="listPhotos" class="mb-4" />
+    <TabView>
       <TabPanel
         v-for="category in Object.keys(categorizedPhotos)"
         :key="category"
         :header="category"
       >
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 -mx-5 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div
             v-for="photo in categorizedPhotos[category].slice(
               curFirst[category],
@@ -65,8 +66,7 @@ async function listPhotos() {
     Bucket: s3Settings.value.bucket,
   });
   const response = await client.send(command);
-  console.log(response.Contents);
-  return (response.Contents as s3Photo[])
+  photos.value = (response.Contents as s3Photo[])
     .map((photo: s3Photo) => {
       return {
         Key: photo.Key,
@@ -76,12 +76,6 @@ async function listPhotos() {
       };
     })
     .filter((photo) => !photo.Key.endsWith("/")) as Photo[];
-}
-onBeforeMount(async () => {
-  s3Settings.value = localStorage.getItem("settings")
-    ? JSON.parse(localStorage.getItem("settings") || "{}")
-    : DEFAULT_SETTINGS;
-  photos.value = await listPhotos();
   categories.value = Array.from(
     new Set(photos.value.map((photo) => photo.category)),
   );
@@ -94,6 +88,13 @@ onBeforeMount(async () => {
   curFirst.value = Object.fromEntries(
     categories.value.map((category) => [category, 0]),
   );
+}
+
+onBeforeMount(async () => {
+  s3Settings.value = localStorage.getItem("settings")
+    ? JSON.parse(localStorage.getItem("settings") || "{}")
+    : DEFAULT_SETTINGS;
+  await listPhotos();
 
   if (process.env.NODE_ENV === "development") {
     console.log(photos.value);
