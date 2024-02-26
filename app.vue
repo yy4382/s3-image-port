@@ -1,6 +1,6 @@
 
 <template>
-  <div class="min-h-screen flex flex-col dark:bg-[rgb(var(--surface-950))] gap-4">
+  <div class="min-h-screen flex flex-col dark:bg-surface-800 gap-4">
     <Toast />
     <Menubar :model="items">
       <template #item="{ item, props }">
@@ -17,6 +17,7 @@
       </template>
     </Menubar>
     <NuxtPage />
+    <FooterComp />
   </div>
 </template>
 
