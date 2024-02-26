@@ -1,12 +1,12 @@
 <template>
   <div>
-    <TabView class="mx-4">
+    <TabView class="mx-4 rounded-lg">
       <TabPanel
         v-for="category in Object.keys(categorizedPhotos)"
         :key="category"
         :header="category"
       >
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mx-2 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 -mx-5 mb-4">
           <div
             v-for="photo in categorizedPhotos[category].slice(
               curFirst[category],
