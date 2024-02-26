@@ -59,6 +59,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { type Settings, DEFAULT_SETTINGS, convertType } from "../types";
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
 const s3Settings = ref<Settings>(DEFAULT_SETTINGS);
 onMounted(() => {
   s3Settings.value = Object.assign(
@@ -69,5 +71,10 @@ onMounted(() => {
 });
 const save = () => {
   localStorage.setItem("settings", JSON.stringify(s3Settings.value));
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: "Settings saved",
+  });
 };
 </script>

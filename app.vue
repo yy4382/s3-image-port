@@ -1,6 +1,7 @@
 
 <template>
   <div class="min-h-screen flex flex-col dark:bg-[rgb(var(--surface-950))] gap-4">
+    <Toast />
     <Menubar :model="items">
       <template #item="{ item, props }">
         <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>

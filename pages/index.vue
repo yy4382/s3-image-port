@@ -9,7 +9,6 @@
       />
     </div>
     <div class="card">
-      <Toast />
       <FileUpload
         name="demo[]"
         :multiple="true"
