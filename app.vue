@@ -1,0 +1,45 @@
+
+<template>
+  <div class="min-h-screen flex flex-col dark:bg-[rgb(var(--surface-950))] gap-4">
+    <Menubar :model="items">
+      <template #item="{ item, props }">
+        <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+          <a v-ripple :href="href" v-bind="props.action" @click="navigate">
+            <span :class="item.icon" />
+            <span class="ml-2">{{ item.label }}</span>
+          </a>
+        </router-link>
+        <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
+          <span :class="item.icon" />
+          <span class="ml-2">{{ item.label }}</span>
+        </a>
+      </template>
+    </Menubar>
+    <NuxtPage />
+  </div>
+</template>
+
+<script setup>
+import { ref } from "vue";
+
+const items = ref([
+  {
+    label: 'Home',
+    icon: 'pi pi-home',
+    route: '/'
+  },
+  {
+    label: 'Photos',
+    icon: 'pi pi-star',
+    route: '/photos'
+  },
+  {
+    label: 'Settings',
+    icon: 'pi pi-star',
+    route: '/settings'
+  },]);
+</script>
+
+<style>
+@import url("~/assets/css/base.css");
+</style>
