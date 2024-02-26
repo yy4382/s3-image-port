@@ -37,6 +37,7 @@
           />
           <label for="secretAccKey">Secret Access Key</label>
         </FloatLabel>
+        <Dropdown v-model="s3Settings.convert" :options="convertType" />
         <Button label="Submit" @click="save" />
       </div>
     </template>
@@ -45,15 +46,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { type Settings, DEFAULT_SETTINGS } from "../types";
-const s3Settings = ref<Settings>({
-  endpoint: "",
-  accKeyId: "",
-  secretAccKey: "",
-  bucket: "",
-  region: "auto",
-});
-const settings = onMounted(() => {
+import { type Settings, DEFAULT_SETTINGS, convertType } from "../types";
+const s3Settings = ref<Settings>(DEFAULT_SETTINGS);
+onBeforeMount(() => {
   s3Settings.value = Object.assign(
     {},
     DEFAULT_SETTINGS,

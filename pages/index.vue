@@ -62,18 +62,20 @@ const uploadedLinksFormatted = computed(() => ({
 
 onBeforeMount(() => {
   categories.value = JSON.parse(
-    localStorage.getItem("image_categories") || "[]",
+    localStorage.getItem("image_categories") || "[]"
   );
 });
 
-function genKey(file: File) {
+function genKey(file: File, type: string) {
   const now = DateTime.now();
   const today_start = now.startOf("day");
   const interval = Interval.fromDateTimes(today_start, now);
   const fileExt = file.name.split(".").pop();
   const filename = `${interval
     .length("milliseconds")
-    .toString(36)}-${Math.random().toString(36).substring(2, 4)}.${fileExt}`;
+    .toString(36)}-${Math.random().toString(36).substring(2, 4)}.${
+    type === "none" ? fileExt : type
+  }`;
   return (
     category.value +
     "/" +
@@ -83,7 +85,37 @@ function genKey(file: File) {
   );
 }
 
-const uploadHandler = (e: any) => {
+async function convert(file: File, type: string): Promise<Blob | File> {
+  if (type === "none") return file;
+
+  const mime = "image/webp";
+  if (type === "webp") {
+    const mime = "image/webp";
+  } else if (type === "jpg") {
+    const mime = "image/jpeg";
+  }
+  const img = new Image();
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  const reader = new FileReader();
+  const p = new Promise<Blob>((resolve, reject) => {
+    reader.onload = (e) => {
+      img.src = e.target?.result as string;
+    };
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        resolve(blob as Blob);
+      }, mime);
+    };
+  });
+  reader.readAsDataURL(file);
+  return p;
+}
+
+const uploadHandler = async (e: any) => {
   if (!category.value) {
     toast.add({
       severity: "error",
@@ -95,7 +127,7 @@ const uploadHandler = (e: any) => {
   }
   const files = e.files as File[];
   const s3Settings: Settings = JSON.parse(
-    localStorage.getItem("settings") || "{}",
+    localStorage.getItem("settings") || "{}"
   );
   const client = new S3Client({
     region: s3Settings.region,
@@ -107,10 +139,11 @@ const uploadHandler = (e: any) => {
   });
   const bucket = s3Settings.bucket;
   for (const file of files) {
+    const converted = await convert(file, s3Settings.convert);
     const upload = new PutObjectCommand({
       Bucket: bucket,
-      Key: genKey(file),
-      Body: file,
+      Key: genKey(file, s3Settings.convert),
+      Body: converted,
     });
     client
       .send(upload)

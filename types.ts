@@ -4,12 +4,15 @@ export interface Photo {
   category: string;
   url: string;
 }
+export const convertType = ["none", "jpg", "webp"];
+
 export interface Settings {
   endpoint: string;
   accKeyId: string;
   secretAccKey: string;
   bucket: string;
   region: string;
+  convert: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -18,4 +21,5 @@ export const DEFAULT_SETTINGS: Settings = {
   secretAccKey: "",
   bucket: "",
   region: "auto",
+  convert: "webp",
 };
