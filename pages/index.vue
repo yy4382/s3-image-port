@@ -59,12 +59,12 @@ const uploadedLinksFormatted = computed(() =>
   uploadedLinks.value.map((link) => ({
     link: link.link,
     markdown: `![${link.name}](${link.link})`,
-  }))
+  })),
 );
 
 onBeforeMount(() => {
   categories.value = JSON.parse(
-    localStorage.getItem("image_categories") || "[]"
+    localStorage.getItem("image_categories") || "[]",
   );
 });
 
@@ -129,7 +129,7 @@ const uploadHandler = async (e: any) => {
   }
   const files = e.files as File[];
   const s3Settings: Settings = JSON.parse(
-    localStorage.getItem("settings") || "{}"
+    localStorage.getItem("settings") || "{}",
   );
   const client = new S3Client({
     region: s3Settings.region,
