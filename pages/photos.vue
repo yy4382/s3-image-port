@@ -35,7 +35,8 @@
 </template>
 <script setup lang="ts">
 import { type Photo, type Settings, DEFAULT_SETTINGS } from "../types";
-
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
 const s3Settings: Ref<Settings> = ref(DEFAULT_SETTINGS);
 const photos = ref([] as Photo[]);
 const categories = ref([] as string[]);
@@ -63,9 +64,27 @@ async function listPhotos() {
   );
 }
 async function deletePhoto(key: string) {
-  await deleteObj(key, s3Settings.value)
-    .then(() => listPhotos())
-    .catch(console.error);
+  const response = await $fetch(`/api/delete?key=${key}`) as {
+    statusCode: number;
+    body: string;
+  }
+  if (response.statusCode === 200) {
+    toast.add({
+      severity: "success",
+      summary: "Success",
+      detail: "Photo deleted successfully",
+      life: 3000,
+    });
+    await listPhotos();
+  } else {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Failed to delete photo",
+      life: 3000,
+    });
+    console.error(response.body);
+  }
 }
 
 onBeforeMount(async () => {
