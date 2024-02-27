@@ -37,7 +37,7 @@
 import { type Photo, type Settings, DEFAULT_SETTINGS } from "../types";
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
-const s3Settings: Ref<Settings> = ref(DEFAULT_SETTINGS);
+const config: Ref<Settings> = ref(DEFAULT_SETTINGS);
 const photos = ref([] as Photo[]);
 const categories = ref([] as string[]);
 const categorizedPhotos: Ref<Record<string, Photo[]>> = ref({});
@@ -45,7 +45,13 @@ const categorizedPhotos: Ref<Record<string, Photo[]>> = ref({});
 const curFirst: Ref<Record<string, number>> = ref({});
 
 async function listPhotos() {
-  const response = (await $fetch("/api/list")) as {
+  const response = (await $fetch("/api/list", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: "Bearer " + config.value.token,
+    },
+  })) as {
     status: number;
     body: string;
   };
@@ -64,10 +70,16 @@ async function listPhotos() {
   );
 }
 async function deletePhoto(key: string) {
-  const response = await $fetch(`/api/delete?key=${key}`) as {
+  const response = (await $fetch(`/api/delete?key=${key}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: "Bearer " + config.value.token,
+    },
+  })) as {
     statusCode: number;
     body: string;
-  }
+  };
   if (response.statusCode === 200) {
     toast.add({
       severity: "success",
@@ -88,7 +100,7 @@ async function deletePhoto(key: string) {
 }
 
 onBeforeMount(async () => {
-  s3Settings.value = localStorage.getItem("settings")
+  config.value = localStorage.getItem("settings")
     ? JSON.parse(localStorage.getItem("settings") || "{}")
     : DEFAULT_SETTINGS;
   await listPhotos();

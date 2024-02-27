@@ -6,20 +6,20 @@ export interface Photo {
 }
 export const convertType = ["none", "jpg", "webp"];
 
-export interface Settings {
+export interface S3Config {
   endpoint: string;
-  accKeyId: string;
-  secretAccKey: string;
   bucket: string;
   region: string;
+  accKeyId: string;
+  secretAccKey: string;
+}
+
+export interface Settings {
+  token: string;
   convert: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  endpoint: "",
-  accKeyId: "",
-  secretAccKey: "",
-  bucket: "",
-  region: "auto",
+  token: "",
   convert: "webp",
 };

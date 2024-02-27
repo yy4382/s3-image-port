@@ -129,17 +129,19 @@ const uploadHandler = async (e: any) => {
     return;
   }
   const files = e.files as File[];
-  const config: Settings = JSON.parse(
-    localStorage.getItem("settings") || "{}",
-  );
+  const config: Settings = JSON.parse(localStorage.getItem("settings") || "{}");
 
   for (const file of files) {
     const converted = await convert(file, config.convert);
     const key = genKey(file, config.convert);
-    const response = await $fetch("/api/upload?key=" + key, {
+    const response = (await $fetch("/api/upload", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: "Bearer " + config.token,
+      },
       body: { key: key, dataUrl: converted },
-    }) as { statusCode: number; body: string; link?: string };
+    })) as { statusCode: number; body: string; link?: string };
     console.log(response);
     if (response.statusCode === 200) {
       toast.add({

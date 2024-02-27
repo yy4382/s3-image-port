@@ -1,4 +1,4 @@
-import { type Settings, type Photo } from "~/types";
+import { type S3Config, type Photo } from "~/types";
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 import newClient from "./newClient";
 interface s3Photo {
@@ -8,7 +8,7 @@ interface s3Photo {
   Size: number;
   StorageClass: string;
 }
-export default async function (config: Settings): Promise<Photo[]> {
+export default async function (config: S3Config): Promise<Photo[]> {
   const client = newClient(config);
   const command = new ListObjectsV2Command({
     Bucket: config.bucket,

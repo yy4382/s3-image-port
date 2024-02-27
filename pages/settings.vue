@@ -7,35 +7,11 @@
       <div class="flex flex-col gap-8">
         <FloatLabel>
           <InputText
-            id="endpoint"
-            v-model="s3Settings.endpoint"
+            id="token"
+            v-model="s3Settings.token"
             class="w-full"
           />
-          <label for="endpoint">Endpoint</label>
-        </FloatLabel>
-        <FloatLabel>
-          <InputText id="bucket" v-model="s3Settings.bucket" class="w-full" />
-          <label for="bucket">Bucket Name</label>
-        </FloatLabel>
-        <FloatLabel>
-          <InputText id="region" v-model="s3Settings.region" class="w-full" />
-          <label for="region">Region</label>
-        </FloatLabel>
-        <FloatLabel>
-          <InputText
-            id="accKeyId"
-            v-model="s3Settings.accKeyId"
-            class="w-full"
-          />
-          <label for="accKeyId">Access Key ID</label>
-        </FloatLabel>
-        <FloatLabel>
-          <InputText
-            id="secretAccKey"
-            v-model="s3Settings.secretAccKey"
-            class="w-full"
-          />
-          <label for="secretAccKey">Secret Access Key</label>
+          <label for="secretAccKey">Token</label>
         </FloatLabel>
         <div class="flex flex-col">
           <label
