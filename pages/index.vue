@@ -86,20 +86,22 @@ function genKey(file: File, type: string) {
   );
 }
 
-async function convert(file: File, type: string): Promise<Blob | File> {
-  if (type === "none") return file;
+async function convert(file: File, type: string): Promise<string> {
+  if (type === "none") return URL.createObjectURL(file);
 
-  const mime = "image/webp";
+  let mime = "image/webp";
   if (type === "webp") {
-    const mime = "image/webp";
+    mime = "image/webp";
   } else if (type === "jpg") {
-    const mime = "image/jpeg";
+    mime = "image/jpeg";
   }
+
   const img = new Image();
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   const reader = new FileReader();
-  const p = new Promise<Blob>((resolve, reject) => {
+
+  const p = new Promise<string>((resolve, reject) => {
     reader.onload = (e) => {
       img.src = e.target?.result as string;
     };
@@ -107,11 +109,11 @@ async function convert(file: File, type: string): Promise<Blob | File> {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx?.drawImage(img, 0, 0);
-      canvas.toBlob((blob) => {
-        resolve(blob as Blob);
-      }, mime);
+      const dataURL = canvas.toDataURL(mime);
+      resolve(dataURL);
     };
   });
+
   reader.readAsDataURL(file);
   return p;
 }
@@ -127,35 +129,38 @@ const uploadHandler = async (e: any) => {
     return;
   }
   const files = e.files as File[];
-  const s3Settings: Settings = JSON.parse(
+  const config: Settings = JSON.parse(
     localStorage.getItem("settings") || "{}",
   );
 
   for (const file of files) {
-    const converted = await convert(file, s3Settings.convert);
-    const key = genKey(file, s3Settings.convert);
-    uploadObj(converted, key, s3Settings)
-      .then((data) => {
-        toast.add({
-          severity: "info",
-          summary: "Success",
-          detail: "File Uploaded",
-          life: 3000,
-        });
-        uploadedLinks.value.push({
-          link: `${s3Settings.endpoint}/${s3Settings.bucket}/${key}`,
-          name: file.name,
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: "File Upload Failed",
-          life: 3000,
-        });
+    const converted = await convert(file, config.convert);
+    const key = genKey(file, config.convert);
+    const response = await $fetch("/api/upload?key=" + key, {
+      method: "POST",
+      body: { key: key, dataUrl: converted },
+    }) as { statusCode: number; body: string; link?: string };
+    console.log(response);
+    if (response.statusCode === 200) {
+      toast.add({
+        severity: "info",
+        summary: "Success",
+        detail: "File Uploaded",
+        life: 3000,
       });
+      uploadedLinks.value.push({
+        link: response.link as string,
+        name: file.name,
+      });
+    } else if (response.statusCode === 500) {
+      console.error(response.body);
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "File Upload Failed",
+        life: 3000,
+      });
+    }
   }
 };
 </script>
