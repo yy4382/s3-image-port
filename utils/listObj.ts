@@ -1,5 +1,6 @@
 import { type Settings, type Photo } from "~/types";
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
+import newClient from "./newClient";
 interface s3Photo {
   Key: string;
   LastModified: Date;

@@ -44,7 +44,11 @@ const categorizedPhotos: Ref<Record<string, Photo[]>> = ref({});
 const curFirst: Ref<Record<string, number>> = ref({});
 
 async function listPhotos() {
-  photos.value = await listObj(s3Settings.value);
+  const response = (await $fetch("/api/list")) as {
+    status: number;
+    body: string;
+  };
+  photos.value = JSON.parse(response.body);
   categories.value = Array.from(
     new Set(photos.value.map((photo) => photo.category)),
   );
