@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "nuxi": "nuxi"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.521.0",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.11.4",
+    "nuxi": "^3.10.1",
     "nuxt-primevue": "^0.3.0",
     "prettier": "^3.2.5"
   }

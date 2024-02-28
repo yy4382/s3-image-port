@@ -34,6 +34,9 @@ devDependencies:
   '@nuxtjs/tailwindcss':
     specifier: ^6.11.4
     version: 6.11.4
+  nuxi:
+    specifier: ^3.10.1
+    version: 3.10.1
   nuxt-primevue:
     specifier: ^0.3.0
     version: 0.3.0(vue@3.4.19)
@@ -5531,7 +5534,6 @@ packages:
     hasBin: true
     optionalDependencies:
       fsevents: 2.3.3
-    dev: false
 
   /nuxt-primevue@0.3.0(vue@3.4.19):
     resolution: {integrity: sha512-sx5JZjqQ7H96FH5nWsL4Ypk4amkUz5nHsoxAiyc7oI3sSP54wfXPo5rjB4GKI50Ky7HPdE2CIWs137jRl6RkMw==}
