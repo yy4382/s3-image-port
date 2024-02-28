@@ -1,6 +1,6 @@
 export interface Photo {
   Key: string;
-  LastModified: Date;
+  LastModified: string;
   category: string;
   url: string;
 }

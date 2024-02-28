@@ -24,7 +24,7 @@
         </Chip>
         <Chip class="text-sm" v-tooltip="`Last Modified`">
           <i class="pi pi-pencil mr-1" />
-          {{ DateTime.fromJSDate(photo.LastModified).toFormat("yyyy-LL-dd") }}
+          {{ DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd") }}
         </Chip>
       </div>
       <div class="flex gap-2">

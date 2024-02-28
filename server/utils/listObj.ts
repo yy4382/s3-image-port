@@ -27,7 +27,7 @@ export default async function (config: S3Config): Promise<Photo[]> {
     .map((photo: s3Photo) => {
       return {
         Key: photo.Key,
-        LastModified: photo.LastModified,
+        LastModified: photo.LastModified.toISOString(),
         category: photo.Key.split("/")[0],
         url: `${config.endpoint}/${config.bucket}/${photo.Key}`,
       };
