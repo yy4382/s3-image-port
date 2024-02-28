@@ -10,7 +10,7 @@ export default async function (config: S3Config): Promise<Photo[]> {
   try {
     client = newClient(config);
   } catch (e) {
-    throw new Error("Failed construct client: " + e );
+    throw new Error("Failed construct client: " + e);
   }
   const command = new ListObjectsV2Command({
     Bucket: config.bucket,

@@ -13,7 +13,7 @@ export default async function (key: string, config: S3Config) {
     Key: key,
   });
   const response = await client.send(command);
-  console.log(response)
+  console.log(response);
   // If the HTTP status code is not 200, throw an error
   const httpStatusCode = response.$metadata.httpStatusCode!;
   if (httpStatusCode >= 300) {

@@ -6,11 +6,7 @@
     <template #content>
       <div class="flex flex-col gap-8">
         <FloatLabel>
-          <InputText
-            id="token"
-            v-model="s3Settings.token"
-            class="w-full"
-          />
+          <InputText id="token" v-model="s3Settings.token" class="w-full" />
           <label for="secretAccKey">Token</label>
         </FloatLabel>
         <div class="flex flex-col">

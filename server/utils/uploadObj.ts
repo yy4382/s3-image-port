@@ -1,12 +1,16 @@
 import { type S3Config } from "~/types";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import newClient from "./newClient";
-export default async function (file: Blob | Buffer, key: string, config: S3Config) {
+export default async function (
+  file: Blob | Buffer,
+  key: string,
+  config: S3Config,
+) {
   let client;
   try {
     client = newClient(config);
   } catch (e) {
-    throw new Error("Failed construct client: " + e );
+    throw new Error("Failed construct client: " + e);
   }
   const command = new PutObjectCommand({
     Bucket: config.bucket,

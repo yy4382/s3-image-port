@@ -26,7 +26,13 @@
         </a>
       </template>
       <template #end>
-        <Button label="Check server" icon="pi pi-refresh" @click="checkHeartbeat" raised text />
+        <Button
+          label="Check server"
+          icon="pi pi-refresh"
+          @click="checkHeartbeat"
+          raised
+          text
+        />
       </template>
     </Menubar>
     <NuxtPage class="flex-grow" />
@@ -52,7 +58,7 @@ async function checkHeartbeat() {
       summary: "Success",
       detail: "Server runtime config is ok!",
       life: 3000,
-    })
+    });
   }
 }
 onMounted(async () => {

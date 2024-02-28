@@ -13,12 +13,12 @@ export default defineNuxtConfig({
   // },
   runtimeConfig: {
     s3Config: {
-      endpoint: '',
-      accKeyId: '',
-      secretAccKey: '',
-      bucket: '',
-      region: '',
+      endpoint: "",
+      accKeyId: "",
+      secretAccKey: "",
+      bucket: "",
+      region: "",
     },
-    token: '',
-  }
+    token: "",
+  },
 });
