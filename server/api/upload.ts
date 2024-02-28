@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   console.log("upload.ts received body in", getBodyEnd - getBodyStart, "ms");
   const base64Data = body.dataUrl.replace(/^data:image\/\w+;base64,/, "");
   const buffer = Buffer.from(base64Data, "base64");
-  const runtimeConfig = useRuntimeConfig();
+  const runtimeConfig = useRuntimeConfig(event);
   const { s3Config } = runtimeConfig;
   try {
     const uploadStart = performance.now();

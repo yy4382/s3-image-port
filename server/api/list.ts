@@ -2,7 +2,7 @@ import listObj from "~/server/utils/listObj";
 
 export default defineEventHandler(async (event) => {
   console.log("list.ts received request.");
-  const runtimeConfig = useRuntimeConfig();
+  const runtimeConfig = useRuntimeConfig(event);
   const { s3Config } = runtimeConfig;
   try {
     const photos = await listObj(s3Config);

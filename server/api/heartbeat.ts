@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const runtimeConfig = useRuntimeConfig();
+  const runtimeConfig = useRuntimeConfig(event);
   const { token, s3Config } = runtimeConfig;
   console.log("heartbeat.ts received request.");
   const errors: string[] = [];

@@ -3,7 +3,7 @@ import deleteObj from "~/server/utils/deleteObj";
 export default defineEventHandler(async (event) => {
   console.log("delete.ts received request.");
   const query = getQuery(event) as { key: string };
-  const runtimeConfig = useRuntimeConfig();
+  const runtimeConfig = useRuntimeConfig(event);
   const { s3Config } = runtimeConfig;
   try {
     const response = await deleteObj(query.key, s3Config);
