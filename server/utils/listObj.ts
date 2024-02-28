@@ -4,16 +4,25 @@ import newClient from "./newClient";
 interface s3Photo {
   Key: string;
   LastModified: Date;
-  ETag: string;
-  Size: number;
-  StorageClass: string;
 }
 export default async function (config: S3Config): Promise<Photo[]> {
-  const client = newClient(config);
+  let client;
+  try {
+    client = newClient(config);
+  } catch (e) {
+    throw new Error("Failed construct client: " + e );
+  }
   const command = new ListObjectsV2Command({
     Bucket: config.bucket,
   });
   const response = await client.send(command);
+
+  // If the HTTP status code is not 200, throw an error
+  const httpStatusCode = response.$metadata.httpStatusCode!;
+  if (httpStatusCode >= 300) {
+    throw new Error(`List operation get http code: ${httpStatusCode}`);
+  }
+
   return (response.Contents as s3Photo[])
     .map((photo: s3Photo) => {
       return {

@@ -5,6 +5,7 @@ export default defineEventHandler((event) => {
     const { token } = runtimeConfig;
     const authorization = event.node.req.headers.authorization;
     if (authorization !== "Bearer " + token) {
+      console.log("Unauthorized request by ", authorization);
       throw createError({
         statusCode: 401,
         statusMessage: "Unauthorized",
