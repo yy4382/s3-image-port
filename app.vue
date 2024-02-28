@@ -25,6 +25,9 @@
           <span class="ml-2">{{ item.label }}</span>
         </a>
       </template>
+      <template #end>
+        <Button label="Check server" icon="pi pi-refresh" @click="checkHeartbeat" raised text />
+      </template>
     </Menubar>
     <NuxtPage class="flex-grow" />
     <FooterComp />
@@ -32,8 +35,29 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
+async function checkHeartbeat() {
+  const response = await $fetch("/api/heartbeat");
+  if (response.status !== "ok") {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: response.message,
+      life: 3000,
+    });
+  } else {
+    toast.add({
+      severity: "success",
+      summary: "Success",
+      detail: "Server runtime config is ok!",
+      life: 3000,
+    })
+  }
+}
+onMounted(async () => {
+  await checkHeartbeat();
+});
 const items = ref([
   {
     label: "Home",

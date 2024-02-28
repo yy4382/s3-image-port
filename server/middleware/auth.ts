@@ -1,6 +1,6 @@
 export default defineEventHandler((event) => {
   const requestURL = getRequestURL(event);
-  if (requestURL.pathname.startsWith("/api")) {
+  if (requestURL.pathname.startsWith("/api") && requestURL.pathname !== "/api/heartbeat") {
     const runtimeConfig = useRuntimeConfig();
     const { token } = runtimeConfig;
     const authorization = event.node.req.headers.authorization;
