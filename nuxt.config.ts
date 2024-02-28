@@ -8,9 +8,9 @@ export default defineNuxtConfig({
     importPT: { from: path.resolve(__dirname, "./presets/lara/") }, //import and apply preset
   },
   css: ["primeicons/primeicons.css"],
-  nitro: {
-    preset: "vercel-edge",
-  },
+  // nitro: {
+  //   preset: "vercel-edge",
+  // },
   runtimeConfig: {
     s3Config: {
       endpoint: '',
