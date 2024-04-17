@@ -12,21 +12,21 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.521.0",
+    "@aws-sdk/client-s3": "^3.556.0",
     "luxon": "^3.4.4",
-    "nuxt": "^3.10.3",
+    "nuxt": "^3.11.2",
     "primeicons": "^6.0.1",
-    "primevue": "^3.49.0",
-    "vue": "^3.4.19",
-    "vue-router": "^4.3.0"
+    "primevue": "^3.51.0",
+    "vue": "^3.4.23",
+    "vue-router": "^4.3.1"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.11.4",
     "@types/luxon": "^3.4.2",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
-    "nuxi": "^3.10.1",
-    "nuxt-primevue": "^0.3.0",
+    "nuxi": "^3.11.1",
+    "nuxt-primevue": "^0.3.1",
     "prettier": "^3.2.5"
   },
   "lint-staged": {
