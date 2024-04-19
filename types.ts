@@ -1,11 +1,11 @@
+import { z } from "zod";
+
 export interface Photo {
   Key: string;
   LastModified: string;
   category: string;
   url: string;
 }
-export type ConvertType = "none" | "jpg" | "webp";
-export const convertTypes: ConvertType[] = ["none", "jpg", "webp"];
 
 export interface S3Config {
   endpoint: string;
@@ -13,19 +13,24 @@ export interface S3Config {
   region: string;
   accKeyId: string;
   secretAccKey: string;
+  pubUrl: string;
 }
 
-export interface AppSettings  {
-  convertType: ConvertType,
-  pubUrl: string,
+export const s3ConfigSchema = z.object({
+  endpoint: z.string().url(),
+  bucket: z.string(),
+  region: z.string(),
+  accKeyId: z.string(),
+  secretAccKey: z.string(),
+  pubUrl: z.string().url(),
+});
+
+export type ConvertType = "none" | "jpg" | "webp";
+export const convertTypes: ConvertType[] = ["none", "jpg", "webp"];
+export interface AppSettings {
+  convertType: ConvertType;
 }
 
-export interface Settings {
-  token: string;
-  convert: string;
-}
-
-export const DEFAULT_SETTINGS: Settings = {
-  token: "",
-  convert: "webp",
-};
+export const appSettingsSchema = z.object({
+  convertType: z.enum(["none", "jpg", "webp"]),
+});

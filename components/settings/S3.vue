@@ -2,7 +2,7 @@
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 import { useStorage } from "@vueuse/core";
-import type { S3Config } from "~/types";
+import { s3ConfigSchema, type S3Config } from "~/types";
 const toast = useToast();
 
 const schema = z.object({
@@ -21,6 +21,7 @@ const state: Ref<S3Config> = useStorage("s3-settings", {
   accKeyId: "",
   secretAccKey: "",
   region: "",
+  pubUrl: "",
 });
 const form = ref();
 async function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -41,7 +42,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <UForm
-    :schema="schema"
+    :schema="s3ConfigSchema"
     :state="state"
     class="space-y-4"
     @submit="onSubmit"
@@ -65,6 +66,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     <UFormGroup label="Secret access key" name="secretAccKey">
       <UInput v-model="state.secretAccKey" type="password" />
+    </UFormGroup>
+
+    <UFormGroup label="Public URL" name="pubUrl">
+      <UInput v-model="state.pubUrl" />
     </UFormGroup>
 
     <UButton type="submit"> 测试 </UButton>

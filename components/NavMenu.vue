@@ -1,8 +1,11 @@
 <template>
-  <UContainer class="w-full max-w-screen-lg">
+  <UContainer class="w-full">
     <nav class="flex items-center justify-between h-16">
       <div class="flex-1 justify-start">
-        <i class="i-mingcute-photo-album-fill text-3xl text-primary"></i>
+        <Icon
+          name="i-mingcute-photo-album-fill"
+          class="text-3xl text-primary"
+        />
       </div>
       <div class="flex space-x-4">
         <ULink

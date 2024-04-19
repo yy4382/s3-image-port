@@ -17,7 +17,7 @@ export default async function (key: string, config: S3Config) {
   // If the HTTP status code is not 200, throw an error
   const httpStatusCode = response.$metadata.httpStatusCode!;
   if (httpStatusCode >= 300) {
-    throw new Error(`List operation get http code: ${httpStatusCode}`);
+    throw new Error(`Delete operation get http code: ${httpStatusCode}`);
   }
 
   return response;
