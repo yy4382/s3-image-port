@@ -9,7 +9,12 @@
         <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
       </div>
     </div>
-    <UPagination class="mx-auto max-w-fit" v-model="page" :total="photos.length" :perPage="9" />
+    <UPagination
+      class="mx-auto max-w-fit"
+      v-model="page"
+      :total="photos.length"
+      :perPage="9"
+    />
   </UContainer>
 </template>
 <script setup lang="ts">
@@ -22,14 +27,14 @@ const page = ref(1);
 
 async function listPhotos() {
   console.log(s3Config.value);
-  photos.value = await listObj(s3Config.value);
+  photos.value = (await listObj(s3Config.value)).reverse();
 }
 async function deletePhoto(key: string) {
   try {
     toast.add({
       title: "Delete requested...",
       timeout: 1000,
-    })
+    });
     await deleteObj(key, s3Config.value);
     toast.add({
       title: "Photo deleted successfully",
