@@ -15,7 +15,7 @@
         <UCard>
           <ul class="space-y-3">
             <li v-for="link in uploadedLinksFormatted" :key="link.link">
-              <ULink :href="link.link" target="_blank">{{
+              <ULink :to="link.link" target="_blank">{{
                 ((key, link) => {
                   switch (key) {
                     case 'links':
