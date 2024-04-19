@@ -42,7 +42,6 @@
 </template>
 
 <script setup lang="ts">
-import { useToast } from "primevue/usetoast";
 import { DateTime, Interval } from "luxon";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { type Settings } from "~/types";

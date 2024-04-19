@@ -1,4 +1,10 @@
 {
-  "cSpell.words": ["primeicons", "primevue"],
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "tailwindCSS.classAttributes": ["class", "className", "ngClass", "ui"]
 }

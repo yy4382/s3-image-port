@@ -4,7 +4,8 @@ export interface Photo {
   category: string;
   url: string;
 }
-export const convertType = ["none", "jpg", "webp"];
+export type ConvertType = "none" | "jpg" | "webp";
+export const convertTypes: ConvertType[] = ["none", "jpg", "webp"];
 
 export interface S3Config {
   endpoint: string;
@@ -12,6 +13,11 @@ export interface S3Config {
   region: string;
   accKeyId: string;
   secretAccKey: string;
+}
+
+export interface AppSettings  {
+  convertType: ConvertType,
+  pubUrl: string,
 }
 
 export interface Settings {

@@ -35,7 +35,6 @@
 </template>
 <script setup lang="ts">
 import { type Photo, type Settings, DEFAULT_SETTINGS } from "../types";
-import { useToast } from "primevue/usetoast";
 const toast = useToast();
 const config: Ref<Settings> = ref(DEFAULT_SETTINGS);
 const photos = ref([] as Photo[]);

@@ -1,26 +1,75 @@
-# S3 Image Port
+# Nuxt UI Minimal Starter
 
-> [!TIP]
-> Under early and rapid development...
+Look at [Nuxt docs](https://nuxt.com/docs/getting-started/introduction) and [Nuxt UI docs](https://ui.nuxt.com) to learn more.
 
-If using S3 for image hosting, this is a frontend to manage your images in a S3 (or S3 compatible) bucket.
+## Setup
 
-~~This website directly communicate with the bucket using S3 APIs, so a server (or a container) is not needed.~~
+Make sure to install the dependencies:
 
-~~Considering to add some server side functions such as detecting duplicated images in the bucket. However, I will keep these functions simple so that they can be executed on edge(such as Vercel).~~
+```bash
+# npm
+npm install
 
-Currently tested on Vercel. Add environment variables to specify s3 config. See [.env.example](./.env.example). After setting the variables, you need to input the TOKEN variable in the setting page to start using it.
+# pnpm
+pnpm install
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyy4382%2Fs3-image-port&env=NUXT_S3_CONFIG_ENDPOINT,NUXT_S3_CONFIG_ACC_KEY_ID,NUXT_S3_CONFIG_SECRET_ACC_KEY,NUXT_S3_CONFIG_REGION,NUXT_S3_CONFIG_BUCKET,NUXT_TOKEN)
+# yarn
+yarn install
 
-## Features
+# bun
+bun install
+```
 
-- Upload multiple images.
-- Convert to jpg or webp before upload.
-- Categorize images.
-- List and preview images in bucket.
-- Delete images.
+## Development Server
 
-## Requirements
+Start the development server on `http://localhost:3000`:
 
-The directories of the s3 bucket should be `/${category}/${year}/${month}/${day}/filename`. Errors may occur if the directory structure violate this pattern, since i haven't write any code for error handle.
+```bash
+# npm
+npm run dev
+
+# pnpm
+pnpm run dev
+
+# yarn
+yarn dev
+
+# bun
+bun run dev
+```
+
+## Production
+
+Build the application for production:
+
+```bash
+# npm
+npm run build
+
+# pnpm
+pnpm run build
+
+# yarn
+yarn build
+
+# bun
+bun run build
+```
+
+Locally preview production build:
+
+```bash
+# npm
+npm run preview
+
+# pnpm
+pnpm run preview
+
+# yarn
+yarn preview
+
+# bun
+bun run preview
+```
+
+Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

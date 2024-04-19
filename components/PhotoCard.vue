@@ -48,7 +48,6 @@
 <script setup lang="ts">
 import { DateTime } from "luxon";
 import { type Photo, type Settings, DEFAULT_SETTINGS } from "../types";
-import Tooltip from "primevue/tooltip";
 defineProps<{
   photo: Photo;
 }>();
@@ -58,7 +57,6 @@ onBeforeMount(async () => {
     ? JSON.parse(localStorage.getItem("settings") || "{}")
     : DEFAULT_SETTINGS;
 });
-const vTooltip = Tooltip;
 function copy(photo: Photo, event: MouseEvent) {
   navigator.clipboard.writeText(photo.url);
 }

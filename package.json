@@ -7,29 +7,20 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "nuxi": "nuxi",
-    "prepare": "husky install"
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@nuxt/ui": "^2.13.0",
+    "@types/luxon": "^3.4.2",
+    "@vueuse/core": "^10.9.0",
+    "@vueuse/nuxt": "^10.9.0",
+    "nuxt": "^3.10.1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
+    "@iconify-json/mingcute": "^1.1.17",
     "luxon": "^3.4.4",
-    "nuxt": "^3.11.2",
-    "primeicons": "^6.0.1",
-    "primevue": "^3.51.0",
-    "vue": "^3.4.23",
-    "vue-router": "^4.3.1"
-  },
-  "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.11.4",
-    "@types/luxon": "^3.4.2",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
-    "nuxi": "^3.11.1",
-    "nuxt-primevue": "^0.3.1",
-    "prettier": "^3.2.5"
-  },
-  "lint-staged": {
-    "*.{js,css,md,vue,ts}": "prettier -c"
+    "zod": "^3.22.5"
   }
 }
