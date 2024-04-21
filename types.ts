@@ -22,7 +22,7 @@ export const s3ConfigSchema = z.object({
   region: z.string(),
   accKeyId: z.string(),
   secretAccKey: z.string(),
-  pubUrl: z.string().url(),
+  pubUrl: z.union([z.string().url(), z.string().length(0)]),
 });
 
 export type ConvertType = "none" | "jpg" | "webp";

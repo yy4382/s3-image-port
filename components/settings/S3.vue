@@ -5,15 +5,7 @@ import { useStorage } from "@vueuse/core";
 import { s3ConfigSchema, type S3Config } from "~/types";
 const toast = useToast();
 
-const schema = z.object({
-  endpoint: z.string().url("Invalid URL"),
-  bucket: z.string(),
-  accKeyId: z.string(),
-  secretAccKey: z.string(),
-  region: z.string(),
-});
-
-type Schema = z.output<typeof schema>;
+type Schema = z.output<typeof s3ConfigSchema>;
 
 const state: Ref<S3Config> = useStorage("s3-settings", {
   endpoint: "",

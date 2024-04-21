@@ -62,9 +62,12 @@ interface ImageLink {
   link: string;
   name: string;
 }
+const router = useRouter();
 const toast = useToast();
 const uploadedLinks: Ref<ImageLink[]> = ref(
-  import.meta.env.DEV ? [{ link: "https://example.com/abc.png", name: "abc.png" }] : []
+  import.meta.env.DEV
+    ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
+    : []
 );
 const uploadedLinksFormatted = computed(() =>
   uploadedLinks.value.map((link) => ({
@@ -153,7 +156,11 @@ const uploadHandler = async (e: any) => {
     } catch (e) {
       console.error(e);
       toast.add({
-        title: "File Upload Failed: " + key,
+        title: "File Upload Failed",
+        description: key,
+        actions: [
+          { label: "Go to settings", click: () => router.push("/settings") },
+        ],
       });
     }
   }

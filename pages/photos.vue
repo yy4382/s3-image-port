@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { type Photo, type S3Config } from "../types";
 import { useStorage } from "@vueuse/core";
+const router =  useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
@@ -29,7 +30,16 @@ const page = ref(1);
 
 async function listPhotos() {
   console.log(s3Config.value);
-  photos.value = (await listObj(s3Config.value)).reverse();
+  try {
+    photos.value = (await listObj(s3Config.value)).reverse();
+  } catch (error) {
+    toast.add({
+      title: "Failed to list photos",
+      description: "Open dev console for more info",
+      actions:[{label: "Retry", click: listPhotos}, {label: "Go to settings", click: () => router.push("/settings")}]
+    });
+    console.error((error as Error).message);
+  }
 }
 async function deletePhoto(key: string) {
   try {
