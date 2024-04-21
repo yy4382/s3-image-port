@@ -17,6 +17,9 @@ importers:
       luxon:
         specifier: ^3.4.4
         version: 3.4.4
+      mime-types:
+        specifier: ^2.1.35
+        version: 2.1.35
       zod:
         specifier: ^3.22.5
         version: 3.22.5
@@ -30,6 +33,9 @@ importers:
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.4.2
+      '@types/mime-types':
+        specifier: ^2.1.4
+        version: 2.1.4
       '@vueuse/core':
         specifier: ^10.9.0
         version: 10.9.0(vue@3.4.23)
@@ -1279,6 +1285,9 @@ packages:
 
   '@types/luxon@3.4.2':
     resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
+
+  '@types/mime-types@2.1.4':
+    resolution: {integrity: sha512-lfU4b34HOri+kAY5UheuFMWPDOI+OPceBSHZKp69gEyTL/mmJ4cnU6Y/rlme3UL3GyOn6Y42hyIEw0/q8sWx5w==}
 
   '@types/node@20.12.7':
     resolution: {integrity: sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==}
@@ -6233,6 +6242,8 @@ snapshots:
       '@types/node': 20.12.7
 
   '@types/luxon@3.4.2': {}
+
+  '@types/mime-types@2.1.4': {}
 
   '@types/node@20.12.7':
     dependencies:

@@ -28,9 +28,7 @@ export default async function (config: S3Config): Promise<Photo[]> {
         Key: photo.Key,
         LastModified: photo.LastModified.toISOString(),
         category: photo.Key.split("/")[0],
-        url: config.pubUrl
-          ? config.pubUrl + photo.Key
-          : `${config.endpoint}/${config.bucket}/${photo.Key}`,
+        url: key2Url(photo.Key, config),
       };
     })
     .filter((photo) => !photo.Key.endsWith("/")) as Photo[];
