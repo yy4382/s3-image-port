@@ -3,6 +3,7 @@
     <UButton
       :label="photos.length === 0 ? 'Load' : 'Refresh'"
       @click="listPhotos"
+      variant="outline"
     />
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <div v-for="photo in photos.slice((page - 1) * 9, page * 9)">
@@ -14,6 +15,7 @@
       v-model="page"
       :total="photos.length"
       :perPage="9"
+      v-if="photos.length > 0"
     />
   </UContainer>
 </template>
@@ -21,7 +23,7 @@
 import { type Photo, type S3Config } from "../types";
 import { useStorage } from "@vueuse/core";
 const toast = useToast();
-const photos: Ref<Photo[]> = ref([]);
+const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
 const page = ref(1);
 
