@@ -1,30 +1,50 @@
 <template>
   <UContainer class="space-y-8">
-    <form @submit="uploadHandler" class="space-y-4">
-      <UInput type="file" multiple id="file" />
-      <UButton type="submit">Upload</UButton>
-    </form>
+    <UContainer>
+      <form @submit.prevent="uploadHandler" class="flex gap-2">
+        <UInput type="file" multiple id="file" />
+        <UButton type="submit" variant="outline" :loading="uploading"
+          >Upload</UButton
+        >
+      </form>
+    </UContainer>
     <UTabs
       v-if="uploadedLinksFormatted.length > 0"
       :items="[
-        { key: 'links', label: 'Link' },
-        { key: 'markdown', label: 'Markdown' },
+        { slot: 'links', label: 'Link' },
+        { slot: 'markdown', label: 'Markdown' },
       ]"
     >
-      <template #item="{ item }">
+      <template #links>
         <UCard>
           <ul class="space-y-3">
             <li v-for="link in uploadedLinksFormatted" :key="link.link">
-              <ULink :to="link.link" target="_blank">{{
-                ((key, link) => {
-                  switch (key) {
-                    case 'links':
-                      return link.link;
-                    case 'markdown':
-                      return link.markdown;
-                  }
-                })(item.key, link)
-              }}</ULink>
+              <UseClipboard :source="link.link" v-slot="{ copy }">
+                <UButton
+                  color="black"
+                  variant="link"
+                  @click="copy() && toast.add({ title: 'Copied' })"
+                >
+                  {{ link.link }}
+                </UButton>
+              </UseClipboard>
+            </li>
+          </ul>
+        </UCard>
+      </template>
+      <template #markdown>
+        <UCard>
+          <ul class="space-y-3">
+            <li v-for="link in uploadedLinksFormatted" :key="link.markdown">
+              <UseClipboard :source="link.markdown" v-slot="{ copy }">
+                <UButton
+                  color="black"
+                  variant="link"
+                  @click="copy() && toast.add({ title: 'Copied' })"
+                >
+                  {{ link.markdown }}
+                </UButton>
+              </UseClipboard>
             </li>
           </ul>
         </UCard>
@@ -36,19 +56,23 @@
 <script setup lang="ts">
 import { DateTime, Interval } from "luxon";
 import { useStorage } from "@vueuse/core";
+import { UseClipboard } from "@vueuse/components";
 import { type S3Config, type AppSettings } from "~/types";
 interface ImageLink {
   link: string;
   name: string;
 }
 const toast = useToast();
-const uploadedLinks: Ref<ImageLink[]> = ref([]);
+const uploadedLinks: Ref<ImageLink[]> = ref(
+  import.meta.env.DEV ? [{ link: "https://example.com/abc.png", name: "abc.png" }] : []
+);
 const uploadedLinksFormatted = computed(() =>
   uploadedLinks.value.map((link) => ({
     link: link.link,
     markdown: `![${link.name}](${link.link})`,
   }))
 );
+const uploading = ref(false);
 
 function genKey(file: File, type: string) {
   const now = DateTime.now();
@@ -106,6 +130,7 @@ async function convert(file: File, type: string): Promise<File> {
 }
 
 const uploadHandler = async (e: any) => {
+  uploading.value = true;
   e.preventDefault();
   const files = e.target?.elements["file"].files as File[];
   const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
@@ -132,5 +157,6 @@ const uploadHandler = async (e: any) => {
       });
     }
   }
+  uploading.value = false;
 };
 </script>
