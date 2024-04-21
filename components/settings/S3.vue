@@ -48,7 +48,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     @submit="onSubmit"
     ref="form"
   >
-    <UFormGroup label="Endpoint" name="endpoint">
+    <UFormGroup label="Endpoint" name="endpoint" help="域名的第一个部分不应该包含你的 bucket name">
       <UInput v-model="state.endpoint" />
     </UFormGroup>
 
@@ -68,8 +68,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInput v-model="state.secretAccKey" type="password" />
     </UFormGroup>
 
-    <UFormGroup label="Public URL" name="pubUrl">
+    <UFormGroup label="Public URL" name="pubUrl" hint="可选" help="">
       <UInput v-model="state.pubUrl" />
+      <template #help>
+        访问图片的链接，最后会拼接为 `publicUrl+Key` 的形式，key 为图片在 S3
+        中的路径。<br />
+        如果储存桶本身是公开的，则不需要该参数，会用 `endpoint/bucketName/key`
+        链接访问。
+      </template>
     </UFormGroup>
 
     <UButton type="submit"> 测试 </UButton>
