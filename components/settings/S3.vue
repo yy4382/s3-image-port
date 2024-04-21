@@ -41,6 +41,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
+  <UAlert
+    title="隐私说明"
+    description="本网站一切数据都储存于本地浏览器中，不会上传到服务器。"
+    class="my-4"
+  />
   <UForm
     :schema="s3ConfigSchema"
     :state="state"
@@ -48,7 +53,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     @submit="onSubmit"
     ref="form"
   >
-    <UFormGroup label="Endpoint" name="endpoint" help="域名的第一个部分不应该包含你的 bucket name">
+    <UFormGroup
+      label="Endpoint"
+      name="endpoint"
+      help="域名的第一个部分不应该包含你的 bucket name"
+    >
       <UInput v-model="state.endpoint" />
     </UFormGroup>
 
