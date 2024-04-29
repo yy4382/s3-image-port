@@ -17,7 +17,6 @@ export default async function (
   if (!fileExt) {
     throw new Error("File extension not found");
   }
-  console.log(mime.types[fileExt]);
   const command = new PutObjectCommand({
     Bucket: config.bucket,
     Key: key,

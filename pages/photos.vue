@@ -29,7 +29,6 @@ const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
 const page = ref(1);
 
 async function listPhotos() {
-  console.log(s3Config.value);
   try {
     photos.value = (await listObj(s3Config.value)).reverse();
   } catch (error) {
