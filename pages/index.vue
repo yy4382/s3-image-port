@@ -142,6 +142,13 @@ const uploadHandler = async (e: any) => {
   } as AppSettings);
 
   for (const file of files) {
+    if (!file.type.startsWith("image/")) {
+      toast.add({
+        title: "File type not supported",
+        description: file.type,
+      });
+      continue;
+    }
     const converted = await convert(file, appConfig.value.convertType);
     const key = genKey(file, appConfig.value.convertType);
     try {
