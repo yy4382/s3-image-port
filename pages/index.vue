@@ -2,7 +2,7 @@
   <UContainer class="space-y-8">
     <UContainer>
       <form @submit.prevent="uploadHandler" class="flex gap-2">
-        <UInput type="file" multiple id="file" />
+        <UInput type="file" multiple id="file" accept="image/*" />
         <UButton type="submit" variant="outline" :loading="uploading"
           >Upload</UButton
         >
