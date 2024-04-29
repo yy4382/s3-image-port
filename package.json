@@ -11,19 +11,19 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
-    "@nuxt/ui": "^2.13.0",
+    "@nuxt/ui": "^2.15.2",
     "@types/luxon": "^3.4.2",
     "@types/mime-types": "^2.1.4",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
-    "nuxt": "^3.10.1"
+    "nuxt": "^3.11.2"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.556.0",
+    "@aws-sdk/client-s3": "^3.564.0",
     "@iconify-json/mingcute": "^1.1.17",
     "@vueuse/components": "^10.9.0",
     "luxon": "^3.4.4",
     "mime-types": "^2.1.35",
-    "zod": "^3.22.5"
+    "zod": "^3.23.4"
   }
 }
