@@ -1,0 +1,66 @@
+{
+  "upload": {
+    "title": "Upload",
+    "fileUploader": {
+      "chooseFilesButton": {},
+      "uploadButton": "Upload"
+    },
+    "uploadedLinks": {
+      "pureLink": {
+        "title": "Link"
+      },
+      "markdown": {
+        "title": "Markdown"
+      }
+    },
+    "message": {
+      "copied": "Copied!"
+    }
+  },
+  "photos": {
+    "title": "Photos"
+  },
+  "settings": {
+    "title": "Settings",
+    "s3": {
+      "title": "S3 Settings",
+      "info": {
+        "title": "Privacy Statement",
+        "description": "All data on this site is stored in your local browser and is not uploaded to a server."
+      },
+      "form": {
+        "endpoint": {
+          "title": "Endpoint",
+          "help": "The URL of the S3 endpoint. Bucket name is not included."
+        },
+        "bucketName": {
+          "title": "Bucket Name",
+          "help": "The name of the S3 bucket."
+        },
+        "region": {
+          "title": "Region",
+          "help": "The region of the S3 bucket."
+        },
+        "accessKeyId": {
+          "title": "Access Key ID"
+        },
+        "secretAccessKey": {
+          "title": "Secret Access Key"
+        },
+        "publicUrl": {
+          "title": "Public URL",
+          "optional": "Optional",
+          "help": "The outcome URL of the uploaded file."
+        }
+      },
+      "submitFormButton": "Test Connection"
+    },
+    "app": {
+      "title": "App Settings",
+      "convert" : {
+        "title": "Convert Image Before Upload",
+        "help": "Convert image before uploading to S3. \"none\" will not perform the conversion."
+      }
+    }
+  }
+}

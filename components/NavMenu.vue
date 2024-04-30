@@ -10,25 +10,32 @@
       </div>
       <div class="flex space-x-4">
         <ULink
-          to="/"
+          :to="localePath('/')"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >Upload</ULink
+        >
+          {{ $t("upload.title") }}</ULink
         >
         <ULink
-          to="/photos"
+          :to="localePath('/photos')"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >Photos</ULink
+          >{{ $t("photos.title") }}</ULink
         >
         <ULink
-          to="/settings"
+          :to="localePath('/settings')"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >Settings</ULink
+          >{{ $t("settings.title") }}</ULink
         >
       </div>
       <div class="flex-1 flex justify-end">
+        <USelectMenu
+          icon="i-mingcute-translate-2-line"
+          :options="locales"
+          v-model="localeSelected"
+          @change="localeRedirect"
+        ></USelectMenu>
         <UButton
           icon="i-mingcute-github-fill"
           size="md"
@@ -42,3 +49,27 @@
     </nav>
   </UContainer>
 </template>
+
+<script setup lang="ts">
+import { GetBucketReplicationCommand } from "@aws-sdk/client-s3";
+
+const i18n = useI18n();
+const localePath = useLocalePath();
+const locales = ["English", "简体中文"];
+const localeSelected = ref(
+  i18n.getBrowserLocale() === "zh" ? "简体中文" : "English"
+);
+let locale = i18n.getBrowserLocale() === "zh" ? "zh" : "en";
+
+const localeRedirect = () => {
+  console.log("Locale to " + localeSelected.value);
+  if (localeSelected.value === "English") {
+    locale = "en";
+  } else if (localeSelected.value === "简体中文") {
+    locale = "zh";
+  } else {
+    // assert false;
+  }
+  i18n.setLocale(locale);
+};
+</script>

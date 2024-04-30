@@ -1,0 +1,66 @@
+{
+  "upload": {
+    "title": "上传",
+    "fileUploader": {
+      "chooseFilesButton": {},
+      "uploadButton": "上传"
+    },
+    "uploadedLinks": {
+      "pureLink": {
+        "title": "纯链接"
+      },
+      "markdown": {
+        "title": "Markdown"
+      }
+    },
+    "message": {
+      "copied": "已复制!"
+    }
+  },
+  "photos": {
+    "title": "图库"
+  },
+  "settings": {
+    "title": "设置",
+    "s3": {
+      "title": "S3 存储桶设置",
+      "info": {
+        "title": "隐私声明",
+        "description": "本站所有数据均存储在您的本地浏览器，均不会上传服务器。"
+      },
+      "form": {
+        "endpoint": {
+          "title": "Endpoint",
+          "help": "S3 存储桶的 Endpoint，不包含存储桶名称。"
+        },
+        "bucketName": {
+          "title": "Bucket Name",
+          "help": "存储桶名称。"
+        },
+        "region": {
+          "title": "Region",
+          "help": "S3 存储桶的 Region。"
+        },
+        "accessKeyId": {
+          "title": "Access Key ID"
+        },
+        "secretAccessKey": {
+          "title": "Secret Access Key"
+        },
+        "publicUrl": {
+          "title": "Public URL",
+          "optional": "可选",
+          "help": "访问图片的链接，最后会拼接为 `Public URL` + `Key` 的形式，Key 为图片在 S3 中的路径。如果储存桶本身是公开的，则不需要该参数，会用 `endpoint/bucketName/key` 链接访问。"
+        }
+      },
+      "submitFormButton": "测试连接"
+    },
+    "app": {
+      "title": "应用设置",
+      "convert" : {
+        "title": "在上传前转换图片格式",
+        "help": "选择在上传图片前先将其转换为什么格式。选择 “none” 将不进行转换。"
+      }
+    }
+  }
+}

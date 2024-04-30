@@ -34,8 +34,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <UAlert
-    title="隐私说明"
-    description="本网站一切数据都储存于本地浏览器中，不会上传到服务器。"
+    :title="$t('settings.s3.info.title')"
+    :description="$t('settings.s3.info.description')"
     class="my-4"
   />
   <UForm
@@ -46,39 +46,44 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     ref="form"
   >
     <UFormGroup
-      label="Endpoint"
+      :label="$t('settings.s3.form.endpoint.title')"
       name="endpoint"
-      help="域名的第一个部分不应该包含你的 bucket name"
+      :help="$t('settings.s3.form.endpoint.help')"
     >
       <UInput v-model="state.endpoint" />
     </UFormGroup>
 
-    <UFormGroup label="Bucket name" name="bucket">
+    <UFormGroup :label="$t('settings.s3.form.bucketName.title')" name="bucket">
       <UInput v-model="state.bucket" />
     </UFormGroup>
 
-    <UFormGroup label="Region" name="region">
+    <UFormGroup :label="$t('settings.s3.form.region.title')" name="region">
       <UInput v-model="state.region" />
     </UFormGroup>
 
-    <UFormGroup label="Access key ID" name="accKeyId">
+    <UFormGroup
+      :label="$t('settings.s3.form.accessKeyId.title')"
+      name="accKeyId"
+    >
       <UInput v-model="state.accKeyId" type="password" />
     </UFormGroup>
 
-    <UFormGroup label="Secret access key" name="secretAccKey">
+    <UFormGroup
+      :label="$t('settings.s3.form.secretAccessKey.title')"
+      name="secretAccKey"
+    >
       <UInput v-model="state.secretAccKey" type="password" />
     </UFormGroup>
 
-    <UFormGroup label="Public URL" name="pubUrl" hint="可选" help="">
+    <UFormGroup
+      :label="$t('settings.s3.form.publicUrl.title')"
+      name="pubUrl"
+      :hint="$t('settings.s3.form.publicUrl.optional')"
+      :help="$t('settings.s3.form.publicUrl.help')"
+    >
       <UInput v-model="state.pubUrl" />
-      <template #help>
-        访问图片的链接，最后会拼接为 `publicUrl+Key` 的形式，key 为图片在 S3
-        中的路径。<br />
-        如果储存桶本身是公开的，则不需要该参数，会用 `endpoint/bucketName/key`
-        链接访问。
-      </template>
     </UFormGroup>
 
-    <UButton type="submit"> 测试 </UButton>
+    <UButton type="submit"> {{ $t("settings.s3.submitFormButton") }} </UButton>
   </UForm>
 </template>
