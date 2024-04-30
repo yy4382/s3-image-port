@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type ConvertType, type AppSettings, convertTypes } from "~/types";
 import { useStorage } from "@vueuse/core";
-const defaultKeyTemplate = "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
+import { defaultKeyTemplate } from "~/utils/uploadObj";
 const appSettings: Ref<AppSettings> = useStorage("app-settings", {
   convertType: "none",
   keyTemplate: defaultKeyTemplate,

@@ -62,12 +62,20 @@ import { DateTime, Interval } from "luxon";
 import { useStorage } from "@vueuse/core";
 import { UseClipboard } from "@vueuse/components";
 import { type S3Config, type AppSettings } from "~/types";
+import { defaultKeyTemplate } from "~/utils/uploadObj";
 interface ImageLink {
   link: string;
   name: string;
 }
+
 const router = useRouter();
 const toast = useToast();
+
+const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
+const appConfig = useStorage<AppSettings>("app-settings", {
+  convertType: "none",
+} as AppSettings);
+
 const uploadedLinks: Ref<ImageLink[]> = ref(
   import.meta.env.DEV
     ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
@@ -82,16 +90,26 @@ const uploadedLinksFormatted = computed(() =>
 const uploading = ref(false);
 
 function genKey(file: File, type: string) {
+  if (appConfig.value.keyTemplate.trim().length == 0) {
+    appConfig.value.keyTemplate = defaultKeyTemplate;
+  }
   const now = DateTime.now();
   const today_start = now.startOf("day");
   const interval = Interval.fromDateTimes(today_start, now);
-  const fileExt = file.name.split(".").pop();
-  const filename = `${interval
-    .length("milliseconds")
-    .toString(36)}-${Math.random().toString(36).substring(2, 4)}.${
-    type === "none" ? fileExt : type
-  }`;
-  return "i/" + DateTime.now().toFormat("yyyy/LL/dd") + "/" + filename;
+  const data: Record<string, string> = {
+    year: now.toFormat("yyyy"),
+    month: now.toFormat("LL"),
+    day: now.toFormat("dd"),
+    filename: file.name.split(".").shift() || "",
+    ext: type === "none" ? file.name.split(".").pop() || "" : type,
+    random: `${interval.length("milliseconds").toString(36)}-${Math.random()
+      .toString(36)
+      .substring(2, 4)}`,
+  };
+  return appConfig.value.keyTemplate.replace(
+    /{{(.*?)}}/g,
+    (match, key) => data[key.trim()] || ""
+  );
 }
 
 async function convert(file: File, type: string): Promise<File> {
@@ -140,10 +158,6 @@ const uploadHandler = async (e: any) => {
   uploading.value = true;
   e.preventDefault();
   const files = e.target?.elements["file"].files as File[];
-  const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
-  const appConfig = useStorage<AppSettings>("app-settings", {
-    convertType: "none",
-  } as AppSettings);
 
   for (const file of files) {
     if (!file.type.startsWith("image/")) {
