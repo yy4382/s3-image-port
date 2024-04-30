@@ -32,7 +32,7 @@
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >Nuxt UI</ULink
           >.
-          {{ showHostingProvider ? `Hosted on ${hostingProvider}` : "" }}
+          {{ hostingProvider ? `Hosted on ${hostingProvider}.` : "" }}
         </span>
         <span
           >Source at
@@ -48,19 +48,19 @@
 </template>
 
 <script setup lang="ts">
-const showHostingProvider = ref(false);
-const hostingProvider = ref("");
-
-if (process.env.NETLIFY) {
-  console.log("Running on Netlify");
-  hostingProvider.value = "Netlify";
-  showHostingProvider.value = true;
-} else if (process.env.VERCEL) {
-  console.log("Running on Vercel");
-  hostingProvider.value = "Vercel";
-  showHostingProvider.value = true;
-} else {
-  console.log("Running on unknown hosting provider");
-  showHostingProvider.value = false;
-}
+const { data: hostingProvider } = await useAsyncData(
+  "hostingProvider",
+  async () => {
+    if (process.env.NETLIFY) {
+      console.log("Running on Netlify");
+      return "Netlify";
+    } else if (process.env.VERCEL) {
+      console.log("Running on Vercel");
+      return "Vercel";
+    } else {
+      console.log("Running on unknown hosting provider");
+      return undefined;
+    }
+  }
+);
 </script>
