@@ -9,10 +9,58 @@
         },
       }"
     >
-      <div class="inline-flex items-center justify-between w-full dark:text-gray-400 text-gray-600 text-sm">
-        <span>© 2024 <a href="https://yfi.moe">Yunfi</a><br>Powered by Nuxt & Nuxt UI. Hosted on Vercel.</span>
-        <span>Source at <a href="https://github.com/yy4382/s3-image-port">GitHub</a></span>
+      <div
+        class="inline-flex items-center justify-between w-full dark:text-gray-400 text-gray-600 text-sm"
+      >
+        <span>
+          Copyright © 2024
+          <ULink
+            to="https://yfi.moe"
+            inactive-class="text-primary hover:underline"
+            >Yunfi</ULink
+          >
+          <br />
+          Powered by
+          <ULink
+            to="https://nuxt.com/"
+            inactive-class="text-primary hover:underline"
+            >Nuxt</ULink
+          >
+          &
+          <ULink
+            to="https://ui.nuxt.com/"
+            inactive-class="text-primary hover:underline"
+            >Nuxt UI</ULink
+          >.
+          {{ showHostingProvider ? `Hosted on ${hostingProvider}` : "" }}
+        </span>
+        <span
+          >Source at
+          <ULink
+            to="https://github.com/yy4382/s3-image-port"
+            inactive-class="text-primary hover:underline"
+            >GitHub</ULink
+          ></span
+        >
       </div>
     </UCard>
   </UContainer>
 </template>
+
+<script setup lang="ts">
+const showHostingProvider = ref(false);
+const hostingProvider = ref("");
+
+if (process.env.NETLIFY) {
+  console.log("Running on Netlify");
+  hostingProvider.value = "Netlify";
+  showHostingProvider.value = true;
+} else if (process.env.VERCEL) {
+  console.log("Running on Vercel");
+  hostingProvider.value = "Vercel";
+  showHostingProvider.value = true;
+} else {
+  console.log("Running on unknown hosting provider");
+  showHostingProvider.value = false;
+}
+</script>
