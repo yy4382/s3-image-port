@@ -51,16 +51,13 @@
 const { data: hostingProvider } = await useAsyncData(
   "hostingProvider",
   async () => {
-    if (process.env.NETLIFY) {
-      console.log("Running on Netlify");
-      return "Netlify";
-    } else if (process.env.VERCEL) {
-      console.log("Running on Vercel");
-      return "Vercel";
-    } else {
-      console.log("Running on unknown hosting provider");
-      return undefined;
-    }
+    const hostEnvMap: { [propName: string]: string } = {
+      NETLIFY: "Netlify",
+      VERCEL: "Vercel",
+      CF_PAGES: "Cloudflare Pages",
+    };
+    const env = Object.keys(hostEnvMap).find((key) => process.env[key]);
+    return env ? hostEnvMap[env] : undefined;
   }
 );
 </script>
