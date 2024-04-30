@@ -23,6 +23,7 @@
   "settings": {
     "title": "设置",
     "s3": {
+      "title": "S3 存储桶设置",
       "info": {
         "title": "隐私声明",
         "description": "本站所有数据均存储在您的本地浏览器，均不会上传服务器。"
@@ -55,6 +56,7 @@
       "submitFormButton": "测试连接"
     },
     "app": {
+      "title": "应用设置",
       "convert" : {
         "title": "在上传前转换图片格式",
         "help": "选择在上传图片前先将其转换为什么格式。选择 “none” 将不进行转换。"

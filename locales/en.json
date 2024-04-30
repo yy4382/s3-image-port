@@ -23,6 +23,7 @@
   "settings": {
     "title": "Settings",
     "s3": {
+      "title": "S3 Settings",
       "info": {
         "title": "Privacy Statement",
         "description": "All data on this site is stored in your local browser and is not uploaded to a server."
@@ -33,7 +34,8 @@
           "help": "The URL of the S3 endpoint. Bucket name is not included."
         },
         "bucketName": {
-          "title": "Bucket Name"
+          "title": "Bucket Name",
+          "help": "The name of the S3 bucket."
         },
         "region": {
           "title": "Region",
@@ -54,6 +56,7 @@
       "submitFormButton": "Test Connection"
     },
     "app": {
+      "title": "App Settings",
       "convert" : {
         "title": "Convert Image Before Upload",
         "help": "Convert image before uploading to S3. \"none\" will not perform the conversion."

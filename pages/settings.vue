@@ -2,12 +2,12 @@
   <UContainer>
     <UCard class="w-96 m-auto">
       <template #header>
-        <h2>Settings</h2>
+        <h2>{{ $t("settings.title") }}</h2>
       </template>
       <UTabs
         :items="[
-          { key: 's3', label: 'S3 Settings' },
-          { key: 'app', label: 'App Settings' },
+          { key: 's3', label: $t('settings.s3.title') },
+          { key: 'app', label: $t('settings.app.title') },
         ]"
       >
         <template #item="{ item }">
