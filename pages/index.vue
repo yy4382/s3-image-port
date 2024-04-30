@@ -3,16 +3,16 @@
     <UContainer>
       <form @submit.prevent="uploadHandler" class="flex gap-2">
         <UInput type="file" multiple id="file" accept="image/*" />
-        <UButton type="submit" variant="outline" :loading="uploading"
-          >Upload</UButton
-        >
+        <UButton type="submit" variant="outline" :loading="uploading">{{
+          $t("upload.fileUploader.uploadButton")
+        }}</UButton>
       </form>
     </UContainer>
     <UTabs
       v-if="uploadedLinksFormatted.length > 0"
       :items="[
-        { slot: 'links', label: 'Link' },
-        { slot: 'markdown', label: 'Markdown' },
+        { slot: 'links', label: $t('upload.uploadedLinks.pureLink.title') },
+        { slot: 'markdown', label: $t('upload.uploadedLinks.markdown.title') },
       ]"
     >
       <template #links>
@@ -23,7 +23,9 @@
                 <UButton
                   color="black"
                   variant="link"
-                  @click="copy() && toast.add({ title: 'Copied' })"
+                  @click="
+                    copy() && toast.add({ title: $t('upload.message.copied') })
+                  "
                 >
                   {{ link.link }}
                 </UButton>
@@ -40,7 +42,9 @@
                 <UButton
                   color="black"
                   variant="link"
-                  @click="copy() && toast.add({ title: 'Copied' })"
+                  @click="
+                    copy() && toast.add({ title: $t('upload.message.copied') })
+                  "
                 >
                   {{ link.markdown }}
                 </UButton>

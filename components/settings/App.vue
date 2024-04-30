@@ -8,10 +8,10 @@ const appSettings: Ref<AppSettings> = useStorage("app-settings", {
 
 <template>
   <div class="space-y-4">
-    <UFormGroup label="Convert image before upload">
+    <UFormGroup :label="$t('settings.app.convert.title')">
       <USelectMenu v-model="appSettings.convertType" :options="convertTypes" />
       <template #help>
-        Convert image before uploading to S3. "none" will not do conversion.
+        {{ $t("settings.app.convert.help") }}
       </template>
     </UFormGroup>
   </div>
