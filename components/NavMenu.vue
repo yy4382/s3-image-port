@@ -29,7 +29,7 @@
           >{{ $t("settings.title") }}</ULink
         >
       </div>
-      <div class="flex-1 flex justify-end">
+      <div class="flex-1 flex justify-end items-center gap-1">
         <USelectMenu
           icon="i-mingcute-translate-2-line"
           :options="locales"
@@ -51,8 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { GetBucketReplicationCommand } from "@aws-sdk/client-s3";
-
 const i18n = useI18n();
 const localePath = useLocalePath();
 const locales = ["English", "简体中文"];
