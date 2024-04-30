@@ -1,5 +1,6 @@
 {
   "upload": {
+    "title": "Upload",
     "fileUploader": {
       "chooseFilesButton": {},
       "uploadButton": "Upload"
@@ -16,8 +17,11 @@
       "copied": "Copied!"
     }
   },
-  "photos": {},
+  "photos": {
+    "title": "Photos"
+  },
   "settings": {
+    "title": "Settings",
     "s3": {
       "info": {
         "title": "Privacy Statement",

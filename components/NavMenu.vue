@@ -13,19 +13,20 @@
           to="/"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >Upload</ULink
+        >
+          {{ $t("upload.title") }}</ULink
         >
         <ULink
           to="/photos"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >Photos</ULink
+          >{{ $t("photos.title") }}</ULink
         >
         <ULink
           to="/settings"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >Settings</ULink
+          >{{ $t("settings.title") }}</ULink
         >
       </div>
       <div class="flex-1 flex justify-end">
