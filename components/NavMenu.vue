@@ -31,7 +31,7 @@
       </div>
       <div class="flex-1 flex justify-end">
         <USelectMenu
-          icon="i-mingcute-translate-2-fill"
+          icon="i-mingcute-translate-2-line"
           :options="locales"
           v-model="localeSelected"
           @change="localeRedirect"
