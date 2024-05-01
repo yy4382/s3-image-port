@@ -32,6 +32,7 @@ const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
 const page = ref(1);
 const { t } = useI18n();
+const localePath = useLocalePath();
 
 async function listPhotos() {
   try {
@@ -47,7 +48,7 @@ async function listPhotos() {
         },
         {
           label: t("photos.message.failToListPhotos.actions.goToSettings"),
-          click: () => router.push("/settings"),
+          click: () => router.push(localePath("/settings")),
         },
       ],
     });
