@@ -87,10 +87,10 @@
         "publicUrl": {
           "title": "Public URL",
           "optional": "可选",
-          "description": "如果你的存储桶是公开的，你可以在此设置公开 URL。",
+          "description": "图像链接的前缀",
           "descriptionExtended": {
-            "line1": "默认情况下，输出 URL 将基于 `Endpoint` + `Bucket Name` 构建。",
-            "line2": "如果你填入了该字段，输出 URL 将基于此公开 URL 构建。"
+            "line1": "默认情况下，输出 URL 将根据 `Endpoint/BucketName/PathToImage` 来拼接。",
+            "line2": "如果您有一个自定义域名指向存储桶，或者无法通过Endpoint 拼接而成的链接访问图像文件（例如 R2），您可以在此处指定自定义域名。它将构造成 `PublicUrl/PathToImage`。"
           }
         }
       },

@@ -55,7 +55,13 @@ const isDefaultKeyTemplate = computed(
                 variant="link"
               />
               <template #panel>
-                <UCard>
+                <UCard
+                  :ui="{
+                    body: {
+                      base: 'max-w-[90vw] w-[40rem] space-y-3',
+                    },
+                  }"
+                >
                   <p>{{ $t("settings.app.keyTemplate.placeholders") }}</p>
                   <p>{{ $t("settings.app.keyTemplate.default") }}</p>
                   <p class="text-red-500">

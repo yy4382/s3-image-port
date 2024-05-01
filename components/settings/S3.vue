@@ -106,7 +106,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 variant="link"
               />
               <template #panel>
-                <UCard>
+                <UCard
+                  :ui="{
+                    body: {
+                      base: 'max-w-[90vw] md:w-[40rem] space-y-3',
+                    },
+                  }"
+                >
                   <p>
                     {{
                       $t("settings.s3.form.publicUrl.descriptionExtended.line1")
