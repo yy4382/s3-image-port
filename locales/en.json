@@ -24,7 +24,7 @@
       "uploadFailed": {
         "title": "File Upload Failed",
         "actions": {
-          "goToSettings":"Go to settings"
+          "goToSettings": "Go to settings"
         }
       }
     }
@@ -68,15 +68,15 @@
       "form": {
         "endpoint": {
           "title": "Endpoint",
-          "help": "The URL of the S3 endpoint. Bucket name is not included."
+          "description": "The URL of the S3 endpoint. Bucket name is not included."
         },
         "bucketName": {
           "title": "Bucket Name",
-          "help": "The name of the S3 bucket."
+          "description": "The name of the S3 bucket."
         },
         "region": {
           "title": "Region",
-          "help": "The region of the S3 bucket."
+          "description": "The region of the S3 bucket."
         },
         "accessKeyId": {
           "title": "Access Key ID"
@@ -87,7 +87,11 @@
         "publicUrl": {
           "title": "Public URL",
           "optional": "Optional",
-          "help": "The outcome URL of the uploaded file."
+          "description": "Prefix of URL to access the image.",
+          "descriptionExtended": {
+            "line1": "By default, the output URL will be constructed based on `Endpoint/BucketName/PathToImage`.",
+            "line2": "If you have a custom domain pointing to the bucket, or the image file cannot be accessed by endpoint url (e.g. R2), you can specify the custom domain here. It will be constructed into `PublicUrl/PathToImage`."
+          }
         }
       },
       "submitFormButton": "Test Connection"
@@ -96,15 +100,16 @@
       "title": "App Settings",
       "convert": {
         "title": "Convert Image Before Upload",
-        "help": "Convert image before uploading to S3. \"none\" will not perform the conversion."
+        "description": "Convert image before uploading to S3. \"none\" will not perform the conversion."
       },
       "keyTemplate": {
         "title": "Key Template",
-        "help": "The template of the key of the uploaded file.",
+        "description": "The key template of the uploaded file.",
         "placeholders": "Available placeholders: year, month, day, random, filename, ext. (Should be wrapped with {'{{'} and {'}}'}. )",
         "default": "Default: i/{'{{'}year{'}}'}/{'{{'}month{'}}'}/{'{{'}day{'}}'}/{'{{'}random{'}}'}.{'{{'}ext{'}}'}",
         "warning": "Warning: CHANGE IT AT YOUR OWN RISK! If the new key collides with the existing key, the existing file will be overwritten.",
-        "info1": "The random placeholder is not completely random. It concatenates the milliseconds from 0 am and a two-digit random number to generate the value. Therefore, it is recommended to use it together with year/month/day."
+        "info1": "The random placeholder is not completely random. It concatenates the milliseconds from 0 am and a two-digit random number to generate the value. Therefore, it is recommended to use it together with year/month/day.",
+        "reset": "Reset to default"
       }
     }
   }
