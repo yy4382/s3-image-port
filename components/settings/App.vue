@@ -4,10 +4,12 @@ import { useStorage } from "@vueuse/core";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
 const appSettings: Ref<AppSettings> = useStorage("app-settings", {
   convertType: "none",
-  keyTemplate: defaultKeyTemplate,
+  keyTemplate: "",
 });
 const isDefaultKeyTemplate = computed(
-  () => appSettings.value.keyTemplate === defaultKeyTemplate
+  () =>
+    appSettings.value.keyTemplate === defaultKeyTemplate ||
+    appSettings.value.keyTemplate === ""
 );
 </script>
 
@@ -27,13 +29,18 @@ const isDefaultKeyTemplate = computed(
             :placeholder="defaultKeyTemplate"
           />
         </div>
-        <UButton
-          icon="i-mingcute-close-line"
-          color="red"
-          size="xs"
+        <UTooltip
+          :text="$t('settings.app.keyTemplate.reset')"
           v-if="!isDefaultKeyTemplate"
-          @click="appSettings.keyTemplate = defaultKeyTemplate"
-        />
+        >
+          <UButton
+            icon="i-mingcute-close-circle-line"
+            color="red"
+            size="xs"
+            square
+            @click="appSettings.keyTemplate = ''"
+          />
+        </UTooltip>
       </div>
       <template #description>
         <div>
