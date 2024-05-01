@@ -1,6 +1,6 @@
 <template>
-  <UContainer>
-    <UCard class="w-96 m-auto">
+  <UContainer :ui="{ base: 'mx-0' }">
+    <UCard class="max-w-md w-full m-auto">
       <template #header>
         <h2>{{ $t("settings.title") }}</h2>
       </template>
