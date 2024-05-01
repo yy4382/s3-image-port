@@ -2,10 +2,14 @@
   <UContainer class="space-y-4">
     <ClientOnly>
       <UButton
-        :label="photos.length === 0 ? 'Load' : 'Refresh'"
-        @click="listPhotos"
-        variant="outline"
-      />
+      :label="
+        photos.length === 0
+          ? $t('photos.loadOrRefreshButton.loadButton')
+          : $t('photos.loadOrRefreshButton.refreshButton')
+      "
+      @click="listPhotos"
+      variant="outline"
+    />
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div v-for="photo in photos.slice((page - 1) * 9, page * 9)">
           <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
@@ -29,17 +33,25 @@ const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
 const page = ref(1);
+const { t } = useI18n();
+const localePath = useLocalePath();
 
 async function listPhotos() {
   try {
     photos.value = (await listObj(s3Config.value)).reverse();
   } catch (error) {
     toast.add({
-      title: "Failed to list photos",
-      description: "Open dev console for more info",
+      title: t("photos.message.failToListPhotos.title"),
+      description: t("photos.message.failToListPhotos.description"),
       actions: [
-        { label: "Retry", click: listPhotos },
-        { label: "Go to settings", click: () => router.push("/settings") },
+        {
+          label: t("photos.message.failToListPhotos.actions.retry"),
+          click: listPhotos,
+        },
+        {
+          label: t("photos.message.failToListPhotos.actions.goToSettings"),
+          click: () => router.push(localePath("/settings")),
+        },
       ],
     });
     console.error((error as Error).message);
@@ -48,17 +60,17 @@ async function listPhotos() {
 async function deletePhoto(key: string) {
   try {
     toast.add({
-      title: "Delete requested...",
+      title: t("photos.message.deletePhoto.try.title"),
       timeout: 1000,
     });
     await deleteObj(key, s3Config.value);
     toast.add({
-      title: "Photo deleted successfully",
+      title: t("photos.message.deletePhoto.success.title"),
     });
     await listPhotos();
   } catch (error) {
     toast.add({
-      title: "Failed to delete photo",
+      title: t("photos.message.deletePhoto.fail.title"),
     });
     console.error((error as Error).message);
   }

@@ -14,11 +14,48 @@
       }
     },
     "message": {
-      "copied": "已复制!"
+      "copied": "已复制！",
+      "fileTypeNotSupported": {
+        "title": "不支持的文件类型"
+      },
+      "uploaded": {
+        "title": "文件已上传"
+      },
+      "uploadFailed": {
+        "title": "文件上传失败",
+        "actions": {
+          "goToSettings":"前往设置"
+        }
+      }
     }
   },
   "photos": {
-    "title": "图库"
+    "title": "图库",
+    "loadOrRefreshButton": {
+      "loadButton": "加载图库",
+      "refreshButton": "刷新"
+    },
+    "message": {
+      "failToListPhotos": {
+        "title": "加载图库失败",
+        "description": "打开控制台以查看详细信息",
+        "actions": {
+          "retry": "重试",
+          "goToSettings": "前往设置"
+        }
+      },
+      "deletePhoto": {
+        "try": {
+          "title": "正在删除图片"
+        },
+        "success": {
+          "title": "图片已删除"
+        },
+        "fail": {
+          "title": "删除图片失败"
+        }
+      }
+    }
   },
   "settings": {
     "title": "设置",
@@ -48,8 +85,7 @@
           "title": "Secret Access Key"
         },
         "publicUrl": {
-          "title": "Public URL",
-          "optional": "可选",
+          "title": "Public URL", "optional": "可选",
           "help": "访问图片的链接，最后会拼接为 `Public URL` + `Key` 的形式，Key 为图片在 S3 中的路径。如果储存桶本身是公开的，则不需要该参数，会用 `endpoint/bucketName/key` 链接访问。"
         }
       },

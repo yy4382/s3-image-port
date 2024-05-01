@@ -14,11 +14,48 @@
       }
     },
     "message": {
-      "copied": "Copied!"
+      "copied": "Copied!",
+      "fileTypeNotSupported": {
+        "title": "File Type Not Supported"
+      },
+      "uploaded": {
+        "title": "File Uploaded"
+      },
+      "uploadFailed": {
+        "title": "File Upload Failed",
+        "actions": {
+          "goToSettings":"Go to settings"
+        }
+      }
     }
   },
   "photos": {
-    "title": "Photos"
+    "title": "Photos",
+    "loadOrRefreshButton": {
+      "loadButton": "Load",
+      "refreshButton": "Refresh"
+    },
+    "message": {
+      "failToListPhotos": {
+        "title": "Failed to List Photos",
+        "description": "Open dev console for more info.",
+        "actions": {
+          "retry": "Retry",
+          "goToSettings": "Go to settings"
+        }
+      },
+      "deletePhoto": {
+        "try": {
+          "title": "Delete requested..."
+        },
+        "success": {
+          "title": "Photo deleted successfully"
+        },
+        "fail": {
+          "title": "Failed to delete photo"
+        }
+      }
+    }
   },
   "settings": {
     "title": "Settings",
