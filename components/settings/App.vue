@@ -13,18 +13,32 @@ const isDefaultKeyTemplate = computed(
 
 <template>
   <div class="space-y-4">
-    <UFormGroup :label="$t('settings.app.convert.title')">
+    <UFormGroup
+      :label="$t('settings.app.convert.title')"
+      :description="$t('settings.app.convert.description')"
+    >
       <USelectMenu v-model="appSettings.convertType" :options="convertTypes" />
-      <template #help>
-        {{ $t("settings.app.convert.help") }}
-      </template>
     </UFormGroup>
     <UFormGroup :label="$t('settings.app.keyTemplate.title')">
-      <UInput v-model="appSettings.keyTemplate" />
-      <template #help>
+      <div class="flex gap-2">
+        <div class="flex-auto">
+          <UInput
+            v-model="appSettings.keyTemplate"
+            :placeholder="defaultKeyTemplate"
+          />
+        </div>
+        <UButton
+          icon="i-mingcute-close-line"
+          color="red"
+          size="xs"
+          v-if="!isDefaultKeyTemplate"
+          @click="appSettings.keyTemplate = defaultKeyTemplate"
+        />
+      </div>
+      <template #description>
         <div>
           <span class="inline-flex items-center">
-            {{ $t("settings.app.keyTemplate.help") }}
+            {{ $t("settings.app.keyTemplate.description") }}
             <UPopover mode="hover">
               <UButton
                 icon="i-mingcute-information-line"
@@ -45,13 +59,6 @@ const isDefaultKeyTemplate = computed(
               </template>
             </UPopover>
           </span>
-          <UButton
-            label="Reset Key Template"
-            color="red"
-            size="xs"
-            v-if="!isDefaultKeyTemplate"
-            @click="appSettings.keyTemplate = defaultKeyTemplate"
-          />
         </div>
       </template>
     </UFormGroup>
