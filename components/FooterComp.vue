@@ -18,7 +18,7 @@
             to="https://yfi.moe"
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >Yunfi</ULink
-          >
+          >.
           <br />
           Powered by
           <ULink
