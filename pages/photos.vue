@@ -1,6 +1,7 @@
 <template>
   <UContainer class="space-y-4">
-    <UButton
+    <ClientOnly>
+      <UButton
       :label="
         photos.length === 0
           ? $t('photos.loadOrRefreshButton.loadButton')
@@ -9,18 +10,19 @@
       @click="listPhotos"
       variant="outline"
     />
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div v-for="photo in photos.slice((page - 1) * 9, page * 9)">
-        <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div v-for="photo in photos.slice((page - 1) * 9, page * 9)">
+          <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
+        </div>
       </div>
-    </div>
-    <UPagination
-      class="mx-auto max-w-fit"
-      v-model="page"
-      :total="photos.length"
-      :perPage="9"
-      v-if="photos.length > 0"
-    />
+      <UPagination
+        class="mx-auto max-w-fit"
+        v-model="page"
+        :total="photos.length"
+        :perPage="9"
+        v-if="photos.length > 0"
+      />
+    </ClientOnly>
   </UContainer>
 </template>
 <script setup lang="ts">

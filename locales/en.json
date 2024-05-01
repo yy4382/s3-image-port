@@ -97,6 +97,14 @@
       "convert": {
         "title": "Convert Image Before Upload",
         "help": "Convert image before uploading to S3. \"none\" will not perform the conversion."
+      },
+      "keyTemplate": {
+        "title": "Key Template",
+        "help": "The template of the key of the uploaded file.",
+        "placeholders": "Available placeholders: year, month, day, random, filename, ext. (Should be wrapped with {'{{'} and {'}}'}. )",
+        "default": "Default: i/{'{{'}year{'}}'}/{'{{'}month{'}}'}/{'{{'}day{'}}'}/{'{{'}random{'}}'}.{'{{'}ext{'}}'}",
+        "warning": "Warning: CHANGE IT AT YOUR OWN RISK! If the new key collides with the existing key, the existing file will be overwritten.",
+        "info1": "The random placeholder is not completely random. It concatenates the milliseconds from 0 am and a two-digit random number to generate the value. Therefore, it is recommended to use it together with year/month/day."
       }
     }
   }

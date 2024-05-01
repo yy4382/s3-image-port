@@ -29,6 +29,7 @@ export type ConvertType = "none" | "jpg" | "webp";
 export const convertTypes: ConvertType[] = ["none", "jpg", "webp"];
 export interface AppSettings {
   convertType: ConvertType;
+  keyTemplate: string;
 }
 
 export const appSettingsSchema = z.object({

@@ -93,9 +93,17 @@
     },
     "app": {
       "title": "应用设置",
-      "convert" : {
+      "convert": {
         "title": "在上传前转换图片格式",
         "help": "选择在上传图片前先将其转换为什么格式。选择 “none” 将不进行转换。"
+      },
+      "keyTemplate": {
+        "title": "Key 模板",
+        "help": "上传文件的 Key 的模板",
+        "placeholders": "可用的占位符：year、month、day、random、filename、ext（应该用 {'{{'} 和 {'}}'}. 包裹）",
+        "default": "默认值：i/{'{{'}year{'}}'}/{'{{'}month{'}}'}/{'{{'}day{'}}'}/{'{{'}random{'}}'}.{'{{'}ext{'}}'}",
+        "warning": "警告：自行承担风险！如果新键与现有键冲突，现有文件将被覆盖。",
+        "info1": "random 占位符并非完全随机，拼接了从0时到现在的毫秒数和两位随机数来生成，因此建议与 year/month/day 一起使用。"
       }
     }
   }

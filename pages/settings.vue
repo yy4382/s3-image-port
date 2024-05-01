@@ -11,8 +11,10 @@
         ]"
       >
         <template #item="{ item }">
-          <SettingsS3 v-if="item.key === 's3'" />
-          <SettingsApp v-if="item.key === 'app'" />
+          <ClientOnly>
+            <SettingsS3 v-if="item.key === 's3'" />
+            <SettingsApp v-if="item.key === 'app'" />
+          </ClientOnly>
         </template>
       </UTabs>
     </UCard>
