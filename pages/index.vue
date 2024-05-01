@@ -68,6 +68,9 @@ interface ImageLink {
 }
 const router = useRouter();
 const toast = useToast();
+const { t } = useI18n();
+const localePath = useLocalePath();
+
 const uploadedLinks: Ref<ImageLink[]> = ref(
   import.meta.env.DEV
     ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
@@ -148,7 +151,7 @@ const uploadHandler = async (e: any) => {
   for (const file of files) {
     if (!file.type.startsWith("image/")) {
       toast.add({
-        title: "File type not supported",
+        title: t("upload.message.fileTypeNotSupported.title"),
         description: file.type,
       });
       continue;
@@ -158,7 +161,8 @@ const uploadHandler = async (e: any) => {
     try {
       await uploadObj(converted, key, s3Config.value);
       toast.add({
-        title: "File Uploaded: " + key,
+        title: t("upload.message.uploaded.title"),
+        description: key,
       });
       uploadedLinks.value.push({
         link: key2Url(key, s3Config.value),
@@ -167,10 +171,13 @@ const uploadHandler = async (e: any) => {
     } catch (e) {
       console.error(e);
       toast.add({
-        title: "File Upload Failed",
+        title: t("upload.message.uploadFailed.title"),
         description: key,
         actions: [
-          { label: "Go to settings", click: () => router.push("/settings") },
+          {
+            label: t("upload.message.uploadFailed.actions.goToSettings"),
+            click: () => router.push(localePath("/settings")),
+          },
         ],
       });
     }

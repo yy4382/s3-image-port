@@ -14,7 +14,19 @@
       }
     },
     "message": {
-      "copied": "已复制!"
+      "copied": "已复制！",
+      "fileTypeNotSupported": {
+        "title": "不支持的文件类型"
+      },
+      "uploaded": {
+        "title": "文件已上传"
+      },
+      "uploadFailed": {
+        "title": "文件上传失败",
+        "actions": {
+          "goToSettings":"前往设置"
+        }
+      }
     }
   },
   "photos": {
