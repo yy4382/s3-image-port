@@ -18,7 +18,32 @@
     }
   },
   "photos": {
-    "title": "Photos"
+    "title": "Photos",
+    "loadOrRefreshButton": {
+      "loadButton": "Load",
+      "refreshButton": "Refresh"
+    },
+    "message": {
+      "failToListPhotos": {
+        "title": "Failed to List Photos",
+        "description": "Open dev console for more info.",
+        "actions": {
+          "retry": "Retry",
+          "goToSettings": "Go to settings"
+        }
+      },
+      "deletePhoto": {
+        "try": {
+          "title": "Delete requested..."
+        },
+        "success": {
+          "title": "Photo deleted successfully"
+        },
+        "fail": {
+          "title": "Failed to delete photo"
+        }
+      }
+    }
   },
   "settings": {
     "title": "Settings",
@@ -57,7 +82,7 @@
     },
     "app": {
       "title": "App Settings",
-      "convert" : {
+      "convert": {
         "title": "Convert Image Before Upload",
         "help": "Convert image before uploading to S3. \"none\" will not perform the conversion."
       }
