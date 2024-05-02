@@ -3,7 +3,7 @@
 <p>
 <a href="README.md">English</a>
 ·
-<a href="/doc/readme_zh.md">简体中文</a>
+<a href="./doc/readme_zh.md">简体中文</a>
 </p>
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
@@ -36,8 +36,8 @@ For obtaining S3 related keys, please refer to the documentation of your storage
 
 ## Feedback and Contributions
 
-Feel free to raise an issue if you encounter any problems or have suggestions.
-If you have ideas for new features, don’t hesitate to create an issue for those as well—no idea is too far-fetched!
+Feel free to raise an [Issue](https://github.com/yy4382/s3-image-port/issues/new/choose) if you encounter any problems or have suggestions.
+If you have ideas for new features, don’t hesitate to create an [Issue](https://github.com/yy4382/s3-image-port/issues/new/choose)for those as well—no idea is too far-fetched!
 
 ## Known Issues / Roadmap
 
