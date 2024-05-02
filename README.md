@@ -41,7 +41,7 @@ If you have ideas for new features, don’t hesitate to create an issue for thos
 
 ## Known Issues / Roadmap
 
-- [ ] Customize upload key
+- [x] Customize upload key
 - [ ] Image preview before upload
 - [ ] Not able to fetch all image if there are more than 1000 objects in the bucket
-- [ ] Distinguish image files from other files
+- [x] Distinguish image files from other files

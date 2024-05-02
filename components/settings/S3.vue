@@ -47,23 +47,35 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   >
     <UFormGroup
       :label="$t('settings.s3.form.endpoint.title')"
+      :description="$t('settings.s3.form.endpoint.description')"
       name="endpoint"
-      :help="$t('settings.s3.form.endpoint.help')"
+      required
     >
       <UInput v-model="state.endpoint" />
     </UFormGroup>
 
-    <UFormGroup :label="$t('settings.s3.form.bucketName.title')" name="bucket">
+    <UFormGroup
+      :label="$t('settings.s3.form.bucketName.title')"
+      :description="$t('settings.s3.form.bucketName.description')"
+      name="bucket"
+      required
+    >
       <UInput v-model="state.bucket" />
     </UFormGroup>
 
-    <UFormGroup :label="$t('settings.s3.form.region.title')" name="region">
+    <UFormGroup
+      :label="$t('settings.s3.form.region.title')"
+      :description="$t('settings.s3.form.region.description')"
+      name="region"
+      required
+    >
       <UInput v-model="state.region" />
     </UFormGroup>
 
     <UFormGroup
       :label="$t('settings.s3.form.accessKeyId.title')"
       name="accKeyId"
+      required
     >
       <UInput v-model="state.accKeyId" type="password" />
     </UFormGroup>
@@ -71,16 +83,52 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UFormGroup
       :label="$t('settings.s3.form.secretAccessKey.title')"
       name="secretAccKey"
+      required
     >
       <UInput v-model="state.secretAccKey" type="password" />
     </UFormGroup>
 
     <UFormGroup
       :label="$t('settings.s3.form.publicUrl.title')"
-      name="pubUrl"
       :hint="$t('settings.s3.form.publicUrl.optional')"
-      :help="$t('settings.s3.form.publicUrl.help')"
+      name="pubUrl"
     >
+      <template #description>
+        <div>
+          <span class="inline-flex items-center">
+            {{ $t("settings.s3.form.publicUrl.description") }}
+            <UPopover mode="hover">
+              <UButton
+                icon="i-mingcute-information-line"
+                size="2xs"
+                color="primary"
+                square
+                variant="link"
+              />
+              <template #panel>
+                <UCard
+                  :ui="{
+                    body: {
+                      base: 'max-w-[90vw] md:w-[40rem] space-y-3',
+                    },
+                  }"
+                >
+                  <p>
+                    {{
+                      $t("settings.s3.form.publicUrl.descriptionExtended.line1")
+                    }}
+                  </p>
+                  <p>
+                    {{
+                      $t("settings.s3.form.publicUrl.descriptionExtended.line2")
+                    }}
+                  </p>
+                </UCard>
+              </template>
+            </UPopover>
+          </span>
+        </div>
+      </template>
       <UInput v-model="state.pubUrl" />
     </UFormGroup>
 

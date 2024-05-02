@@ -77,7 +77,6 @@ const appConfig = useStorage<AppSettings>("app-settings", {
   convertType: "none",
 } as AppSettings);
 
-
 const uploadedLinks: Ref<ImageLink[]> = ref(
   import.meta.env.DEV
     ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
@@ -92,9 +91,10 @@ const uploadedLinksFormatted = computed(() =>
 const uploading = ref(false);
 
 function genKey(file: File, type: string) {
-  if (appConfig.value.keyTemplate.trim().length == 0) {
-    appConfig.value.keyTemplate = defaultKeyTemplate;
-  }
+  const keyTemplate =
+    appConfig.value.keyTemplate.trim().length === 0
+      ? defaultKeyTemplate
+      : appConfig.value.keyTemplate.trim();
   const now = DateTime.now();
   const today_start = now.startOf("day");
   const interval = Interval.fromDateTimes(today_start, now);
@@ -108,7 +108,7 @@ function genKey(file: File, type: string) {
       .toString(36)
       .substring(2, 4)}`,
   };
-  return appConfig.value.keyTemplate.replace(
+  return keyTemplate.replace(
     /{{(.*?)}}/g,
     (match, key) => data[key.trim()] || ""
   );
@@ -171,6 +171,9 @@ const uploadHandler = async (e: any) => {
     }
     const converted = await convert(file, appConfig.value.convertType);
     const key = genKey(file, appConfig.value.convertType);
+    console.log("key", key);
+    return;
+
     try {
       await uploadObj(converted, key, s3Config.value);
       toast.add({
