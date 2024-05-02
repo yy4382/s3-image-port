@@ -38,7 +38,7 @@
           >Source at
           <ULink
             to="https://github.com/yy4382/s3-image-port"
-            inactive-class="text-primary hover:underline"
+            inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >GitHub</ULink
           ></span
         >
