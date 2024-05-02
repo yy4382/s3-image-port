@@ -2,14 +2,14 @@
 
 这是一个定制的前端面板，用于管理托管在**类 S3**存储服务（如 Cloudflare R2）上的图片。传统上这些存储服务没有专门的图片管理面板，该解决方案为图片的**上传**、**管理**和**集成**提供了一个简单而强大的界面。
 
-![upload](https://i.yfi.moe/i/2024/04/28/2yo5d-7h.png)
-![photos](https://i.yfi.moe/i/2024/04/28/2wdb5-wq.png)
+![upload](images/ScreenShotUpload.png)
+![photos](images/ScreenShotPhotos.png)
 
 ## 在线实例和部署
 
 一个公共实例托管在 [Vercel](https://vercel.com)，可通过 [iport.yfi.moe](https://iport.yfi.moe)访问。您只需在 “设置 ”选项卡下输入特定的 S3 设置，即可立即开始使用。
 
-该项目是开源的，保证不进行服务端数据处理（确保您的隐私和安全），您也可以选择 Fork 本仓库，将其部署到自己的 Vercel 账户或服务器上。
+该项目是开源的，并且一切数据都留在您本地的浏览器中不会被上传，您也可以选择 Fork 本仓库，将其部署到自己的 Vercel 账户或服务器上。
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyy4382%2Fs3-image-port)
 

@@ -8,14 +8,14 @@
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
-![upload](https://i.yfi.moe/i/2024/04/28/2yo5d-7h.png)
-![photos](https://i.yfi.moe/i/2024/04/28/2wdb5-wq.png)
+![upload](doc/images/ScreenShotUpload.png)
+![photos](doc/images/ScreenShotPhotos.png)
 
 ## Live Instance and Deployment
 
 A public instance is hosted at [Vercel](https://vercel.com) and can be accessed at [iport.yfi.moe](https://iport.yfi.moe). You can start using it immediately by entering your specific S3 settings under the Settings tab.
 
-While the source code is open and guarantees no server-side data processing (ensuring your privacy and security), you have the option to fork the repository and deploy it on your own Vercel account or server.
+While it is open-source and all your data remains in your local browser without being uploaded., you have the option to fork the repository and deploy it on your own Vercel account or server.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyy4382%2Fs3-image-port)
 
