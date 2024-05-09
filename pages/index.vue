@@ -63,6 +63,7 @@ import { useStorage } from "@vueuse/core";
 import { UseClipboard } from "@vueuse/components";
 import { type S3Config, type AppSettings } from "~/types";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
+import imageCompression from "browser-image-compression";
 interface ImageLink {
   link: string;
   name: string;
@@ -156,6 +157,14 @@ async function convert(file: File, type: string): Promise<File> {
   return p;
 }
 
+async function compressImg(file: File): Promise<File> {
+  const compressedFile = await imageCompression(file, { useWebWorker: true });
+  console.log(
+    "File compressed from " + file.size + " to " + compressedFile.size
+  );
+  return compressedFile;
+}
+
 const uploadHandler = async (e: any) => {
   uploading.value = true;
   e.preventDefault();
@@ -170,12 +179,13 @@ const uploadHandler = async (e: any) => {
       continue;
     }
     const converted = await convert(file, appConfig.value.convertType);
+    const compressed = await compressImg(converted);
     const key = genKey(file, appConfig.value.convertType);
     console.log("key", key);
     return;
 
     try {
-      await uploadObj(converted, key, s3Config.value);
+      await uploadObj(compressed, key, s3Config.value);
       toast.add({
         title: t("upload.message.uploaded.title"),
         description: key,
