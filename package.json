@@ -10,8 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@nuxt/devtools": "latest",
-    "@nuxt/ui": "^2.15.2",
+    "@nuxt/devtools": "^1.2.0",
+    "@nuxt/ui": "^2.16.0",
     "@types/luxon": "^3.4.2",
     "@types/mime-types": "^2.1.4",
     "@vueuse/core": "^10.9.0",
@@ -19,13 +19,13 @@
     "nuxt": "^3.11.2"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.564.0",
+    "@aws-sdk/client-s3": "^3.572.0",
     "@iconify-json/mingcute": "^1.1.17",
     "@nuxtjs/i18n": "^8.3.1",
     "@vueuse/components": "^10.9.0",
     "browser-image-compression": "^2.0.2",
     "luxon": "^3.4.4",
     "mime-types": "^2.1.35",
-    "zod": "^3.23.4"
+    "zod": "^3.23.8"
   }
 }
