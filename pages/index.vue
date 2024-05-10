@@ -158,7 +158,11 @@ async function convert(file: File, type: string): Promise<File> {
 }
 
 async function compressImg(file: File): Promise<File> {
-  const compressedFile = await imageCompression(file, { useWebWorker: true });
+  const compressedFile = await imageCompression(file, {
+    maxSizeMB: appConfig.value.compressionMaxSize,
+    maxWidthOrHeight: appConfig.value.compressionMaxWidthOrHeight,
+    useWebWorker: true,
+  });
   console.log(
     "File compressed from " + file.size + " to " + compressedFile.size
   );

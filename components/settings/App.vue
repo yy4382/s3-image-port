@@ -4,6 +4,8 @@ import { useStorage } from "@vueuse/core";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
 const appSettings: Ref<AppSettings> = useStorage("app-settings", {
   convertType: "none",
+  compressionMaxSize: 1,
+  compressionMaxWidthOrHeight: 1024,
   keyTemplate: "",
 });
 const isDefaultKeyTemplate = computed(
@@ -30,6 +32,7 @@ const isDefaultKeyTemplate = computed(
         <UInput
           :placeholder="$t('settings.app.compress.options.maxSize.title')"
           type="number"
+          v-model="appSettings.compressionMaxSize"
         >
           <template #trailing>
             <span class="text-gray-500 dark:text-gray-400 text-xs">MB</span>
@@ -40,6 +43,7 @@ const isDefaultKeyTemplate = computed(
             $t('settings.app.compress.options.maxWidthOrHeight.title')
           "
           type="number"
+          v-model="appSettings.compressionMaxWidthOrHeight"
         >
           <template #trailing>
             <span class="text-gray-500 dark:text-gray-400 text-xs">px</span>
