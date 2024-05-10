@@ -136,8 +136,8 @@
         }
       },
       "keyTemplate": {
-        "title": "Key 模板",
-        "description": "上传文件的 Key 的模板",
+        "title": "Key（路径）模板",
+        "description": "上传文件的 Key（路径）的模板",
         "placeholders": "可用的占位符：year、month、day、random、filename、ext（应该用 {'{{'} 和 {'}}'}. 包裹）",
         "default": "默认值：i/{'{{'}year{'}}'}/{'{{'}month{'}}'}/{'{{'}day{'}}'}/{'{{'}random{'}}'}.{'{{'}ext{'}}'}",
         "warning": "警告：自行承担风险！如果新键与现有键冲突，现有文件将被覆盖。",
