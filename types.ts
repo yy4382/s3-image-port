@@ -26,14 +26,17 @@ export const s3ConfigSchema = z.object({
 });
 
 export type ConvertType = "none" | "jpg" | "webp";
-export const convertTypes: ConvertType[] = ["none", "jpg", "webp"];
+export const convertTypes = ["none", "jpg", "webp"] as const;
 export interface AppSettings {
   convertType: ConvertType;
   compressionMaxSize: number | "";
-  compressionMaxWidthOrHeight: number| "";
+  compressionMaxWidthOrHeight: number | "";
   keyTemplate: string;
 }
 
 export const appSettingsSchema = z.object({
-  convertType: z.enum(["none", "jpg", "webp"]),
+  convertType: z.enum(convertTypes),
+  compressionMaxSize: z.union([z.number().min(0), z.string().length(0)]),
+  compressionMaxWidthOrHeight: z.union([z.number().min(0), z.string().length(0)]),
+  keyTemplate: z.string().endsWith(".{{ext}}"),
 });

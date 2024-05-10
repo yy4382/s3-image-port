@@ -1,61 +1,74 @@
 <script setup lang="ts">
-import { type ConvertType, type AppSettings, convertTypes } from "~/types";
+import { type AppSettings, convertTypes, appSettingsSchema } from "~/types";
+
 import { useStorage } from "@vueuse/core";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
-const appSettings: Ref<AppSettings> = useStorage("app-settings", {
+
+const state: Ref<AppSettings> = useStorage("app-settings", {
   convertType: "none",
-  compressionMaxSize: 1,
-  compressionMaxWidthOrHeight: 1024,
+  compressionMaxSize: "",
+  compressionMaxWidthOrHeight: "",
   keyTemplate: "",
-});
+} satisfies AppSettings);
+
 const isDefaultKeyTemplate = computed(
   () =>
-    appSettings.value.keyTemplate === defaultKeyTemplate ||
-    appSettings.value.keyTemplate === ""
+    state.value.keyTemplate === defaultKeyTemplate ||
+    state.value.keyTemplate === ""
 );
 </script>
 
 <template>
-  <div class="space-y-4">
+  <UForm :state="state" :schema="appSettingsSchema" class="space-y-4">
     <UFormGroup
       :label="$t('settings.app.convert.title')"
       :description="$t('settings.app.convert.description')"
+      name="convertType"
     >
-      <USelectMenu v-model="appSettings.convertType" :options="convertTypes" />
+      <USelectMenu v-model="state.convertType" :options="convertTypes" />
     </UFormGroup>
-    <UFormGroup
-      :label="$t('settings.app.compress.title')"
-      :description="$t('settings.app.compress.description')"
-    >
-      <div class="flex flex-row gap-2">
-        <!--TODO: optimize layout; limit range of number input-->
-        <UInput
-          :placeholder="$t('settings.app.compress.options.maxSize.title')"
-          type="number"
-          v-model="appSettings.compressionMaxSize"
-        >
-          <template #trailing>
-            <span class="text-gray-500 dark:text-gray-400 text-xs">MB</span>
-          </template>
-        </UInput>
-        <UInput
-          :placeholder="
-            $t('settings.app.compress.options.maxWidthOrHeight.title')
-          "
-          type="number"
-          v-model="appSettings.compressionMaxWidthOrHeight"
-        >
-          <template #trailing>
-            <span class="text-gray-500 dark:text-gray-400 text-xs">px</span>
-          </template>
-        </UInput>
+    <div>
+      <div class="flex content-center items-center justify-between text-sm">
+        {{ $t("settings.app.compress.title") }}
       </div>
-    </UFormGroup>
-    <UFormGroup :label="$t('settings.app.keyTemplate.title')">
+      <p class="text-gray-500 dark:text-gray-400 text-sm">
+        {{ $t("settings.app.compress.description") }}
+      </p>
+      <div class="flex flex-row gap-2 mt-1">
+        <UFormGroup name="compressionMaxSize">
+          <UInput
+            :placeholder="$t('settings.app.compress.options.maxSize.title')"
+            type="number"
+            v-model="state.compressionMaxSize"
+          >
+            <template #trailing>
+              <span class="text-gray-500 dark:text-gray-400 text-xs">MB</span>
+            </template>
+          </UInput>
+        </UFormGroup>
+        <UFormGroup name="compressionMaxWidthOrHeight">
+          <UInput
+            :placeholder="
+              $t('settings.app.compress.options.maxWidthOrHeight.title')
+            "
+            type="number"
+            v-model="state.compressionMaxWidthOrHeight"
+          >
+            <template #trailing>
+              <span class="text-gray-500 dark:text-gray-400 text-xs">px</span>
+            </template>
+          </UInput>
+        </UFormGroup>
+      </div>
+    </div>
+    <UFormGroup
+      :label="$t('settings.app.keyTemplate.title')"
+      name="keyTemplate"
+    >
       <div class="flex gap-2">
         <div class="flex-auto">
           <UInput
-            v-model="appSettings.keyTemplate"
+            v-model="state.keyTemplate"
             :placeholder="defaultKeyTemplate"
           />
         </div>
@@ -68,7 +81,7 @@ const isDefaultKeyTemplate = computed(
             color="red"
             size="xs"
             square
-            @click="appSettings.keyTemplate = ''"
+            @click="state.keyTemplate = ''"
           />
         </UTooltip>
       </div>
@@ -105,5 +118,5 @@ const isDefaultKeyTemplate = computed(
         </div>
       </template>
     </UFormGroup>
-  </div>
+  </UForm>
 </template>
