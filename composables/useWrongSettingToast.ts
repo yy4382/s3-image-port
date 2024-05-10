@@ -1,3 +1,8 @@
+/**
+ * Displays a toast notification for invalid settings.
+ * Notice: Needs to be used on client-side, such as in onMounted hooks.
+ * @param type - The type of setting. "app", "s3", or undefined (show both).
+ */
 export const useWrongSettingToast = (type: "app" | "s3" | undefined) => {
   const toast = useToast();
   const { t } = useI18n();
