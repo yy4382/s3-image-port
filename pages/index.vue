@@ -75,6 +75,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
 const appConfig = useStorage<AppSettings>("app-settings", {
+  keyTemplate: "",
   convertType: "none",
 } as AppSettings);
 
@@ -93,7 +94,7 @@ const uploading = ref(false);
 
 function genKey(file: File, type: string) {
   const keyTemplate =
-    appConfig.value.keyTemplate &&
+    appConfig.value.keyTemplate === undefined ||
     appConfig.value.keyTemplate.trim().length === 0
       ? defaultKeyTemplate
       : appConfig.value.keyTemplate.trim();
