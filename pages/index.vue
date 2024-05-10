@@ -92,6 +92,7 @@ const uploading = ref(false);
 
 function genKey(file: File, type: string) {
   const keyTemplate =
+    appConfig.value.keyTemplate &&
     appConfig.value.keyTemplate.trim().length === 0
       ? defaultKeyTemplate
       : appConfig.value.keyTemplate.trim();
@@ -108,10 +109,7 @@ function genKey(file: File, type: string) {
       .toString(36)
       .substring(2, 4)}`,
   };
-  return keyTemplate.replace(
-    /{{(.*?)}}/g,
-    (match, key) => data[key.trim()] || ""
-  );
+  return keyTemplate.replace(/{{(.*?)}}/g, (match, key) => data[key] || match);
 }
 
 async function convert(file: File, type: string): Promise<File> {
@@ -171,8 +169,6 @@ const uploadHandler = async (e: any) => {
     }
     const converted = await convert(file, appConfig.value.convertType);
     const key = genKey(file, appConfig.value.convertType);
-    console.log("key", key);
-    return;
 
     try {
       await uploadObj(converted, key, s3Config.value);
