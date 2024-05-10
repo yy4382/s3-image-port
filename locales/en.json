@@ -1,4 +1,19 @@
 {
+  "general": {
+    "message": {
+      "invalidS3Setting": {
+        "title": "Invalid S3 Setting",
+        "description": "Please check the S3 settings in the settings page."
+      },
+      "invalidAppSetting": {
+        "title": "Invalid App Setting",
+        "description": "Please check the app settings in the settings page."
+      }
+    },
+    "actions": {
+      "goToSettings": "Go to settings"
+    }
+  },
   "upload": {
     "title": "Upload",
     "fileUploader": {

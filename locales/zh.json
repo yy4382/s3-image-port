@@ -1,4 +1,19 @@
 {
+  "general": {
+    "message": {
+      "invalidS3Setting": {
+        "title": "无效的S3设置",
+        "description": "请在设置页面检查S3设置。"
+      },
+      "invalidAppSetting": {
+        "title": "无效的应用设置",
+        "description": "请在设置页面检查应用设置。"
+      }
+    },
+    "actions": {
+      "goToSettings": "前往设置"
+    }
+  },
   "upload": {
     "title": "上传",
     "fileUploader": {
