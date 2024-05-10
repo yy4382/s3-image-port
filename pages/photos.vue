@@ -38,7 +38,7 @@ import { useStorage } from "@vueuse/core";
 const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
-const { s3Settings: s3Config, validS3Setting } = useValidSettings();
+const { s3Settings, validS3Setting } = useValidSettings();
 const page = ref(1);
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -55,7 +55,7 @@ async function listPhotos() {
     toast.add({
       title: t("photos.message.listPhotos.try.title"),
     });
-    photos.value = (await listObj(s3Config.value)).reverse();
+    photos.value = (await listObj(s3Settings.value)).reverse();
     toast.add({
       title: t("photos.message.listPhotos.success.title"),
     });
@@ -82,7 +82,7 @@ async function deletePhoto(key: string) {
     toast.add({
       title: t("photos.message.deletePhoto.try.title"),
     });
-    await deleteObj(key, s3Config.value);
+    await deleteObj(key, s3Settings.value);
     toast.add({
       title: t("photos.message.deletePhoto.success.title"),
     });

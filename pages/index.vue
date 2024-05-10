@@ -76,12 +76,8 @@ const router = useRouter();
 const toast = useToast();
 const { t } = useI18n();
 const localePath = useLocalePath();
-const {
-  s3Settings: s3Config,
-  appSettings: appConfig,
-  validS3Setting,
-  validAppSetting,
-} = useValidSettings();
+const { s3Settings, appSettings, validS3Setting, validAppSetting } =
+  useValidSettings();
 
 onMounted(() => {
   if (!validS3Setting.value) {
@@ -109,10 +105,10 @@ const uploading = ref(false);
 
 function genKey(file: File, type: string) {
   const keyTemplate =
-    appConfig.value.keyTemplate === undefined ||
-    appConfig.value.keyTemplate.trim().length === 0
+    appSettings.value.keyTemplate === undefined ||
+    appSettings.value.keyTemplate.trim().length === 0
       ? defaultKeyTemplate
-      : appConfig.value.keyTemplate.trim();
+      : appSettings.value.keyTemplate.trim();
   const now = DateTime.now();
   const today_start = now.startOf("day");
   const interval = Interval.fromDateTimes(today_start, now);
@@ -131,7 +127,7 @@ function genKey(file: File, type: string) {
 
 async function compressImg(file: File): Promise<File> {
   let fileType = file.type;
-  switch (appConfig.value.convertType) {
+  switch (appSettings.value.convertType) {
     case "none":
       break;
     case "webp":
@@ -141,10 +137,11 @@ async function compressImg(file: File): Promise<File> {
       fileType = "image/jpeg";
       break;
   }
-  console.log(appConfig.value.compressionMaxSize || undefined);
+  console.log(appSettings.value.compressionMaxSize || undefined);
   const compressedFile = await imageCompression(file, {
-    maxSizeMB: appConfig.value.compressionMaxSize || undefined,
-    maxWidthOrHeight: appConfig.value.compressionMaxWidthOrHeight || undefined,
+    maxSizeMB: appSettings.value.compressionMaxSize || undefined,
+    maxWidthOrHeight:
+      appSettings.value.compressionMaxWidthOrHeight || undefined,
     useWebWorker: true,
     fileType,
   });
@@ -169,16 +166,16 @@ const uploadHandler = async (e: any) => {
       continue;
     }
     const compressed = await compressImg(file);
-    const key = genKey(file, appConfig.value.convertType);
+    const key = genKey(file, appSettings.value.convertType);
 
     try {
-      await uploadObj(compressed, key, s3Config.value);
+      await uploadObj(compressed, key, s3Settings.value);
       toast.add({
         title: t("upload.message.uploaded.title"),
         description: key,
       });
       uploadedLinks.value.push({
-        link: key2Url(key, s3Config.value),
+        link: key2Url(key, s3Settings.value),
         name: file.name,
       });
     } catch (e) {
