@@ -3,9 +3,14 @@
     <UContainer>
       <form @submit.prevent="uploadHandler" class="flex gap-2 justify-center">
         <UInput type="file" multiple id="file" accept="image/*" />
-        <UButton type="submit" variant="outline" :loading="uploading">{{
-          $t("upload.fileUploader.uploadButton")
-        }}</UButton>
+        <UButton
+          type="submit"
+          variant="outline"
+          :loading="uploading"
+          :disabled="!validS3Setting || !validAppSetting"
+        >
+          {{ $t("upload.fileUploader.uploadButton") }}
+        </UButton>
       </form>
     </UContainer>
     <UTabs
@@ -73,13 +78,23 @@ const router = useRouter();
 const toast = useToast();
 const { t } = useI18n();
 const localePath = useLocalePath();
-const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
-const appConfig = useStorage<AppSettings>("app-settings", {
-  keyTemplate: "",
-  convertType: "none",
-  compressionMaxSize: "",
-  compressionMaxWidthOrHeight: "",
-} satisfies AppSettings);
+const {
+  s3Settings: s3Config,
+  appSettings: appConfig,
+  validS3Setting,
+  validAppSetting,
+} = useValidSettings();
+
+onMounted(() => {
+  if (!validS3Setting.value) {
+    useWrongSettingToast("s3");
+    console.error("Invalid S3 settings");
+  }
+  if (!validAppSetting.value) {
+    useWrongSettingToast("app");
+    console.error("Invalid App settings");
+  }
+});
 
 const uploadedLinks: Ref<ImageLink[]> = ref(
   import.meta.env.DEV
