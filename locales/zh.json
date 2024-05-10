@@ -36,12 +36,20 @@
       "refreshButton": "刷新"
     },
     "message": {
-      "failToListPhotos": {
-        "title": "加载图库失败",
-        "description": "打开控制台以查看详细信息",
-        "actions": {
-          "retry": "重试",
-          "goToSettings": "前往设置"
+      "listPhotos": {
+        "try": {
+          "title": "加载图库中 ..."
+        },
+        "success": {
+          "title": "图库加载成功"
+        },
+        "fail": {
+          "title": "加载图库失败",
+          "description": "打开控制台以查看详细信息",
+          "actions": {
+            "retry": "重试",
+            "goToSettings": "前往设置"
+          }
         }
       },
       "deletePhoto": {

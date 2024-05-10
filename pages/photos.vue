@@ -2,14 +2,14 @@
   <UContainer class="space-y-4">
     <ClientOnly>
       <UButton
-      :label="
-        photos.length === 0
-          ? $t('photos.loadOrRefreshButton.loadButton')
-          : $t('photos.loadOrRefreshButton.refreshButton')
-      "
-      @click="listPhotos"
-      variant="outline"
-    />
+        :label="
+          photos.length === 0
+            ? $t('photos.loadOrRefreshButton.loadButton')
+            : $t('photos.loadOrRefreshButton.refreshButton')
+        "
+        @click="listPhotos"
+        variant="outline"
+      />
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div v-for="photo in photos.slice((page - 1) * 9, page * 9)">
           <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
@@ -25,9 +25,11 @@
     </ClientOnly>
   </UContainer>
 </template>
+
 <script setup lang="ts">
 import { type Photo, type S3Config } from "../types";
 import { useStorage } from "@vueuse/core";
+
 const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
@@ -38,18 +40,24 @@ const localePath = useLocalePath();
 
 async function listPhotos() {
   try {
+    toast.add({
+      title: t("photos.message.listPhotos.try.title"),
+    });
     photos.value = (await listObj(s3Config.value)).reverse();
+    toast.add({
+      title: t("photos.message.listPhotos.success.title"),
+    });
   } catch (error) {
     toast.add({
-      title: t("photos.message.failToListPhotos.title"),
-      description: t("photos.message.failToListPhotos.description"),
+      title: t("photos.message.listPhotos.fail.title"),
+      description: t("photos.message.listPhotos.fail.description"),
       actions: [
         {
-          label: t("photos.message.failToListPhotos.actions.retry"),
+          label: t("photos.message.listPhotos.fail.actions.retry"),
           click: listPhotos,
         },
         {
-          label: t("photos.message.failToListPhotos.actions.goToSettings"),
+          label: t("photos.message.listPhotos.fail.actions.goToSettings"),
           click: () => router.push(localePath("/settings")),
         },
       ],
@@ -61,7 +69,6 @@ async function deletePhoto(key: string) {
   try {
     toast.add({
       title: t("photos.message.deletePhoto.try.title"),
-      timeout: 1000,
     });
     await deleteObj(key, s3Config.value);
     toast.add({

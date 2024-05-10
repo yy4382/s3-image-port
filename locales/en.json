@@ -36,12 +36,20 @@
       "refreshButton": "Refresh"
     },
     "message": {
-      "failToListPhotos": {
-        "title": "Failed to List Photos",
-        "description": "Open dev console for more info.",
-        "actions": {
-          "retry": "Retry",
-          "goToSettings": "Go to settings"
+      "listPhotos": {
+        "try": {
+          "title": "Loading photos ..."
+        },
+        "success": {
+          "title": "Gallery updated successfully"
+        },
+        "fail": {
+          "title": "Failed to load photos",
+          "description": "Open dev console for more info.",
+          "actions": {
+            "retry": "Retry",
+            "goToSettings": "Go to settings"
+          }
         }
       },
       "deletePhoto": {
