@@ -1,11 +1,11 @@
-import type { S3Config } from "~/types";
+import type { S3Settings } from "~/types";
 function addTrailingSlash(url: string) {
   if (url.endsWith("/")) {
     return url;
   }
   return url + "/";
 }
-export default function (key: string, config: S3Config) {
+export default function (key: string, config: S3Settings) {
   if (!config.pubUrl) {
     return addTrailingSlash(config.endpoint) + config.bucket + "/" + key;
   } else {

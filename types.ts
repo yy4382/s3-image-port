@@ -7,7 +7,7 @@ export interface Photo {
   url: string;
 }
 
-export interface S3Config {
+export interface S3Settings {
   endpoint: string;
   bucket: string;
   region: string;
@@ -16,7 +16,7 @@ export interface S3Config {
   pubUrl: string;
 }
 
-export const s3ConfigSchema = z.object({
+export const s3SettingsSchema = z.object({
   endpoint: z.string().url(),
   bucket: z.string().min(1, "Required"),
   region: z.string().min(1, "Required"),

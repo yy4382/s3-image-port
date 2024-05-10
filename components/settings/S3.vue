@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
-import { s3ConfigSchema } from "~/types";
+import { s3SettingsSchema } from "~/types";
 
 const toast = useToast();
 const { s3Settings: state } = useSettings();
@@ -11,7 +11,7 @@ const form = ref();
 const showAccessKeyId = ref(false);
 const showSecretAccessKey = ref(false);
 
-type Schema = z.output<typeof s3ConfigSchema>;
+type Schema = z.output<typeof s3SettingsSchema>;
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   // Do something with data
@@ -39,7 +39,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     class="my-4"
   />
   <UForm
-    :schema="s3ConfigSchema"
+    :schema="s3SettingsSchema"
     :state="state"
     class="space-y-4"
     @submit="onSubmit"

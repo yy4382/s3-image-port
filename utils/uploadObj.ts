@@ -1,4 +1,4 @@
-import { type S3Config } from "~/types";
+import { type S3Settings } from "~/types";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import mime from "mime-types";
 import newClient from "./newClient";
@@ -6,7 +6,7 @@ export const defaultKeyTemplate = "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext
 export default async function (
   file: Blob | Buffer,
   key: string,
-  config: S3Config
+  config: S3Settings
 ) {
   let client;
   try {

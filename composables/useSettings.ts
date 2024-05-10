@@ -1,5 +1,5 @@
 import { useStorage } from "@vueuse/core"
-import type { AppSettings, S3Config } from "~/types";
+import type { AppSettings, S3Settings } from "~/types";
 export const useSettings = () => {
   const appSettings = useStorage("app-settings", {
     convertType: "none",
@@ -15,7 +15,7 @@ export const useSettings = () => {
     secretAccKey: "",
     region: "",
     pubUrl: "",
-  } satisfies S3Config as S3Config);
+  } satisfies S3Settings as S3Settings);
 
   return { appSettings, s3Settings };
 }
