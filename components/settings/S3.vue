@@ -16,6 +16,9 @@ const state: Ref<S3Config> = useStorage("s3-settings", {
   pubUrl: "",
 });
 const form = ref();
+const showAccessKeyId = ref(false);
+const showSecretAccessKey = ref(false);
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   // Do something with data
   try {
@@ -77,7 +80,17 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       name="accKeyId"
       required
     >
-      <UInput v-model="state.accKeyId" type="password" />
+      <UButtonGroup>
+        <UInput
+          v-model="state.accKeyId"
+          :type="showAccessKeyId ? 'text' : 'password'"
+        />
+        <UButton
+          :icon="showAccessKeyId ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'"
+          color="gray"
+          @click="showAccessKeyId = !showAccessKeyId"
+        />
+      </UButtonGroup>
     </UFormGroup>
 
     <UFormGroup
@@ -85,7 +98,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       name="secretAccKey"
       required
     >
-      <UInput v-model="state.secretAccKey" type="password" />
+      <UButtonGroup>
+        <UInput
+          v-model="state.secretAccKey"
+          :type="showSecretAccessKey ? 'text' : 'password'"
+        />
+        <UButton
+          :icon="
+            showSecretAccessKey ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'
+          "
+          color="gray"
+          @click="showSecretAccessKey = !showSecretAccessKey"
+        />
+      </UButtonGroup>
     </UFormGroup>
 
     <UFormGroup
