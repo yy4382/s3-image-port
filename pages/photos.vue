@@ -7,12 +7,17 @@
             ? $t('photos.loadOrRefreshButton.loadButton')
             : $t('photos.loadOrRefreshButton.refreshButton')
         "
+        :disabled="!validS3Setting"
         @click="listPhotos"
         variant="outline"
       />
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div v-for="photo in photos.slice((page - 1) * 9, page * 9)">
-          <PhotoCard :photo="photo" @delete-photo="deletePhoto" />
+          <PhotoCard
+            :photo="photo"
+            @delete-photo="deletePhoto"
+            :disabled="!validS3Setting"
+          />
         </div>
       </div>
       <UPagination
@@ -33,10 +38,17 @@ import { useStorage } from "@vueuse/core";
 const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
-const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
+const { s3Settings: s3Config, validS3Setting } = useValidSettings();
 const page = ref(1);
 const { t } = useI18n();
 const localePath = useLocalePath();
+
+onMounted(() => {
+  if (!validS3Setting.value) {
+    useWrongSettingToast("s3");
+    console.error("Invalid S3 settings");
+  }
+});
 
 async function listPhotos() {
   try {

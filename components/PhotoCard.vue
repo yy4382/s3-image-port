@@ -23,6 +23,7 @@
             aria-label="Delete"
             icon="i-mingcute-delete-3-line"
             @click="$emit('deletePhoto', photo.Key)"
+            :disabled="disabled"
           />
         </div>
       </div>
@@ -35,6 +36,7 @@ import { DateTime } from "luxon";
 import { type Photo } from "../types";
 defineProps<{
   photo: Photo;
+  disabled: boolean;
 }>();
 const toast = useToast();
 const { t } = useI18n();
