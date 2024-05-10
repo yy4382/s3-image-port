@@ -21,6 +21,32 @@ const isDefaultKeyTemplate = computed(
     >
       <USelectMenu v-model="appSettings.convertType" :options="convertTypes" />
     </UFormGroup>
+    <UFormGroup
+      :label="$t('settings.app.compress.title')"
+      :description="$t('settings.app.compress.description')"
+    >
+      <div class="flex flex-row gap-2">
+        <!--TODO: optimize layout; limit range of number input-->
+        <UInput
+          :placeholder="$t('settings.app.compress.options.maxSize.title')"
+          type="number"
+        >
+          <template #trailing>
+            <span class="text-gray-500 dark:text-gray-400 text-xs">MB</span>
+          </template>
+        </UInput>
+        <UInput
+          :placeholder="
+            $t('settings.app.compress.options.maxWidthOrHeight.title')
+          "
+          type="number"
+        >
+          <template #trailing>
+            <span class="text-gray-500 dark:text-gray-400 text-xs">px</span>
+          </template>
+        </UInput>
+      </div>
+    </UFormGroup>
     <UFormGroup :label="$t('settings.app.keyTemplate.title')">
       <div class="flex gap-2">
         <div class="flex-auto">

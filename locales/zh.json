@@ -102,6 +102,18 @@
         "title": "在上传前转换图片格式",
         "description": "选择在上传图片前先将其转换为什么格式。选择 “none” 将不进行转换。"
       },
+      "compress": {
+        "title": "在上传前压缩图片",
+        "description": "使用 browser-image-compression 压缩图片。",
+        "options": {
+          "maxSize": {
+            "title": "图片最大大小"
+          },
+          "maxWidthOrHeight": {
+            "title": "图片最大宽度或高度"
+          }
+        }
+      },
       "keyTemplate": {
         "title": "Key 模板",
         "description": "上传文件的 Key 的模板",
