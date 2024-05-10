@@ -16,20 +16,24 @@ const state: Ref<S3Config> = useStorage("s3-settings", {
   pubUrl: "",
 });
 const form = ref();
+const { t } = useI18n();
 const showAccessKeyId = ref(false);
 const showSecretAccessKey = ref(false);
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   // Do something with data
   try {
+    toast.add({
+      title: t("settings.s3.submitFormButton.message.try.title"),
+    });
     await listObj(state.value);
     toast.add({
-      title: "Success",
+      title: t("settings.s3.submitFormButton.message.success.title"),
     });
   } catch (err: any) {
     toast.add({
-      title: "Error",
-      description: err.message + ", check dev console for more info",
+      title: t("settings.s3.submitFormButton.message.fail.title"),
+      description: t("settings.s3.submitFormButton.message.fail.description"),
     });
   }
 }
@@ -159,6 +163,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInput v-model="state.pubUrl" />
     </UFormGroup>
 
-    <UButton type="submit"> {{ $t("settings.s3.submitFormButton") }} </UButton>
+    <UButton type="submit">
+      {{ $t("settings.s3.submitFormButton.title") }}
+    </UButton>
   </UForm>
 </template>
