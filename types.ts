@@ -18,10 +18,10 @@ export interface S3Config {
 
 export const s3ConfigSchema = z.object({
   endpoint: z.string().url(),
-  bucket: z.string(),
-  region: z.string(),
-  accKeyId: z.string(),
-  secretAccKey: z.string(),
+  bucket: z.string().min(1, "Required"),
+  region: z.string().min(1, "Required"),
+  accKeyId: z.string().min(1, "Required"),
+  secretAccKey: z.string().min(1, "Required"),
   pubUrl: z.union([z.string().url(), z.string().length(0)]),
 });
 
