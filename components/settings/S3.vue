@@ -1,24 +1,17 @@
 <script setup lang="ts">
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
-import { useStorage } from "@vueuse/core";
-import { s3ConfigSchema, type S3Config } from "~/types";
+import { s3ConfigSchema } from "~/types";
+
 const toast = useToast();
-
-type Schema = z.output<typeof s3ConfigSchema>;
-
-const state: Ref<S3Config> = useStorage("s3-settings", {
-  endpoint: "",
-  bucket: "",
-  accKeyId: "",
-  secretAccKey: "",
-  region: "",
-  pubUrl: "",
-});
-const form = ref();
+const { s3Settings: state } = useSettings();
 const { t } = useI18n();
+
+const form = ref();
 const showAccessKeyId = ref(false);
 const showSecretAccessKey = ref(false);
+
+type Schema = z.output<typeof s3ConfigSchema>;
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   // Do something with data
