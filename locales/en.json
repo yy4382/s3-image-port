@@ -136,8 +136,8 @@
         }
       },
       "keyTemplate": {
-        "title": "Key Template",
-        "description": "The key template of the uploaded file.",
+        "title": "Key (Path) Template",
+        "description": "The key (path) template of the uploaded file.",
         "placeholders": "Available placeholders: year, month, day, random, filename, ext. (Should be wrapped with {'{{'} and {'}}'}. )",
         "default": "Default: i/{'{{'}year{'}}'}/{'{{'}month{'}}'}/{'{{'}day{'}}'}/{'{{'}random{'}}'}.{'{{'}ext{'}}'}",
         "warning": "Warning: CHANGE IT AT YOUR OWN RISK! If the new key collides with the existing key, the existing file will be overwritten.",
