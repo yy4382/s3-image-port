@@ -3,14 +3,26 @@
     <UContainer>
       <form @submit.prevent="uploadHandler" class="flex gap-2 justify-center">
         <UInput type="file" multiple id="file" accept="image/*" />
-        <UButton
-          type="submit"
-          variant="outline"
-          :loading="uploading"
-          :disabled="!validS3Setting || !validAppSetting"
-        >
-          {{ $t("upload.fileUploader.uploadButton") }}
-        </UButton>
+        <ClientOnly>
+          <UButton
+            type="submit"
+            variant="outline"
+            :loading="uploading"
+            :disabled="!validS3Setting || !validAppSetting"
+          >
+            {{ $t("upload.fileUploader.uploadButton") }}
+          </UButton>
+          <template #placeholder>
+            <UButton
+              type="submit"
+              variant="outline"
+              :loading="uploading"
+              :disabled="true"
+            >
+              {{ $t("upload.fileUploader.uploadButton") }}
+            </UButton>
+          </template>
+        </ClientOnly>
       </form>
     </UContainer>
     <UTabs
