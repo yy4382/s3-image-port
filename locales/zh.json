@@ -52,6 +52,9 @@
           }
         }
       },
+      "copyLink": {
+        "title": "链接已复制"
+      },
       "deletePhoto": {
         "try": {
           "title": "正在删除图片"

@@ -36,7 +36,10 @@ import { type Photo } from "../types";
 defineProps<{
   photo: Photo;
 }>();
+const toast = useToast();
+const { t } = useI18n();
 function copy(photo: Photo, event: MouseEvent) {
   navigator.clipboard.writeText(photo.url);
+  toast.add({ title: t("photos.message.copyLink.title") });
 }
 </script>
