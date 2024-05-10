@@ -80,8 +80,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       name="accKeyId"
       required
     >
-      <UButtonGroup>
+      <UButtonGroup class="w-full">
         <UInput
+          class="w-full"
           v-model="state.accKeyId"
           :type="showAccessKeyId ? 'text' : 'password'"
         />
@@ -98,8 +99,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       name="secretAccKey"
       required
     >
-      <UButtonGroup>
+      <UButtonGroup class="w-full">
         <UInput
+          class="w-full"
           v-model="state.secretAccKey"
           :type="showSecretAccessKey ? 'text' : 'password'"
         />
