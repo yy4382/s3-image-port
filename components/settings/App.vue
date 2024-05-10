@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { type AppSettings, convertTypes, appSettingsSchema } from "~/types";
+import { convertTypes, appSettingsSchema } from "~/types";
 
-import { useStorage } from "@vueuse/core";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
 
-const state: Ref<AppSettings> = useStorage("app-settings", {
-  convertType: "none",
-  compressionMaxSize: "",
-  compressionMaxWidthOrHeight: "",
-  keyTemplate: "",
-} satisfies AppSettings);
+const { appSettings: state } = useSettings();
 
 const isDefaultKeyTemplate = computed(
   () =>
