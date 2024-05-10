@@ -102,7 +102,17 @@
           }
         }
       },
-      "submitFormButton": "Test Connectivity"
+      "submitFormButton": {
+        "title": "Test Connectivity",
+        "message": {
+          "try": { "title": "Testing connectivity ..." },
+          "success": { "title": "Successfully connected to S3" },
+          "fail": {
+            "title": "Failed to connect",
+            "description": "Open dev console for more info."
+          }
+        }
+      }
     },
     "app": {
       "title": "App Settings",

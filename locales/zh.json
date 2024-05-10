@@ -102,7 +102,17 @@
           }
         }
       },
-      "submitFormButton": "测试连接"
+      "submitFormButton": {
+        "title": "测试连接",
+        "message": {
+          "try": { "title": "正在测试连通性 ..." },
+          "success": { "title": "测试连接成功" },
+          "fail": {
+            "title": "测试连接失败",
+            "description": "打开控制台以查看详细信息。"
+          }
+        }
+      }
     },
     "app": {
       "title": "应用设置",
