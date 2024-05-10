@@ -8,8 +8,8 @@
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
-![upload](doc/images/ScreenShotUpload.png)
-![photos](doc/images/ScreenShotPhotos.png)
+![upload](doc/images/screenshot_upload.png)
+![photos](doc/images/screenshot_photos.png)
 
 ## Live Instance and Deployment
 
