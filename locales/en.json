@@ -94,7 +94,7 @@
           }
         }
       },
-      "submitFormButton": "Test Connection"
+      "submitFormButton": "Test Connectivity"
     },
     "app": {
       "title": "App Settings",
