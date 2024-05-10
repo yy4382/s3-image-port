@@ -64,10 +64,8 @@
 
 <script setup lang="ts">
 import { DateTime, Interval } from "luxon";
-import { useStorage } from "@vueuse/core";
-import { UseClipboard } from "@vueuse/components";
-import { type S3Config, type AppSettings } from "~/types";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
+import { UseClipboard } from "@vueuse/components";
 import imageCompression from "browser-image-compression";
 interface ImageLink {
   link: string;
