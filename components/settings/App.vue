@@ -4,6 +4,8 @@ import { useStorage } from "@vueuse/core";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
 const appSettings: Ref<AppSettings> = useStorage("app-settings", {
   convertType: "none",
+  compressionMaxSize: 1,
+  compressionMaxWidthOrHeight: 1024,
   keyTemplate: "",
 });
 const isDefaultKeyTemplate = computed(
@@ -20,6 +22,34 @@ const isDefaultKeyTemplate = computed(
       :description="$t('settings.app.convert.description')"
     >
       <USelectMenu v-model="appSettings.convertType" :options="convertTypes" />
+    </UFormGroup>
+    <UFormGroup
+      :label="$t('settings.app.compress.title')"
+      :description="$t('settings.app.compress.description')"
+    >
+      <div class="flex flex-row gap-2">
+        <!--TODO: optimize layout; limit range of number input-->
+        <UInput
+          :placeholder="$t('settings.app.compress.options.maxSize.title')"
+          type="number"
+          v-model="appSettings.compressionMaxSize"
+        >
+          <template #trailing>
+            <span class="text-gray-500 dark:text-gray-400 text-xs">MB</span>
+          </template>
+        </UInput>
+        <UInput
+          :placeholder="
+            $t('settings.app.compress.options.maxWidthOrHeight.title')
+          "
+          type="number"
+          v-model="appSettings.compressionMaxWidthOrHeight"
+        >
+          <template #trailing>
+            <span class="text-gray-500 dark:text-gray-400 text-xs">px</span>
+          </template>
+        </UInput>
+      </div>
     </UFormGroup>
     <UFormGroup :label="$t('settings.app.keyTemplate.title')">
       <div class="flex gap-2">

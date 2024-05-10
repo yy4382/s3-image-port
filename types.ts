@@ -29,6 +29,8 @@ export type ConvertType = "none" | "jpg" | "webp";
 export const convertTypes: ConvertType[] = ["none", "jpg", "webp"];
 export interface AppSettings {
   convertType: ConvertType;
+  compressionMaxSize: number | "";
+  compressionMaxWidthOrHeight: number| "";
   keyTemplate: string;
 }
 

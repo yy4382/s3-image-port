@@ -102,6 +102,18 @@
         "title": "Convert Image Before Upload",
         "description": "Convert image before uploading to S3. \"none\" will not perform the conversion."
       },
+      "compress": {
+        "title": "Compress Image Before Upload",
+        "description": "Use browser-image-compression to compress image before uploading to S3.",
+        "options": {
+          "maxSize": {
+            "title": "Max Size"
+          },
+          "maxWidthOrHeight": {
+            "title": "Max Width / Height"
+          }
+        }
+      },
       "keyTemplate": {
         "title": "Key Template",
         "description": "The key template of the uploaded file.",
