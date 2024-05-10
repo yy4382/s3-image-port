@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Photo, type S3Config } from "../types";
+import { type Photo } from "~/types";
 import { useStorage } from "@vueuse/core";
 
 const router = useRouter();
