@@ -77,7 +77,9 @@ const s3Config = useStorage<S3Config>("s3-settings", {} as S3Config);
 const appConfig = useStorage<AppSettings>("app-settings", {
   keyTemplate: "",
   convertType: "none",
-} as AppSettings);
+  compressionMaxSize: "",
+  compressionMaxWidthOrHeight: "",
+} satisfies AppSettings);
 
 const uploadedLinks: Ref<ImageLink[]> = ref(
   import.meta.env.DEV
@@ -114,56 +116,28 @@ function genKey(file: File, type: string) {
   return keyTemplate.replace(/{{(.*?)}}/g, (match, key) => data[key] || match);
 }
 
-async function convert(file: File, type: string): Promise<File> {
-  if (type === "none") return file; //!TODO wrong mime type application/octet-stream
-
-  let mime = "image/webp";
-  if (type === "webp") {
-    mime = "image/webp";
-  } else if (type === "jpg") {
-    mime = "image/jpeg";
-  }
-
-  const img = new Image();
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  const reader = new FileReader();
-
-  const p = new Promise<File>((resolve, reject) => {
-    reader.onload = (e) => {
-      img.src = e.target?.result as string;
-    };
-
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx?.drawImage(img, 0, 0);
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("Blob is null, could not convert to File."));
-          return;
-        }
-        const out_file = new File([blob], file.name, { type: mime });
-        resolve(out_file);
-      }, mime);
-    };
-
-    img.onerror = () => reject(new Error("Error loading image"));
-  });
-
-  reader.readAsDataURL(file);
-  return p;
-}
-
 async function compressImg(file: File): Promise<File> {
+  let fileType = file.type;
+  switch (appConfig.value.convertType) {
+    case "none":
+      break;
+    case "webp":
+      fileType = "image/webp";
+      break;
+    case "jpg":
+      fileType = "image/jpeg";
+      break;
+  }
+  console.log(appConfig.value.compressionMaxSize || undefined);
   const compressedFile = await imageCompression(file, {
     maxSizeMB: appConfig.value.compressionMaxSize || undefined,
     maxWidthOrHeight: appConfig.value.compressionMaxWidthOrHeight || undefined,
     useWebWorker: true,
+    fileType,
   });
   console.log(
-    "File compressed from " + file.size + " to " + compressedFile.size
+    `File compressed from ${file.size} to ${compressedFile.size},\n` +
+      `from ${file.type} to ${compressedFile.type}`
   );
   return compressedFile;
 }
@@ -181,8 +155,7 @@ const uploadHandler = async (e: any) => {
       });
       continue;
     }
-    const converted = await convert(file, appConfig.value.convertType);
-    const compressed = await compressImg(converted);
+    const compressed = await compressImg(file);
     const key = genKey(file, appConfig.value.convertType);
 
     try {
