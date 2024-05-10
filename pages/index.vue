@@ -1,7 +1,7 @@
 <template>
   <UContainer class="space-y-8">
     <UContainer>
-      <form @submit.prevent="uploadHandler" class="flex gap-2">
+      <form @submit.prevent="uploadHandler" class="flex gap-2 justify-center">
         <UInput type="file" multiple id="file" accept="image/*" />
         <UButton type="submit" variant="outline" :loading="uploading">{{
           $t("upload.fileUploader.uploadButton")
