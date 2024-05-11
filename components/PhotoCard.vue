@@ -27,16 +27,17 @@
             />
             <template #panel="{ close }">
               <!--TODO: optimize text style-->
-              <div class="p-5 space-y-2">
-                <div class="font-semibold">
+              <div class="flex p-4 gap-3 items-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-white">
                   {{ $t("photos.photoCard.deleteButton.confirm.title") }}
                 </div>
-                <div class="flex flex-row-reverse gap-2">
+                <div class="flex items-center gap-2 flex-shrink-0 mt-0">
                   <UButton
                     size="xs"
                     :label="
                       $t('photos.photoCard.deleteButton.confirm.actions.cancel')
                     "
+                    color="gray"
                     @click="close()"
                   />
                   <UButton
