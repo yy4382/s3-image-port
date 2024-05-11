@@ -34,6 +34,7 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
           <UInput
             :placeholder="$t('settings.app.compress.options.maxSize.title')"
             type="number"
+            min="0"
             v-model="state.compressionMaxSize"
           >
             <template #trailing>
@@ -47,6 +48,7 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
               $t('settings.app.compress.options.maxWidthOrHeight.title')
             "
             type="number"
+            min="1"
             v-model="state.compressionMaxWidthOrHeight"
           >
             <template #trailing>
