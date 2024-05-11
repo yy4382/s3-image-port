@@ -13,5 +13,6 @@
     "ui",
     "active-class",
     "inactive-class"
-  ]
+  ],
+  "eslint.experimental.useFlatConfig": true
 }
