@@ -50,6 +50,17 @@
       "loadButton": "Load",
       "refreshButton": "Refresh"
     },
+    "photoCard": {
+      "deleteButton": {
+        "confirm": {
+          "title": "Confirm to delete this photo?",
+          "actions": {
+            "confirm": "Confirm",
+            "cancel": "Cancel"
+          }
+        }
+      }
+    },
     "message": {
       "listPhotos": {
         "try": {

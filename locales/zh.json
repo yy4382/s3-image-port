@@ -50,6 +50,17 @@
       "loadButton": "加载图库",
       "refreshButton": "刷新"
     },
+    "photoCard": {
+      "deleteButton": {
+        "confirm": {
+          "title": "确认删除此图片？",
+          "actions": {
+            "confirm": "确认",
+            "cancel": "取消"
+          }
+        }
+      }
+    },
     "message": {
       "listPhotos": {
         "try": {
