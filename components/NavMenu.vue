@@ -1,6 +1,6 @@
 <template>
   <UContainer class="w-full">
-    <nav class="flex items-center justify-between h-16">
+    <nav class="flex items-center justify-between h-16 gap-2">
       <div class="flex-1 justify-start flex items-center gap-2">
         <Icon
           name="i-mingcute-photo-album-fill"
