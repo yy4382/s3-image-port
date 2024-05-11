@@ -10,6 +10,7 @@ const isDefaultKeyTemplate = computed(
     state.value.keyTemplate === defaultKeyTemplate ||
     state.value.keyTemplate === ""
 );
+const selectMenuOptions = computed(() => convertTypes.map((type) => type));
 </script>
 
 <template>
@@ -19,7 +20,7 @@ const isDefaultKeyTemplate = computed(
       :description="$t('settings.app.convert.description')"
       name="convertType"
     >
-      <USelectMenu v-model="state.convertType" :options="convertTypes" />
+      <USelectMenu v-model="state.convertType" :options="selectMenuOptions" />
     </UFormGroup>
     <div>
       <div class="flex content-center items-center justify-between text-sm">
