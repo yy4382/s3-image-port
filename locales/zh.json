@@ -1,9 +1,11 @@
 {
   "upload": {
     "title": "上传",
-    "fileUploader": {
-      "chooseFilesButton": {},
-      "uploadButton": "上传"
+    "filepond": {
+      "labelIdle": {
+        "part1": "拖放文件或",
+        "part2": "浏览"
+      }
     },
     "uploadedLinks": {
       "pureLink": {

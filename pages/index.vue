@@ -1,13 +1,17 @@
 <template>
-  <UContainer class="space-y-8">
-    <UContainer>
-      <form @submit.prevent="uploadHandler" class="flex gap-2 justify-center">
-        <UInput type="file" multiple id="file" accept="image/*" />
-        <UButton type="submit" variant="outline" :loading="uploading">{{
-          $t("upload.fileUploader.uploadButton")
-        }}</UButton>
-      </form>
-    </UContainer>
+  <UContainer class="w-1/2 space-y-8">
+    <!--TODO: process to upload-->
+    <FilePond
+      allowMulti="true"
+      credits="false"
+      accept="image/*"
+      :label-idle="
+        $t('upload.filepond.labelIdle.part1') +
+        '<span class=\'filepond--label-action\'>' +
+        $t('upload.filepond.labelIdle.part2') +
+        '</span>'
+      "
+    />
     <UTabs
       v-if="uploadedLinksFormatted.length > 0"
       :items="[
@@ -59,7 +63,7 @@
 
 <script setup lang="ts">
 import { DateTime, Interval } from "luxon";
-import { useStorage } from "@vueuse/core";
+import { get, useStorage } from "@vueuse/core";
 import { UseClipboard } from "@vueuse/components";
 import { type S3Config, type AppSettings } from "~/types";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
@@ -184,4 +188,7 @@ const uploadHandler = async (e: any) => {
   }
   uploading.value = false;
 };
+
+import createVueFilePond from "vue-filepond";
+const FilePond = createVueFilePond();
 </script>

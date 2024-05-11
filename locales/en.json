@@ -1,9 +1,11 @@
 {
   "upload": {
     "title": "Upload",
-    "fileUploader": {
-      "chooseFilesButton": {},
-      "uploadButton": "Upload"
+    "filepond": {
+      "labelIdle": {
+        "part1": "Drag & Drop your files or ",
+        "part2": "Browse"
+      }
     },
     "uploadedLinks": {
       "pureLink": {
