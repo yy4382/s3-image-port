@@ -19,12 +19,43 @@
             icon="i-mingcute-copy-2-line"
             @click="copy(photo, $event)"
           />
-          <UButton
-            aria-label="Delete"
-            icon="i-mingcute-delete-3-line"
-            @click="$emit('deletePhoto', photo.Key)"
-            :disabled="disabled"
-          />
+          <UPopover overlay>
+            <UButton
+              aria-label="Delete"
+              icon="i-mingcute-delete-3-line"
+              :disabled="disabled"
+            />
+            <template #panel="{ close }">
+              <!--TODO: optimize text style-->
+              <div class="p-5 space-y-2">
+                <div class="font-semibold">
+                  {{ $t("photos.photoCard.deleteButton.confirm.title") }}
+                </div>
+                <div class="flex flex-row-reverse gap-2">
+                  <UButton
+                    size="xs"
+                    :label="
+                      $t('photos.photoCard.deleteButton.confirm.actions.cancel')
+                    "
+                    @click="close()"
+                  />
+                  <UButton
+                    size="xs"
+                    :label="
+                      $t(
+                        'photos.photoCard.deleteButton.confirm.actions.confirm'
+                      )
+                    "
+                    color="red"
+                    @click="
+                      $emit('deletePhoto', photo.Key);
+                      close();
+                    "
+                  />
+                </div>
+              </div>
+            </template>
+          </UPopover>
         </div>
       </div>
     </template>
