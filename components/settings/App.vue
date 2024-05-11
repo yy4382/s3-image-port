@@ -33,6 +33,7 @@ const isDefaultKeyTemplate = computed(
           <UInput
             :placeholder="$t('settings.app.compress.options.maxSize.title')"
             type="number"
+            min="0"
             v-model="state.compressionMaxSize"
           >
             <template #trailing>
@@ -46,6 +47,7 @@ const isDefaultKeyTemplate = computed(
               $t('settings.app.compress.options.maxWidthOrHeight.title')
             "
             type="number"
+            min="1"
             v-model="state.compressionMaxWidthOrHeight"
           >
             <template #trailing>
