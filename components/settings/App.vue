@@ -32,10 +32,10 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
       <div class="flex flex-row gap-2 mt-1">
         <UFormGroup name="compressionMaxSize">
           <UInput
+            v-model="state.compressionMaxSize"
             :placeholder="$t('settings.app.compress.options.maxSize.title')"
             type="number"
             min="0"
-            v-model="state.compressionMaxSize"
           >
             <template #trailing>
               <span class="text-gray-500 dark:text-gray-400 text-xs">MB</span>
@@ -44,12 +44,12 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
         </UFormGroup>
         <UFormGroup name="compressionMaxWidthOrHeight">
           <UInput
+            v-model="state.compressionMaxWidthOrHeight"
             :placeholder="
               $t('settings.app.compress.options.maxWidthOrHeight.title')
             "
             type="number"
             min="1"
-            v-model="state.compressionMaxWidthOrHeight"
           >
             <template #trailing>
               <span class="text-gray-500 dark:text-gray-400 text-xs">px</span>
@@ -70,8 +70,8 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
           />
         </div>
         <UTooltip
-          :text="$t('settings.app.keyTemplate.reset')"
           v-if="!isDefaultKeyTemplate"
+          :text="$t('settings.app.keyTemplate.reset')"
         >
           <UButton
             icon="i-mingcute-close-circle-line"

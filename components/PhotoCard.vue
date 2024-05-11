@@ -1,6 +1,6 @@
 <template>
   <UCard>
-    <img :src="photo.url" preview class="w-fit m-auto overflow-visible" />
+    <img :src="photo.url" preview class="w-fit m-auto overflow-visible" >
     <template #footer>
       <div class="flex justify-between items-center gap-2">
         <div class="flex flex-col space-y-1">

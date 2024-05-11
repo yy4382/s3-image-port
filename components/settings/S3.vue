@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { z } from "zod";
+import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 import { s3SettingsSchema } from "~/types";
 
@@ -13,7 +13,7 @@ const showSecretAccessKey = ref(false);
 
 type Schema = z.output<typeof s3SettingsSchema>;
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(_event: FormSubmitEvent<Schema>) {
   // Do something with data
   try {
     toast.add({
@@ -23,7 +23,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     toast.add({
       title: t("settings.s3.submitFormButton.message.success.title"),
     });
-  } catch (err: any) {
+  } catch (err) {
     toast.add({
       title: t("settings.s3.submitFormButton.message.fail.title"),
       description: t("settings.s3.submitFormButton.message.fail.description"),
@@ -39,11 +39,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     class="my-4"
   />
   <UForm
+    ref="form"
     :schema="s3SettingsSchema"
     :state="state"
     class="space-y-4"
     @submit="onSubmit"
-    ref="form"
   >
     <UFormGroup
       :label="$t('settings.s3.form.endpoint.title')"
@@ -79,8 +79,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     >
       <UButtonGroup class="w-full">
         <UInput
-          class="w-full"
           v-model="state.accKeyId"
+          class="w-full"
           :type="showAccessKeyId ? 'text' : 'password'"
         />
         <UButton
@@ -98,8 +98,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     >
       <UButtonGroup class="w-full">
         <UInput
-          class="w-full"
           v-model="state.secretAccKey"
+          class="w-full"
           :type="showSecretAccessKey ? 'text' : 'password'"
         />
         <UButton

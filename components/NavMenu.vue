@@ -31,11 +31,11 @@
       </div>
       <div class="flex-1 flex justify-end items-center gap-1">
         <USelectMenu
+          v-model="localeSelected"
           icon="i-mingcute-translate-2-line"
           :options="locales"
-          v-model="localeSelected"
           @change="localeRedirect"
-        ></USelectMenu>
+        />
         <UButton
           icon="i-mingcute-github-fill"
           size="md"

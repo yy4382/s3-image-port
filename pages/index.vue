@@ -36,7 +36,7 @@
         <UCard>
           <ul class="space-y-3">
             <li v-for="link in uploadedLinksFormatted" :key="link.link">
-              <UseClipboard :source="link.link" v-slot="{ copy }">
+              <UseClipboard v-slot="{ copy }" :source="link.link">
                 <UButton
                   color="black"
                   variant="link"
@@ -55,7 +55,7 @@
         <UCard>
           <ul class="space-y-3">
             <li v-for="link in uploadedLinksFormatted" :key="link.markdown">
-              <UseClipboard :source="link.markdown" v-slot="{ copy }">
+              <UseClipboard v-slot="{ copy }" :source="link.markdown">
                 <UButton
                   color="black"
                   variant="link"
@@ -122,8 +122,8 @@ function genKey(file: File, type: string) {
       ? defaultKeyTemplate
       : appSettings.value.keyTemplate.trim();
   const now = DateTime.now();
-  const today_start = now.startOf("day");
-  const interval = Interval.fromDateTimes(today_start, now);
+  const todayStart = now.startOf("day");
+  const interval = Interval.fromDateTimes(todayStart, now);
   const data: Record<string, string> = {
     year: now.toFormat("yyyy"),
     month: now.toFormat("LL"),
@@ -149,7 +149,6 @@ async function compressImg(file: File): Promise<File> {
       fileType = "image/jpeg";
       break;
   }
-  console.log(appSettings.value.compressionMaxSize || undefined);
   const compressedFile = await imageCompression(file, {
     maxSizeMB: appSettings.value.compressionMaxSize || undefined,
     maxWidthOrHeight:
