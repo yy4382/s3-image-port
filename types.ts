@@ -37,6 +37,6 @@ export interface AppSettings {
 export const appSettingsSchema = z.object({
   convertType: z.enum(convertTypes),
   compressionMaxSize: z.union([z.number().min(0), z.string().length(0)]),
-  compressionMaxWidthOrHeight: z.union([z.number().min(0), z.string().length(0)]),
+  compressionMaxWidthOrHeight: z.union([z.number().min(1), z.string().length(0)]),
   keyTemplate: z.union([z.string().endsWith(".{{ext}}"), z.string().length(0)]),
 });
