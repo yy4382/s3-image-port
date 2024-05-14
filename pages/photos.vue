@@ -1,7 +1,7 @@
 <template>
   <UContainer class="w-full space-y-4">
     <ClientOnly>
-      <div class="flex gap-4 justify-between">
+      <UForm class="flex gap-4 justify-between">
         <UButton
           :label="
             photos.length === 0
@@ -18,7 +18,7 @@
           icon="i-heroicons-magnifying-glass-20-solid"
           placeholder="Search..."
         />
-      </div>
+      </UForm>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <!--TODO: handle pagination-->
         <div
