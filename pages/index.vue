@@ -1,8 +1,8 @@
 <template>
   <UContainer class="space-y-8">
     <UContainer>
-      <form @submit.prevent="uploadHandler" class="flex gap-2 justify-center">
-        <UInput type="file" multiple id="file" accept="image/*" />
+      <form class="flex gap-2 justify-center" @submit.prevent="uploadHandler">
+        <UInput id="file" type="file" multiple accept="image/*" />
         <ClientOnly>
           <UButton
             type="submit"
@@ -163,9 +163,10 @@ async function compressImg(file: File): Promise<File> {
   return compressedFile;
 }
 
-const uploadHandler = async (e: any) => {
+const uploadHandler = async (e: Event) => {
   uploading.value = true;
   e.preventDefault();
+  // @ts-expect-error Should be refactored, a temporary workaround
   const files = e.target?.elements["file"].files as File[];
 
   for (const file of files) {

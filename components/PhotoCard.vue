@@ -24,7 +24,7 @@
           <UButton
             aria-label="Copy Link"
             icon="i-mingcute-copy-2-line"
-            @click="copy(photo, $event)"
+            @click="copy(photo)"
           />
           <UPopover overlay>
             <UButton
@@ -33,7 +33,6 @@
               :disabled="disabled"
             />
             <template #panel="{ close }">
-              <!--TODO: optimize text style-->
               <div class="flex p-4 gap-3 items-center">
                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                   {{ $t("photos.photoCard.deleteButton.confirm.title") }}
@@ -77,9 +76,12 @@ defineProps<{
   photo: Photo;
   disabled: boolean;
 }>();
+defineEmits<{
+  (e: "deletePhoto", key: string): void;
+}>();
 const toast = useToast();
 const { t } = useI18n();
-function copy(photo: Photo, event: MouseEvent) {
+function copy(photo: Photo) {
   navigator.clipboard.writeText(photo.url);
   toast.add({ title: t("photos.message.copyLink.title") });
 }
