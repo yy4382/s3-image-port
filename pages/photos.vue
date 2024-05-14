@@ -65,7 +65,12 @@ const photosToDisplay = computed(() => {
   }
   const { results } = useFuse(
     debouncedSearchTerm.value,
-    photos.value.map((photo) => photo.Key)
+    photos.value.map((photo) => photo.Key),
+    {
+      fuseOptions: {
+        threshold: 0.4,
+      },
+    }
   );
   const keys = results.value.map((result) => result.item);
   const filteredPhotos = photos.value.filter((photo) =>
