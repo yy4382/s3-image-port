@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { type Photo } from "~/types";
-import { useStorage } from "@vueuse/core";
+import { useStorage, refDebounced } from "@vueuse/core";
 
 const router = useRouter();
 const toast = useToast();
@@ -57,12 +57,13 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const isLoading = ref(false);
 const searchTerm = ref("");
+const debouncedSearchTerm = refDebounced(searchTerm, 300);
 const photosToDisplay = computed(() => {
-  if (searchTerm.value === "") {
+  if (debouncedSearchTerm.value === "") {
     return photos.value;
   }
   return photos.value.filter((photo) =>
-    photo.Key.toLowerCase().includes(searchTerm.value.toLowerCase())
+    photo.Key.toLowerCase().includes(debouncedSearchTerm.value.toLowerCase())
   );
 });
 
