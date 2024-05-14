@@ -42,3 +42,6 @@ export const appSettingsSchema = z.object({
   compressionMaxWidthOrHeight: z.union([z.number().min(1), z.string().length(0)]),
   keyTemplate: z.union([z.string().endsWith(".{{ext}}"), z.string().length(0)]),
 });
+
+export type SortByOpts = "date" | "key";
+export type SortOrderOpts = "asc" | "desc";

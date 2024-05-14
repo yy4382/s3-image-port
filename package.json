@@ -25,9 +25,11 @@
     "@nuxtjs/i18n": "^8.3.1",
     "@vueuse/components": "^10.9.0",
     "browser-image-compression": "^2.0.2",
+    "date-fns": "^3.6.0",
     "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
     "mime-types": "^2.1.35",
+    "v-calendar": "^3.1.2",
     "zod": "^3.23.8"
   }
 }
