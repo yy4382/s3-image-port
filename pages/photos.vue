@@ -1,7 +1,7 @@
 <template>
   <UContainer class="w-full space-y-4">
     <ClientOnly>
-      <UForm class="flex gap-4 justify-between">
+      <UForm class="flex gap-4 justify-between" :state="{}">
         <UButton
           :label="
             photos.length === 0
@@ -68,7 +68,12 @@ const photosToDisplay = computed(() => {
     photos.value.map((photo) => photo.Key)
   );
   const keys = results.value.map((result) => result.item);
-  return photos.value.filter((photo) => keys.includes(photo.Key));
+  const filteredPhotos = photos.value.filter((photo) =>
+    keys.includes(photo.Key)
+  );
+  return filteredPhotos.sort(
+    (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key)
+  );
 });
 
 onMounted(() => {
