@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { type Photo } from "~/types";
-import { useStorage, refDebounced } from "@vueuse/core";
+import { useStorage } from "@vueuse/core";
 import { useFuse } from "@vueuse/integrations/useFuse";
 
 const router = useRouter();
