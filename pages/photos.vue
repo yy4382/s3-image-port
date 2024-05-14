@@ -1,20 +1,28 @@
 <template>
   <UContainer class="space-y-4">
     <ClientOnly>
-      <UButton
-        :label="
-          photos.length === 0
-            ? $t('photos.loadOrRefreshButton.loadButton')
-            : $t('photos.loadOrRefreshButton.refreshButton')
-        "
-        :disabled="!validS3Setting"
-        variant="outline"
-        :loading="isLoading"
-        @click="listPhotos"
-      />
+      <div class="flex gap-4 justify-between">
+        <UButton
+          :label="
+            photos.length === 0
+              ? $t('photos.loadOrRefreshButton.loadButton')
+              : $t('photos.loadOrRefreshButton.refreshButton')
+          "
+          :disabled="!validS3Setting"
+          variant="outline"
+          :loading="isLoading"
+          @click="listPhotos"
+        />
+        <UInput
+          v-model="searchTerm"
+          icon="i-heroicons-magnifying-glass-20-solid"
+          placeholder="Search..."
+        />
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <!--TODO: handle pagination-->
         <div
-          v-for="photo in photos.slice((page - 1) * 9, page * 9)"
+          v-for="photo in photosToDisplay.slice((page - 1) * 9, page * 9)"
           :key="photo.Key"
         >
           <PhotoCard
@@ -48,6 +56,15 @@ const page = ref(1);
 const { t } = useI18n();
 const localePath = useLocalePath();
 const isLoading = ref(false);
+const searchTerm = ref("");
+const photosToDisplay = computed(() => {
+  if (searchTerm.value === "") {
+    return photos.value;
+  }
+  return photos.value.filter((photo) =>
+    photo.Key.toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
+});
 
 onMounted(() => {
   if (!validS3Setting.value) {
