@@ -1,6 +1,6 @@
 <template>
   <UCard>
-    <img :src="photo.url" preview class="w-fit m-auto overflow-visible" >
+    <img :src="photo.url" preview class="w-fit m-auto overflow-visible" />
     <template #footer>
       <div class="flex justify-between items-center gap-2">
         <div class="flex flex-col space-y-1">
@@ -10,7 +10,13 @@
           </div>
           <div class="text-xs items-center inline-flex">
             <Icon name="i-mingcute-key-2-line" class="mr-2" />
-            {{ photo.Key }}
+            <div :title="photo.Key">
+              {{
+                photo.Key.length > 24
+                  ? photo.Key.slice(0, 10) + "..." + photo.Key.slice(-10)
+                  : photo.Key
+              }}
+            </div>
           </div>
         </div>
         <div class="flex gap-2">
