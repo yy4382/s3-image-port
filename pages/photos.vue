@@ -38,7 +38,8 @@ import { useStorage } from "@vueuse/core";
 const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
-const { s3Settings, validS3Setting } = useValidSettings();
+const { s3Settings, appSettings, validS3Setting, validAppSetting } =
+  useValidSettings();
 const page = ref(1);
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -47,6 +48,13 @@ onMounted(() => {
   if (!validS3Setting.value) {
     useWrongSettingToast("s3");
     console.error("Invalid S3 settings");
+  }
+  if (!validAppSetting.value) {
+    useWrongSettingToast("app");
+    console.error("Invalid app settings");
+  }
+  if (appSettings.value.enableAutoRefresh) {
+    listPhotos();
   }
 });
 
