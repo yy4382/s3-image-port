@@ -9,6 +9,7 @@
         "
         :disabled="!validS3Setting"
         variant="outline"
+        :loading="isLoading"
         @click="listPhotos"
       />
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -46,6 +47,7 @@ const { s3Settings, appSettings, validS3Setting, validAppSetting } =
 const page = ref(1);
 const { t } = useI18n();
 const localePath = useLocalePath();
+const isLoading = ref(false);
 
 onMounted(() => {
   if (!validS3Setting.value) {
@@ -62,6 +64,7 @@ onMounted(() => {
 });
 
 async function listPhotos() {
+  isLoading.value = true;
   try {
     toast.add({
       title: t("photos.message.listPhotos.try.title"),
@@ -87,6 +90,7 @@ async function listPhotos() {
     });
     console.error((error as Error).message);
   }
+  isLoading.value = false;
 }
 async function deletePhoto(key: string) {
   try {
