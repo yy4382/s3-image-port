@@ -2,6 +2,7 @@ import { useStorage } from "@vueuse/core"
 import type { AppSettings, S3Settings } from "~/types";
 export const useSettings = () => {
   const appSettings = useStorage("app-settings", {
+    enableAutoRefresh: false,
     convertType: "none",
     compressionMaxSize: "",
     compressionMaxWidthOrHeight: "",

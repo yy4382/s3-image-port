@@ -145,6 +145,10 @@
     },
     "app": {
       "title": "应用设置",
+      "autoRefresh": {
+        "title": "启用自动刷新图库功能",
+        "description": "切换到图库页面时自动刷新图库。"
+      },
       "convert": {
         "title": "在上传前转换图片格式",
         "description": "选择在上传图片前先将其转换为什么格式。选择 “none” 将不进行转换。"

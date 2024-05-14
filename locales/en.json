@@ -145,6 +145,10 @@
     },
     "app": {
       "title": "App Settings",
+      "autoRefresh": {
+        "title": "Enable gallery auto-refresh",
+        "description": "Auto refresh the gallery when you navigate back to the gallery page."
+      },
       "convert": {
         "title": "Convert Image Before Upload",
         "description": "Convert image before uploading to S3. \"none\" will not perform the conversion."

@@ -1,20 +1,22 @@
-<script setup lang="ts">
-import { convertTypes, appSettingsSchema } from "~/types";
-
-import { defaultKeyTemplate } from "~/utils/uploadObj";
-
-const { appSettings: state } = useSettings();
-
-const isDefaultKeyTemplate = computed(
-  () =>
-    state.value.keyTemplate === defaultKeyTemplate ||
-    state.value.keyTemplate === ""
-);
-const selectMenuOptions = computed(() => convertTypes.map((type) => type));
-</script>
-
 <template>
   <UForm :state="state" :schema="appSettingsSchema" class="space-y-4">
+    <!--auto refresh switch-->
+    <div class="flex justify-between">
+      <UFormGroup
+        :label="$t('settings.app.autoRefresh.title')"
+        :description="$t('settings.app.autoRefresh.description')"
+        name="autoRefresh"
+        class="basis-3/4"
+      />
+      <div class="flex flex-col justify-center">
+        <UToggle
+          v-model="state.enableAutoRefresh"
+          on-icon="i-heroicons-check-20-solid"
+          off-icon="i-heroicons-x-mark-20-solid"
+        />
+      </div>
+    </div>
+    <!--convert-->
     <UFormGroup
       :label="$t('settings.app.convert.title')"
       :description="$t('settings.app.convert.description')"
@@ -22,6 +24,7 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
     >
       <USelectMenu v-model="state.convertType" :options="selectMenuOptions" />
     </UFormGroup>
+    <!--compress-->
     <div>
       <div class="flex content-center items-center justify-between text-sm">
         {{ $t("settings.app.compress.title") }}
@@ -58,6 +61,7 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
         </UFormGroup>
       </div>
     </div>
+    <!--key template-->
     <UFormGroup
       :label="$t('settings.app.keyTemplate.title')"
       name="keyTemplate"
@@ -117,3 +121,16 @@ const selectMenuOptions = computed(() => convertTypes.map((type) => type));
     </UFormGroup>
   </UForm>
 </template>
+
+<script setup lang="ts">
+import { convertTypes, appSettingsSchema } from "~/types";
+import { defaultKeyTemplate } from "~/utils/uploadObj";
+
+const { appSettings: state } = useSettings();
+const isDefaultKeyTemplate = computed(
+  () =>
+    state.value.keyTemplate === defaultKeyTemplate ||
+    state.value.keyTemplate === ""
+);
+const selectMenuOptions = computed(() => convertTypes.map((type) => type));
+</script>
