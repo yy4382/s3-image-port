@@ -3,20 +3,21 @@
     <img :src="photo.url" preview class="w-fit m-auto overflow-visible" />
     <template #footer>
       <div class="flex justify-between items-center gap-2">
-        <div class="flex flex-col space-y-1">
+        <div
+          class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0"
+        >
           <div class="text-xs items-center inline-flex">
             <Icon name="i-mingcute-time-line" class="mr-2" />
             {{ DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd") }}
           </div>
           <div class="text-xs items-center inline-flex">
             <Icon name="i-mingcute-key-2-line" class="mr-2" />
-            <div :title="photo.Key">
-              {{
-                photo.Key.length > 24
-                  ? photo.Key.slice(0, 10) + "..." + photo.Key.slice(-10)
-                  : photo.Key
-              }}
-            </div>
+            <span
+              :title="photo.Key"
+              class="text-ellipsis overflow-hidden whitespace-nowrap block"
+            >
+              {{ photo.Key }}
+            </span>
           </div>
         </div>
         <div class="flex gap-2">
