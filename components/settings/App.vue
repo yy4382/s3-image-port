@@ -5,7 +5,7 @@
       <UFormGroup
         :label="$t('settings.app.autoRefresh.title')"
         :description="$t('settings.app.autoRefresh.description')"
-        name="autoRefresh"
+        name="enableAutoRefresh"
         class="basis-3/4"
       />
       <div class="flex flex-col justify-center">
