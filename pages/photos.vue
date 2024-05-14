@@ -1,5 +1,5 @@
 <template>
-  <UContainer class="space-y-4">
+  <UContainer class="w-full space-y-4">
     <ClientOnly>
       <div class="flex gap-4 justify-between">
         <UButton
@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { type Photo } from "~/types";
 import { useStorage, refDebounced } from "@vueuse/core";
+import { useFuse } from "@vueuse/integrations/useFuse";
 
 const router = useRouter();
 const toast = useToast();
@@ -62,9 +63,12 @@ const photosToDisplay = computed(() => {
   if (debouncedSearchTerm.value === "") {
     return photos.value;
   }
-  return photos.value.filter((photo) =>
-    photo.Key.toLowerCase().includes(debouncedSearchTerm.value.toLowerCase())
+  const { results } = useFuse(
+    debouncedSearchTerm.value,
+    photos.value.map((photo) => photo.Key)
   );
+  const keys = results.value.map((result) => result.item);
+  return photos.value.filter((photo) => keys.includes(photo.Key));
 });
 
 onMounted(() => {
