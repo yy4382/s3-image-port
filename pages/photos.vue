@@ -33,10 +33,10 @@
         </div>
       </div>
       <UPagination
-        v-if="photos.length > 0"
+        v-if="photosToDisplay.length > 0"
         v-model="page"
         class="mx-auto max-w-fit"
-        :total="photos.length"
+        :total="photosToDisplay.length"
         :per-page="9"
       />
     </ClientOnly>
