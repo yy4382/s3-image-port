@@ -20,7 +20,6 @@
         />
       </UForm>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <!--TODO: handle pagination-->
         <div
           v-for="photo in photosToDisplay.slice((page - 1) * 9, page * 9)"
           :key="photo.Key"
