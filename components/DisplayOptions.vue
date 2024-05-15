@@ -50,7 +50,7 @@
           <USelectMenu
             v-model="prefix"
             searchable
-            :options="availablePrefixes"
+            :options="displayAvailablePrefixes"
             :placeholder="
               $t('photos.displayOptions.filter.prefixFilter.placeholder')
             "
@@ -275,4 +275,20 @@ function isRangeSelected(duration: Duration) {
 function selectRange(duration: Duration) {
   dateRange.value = { start: sub(new Date(), duration), end: new Date() };
 }
+
+const displayAvailablePrefixes = computed(() =>
+  availablePrefixes.value.map((prefix) =>
+    prefix === ""
+      ? t("photos.displayOptions.filter.prefixFilter.noPrefixPlaceholder")
+      : prefix
+  )
+);
+watch(prefix, (newValue) => {
+  if (
+    newValue ===
+    t("photos.displayOptions.filter.prefixFilter.noPrefixPlaceholder")
+  ) {
+    prefix.value = "";
+  }
+});
 </script>

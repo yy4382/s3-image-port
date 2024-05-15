@@ -59,7 +59,8 @@
         "prefixFilter": {
           "title": "Filter by Prefix",
           "description": "Use this to find images just like in a dir tree.",
-          "placeholder": "Click to select or search ..."
+          "placeholder": "Click to select or search ...",
+          "noPrefixPlaceholder": "(No Prefix)"
         },
         "dateFilter": {
           "title": "Filter by Date",

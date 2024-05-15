@@ -59,7 +59,8 @@
         "prefixFilter": {
           "title": "按前缀过滤",
           "description": "像在目录树中一样查找图像。",
-          "placeholder": "点击以选择或查找前缀 ..."
+          "placeholder": "点击以选择或查找前缀 ...",
+          "noPrefixPlaceholder": "（无前缀）"
         },
         "dateFilter": {
           "title": "按日期过滤",
