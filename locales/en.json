@@ -168,10 +168,21 @@
       "keyTemplate": {
         "title": "Key (Path) Template",
         "description": "The key (path) template of the uploaded file.",
-        "placeholders": "Available placeholders: year, month, day, random, filename, ext. (Should be wrapped with {'{{'} and {'}}'}. )",
-        "default": "Default: i/{'{{'}year{'}}'}/{'{{'}month{'}}'}/{'{{'}day{'}}'}/{'{{'}random{'}}'}.{'{{'}ext{'}}'}",
-        "warning": "Warning: CHANGE IT AT YOUR OWN RISK! If the new key collides with the existing key, the existing file will be overwritten.",
-        "info1": "The random placeholder is not completely random. It concatenates the milliseconds from 0 am and a two-digit random number to generate the value. Therefore, it is recommended to use it together with year/month/day.",
+        "moreInfo": {
+          "warning": {
+            "title": "WARNING",
+            "description":"If the new key collides with the existing key, the existing file is OVERWRITTEN!"
+          },
+          "placeholders": {
+            "title": "Available Placeholders",
+            "description": "Available placeholders include `year`, `month`, `day`, `random`, `filename` and `ext`. Should be wrapped with {'`{{`'} and {'`}}`'}."
+          },
+          "learnMore": {
+            "part1": "Check out ",
+            "part2": "Special Note on `Key (Path) Template`",
+            "part3": " for more info."
+          }
+        },
         "reset": "Reset to default"
       }
     }
