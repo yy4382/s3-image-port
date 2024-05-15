@@ -64,7 +64,18 @@
         "dateFilter": {
           "title": "Filter by Date",
           "description": "Click to open the calendar and select a date range.",
-          "notAvailableOnMobile": "Sorry, Calendar not supported on mobile."
+          "notAvailableOnMobile": "Sorry, Calendar not supported on mobile.",
+          "calendar": {
+            "labels": {
+              "last7Days": "Last 7 Days",
+              "last14Days": "Last 14 Days",
+              "last30Days": "Last 30 Days",
+              "last3Months": "Last 3 Months",
+              "last6Months": "Last 6 Months",
+              "lastYear": "Last Year",
+              "allTime": "All Time"
+            }
+          }
         }
       },
       "sort": {

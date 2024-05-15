@@ -64,7 +64,18 @@
         "dateFilter": {
           "title": "按日期过滤",
           "description": "点击以打开日历以选择日期范围。",
-          "notAvailableOnMobile": "抱歉，Calendar 组件在移动设备上暂不可用。"
+          "notAvailableOnMobile": "抱歉，Calendar 组件在移动设备上暂不可用。",
+          "calendar": {
+            "labels": {
+              "last7Days": "最近 7 天",
+              "last14Days": "最近 14 天",
+              "last30Days": "最近 30 天",
+              "last3Months": "最近 3 个月",
+              "last6Months": "最近 6 个月",
+              "lastYear": "最近 1 年",
+              "allTime": "最近 1000 年"
+            }
+          }
         }
       },
       "sort": {

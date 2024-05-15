@@ -51,17 +51,12 @@
 </template>
 
 <script setup lang="ts">
+import getLocale from "~/utils/getLocale";
+
 const i18n = useI18n();
 const localePath = useLocalePath();
-const getLocale = () => {
-  let locale = i18n.getLocaleCookie();
-  if (locale === undefined) {
-    locale = i18n.getBrowserLocale();
-  }
-  return locale;
-};
 const localeNames = ["English", "简体中文"];
-const localeNameSelected = ref(getLocale() === "en" ? "English" : "简体中文");
+const localeNameSelected = ref(getLocale() === "zh" ? "简体中文" : "English");
 let locale = getLocale();
 
 const localeRedirect = () => {

@@ -67,10 +67,10 @@
             <UButton icon="i-heroicons-calendar-days-20-solid">
               {{
                 isRangeSelected({ years: 1000 })
-                  ? "All Time"
-                  : format(dateRange.start, "d MMM, yyyy") +
-                    "-" +
-                    format(dateRange.end, "d MMM, yyyy")
+                  ? $t(
+                      "photos.displayOptions.filter.dateFilter.calendar.labels.allTime"
+                    )
+                  : getDateRangeString(dateRange)
               }}
             </UButton>
 
@@ -96,7 +96,11 @@
                   />
                 </div>
 
-                <DatePicker v-model="dateRange" @close="close" />
+                <DatePicker
+                  v-model="dateRange"
+                  :locale="getLocale() === 'zh' ? 'zh-CN' : 'en'"
+                  @close="close"
+                />
               </div>
             </template>
           </UPopover>
@@ -171,7 +175,12 @@
 
 <script lang="ts" setup>
 import { sub, format, isSameDay, type Duration } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 import type { SortByOpts } from "~/types";
+import getLocale from "~/utils/getLocale";
+
+const { t } = useI18n();
+
 const props = defineProps<{
   availablePrefixes: string[];
 }>();
@@ -196,14 +205,58 @@ const hasFilters = computed<boolean>(
 const openFilter = ref(false);
 const openSort = ref(false);
 const ranges = [
-  { label: "Last 7 days", duration: { days: 7 } },
-  { label: "Last 14 days", duration: { days: 14 } },
-  { label: "Last 30 days", duration: { days: 30 } },
-  { label: "Last 3 months", duration: { months: 3 } },
-  { label: "Last 6 months", duration: { months: 6 } },
-  { label: "Last year", duration: { years: 1 } },
-  { label: "All time", duration: { years: 1000 } },
+  {
+    label: t(
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last7Days"
+    ),
+    duration: { days: 7 },
+  },
+  {
+    label: t(
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last14Days"
+    ),
+    duration: { days: 14 },
+  },
+  {
+    label: t(
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last30Days"
+    ),
+    duration: { days: 30 },
+  },
+  {
+    label: t(
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last3Months"
+    ),
+    duration: { months: 3 },
+  },
+  {
+    label: t(
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last6Months"
+    ),
+    duration: { months: 6 },
+  },
+  {
+    label: t(
+      "photos.displayOptions.filter.dateFilter.calendar.labels.lastYear"
+    ),
+    duration: { years: 1 },
+  },
+  {
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.allTime"),
+    duration: { years: 1000 },
+  },
 ];
+
+const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
+  const localeForDateFns = getLocale() === "zh" ? zhCN : enUS;
+  const formatString =
+    localeForDateFns === zhCN ? "yyyy 年 M 月 d 日" : "d MMM, yyyy";
+  const formattedDate = (date: Date) =>
+    format(date, formatString, {
+      locale: localeForDateFns,
+    });
+  return `${formattedDate(dateRange.start)} - ${formattedDate(dateRange.end)}`;
+};
 
 function isRangeSelected(duration: Duration) {
   return (
