@@ -16,7 +16,7 @@
         <UInput
           v-model="searchTerm"
           icon="i-heroicons-magnifying-glass-20-solid"
-          placeholder="Search..."
+          :placeholder="$t('photos.search.placeholder')"
         />
       </UForm>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

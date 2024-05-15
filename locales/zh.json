@@ -50,6 +50,9 @@
       "loadButton": "加载图库",
       "refreshButton": "刷新"
     },
+    "search": {
+      "placeholder": "搜索 ..."
+    },
     "photoCard": {
       "deleteButton": {
         "confirm": {

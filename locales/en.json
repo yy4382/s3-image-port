@@ -50,6 +50,9 @@
       "loadButton": "Load",
       "refreshButton": "Refresh"
     },
+    "search": {
+      "placeholder": "Search ..."
+    },
     "photoCard": {
       "deleteButton": {
         "confirm": {
