@@ -68,7 +68,8 @@ const photosToDisplay = computed(() => {
     photos.value.map((photo) => photo.Key),
     {
       fuseOptions: {
-        threshold: 0.4,
+        threshold: 0.6,
+        useExtendedSearch: true,
       },
     }
   );
