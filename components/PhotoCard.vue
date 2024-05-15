@@ -7,15 +7,14 @@
           class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0"
         >
           <div class="text-xs items-center inline-flex">
-            <Icon name="i-mingcute-time-line" class="mr-2" />
-            {{ DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd") }}
+            <Icon name="i-mingcute-time-line" class="shrink-0 mr-2" />
+            <span class="truncate block">
+              {{ DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd") }}
+            </span>
           </div>
           <div class="text-xs items-center inline-flex">
-            <Icon name="i-mingcute-key-2-line" class="mr-2" />
-            <span
-              :title="photo.Key"
-              class="text-ellipsis overflow-hidden whitespace-nowrap block"
-            >
+            <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
+            <span :title="photo.Key" class="truncate block">
               {{ photo.Key }}
             </span>
           </div>
