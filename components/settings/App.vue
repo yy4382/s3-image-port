@@ -16,6 +16,22 @@
         />
       </div>
     </div>
+    <!--fuzzy search switch-->
+    <div class="flex justify-between">
+      <UFormGroup
+        :label="$t('settings.app.fuzzySearch.title')"
+        :description="$t('settings.app.fuzzySearch.description')"
+        name="enableFuzzySearch"
+        class="basis-3/4"
+      />
+      <div class="flex flex-col justify-center">
+        <UToggle
+          v-model="state.enableFuzzySearch"
+          on-icon="i-heroicons-check-20-solid"
+          off-icon="i-heroicons-x-mark-20-solid"
+        />
+      </div>
+    </div>
     <!--convert-->
     <UFormGroup
       :label="$t('settings.app.convert.title')"

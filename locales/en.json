@@ -149,6 +149,10 @@
         "title": "Enable gallery auto-refresh",
         "description": "Auto refresh the gallery when you navigate back to the gallery page."
       },
+      "fuzzySearch": {
+        "title": "Enable fuzzy search",
+        "description": "Enable fuzzy search in the gallery."
+      },
       "convert": {
         "title": "Convert Image Before Upload",
         "description": "Convert image before uploading to S3. \"none\" will not perform the conversion."
