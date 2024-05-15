@@ -105,28 +105,32 @@ const filterByDate = (
 };
 
 const photosToDisplay = computed(() => {
-  const filteredByPrefix = filterByPrefix(photos.value, prefix.value);
-  const filteredByDate = filterByDate(filteredByPrefix, dateRange.value);
-  if (debouncedSearchTerm.value === "") {
+  const photosFilteredByPrefixAndDate = filterByDate(
+    filterByPrefix(photos.value, prefix.value),
+    dateRange.value
+  );
+
+  if (debouncedSearchTerm.value.trim() === "") {
     // Sort related options are only available when search term is empty
     if (sortBy.value === "key") {
-      return filteredByDate.sort((a, b) =>
+      return photosFilteredByPrefixAndDate.sort((a, b) =>
         sortOrder.value === "asc"
           ? a.Key.localeCompare(b.Key)
           : b.Key.localeCompare(a.Key)
       );
     } else {
-      return filteredByDate.sort((a, b) =>
+      return photosFilteredByPrefixAndDate.sort((a, b) =>
         sortOrder.value === "asc"
           ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
           : compareDesc(new Date(a.LastModified), new Date(b.LastModified))
       );
     }
   }
+
   if (appSettings.value.enableFuzzySearch) {
     const { results } = useFuse(
       debouncedSearchTerm.value,
-      photos.value.map((photo) => photo.Key),
+      photosFilteredByPrefixAndDate.map((photo) => photo.Key),
       {
         fuseOptions: {
           threshold: appSettings.value.fuzzySearchThreshold,
@@ -135,15 +139,15 @@ const photosToDisplay = computed(() => {
       }
     );
     const keys = results.value.map((result) => result.item);
-    const filteredPhotos = photos.value.filter((photo) =>
+    const searchResultPhotos = photosFilteredByPrefixAndDate.filter((photo) =>
       keys.includes(photo.Key)
     );
-    return filteredPhotos.sort(
+    return searchResultPhotos.sort(
       (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key)
     );
   } else {
-    return photos.value.filter((photo) =>
-      photo.Key.includes(debouncedSearchTerm.value)
+    return photosFilteredByPrefixAndDate.filter((photo) =>
+      photo.Key.includes(debouncedSearchTerm.value.trim())
     );
   }
 });
