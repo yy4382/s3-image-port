@@ -5,7 +5,7 @@
       icon="i-heroicons-magnifying-glass-20-solid"
       :placeholder="$t('photos.displayOptions.search.placeholder')"
     />
-    <UChip :show="hasFilters">
+    <UChip :show="hasFilters" :text="getNumberOfFilters()" size="lg">
       <UButton
         icon="i-mingcute-filter-line"
         @click="
@@ -256,6 +256,13 @@ const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
       locale: localeForDateFns,
     });
   return `${formattedDate(dateRange.start)} - ${formattedDate(dateRange.end)}`;
+};
+
+const getNumberOfFilters = () => {
+  let count = 0;
+  if (prefix.value !== "") ++count;
+  if (!isRangeSelected({ years: 1000 })) ++count;
+  return count;
 };
 
 function isRangeSelected(duration: Duration) {
