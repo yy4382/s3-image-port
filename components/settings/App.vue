@@ -146,12 +146,45 @@
                     },
                   }"
                 >
-                  <p>{{ $t("settings.app.keyTemplate.placeholders") }}</p>
-                  <p>{{ $t("settings.app.keyTemplate.default") }}</p>
-                  <p class="text-red-500">
-                    {{ $t("settings.app.keyTemplate.warning") }}
+                  <UAlert
+                    icon="i-heroicons-exclamation-triangle"
+                    color="red"
+                    :title="
+                      $t('settings.app.keyTemplate.moreInfo.warning.title')
+                    "
+                    :description="
+                      $t(
+                        'settings.app.keyTemplate.moreInfo.warning.description'
+                      )
+                    "
+                  />
+                  <UAlert
+                    :title="
+                      $t('settings.app.keyTemplate.moreInfo.placeholders.title')
+                    "
+                    :description="
+                      $t(
+                        'settings.app.keyTemplate.moreInfo.placeholders.description'
+                      )
+                    "
+                  />
+                  <p>
+                    {{
+                      $t("settings.app.keyTemplate.moreInfo.learnMore.part1")
+                    }}
+                    <ULink
+                      to="https://github.com/yy4382/s3-image-port/blob/main/README.md#special-note-on-key-path-template"
+                      inactive-class="underline underline-offset-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                      target="_blank"
+                    >
+                      {{
+                        $t("settings.app.keyTemplate.moreInfo.learnMore.part2")
+                      }}
+                    </ULink>
+                    {{
+                      $t("settings.app.keyTemplate.moreInfo.learnMore.part3")
+                    }}
                   </p>
-                  <p>{{ $t("settings.app.keyTemplate.info1") }}</p>
                 </UCard>
               </template>
             </UPopover>

@@ -31,9 +31,9 @@
       </div>
       <div class="flex-1 flex justify-end items-center gap-1">
         <USelectMenu
-          v-model="localeSelected"
+          v-model="localeNameSelected"
           icon="i-mingcute-translate-2-line"
-          :options="locales"
+          :options="localeNames"
           @change="localeRedirect"
         />
         <UButton
@@ -53,20 +53,25 @@
 <script setup lang="ts">
 const i18n = useI18n();
 const localePath = useLocalePath();
-const locales = ["English", "简体中文"];
-const localeSelected = ref(
-  i18n.getBrowserLocale() === "zh" ? "简体中文" : "English"
-);
-let locale = i18n.getBrowserLocale() === "zh" ? "zh" : "en";
+const getLocale = () => {
+  let locale = i18n.getLocaleCookie();
+  if (locale === undefined) {
+    locale = i18n.getBrowserLocale();
+  }
+  return locale;
+};
+const localeNames = ["English", "简体中文"];
+const localeNameSelected = ref(getLocale() === "en" ? "English" : "简体中文");
+let locale = getLocale();
 
 const localeRedirect = () => {
-  console.log("Locale to " + localeSelected.value);
-  if (localeSelected.value === "English") {
+  if (localeNameSelected.value === "English") {
     locale = "en";
-  } else if (localeSelected.value === "简体中文") {
+  } else if (localeNameSelected.value === "简体中文") {
     locale = "zh";
   } else {
     // assert false;
+    locale = "en"; // default
   }
   i18n.setLocale(locale);
 };

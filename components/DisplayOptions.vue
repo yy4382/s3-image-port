@@ -1,6 +1,10 @@
 <template>
   <div class="flex gap-2">
-    <UInput v-model="searchTerm" placeholder="Search" />
+    <UInput
+      v-model="searchTerm"
+      icon="i-heroicons-magnifying-glass-20-solid"
+      :placeholder="$t('photos.search.placeholder')"
+    />
     <UChip :show="hasFilters">
       <UButton
         icon="i-mingcute-filter-line"
