@@ -43,56 +43,63 @@
         <div class="flex flex-col gap-4">
           <UFormGroup
             :label="$t('photos.displayOptions.filter.prefixFilter.title')"
-          >
-            <USelectMenu
-              v-model="prefix"
-              searchable
-              :options="availablePrefixes"
-              placeholder="Prefix"
-            />
-          </UFormGroup>
+            :description="
+              $t('photos.displayOptions.filter.prefixFilter.description')
+            "
+          />
+          <USelectMenu
+            v-model="prefix"
+            searchable
+            :options="availablePrefixes"
+            :placeholder="
+              $t('photos.displayOptions.filter.prefixFilter.placeholder')
+            "
+          />
+          <UDivider />
           <UFormGroup
             :label="$t('photos.displayOptions.filter.dateFilter.title')"
+            :description="
+              $t('photos.displayOptions.filter.dateFilter.description')
+            "
             class="hidden md:block"
-          >
-            <UPopover :popper="{ placement: 'bottom-start' }">
-              <UButton icon="i-heroicons-calendar-days-20-solid">
-                {{
-                  isRangeSelected({ years: 1000 })
-                    ? "All Time"
-                    : format(dateRange.start, "d MMM, yyyy") +
-                      "-" +
-                      format(dateRange.end, "d MMM, yyyy")
-                }}
-              </UButton>
+          />
+          <UPopover :popper="{ placement: 'bottom-start' }">
+            <UButton icon="i-heroicons-calendar-days-20-solid">
+              {{
+                isRangeSelected({ years: 1000 })
+                  ? "All Time"
+                  : format(dateRange.start, "d MMM, yyyy") +
+                    "-" +
+                    format(dateRange.end, "d MMM, yyyy")
+              }}
+            </UButton>
 
-              <template #panel="{ close }">
-                <div
-                  class="flex items-center sm:divide-x divide-gray-200 dark:divide-gray-800"
-                >
-                  <div class="hidden sm:flex flex-col py-4">
-                    <UButton
-                      v-for="(range, index) in ranges"
-                      :key="index"
-                      :label="range.label"
-                      color="gray"
-                      variant="ghost"
-                      class="rounded-none px-6"
-                      :class="[
-                        isRangeSelected(range.duration)
-                          ? 'bg-gray-100 dark:bg-gray-800'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
-                      ]"
-                      truncate
-                      @click="selectRange(range.duration)"
-                    />
-                  </div>
-
-                  <DatePicker v-model="dateRange" @close="close" />
+            <template #panel="{ close }">
+              <div
+                class="flex items-center sm:divide-x divide-gray-200 dark:divide-gray-800"
+              >
+                <div class="hidden sm:flex flex-col py-4">
+                  <UButton
+                    v-for="(range, index) in ranges"
+                    :key="index"
+                    :label="range.label"
+                    color="gray"
+                    variant="ghost"
+                    class="rounded-none px-6"
+                    :class="[
+                      isRangeSelected(range.duration)
+                        ? 'bg-gray-100 dark:bg-gray-800'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
+                    ]"
+                    truncate
+                    @click="selectRange(range.duration)"
+                  />
                 </div>
-              </template>
-            </UPopover>
-          </UFormGroup>
+
+                <DatePicker v-model="dateRange" @close="close" />
+              </div>
+            </template>
+          </UPopover>
           <div class="md:hidden">
             {{
               $t("photos.displayOptions.filter.dateFilter.notAvailableOnMobile")
