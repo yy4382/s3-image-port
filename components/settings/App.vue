@@ -32,6 +32,30 @@
         />
       </div>
     </div>
+    <!--fuzzy search threshold-->
+    <UFormGroup
+      :label="$t('settings.app.fuzzySearchThreshold.title')"
+      :description="$t('settings.app.fuzzySearchThreshold.description')"
+      name="fuzzySearchThreshold"
+    >
+      <div class="flex gap-2">
+        <UAlert>
+          <template #description>
+            <div class="flex gap-4">
+              <URange
+                v-model="state.fuzzySearchThreshold"
+                :min="0"
+                :max="1"
+                :step="0.1"
+                :disabled="!state.enableFuzzySearch"
+                class="basis-11/12"
+              />
+              <span class="basis-1/12">{{ state.fuzzySearchThreshold }}</span>
+            </div>
+          </template>
+        </UAlert>
+      </div>
+    </UFormGroup>
     <!--convert-->
     <UFormGroup
       :label="$t('settings.app.convert.title')"

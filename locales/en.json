@@ -153,6 +153,10 @@
         "title": "Enable fuzzy search",
         "description": "Enable fuzzy search in the gallery."
       },
+      "fuzzySearchThreshold": {
+        "title": "Threshold of fuzzy search",
+        "description": "The threshold of fuzzy search. A threshold of 0.0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything."
+      },
       "convert": {
         "title": "Convert Image Before Upload",
         "description": "Convert image before uploading to S3. \"none\" will not perform the conversion."

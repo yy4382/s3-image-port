@@ -4,6 +4,7 @@ export const useSettings = () => {
   const appSettings = useStorage("app-settings", {
     enableAutoRefresh: false,
     enableFuzzySearch: true,
+    fuzzySearchThreshold: 0.6,
     convertType: "none",
     compressionMaxSize: "",
     compressionMaxWidthOrHeight: "",
