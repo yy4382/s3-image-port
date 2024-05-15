@@ -66,11 +66,14 @@
       },
       "sort": {
         "title": "Sort Options",
+        "description": "Options here are disabled if search is enabled (In that case the order will be determined by the match of the search results).",
         "sortBy": {
-          "title": "Sort By"
+          "title": "Sort By",
+          "description": "Properties on which the sorting is based."
         },
         "order": {
-          "title": "Order"
+          "title": "Order",
+          "description": "Display results in ascending or descending order."
         }
       }
     },

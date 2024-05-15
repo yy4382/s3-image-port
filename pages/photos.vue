@@ -18,7 +18,7 @@
           <DisplayOptions
             v-model:date-range="dateRange"
             v-model:sort-by="sortBy"
-            v-model:sort-order="sortOrder"
+            v-model:sort-order-is-descending="sortOrderIsDescending"
             v-model:search-term="searchTerm"
             v-model:prefix="prefix"
             :available-prefixes="availablePrefixes"
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import type { SortByOpts, SortOrderOpts, Photo } from "~/types";
+import type { SortByOpts, Photo } from "~/types";
 import { useStorage } from "@vueuse/core";
 import { useFuse } from "@vueuse/integrations/useFuse";
 import { sub, compareAsc, compareDesc } from "date-fns";
@@ -85,7 +85,7 @@ const dateRange: Ref<{ start: Date; end: Date }> = ref({
   end: new Date(),
 });
 const sortBy: Ref<SortByOpts> = ref("key");
-const sortOrder: Ref<SortOrderOpts> = ref("desc");
+const sortOrderIsDescending: Ref<boolean> = ref(true);
 
 const filterByPrefix = (photos: Photo[], prefix: string) => {
   if (prefix === "") {
@@ -114,13 +114,13 @@ const photosToDisplay = computed(() => {
     // Sort related options are only available when search term is empty
     if (sortBy.value === "key") {
       return photosFilteredByPrefixAndDate.sort((a, b) =>
-        sortOrder.value === "asc"
+        !sortOrderIsDescending.value
           ? a.Key.localeCompare(b.Key)
           : b.Key.localeCompare(a.Key)
       );
     } else {
       return photosFilteredByPrefixAndDate.sort((a, b) =>
-        sortOrder.value === "asc"
+        !sortOrderIsDescending.value
           ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
           : compareDesc(new Date(a.LastModified), new Date(b.LastModified))
       );

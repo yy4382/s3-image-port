@@ -48,4 +48,3 @@ export const appSettingsSchema = z.object({
 });
 
 export type SortByOpts = "date" | "key";
-export type SortOrderOpts = "asc" | "desc";

@@ -15,7 +15,11 @@
       />
     </UChip>
     <UButton
-      icon="i-mingcute-sort-ascending-line"
+      :icon="
+        sortOrderIsDescending
+          ? 'i-mingcute-sort-descending-line'
+          : 'i-mingcute-sort-ascending-line'
+      "
       :color="openSort ? 'primary' : 'gray'"
       @click="openSort = true"
     />
@@ -101,9 +105,14 @@
       <UCard>
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">
-              {{ $t("photos.displayOptions.sort.title") }}
-            </h3>
+            <div class="flex flex-col">
+              <h3 class="text-base font-semibold">
+                {{ $t("photos.displayOptions.sort.title") }}
+              </h3>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">
+                {{ $t("photos.displayOptions.sort.description") }}
+              </p>
+            </div>
             <UButton
               color="gray"
               variant="ghost"
@@ -114,20 +123,39 @@
           </div>
         </template>
         <div class="flex flex-col gap-4">
-          <UFormGroup :label="$t('photos.displayOptions.sort.sortBy.title')">
-            <USelectMenu
-              v-if="!searchTerm"
-              v-model="sortBy"
-              :options="sortByOptions"
+          <div class="flex flex-row gap-4 justify-between">
+            <div class="flex flex-col justify-center">
+              <UFormGroup
+                :label="$t('photos.displayOptions.sort.sortBy.title')"
+                :description="
+                  $t('photos.displayOptions.sort.sortBy.description')
+                "
+              />
+            </div>
+            <div class="flex flex-col justify-center">
+              <USelectMenu
+                v-model="sortBy"
+                :options="sortByOptions"
+                :disabled="searchTerm.trim() !== ''"
+              />
+            </div>
+          </div>
+          <div class="flex flex-row gap-4 justify-between">
+            <UFormGroup
+              :label="$t('photos.displayOptions.sort.order.title')"
+              :description="$t('photos.displayOptions.sort.order.description')"
             />
-          </UFormGroup>
-          <UFormGroup :label="$t('photos.displayOptions.sort.order.title')">
-            <USelectMenu
-              v-if="!searchTerm"
-              v-model="sortOrder"
-              :options="sortOrderOptions"
-            />
-          </UFormGroup>
+            <div class="flex flex-col justify-center">
+              <!--TODO: optimize design (the current version is ugly)-->
+              <UToggle
+                v-model="sortOrderIsDescending"
+                on-icon="i-mingcute-sort-descending-line"
+                off-icon="i-mingcute-sort-ascending-line"
+                :disabled="searchTerm.trim() !== ''"
+                size="2xl"
+              />
+            </div>
+          </div>
         </div>
       </UCard>
     </UModal>
@@ -136,7 +164,7 @@
 
 <script lang="ts" setup>
 import { sub, format, isSameDay, type Duration } from "date-fns";
-import type { SortByOpts, SortOrderOpts } from "~/types";
+import type { SortByOpts } from "~/types";
 const props = defineProps<{
   availablePrefixes: string[];
 }>();
@@ -150,8 +178,7 @@ const dateRange = defineModel<{ start: Date; end: Date }>("dateRange", {
 });
 const sortByOptions = ["key", "date"];
 const sortBy = defineModel<SortByOpts>("sortBy", { required: true });
-const sortOrderOptions = ["asc", "desc"];
-const sortOrder = defineModel<SortOrderOpts>("sortOrder", {
+const sortOrderIsDescending = defineModel<boolean>("sortOrderIsDescending", {
   required: true,
 });
 
