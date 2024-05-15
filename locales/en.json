@@ -50,8 +50,29 @@
       "loadButton": "Load",
       "refreshButton": "Refresh"
     },
-    "search": {
-      "placeholder": "Search ..."
+    "displayOptions": {
+      "search": {
+        "placeholder": "Search ..."
+      },
+      "filter": {
+        "title": "Filter Options",
+        "prefixFilter": {
+          "title": "Filter by Prefix"
+        },
+        "dateFilter": {
+          "title": "Filter by Date",
+          "notAvailableOnMobile": "Sorry, Calendar not supported on mobile."
+        }
+      },
+      "sort": {
+        "title": "Sort Options",
+        "sortBy": {
+          "title": "Sort By"
+        },
+        "order": {
+          "title": "Order"
+        }
+      }
     },
     "photoCard": {
       "deleteButton": {

@@ -3,7 +3,7 @@
     <UInput
       v-model="searchTerm"
       icon="i-heroicons-magnifying-glass-20-solid"
-      :placeholder="$t('photos.search.placeholder')"
+      :placeholder="$t('photos.displayOptions.search.placeholder')"
     />
     <UChip :show="hasFilters">
       <UButton
@@ -24,7 +24,9 @@
       <UCard>
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">Filters</h3>
+            <h3 class="text-base font-semibold">
+              {{ $t("photos.displayOptions.filter.title") }}
+            </h3>
             <UButton
               color="gray"
               variant="ghost"
@@ -35,7 +37,9 @@
           </div>
         </template>
         <div class="flex flex-col gap-4">
-          <UFormGroup label="Prefix">
+          <UFormGroup
+            :label="$t('photos.displayOptions.filter.prefixFilter.title')"
+          >
             <USelectMenu
               v-model="prefix"
               searchable
@@ -43,7 +47,10 @@
               placeholder="Prefix"
             />
           </UFormGroup>
-          <UFormGroup label="Time" class="hidden md:block">
+          <UFormGroup
+            :label="$t('photos.displayOptions.filter.dateFilter.title')"
+            class="hidden md:block"
+          >
             <UPopover :popper="{ placement: 'bottom-start' }">
               <UButton icon="i-heroicons-calendar-days-20-solid">
                 {{
@@ -82,7 +89,11 @@
               </template>
             </UPopover>
           </UFormGroup>
-          <div class="md:hidden">Sorry, Calendar not supported on mobile.</div>
+          <div class="md:hidden">
+            {{
+              $t("photos.displayOptions.filter.dateFilter.notAvailableOnMobile")
+            }}
+          </div>
         </div>
       </UCard>
     </UModal>
@@ -90,7 +101,9 @@
       <UCard>
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">Sort</h3>
+            <h3 class="text-base font-semibold">
+              {{ $t("photos.displayOptions.sort.title") }}
+            </h3>
             <UButton
               color="gray"
               variant="ghost"
@@ -101,14 +114,14 @@
           </div>
         </template>
         <div class="flex flex-col gap-4">
-          <UFormGroup label="Sort By">
+          <UFormGroup :label="$t('photos.displayOptions.sort.sortBy.title')">
             <USelectMenu
               v-if="!searchTerm"
               v-model="sortBy"
               :options="sortByOptions"
             />
           </UFormGroup>
-          <UFormGroup label="Sort Order">
+          <UFormGroup :label="$t('photos.displayOptions.sort.order.title')">
             <USelectMenu
               v-if="!searchTerm"
               v-model="sortOrder"

@@ -50,8 +50,29 @@
       "loadButton": "加载图库",
       "refreshButton": "刷新"
     },
-    "search": {
-      "placeholder": "搜索 ..."
+    "displayOptions": {
+      "search": {
+        "placeholder": "搜索 ..."
+      },
+      "filter": {
+        "title": "过滤选项",
+        "prefixFilter": {
+          "title": "按前缀过滤"
+        },
+        "dateFilter": {
+          "title": "按日期过滤",
+          "notAvailableOnMobile": "抱歉，Calendar 组件在移动设备上暂不可用。"
+        }
+      },
+      "sort": {
+        "title": "排序选项",
+        "sortBy": {
+          "title": "按 ... 排序"
+        },
+        "order": {
+          "title": "升降序"
+        }
+      }
     },
     "photoCard": {
       "deleteButton": {
