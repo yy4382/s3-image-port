@@ -146,15 +146,15 @@
     "app": {
       "title": "App Settings",
       "autoRefresh": {
-        "title": "Enable gallery auto-refresh",
+        "title": "Enable Gallery Auto-Refresh",
         "description": "Auto refresh the gallery when you navigate back to the gallery page."
       },
       "fuzzySearch": {
-        "title": "Enable fuzzy search",
+        "title": "Enable Fuzzy Search",
         "description": "Enable fuzzy search in the gallery."
       },
       "fuzzySearchThreshold": {
-        "title": "Threshold of fuzzy search",
+        "title": "Threshold of Fuzzy Search",
         "description": "The threshold of fuzzy search. A threshold of 0.0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything."
       },
       "convert": {
