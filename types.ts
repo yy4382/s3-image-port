@@ -29,6 +29,8 @@ export type ConvertType = "none" | "jpg" | "webp";
 export const convertTypes = ["none", "jpg", "webp"] as const;
 export interface AppSettings {
   enableAutoRefresh: boolean;
+  enableFuzzySearch: boolean;
+  fuzzySearchThreshold: number;
   convertType: ConvertType;
   compressionMaxSize: number | "";
   compressionMaxWidthOrHeight: number | "";
@@ -37,6 +39,8 @@ export interface AppSettings {
 
 export const appSettingsSchema = z.object({
   enableAutoRefresh: z.boolean(),
+  enableFuzzySearch: z.boolean(),
+  fuzzySearchThreshold: z.number().min(0).max(1),
   convertType: z.enum(convertTypes),
   compressionMaxSize: z.union([z.number().min(0), z.string().length(0)]),
   compressionMaxWidthOrHeight: z.union([z.number().min(1), z.string().length(0)]),

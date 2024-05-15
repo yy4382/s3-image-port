@@ -123,22 +123,29 @@ const photosToDisplay = computed(() => {
       );
     }
   }
-  const { results } = useFuse(
-    debouncedSearchTerm.value,
-    photos.value.map((photo) => photo.Key),
-    {
-      fuseOptions: {
-        threshold: 0.4,
-      },
-    }
-  );
-  const keys = results.value.map((result) => result.item);
-  const filteredPhotos = photos.value.filter((photo) =>
-    keys.includes(photo.Key)
-  );
-  return filteredPhotos.sort(
-    (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key)
-  );
+  if (appSettings.value.enableFuzzySearch) {
+    const { results } = useFuse(
+      debouncedSearchTerm.value,
+      photos.value.map((photo) => photo.Key),
+      {
+        fuseOptions: {
+          threshold: appSettings.value.fuzzySearchThreshold,
+          useExtendedSearch: true,
+        },
+      }
+    );
+    const keys = results.value.map((result) => result.item);
+    const filteredPhotos = photos.value.filter((photo) =>
+      keys.includes(photo.Key)
+    );
+    return filteredPhotos.sort(
+      (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key)
+    );
+  } else {
+    return photos.value.filter((photo) =>
+      photo.Key.includes(debouncedSearchTerm.value)
+    );
+  }
 });
 
 onMounted(() => {
