@@ -1,9 +1,7 @@
 <template>
   <UPopover mode="hover">
     <div
-      class="flex flex-row justify-between gap-2 p-2 rounded-md hover:bg-gray-500/15 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
-      @mouseenter="hovered = true"
-      @mouseleave="hovered = false"
+      class="flex flex-row justify-between gap-2 p-2 rounded-md hover:bg-gray-500/15 hover:text-primary-500 dark:hover:text-primary-400 transition-colors group"
     >
       <div class="flex flex-row gap-2">
         <span class="flex flex-col justify-center">
@@ -17,7 +15,7 @@
           color="gray"
           variant="link"
           icon="i-heroicons-x-mark-20-solid"
-          :class="hovered ? 'visible' : 'invisible'"
+          class="group-hover:opacity-100 opacity-0 transition-opacity"
           @click="$emit('remove', file)"
         />
       </span>
@@ -35,7 +33,6 @@ const props = defineProps({
   file: File,
 });
 defineEmits(["remove"]);
-const hovered = ref(false);
 const previewImage = computed(() => {
   if (!props.file) return "";
   return URL.createObjectURL(props.file);
