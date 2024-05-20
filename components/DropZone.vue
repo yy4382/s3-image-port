@@ -9,16 +9,19 @@
       class="border border-dashed rounded-md border-gray-500 hover:border-primary-500 dark:hover:border-primary-400 cursor-pointer w-full h-full place-content-center"
       :class="
         isOverDropZone &&
-        'border-2 border-primary-500 dark:border-primary-400 bg-primary-500/5 '
+        'border-2 border-primary-500 dark:border-primary-400 bg-primary-500/5 -m-[1px]'
       "
       @click="open()"
     >
-      <div class="flex flex-col m-10 space-y-2">
+      <div
+        class="flex flex-col p-10 space-y-2"
+        :class="isOverDropZone && 'translate-x-[1px]'"
+      >
         <div class="flex justify-center">
           <UIcon name="i-mingcute-upload-3-line" />
         </div>
         <div class="flex justify-center">
-          <p>
+          <p class="text-ellipsis whitespace-nowrap">
             Drop files here or
             <span
               class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
@@ -42,8 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import { useDropZone, useFileDialog } from "@vueuse/core";
-
 // const filesData = ref<File[]>([]);
 const filesData = defineModel<File[]>("filesData", {
   default: [],

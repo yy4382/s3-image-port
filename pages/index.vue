@@ -1,6 +1,6 @@
 <template>
   <UContainer class="space-y-8">
-    <UContainer>
+    <UContainer class="!px-0">
       <form
         class="flex flex-col w-full space-y-2"
         @submit.prevent="uploadHandler"
