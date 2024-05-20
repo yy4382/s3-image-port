@@ -1,33 +1,7 @@
 <template>
   <UContainer class="space-y-8">
     <UContainer class="!px-0">
-      <form
-        class="flex flex-col w-full space-y-2"
-        @submit.prevent="uploadHandler"
-      >
-        <DropZone v-model:files-data="filesData" class="w-full" />
-        <ClientOnly>
-          <UButton
-            type="submit"
-            variant="outline"
-            :loading="uploading"
-            :disabled="!validS3Setting || !validAppSetting"
-            block
-          >
-            {{ $t("upload.fileUploader.uploadButton") }}
-          </UButton>
-          <template #placeholder>
-            <UButton
-              type="submit"
-              variant="outline"
-              :loading="uploading"
-              :disabled="true"
-            >
-              {{ $t("upload.fileUploader.uploadButton") }}
-            </UButton>
-          </template>
-        </ClientOnly>
-      </form>
+      <FileUploader v-model:uploadedLinks="uploadedLinks" class="w-full" />
     </UContainer>
     <UTabs
       v-if="uploadedLinksFormatted.length > 0"
@@ -79,21 +53,10 @@
 </template>
 
 <script setup lang="ts">
-import { DateTime, Interval } from "luxon";
-import { defaultKeyTemplate } from "~/utils/uploadObj";
 import { UseClipboard } from "@vueuse/components";
-import imageCompression from "browser-image-compression";
-interface ImageLink {
-  link: string;
-  name: string;
-}
-
-const router = useRouter();
+import type { UploadedFileLinkObj } from "~/types";
 const toast = useToast();
-const { t } = useI18n();
-const localePath = useLocalePath();
-const { s3Settings, appSettings, validS3Setting, validAppSetting } =
-  useValidSettings();
+const { validS3Setting, validAppSetting } = useValidSettings();
 
 onMounted(() => {
   if (!validS3Setting.value) {
@@ -106,7 +69,7 @@ onMounted(() => {
   }
 });
 
-const uploadedLinks: Ref<ImageLink[]> = ref(
+const uploadedLinks: Ref<UploadedFileLinkObj[]> = ref(
   import.meta.env.DEV
     ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
     : []
@@ -117,97 +80,4 @@ const uploadedLinksFormatted = computed(() =>
     markdown: `![${link.name}](${link.link})`,
   }))
 );
-const uploading = ref(false);
-const filesData = ref<File[]>([]);
-
-function genKey(file: File, type: string) {
-  const keyTemplate =
-    appSettings.value.keyTemplate === undefined ||
-    appSettings.value.keyTemplate.trim().length === 0
-      ? defaultKeyTemplate
-      : appSettings.value.keyTemplate.trim();
-  const now = DateTime.now();
-  const todayStart = now.startOf("day");
-  const interval = Interval.fromDateTimes(todayStart, now);
-  const data: Record<string, string> = {
-    year: now.toFormat("yyyy"),
-    month: now.toFormat("LL"),
-    day: now.toFormat("dd"),
-    filename: file.name.split(".").shift() || "",
-    ext: type === "none" ? file.name.split(".").pop() || "" : type,
-    random: `${interval.length("milliseconds").toString(36)}-${Math.random()
-      .toString(36)
-      .substring(2, 4)}`,
-  };
-  return keyTemplate.replace(/{{(.*?)}}/g, (match, key) => data[key] || match);
-}
-
-async function compressImg(file: File): Promise<File> {
-  let fileType = file.type;
-  switch (appSettings.value.convertType) {
-    case "none":
-      break;
-    case "webp":
-      fileType = "image/webp";
-      break;
-    case "jpg":
-      fileType = "image/jpeg";
-      break;
-  }
-  const compressedFile = await imageCompression(file, {
-    maxSizeMB: appSettings.value.compressionMaxSize || undefined,
-    maxWidthOrHeight:
-      appSettings.value.compressionMaxWidthOrHeight || undefined,
-    useWebWorker: true,
-    fileType,
-  });
-  console.log(
-    `File compressed from ${file.size} to ${compressedFile.size},\n` +
-      `from ${file.type} to ${compressedFile.type}`
-  );
-  return compressedFile;
-}
-
-const uploadHandler = async () => {
-  uploading.value = true;
-  const files = filesData.value;
-
-  for (const file of files) {
-    console.log(file);
-    if (!file.type.startsWith("image/")) {
-      toast.add({
-        title: t("upload.message.fileTypeNotSupported.title"),
-        description: file.type,
-      });
-      continue;
-    }
-    const compressed = await compressImg(file);
-    const key = genKey(file, appSettings.value.convertType);
-
-    try {
-      await uploadObj(compressed, key, s3Settings.value);
-      toast.add({
-        title: t("upload.message.uploaded.title"),
-        description: key,
-      });
-      uploadedLinks.value.push({
-        link: key2Url(key, s3Settings.value),
-        name: file.name,
-      });
-    } catch (e) {
-      console.error(e);
-      toast.add({
-        title: t("upload.message.uploadFailed.title"),
-        description: key,
-        actions: [
-          {
-            label: t("upload.message.uploadFailed.actions.goToSettings"),
-            click: () => router.push(localePath("/settings")),
-          },
-        ],
-      });
-    }
-  }
-  uploading.value = false;
-};
 </script>

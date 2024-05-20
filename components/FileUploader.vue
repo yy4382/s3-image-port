@@ -1,65 +1,73 @@
 <template>
   <DropZone v-model:files-data="filesData" />
-  <UTable
-    v-if="tableData.length !== 0"
-    v-model="tableDataSelected"
-    :rows="tableData"
-  />
-  <div v-if="tableData.length !== 0" class="flex flex-row justify-end gap-2">
+  <div v-if="filesData.length !== 0" class="space-y-2">
+    <div v-for="fileData of filesData" :key="fileData.name">
+      <FileBar
+        :file="fileData"
+        @remove="(fileData) => removeFileData(fileData)"
+      />
+    </div>
     <UButton
-      label="Upload Selected"
+      :label="$t('upload.fileUploader.uploadButton')"
       variant="outline"
-      @click="uploadSelectedByName"
-    />
-    <UButton
-      label="Remove Selected"
-      color="red"
-      @click="removeSelectedByName"
+      :loading="uploading"
+      :disabled="!validS3Setting || !validAppSetting"
+      block
+      @click="upload"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PhotoToUpload } from "~/types";
+import type { UploadedFileLinkObj } from "~/types";
 
-const filesData = defineModel<File[]>("filesData", {
+const { t } = useI18n();
+const { s3Settings, appSettings, validS3Setting, validAppSetting } =
+  useValidSettings();
+const localePath = useLocalePath();
+const router = useRouter();
+const toast = useToast();
+const uploadedLinks = defineModel("uploadedLinks", {
+  type: Array as PropType<UploadedFileLinkObj[]>,
   default: [],
 });
-const getTableDataFromFilesData = (): PhotoToUpload[] => {
-  return filesData.value.map((file) => ({
-    name: file.name,
-    size: file.size,
-  }));
-};
-const tableData = ref<PhotoToUpload[]>(getTableDataFromFilesData());
-const tableDataSelected = ref<PhotoToUpload[]>([]);
-
-watch(filesData, () => {
-  const oldTableData = tableData.value;
-  const newTableData = getTableDataFromFilesData();
-  // add new files to selected
-  tableDataSelected.value.push(
-    ...newTableData.filter(
-      (file) => !oldTableData.map((file) => file.name).includes(file.name)
-    )
-  );
-  tableData.value = newTableData;
-});
-
-const removeSelectedByName = () => {
-  filesData.value = filesData.value.filter(
-    (file) =>
-      !tableDataSelected.value.map((file) => file.name).includes(file.name)
-  );
-  // tableData.value = getTableDataFromFilesData(); // auto updated by `watch`
-  tableDataSelected.value = [];
+const uploading = ref(false);
+const filesData = ref<File[]>([]);
+const removeFileData = (fileToRemove: File) => {
+  filesData.value = filesData.value.filter((file) => file !== fileToRemove);
 };
 
-const uploadSelectedByName = () => {
+const upload = async () => {
+  uploading.value = true;
   for (const file of filesData.value) {
-    console.log("Uploaded " + file.name);
+    const key = genKey(file, appSettings.value.convertType);
+    const compressedFile = await compressAndConvert(file);
+
+    try {
+      await uploadObj(compressedFile, key, s3Settings.value);
+      removeFileData(file);
+      toast.add({
+        title: t("upload.message.uploaded.title"),
+        description: key,
+      });
+      uploadedLinks.value.push({
+        link: key2Url(key, s3Settings.value),
+        name: file.name,
+      });
+    } catch (e) {
+      // console.error(e);
+      toast.add({
+        title: t("upload.message.uploadFailed.title"),
+        description: key,
+        actions: [
+          {
+            label: t("upload.message.uploadFailed.actions.goToSettings"),
+            click: () => router.push(localePath("/settings")),
+          },
+        ],
+      });
+    }
   }
-  filesData.value = [];
-  tableDataSelected.value = [];
+  uploading.value = false;
 };
 </script>
