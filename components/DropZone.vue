@@ -29,14 +29,14 @@
       </div>
     </div>
     <!--for debug-->
-    <div v-if="filesData.length > 0">
+    <!-- <div v-if="filesData.length > 0">
       <h3>Dropped Files:</h3>
       <ul>
         <li v-for="(file, index) in filesData" :key="index">
           {{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)
         </li>
       </ul>
-    </div>
+    </div> -->
     <!--for debug-->
   </div>
 </template>
