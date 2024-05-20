@@ -1,7 +1,6 @@
 <!--
   The current behavior is: 
-  - to update to the selected file if it's via the file selector, or
-  - to add the selected file if it's via drag and drop.
+  - to add the selected file if it's via either drag and drop or file dialog
 -->
 <template>
   <div>
@@ -45,12 +44,22 @@
 <script setup lang="ts">
 import { useDropZone, useFileDialog } from "@vueuse/core";
 
+const updateFilesByName = (toUpdateFiles: File[], newFiles: File[]): File[] => {
+  const newFileNames = newFiles.map((file) => file.name);
+  const updatedFiles: File[] = [];
+  updatedFiles.push(...newFiles); // new files are always added
+  updatedFiles.push(
+    ...toUpdateFiles.filter((file) => !newFileNames.includes(file.name)) // old files are added if not in new files
+  );
+  return updatedFiles;
+};
+
 const filesData = ref<File[]>([]);
-function onDrop(files: File[] | null) {
+const onDrop = (files: File[] | null) => {
   if (files) {
-    filesData.value.push(...files);
+    filesData.value = updateFilesByName(filesData.value, files);
   }
-}
+};
 const dropZoneRef = ref<HTMLElement | null>(null);
 const { isOverDropZone } = useDropZone(dropZoneRef, onDrop);
 
@@ -62,7 +71,8 @@ const { open, onChange } = useFileDialog({
 });
 onChange((fileList) => {
   if (fileList) {
-    filesData.value = Array.from(fileList);
+    const files = Array.from(fileList);
+    filesData.value = updateFilesByName(filesData.value, files);
   }
 });
 </script>
