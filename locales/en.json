@@ -17,7 +17,10 @@
   "upload": {
     "title": "Upload",
     "fileUploader": {
-      "chooseFilesButton": {},
+      "dropZone": {
+        "part1": "Drop files here or ",
+        "part2": "click to upload"
+      },
       "uploadButton": "Upload"
     },
     "uploadedLinks": {

@@ -17,7 +17,10 @@
   "upload": {
     "title": "上传",
     "fileUploader": {
-      "chooseFilesButton": {},
+      "dropZone": {
+        "part1": "拖放文件到这里，或者",
+        "part2": "点击上传"
+      },
       "uploadButton": "上传"
     },
     "uploadedLinks": {
