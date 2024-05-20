@@ -1,21 +1,26 @@
 <template>
-  <UPopover mode="hover">
+  <UPopover mode="hover" class="max-w-full">
     <div
-      class="flex flex-row justify-between gap-2 p-2 rounded-md hover:bg-gray-500/15 hover:text-primary-500 dark:hover:text-primary-400 transition-colors group"
+      class="flex flex-row justify-between gap-2 p-2 rounded-md group bg-gray-200/50 dark:bg-gray-800/80 hover:bg-gray-500/15 hover:text-primary-500 dark:hover:text-primary-400 transition-colors max-w-full cursor-default"
     >
-      <div class="flex flex-row gap-2">
-        <span class="flex flex-col justify-center">
-          <UIcon name="i-mingcute-pic-line" />
-        </span>
-        <span class="flex flex-col justify-center">{{ props.file?.name }}</span>
-      </div>
-      <span class="flex flex-col justify-center">
+      <span
+        class="space-x-2 max-w-full overflow-hidden whitespace-nowrap text-ellipsis"
+      >
+        <UIcon
+          name="i-mingcute-pic-line"
+          class="align-middle -translate-y-[0.1em]"
+        />
+        <span>{{ props.file?.name }}</span>
+      </span>
+      <span
+        class="absolute right-2 top-1/2 -translate-y-1/2 bg-none group-hover:bg-white group-hover:dark:bg-gray-800 rounded-lg transition-all group-hover:opacity-100 opacity-0"
+      >
         <UButton
-          :padded="false"
-          color="gray"
-          variant="link"
+          size="xs"
+          color="white"
+          variant="solid"
           icon="i-heroicons-x-mark-20-solid"
-          class="group-hover:opacity-100 opacity-0 transition-opacity"
+          class=""
           @click="$emit('remove', file)"
         />
       </span>

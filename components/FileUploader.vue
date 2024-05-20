@@ -2,8 +2,13 @@
   <div class="space-y-2">
     <DropZone v-model:files-data="filesData" />
     <div v-if="filesData.length !== 0" class="space-y-2">
-      <div v-for="fileData of filesData" :key="fileData.name">
-        <FileBar :file="fileData" @remove="removeFileData" />
+      <div class="flex flex-wrap gap-2">
+        <FileBar
+          v-for="fileData of filesData"
+          :key="fileData.name"
+          :file="fileData"
+          @remove="removeFileData"
+        />
       </div>
       <UButton
         :label="$t('upload.fileUploader.uploadButton')"
