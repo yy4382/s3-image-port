@@ -7,9 +7,10 @@
   <div>
     <div
       ref="dropZoneRef"
-      class="border border-dashed rounded-md border-gray-500 hover:border-violet-400 cursor-pointer h-40 flex items-center justify-center"
+      class="border border-dashed rounded-md border-gray-500 hover:border-primary-500 dark:hover:border-primary-400 transition-all cursor-pointer w-full h-full flex items-center justify-center"
       :class="
-        isOverDropZone ? 'border-2 border-violet-400 bg-violet-500/5 ' : ''
+        isOverDropZone &&
+        'border-2 border-primary-500 dark:border-primary-400 bg-primary-500/5 '
       "
       @click="open()"
     >
@@ -20,7 +21,10 @@
         <div class="flex justify-center">
           <p>
             Drop files here or
-            <span class="text-violet-500">click to upload</span>
+            <span
+              class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+              >click to upload</span
+            >
           </p>
         </div>
       </div>
