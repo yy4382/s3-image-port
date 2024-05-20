@@ -12,6 +12,7 @@
   "devDependencies": {
     "@nuxt/devtools": "^1.2.0",
     "@nuxt/eslint": "^0.3.12",
+    "@nuxt/image": "^1.7.0",
     "@nuxt/ui": "^2.16.0",
     "@types/luxon": "^3.4.2",
     "@types/mime-types": "^2.1.4",
