@@ -22,10 +22,12 @@
         </div>
         <div class="flex justify-center">
           <p class="text-ellipsis whitespace-nowrap">
-            Drop files here or
+            <span>
+              {{ $t("upload.fileUploader.dropZone.part1") }}
+            </span>
             <span
               class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
-              >click to upload</span
+              >{{ $t("upload.fileUploader.dropZone.part2") }}</span
             >
           </p>
         </div>
