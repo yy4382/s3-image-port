@@ -44,6 +44,11 @@
 <script setup lang="ts">
 import { useDropZone, useFileDialog } from "@vueuse/core";
 
+// const filesData = ref<File[]>([]);
+const filesData = defineModel<File[]>("filesData", {
+  default: [],
+});
+
 const updateFilesByName = (toUpdateFiles: File[], newFiles: File[]): File[] => {
   const newFileNames = newFiles.map((file) => file.name);
   const updatedFiles: File[] = [];
@@ -54,7 +59,6 @@ const updateFilesByName = (toUpdateFiles: File[], newFiles: File[]): File[] => {
   return updatedFiles;
 };
 
-const filesData = ref<File[]>([]);
 const onDrop = (files: File[] | null) => {
   if (files) {
     filesData.value = updateFilesByName(filesData.value, files);
