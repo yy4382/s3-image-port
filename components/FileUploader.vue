@@ -3,10 +3,7 @@
     <DropZone v-model:files-data="filesData" />
     <div v-if="filesData.length !== 0" class="space-y-2">
       <div v-for="fileData of filesData" :key="fileData.name">
-        <FileBar
-          :file="fileData"
-          @remove="(fileData) => removeFileData(fileData)"
-        />
+        <FileBar :file="fileData" @remove="removeFileData" />
       </div>
       <UButton
         :label="$t('upload.fileUploader.uploadButton')"
