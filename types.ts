@@ -7,6 +7,11 @@ export interface Photo {
   url: string;
 }
 
+export interface PhotoToUpload {
+  name: string;
+  size: number;
+}
+
 export interface S3Settings {
   endpoint: string;
   bucket: string;
