@@ -1,14 +1,18 @@
 <template>
   <UContainer class="space-y-8">
     <UContainer>
-      <form class="flex gap-2 justify-center" @submit.prevent="uploadHandler">
-        <UInput id="file" type="file" multiple accept="image/*" />
+      <form
+        class="flex flex-col w-full space-y-2"
+        @submit.prevent="uploadHandler"
+      >
+        <DropZone v-model:files-data="filesData" class="w-full" />
         <ClientOnly>
           <UButton
             type="submit"
             variant="outline"
             :loading="uploading"
             :disabled="!validS3Setting || !validAppSetting"
+            block
           >
             {{ $t("upload.fileUploader.uploadButton") }}
           </UButton>
@@ -114,6 +118,7 @@ const uploadedLinksFormatted = computed(() =>
   }))
 );
 const uploading = ref(false);
+const filesData = ref<File[]>([]);
 
 function genKey(file: File, type: string) {
   const keyTemplate =
@@ -163,13 +168,12 @@ async function compressImg(file: File): Promise<File> {
   return compressedFile;
 }
 
-const uploadHandler = async (e: Event) => {
+const uploadHandler = async () => {
   uploading.value = true;
-  e.preventDefault();
-  // @ts-expect-error Should be refactored, a temporary workaround
-  const files = e.target?.elements["file"].files as File[];
+  const files = filesData.value;
 
   for (const file of files) {
+    console.log(file);
     if (!file.type.startsWith("image/")) {
       toast.add({
         title: t("upload.message.fileTypeNotSupported.title"),
