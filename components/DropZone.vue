@@ -7,14 +7,14 @@
   <div>
     <div
       ref="dropZoneRef"
-      class="border border-dashed rounded-md border-gray-500 hover:border-primary-500 dark:hover:border-primary-400 transition-all cursor-pointer w-full h-full flex items-center justify-center"
+      class="border border-dashed rounded-md border-gray-500 hover:border-primary-500 dark:hover:border-primary-400 cursor-pointer w-full h-full place-content-center"
       :class="
         isOverDropZone &&
         'border-2 border-primary-500 dark:border-primary-400 bg-primary-500/5 '
       "
       @click="open()"
     >
-      <div class="flex flex-col m-10">
+      <div class="flex flex-col m-10 space-y-2">
         <div class="flex justify-center">
           <UIcon name="i-mingcute-upload-3-line" />
         </div>

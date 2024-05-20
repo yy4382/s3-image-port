@@ -5,6 +5,9 @@ export default defineNuxtConfig({
   ui: {
     icons: ["mingcute"],
   },
+  css: [
+    '~/assets/css/global.css'
+  ],
   i18n: {
     locales: [
       {
