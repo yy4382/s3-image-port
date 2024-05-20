@@ -2,8 +2,10 @@
   <div>
     <div
       ref="dropZoneRef"
-      class="drop-zone w-full"
-      :class="isOverDropZone ? 'bg-red-500' : ''"
+      class="border border-dashed rounded-md border-gray-500 hover:border-violet-400 cursor-pointer h-40 flex items-center justify-center"
+      :class="
+        isOverDropZone ? 'border-2 border-violet-400 bg-violet-500/5 ' : ''
+      "
     >
       <p v-if="!isOverDropZone">Drop files here</p>
       <p v-if="isOverDropZone">Drop it!</p>
@@ -34,16 +36,3 @@ function onDrop(files: File[] | null) {
 const dropZoneRef = ref<HTMLElement | null>(null);
 const { isOverDropZone } = useDropZone(dropZoneRef, onDrop);
 </script>
-
-<style scoped>
-.drop-zone {
-  width: 100%;
-  height: 200px;
-  border: 2px dashed #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px auto;
-  text-align: center;
-}
-</style>
