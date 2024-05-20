@@ -1,20 +1,22 @@
 <template>
-  <DropZone v-model:files-data="filesData" />
-  <div v-if="filesData.length !== 0" class="space-y-2">
-    <div v-for="fileData of filesData" :key="fileData.name">
-      <FileBar
-        :file="fileData"
-        @remove="(fileData) => removeFileData(fileData)"
+  <div class="space-y-2">
+    <DropZone v-model:files-data="filesData" />
+    <div v-if="filesData.length !== 0" class="space-y-2">
+      <div v-for="fileData of filesData" :key="fileData.name">
+        <FileBar
+          :file="fileData"
+          @remove="(fileData) => removeFileData(fileData)"
+        />
+      </div>
+      <UButton
+        :label="$t('upload.fileUploader.uploadButton')"
+        variant="outline"
+        :loading="uploading"
+        :disabled="!validS3Setting || !validAppSetting"
+        block
+        @click="upload"
       />
     </div>
-    <UButton
-      :label="$t('upload.fileUploader.uploadButton')"
-      variant="outline"
-      :loading="uploading"
-      :disabled="!validS3Setting || !validAppSetting"
-      block
-      @click="upload"
-    />
   </div>
 </template>
 
