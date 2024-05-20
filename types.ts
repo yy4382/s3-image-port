@@ -1,15 +1,15 @@
 import { z } from "zod";
 
+export interface UploadedFileLinkObj {
+  link: string;
+  name: string;
+}
+
 export interface Photo {
   Key: string;
   LastModified: string;
   category: string;
   url: string;
-}
-
-export interface PhotoToUpload {
-  name: string;
-  size: number;
 }
 
 export interface S3Settings {
