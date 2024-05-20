@@ -37,4 +37,7 @@ const previewImage = computed(() => {
   if (!props.file) return "";
   return URL.createObjectURL(props.file);
 });
+onBeforeUnmount(() => {
+  URL.revokeObjectURL(previewImage.value);
+});
 </script>
