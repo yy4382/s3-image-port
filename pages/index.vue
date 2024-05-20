@@ -1,6 +1,6 @@
 <template>
   <UContainer class="space-y-8">
-    <UContainer class="!px-0">
+    <UContainer class="!px-0 space-y-2">
       <form
         class="flex flex-col w-full space-y-2"
         @submit.prevent="uploadHandler"
@@ -28,6 +28,7 @@
           </template>
         </ClientOnly>
       </form>
+      <UploadPreview :images="filesData" />
     </UContainer>
     <UTabs
       v-if="uploadedLinksFormatted.length > 0"
@@ -169,11 +170,11 @@ async function compressImg(file: File): Promise<File> {
 }
 
 const uploadHandler = async () => {
+  if (!filesData.value) return;
   uploading.value = true;
   const files = filesData.value;
 
   for (const file of files) {
-    console.log(file);
     if (!file.type.startsWith("image/")) {
       toast.add({
         title: t("upload.message.fileTypeNotSupported.title"),
