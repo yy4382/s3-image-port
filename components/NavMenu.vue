@@ -72,6 +72,14 @@
           </template>
         </UPopover>
         <UButton
+          :icon="isDark ? 'i-mingcute-moon-fill' : 'i-mingcute-sun-fill'"
+          size="md"
+          color="primary"
+          square
+          variant="ghost"
+          @click="isDark = !isDark"
+        />
+        <UButton
           icon="i-mingcute-github-fill"
           size="md"
           color="primary"
@@ -88,4 +96,13 @@
 <script setup lang="ts">
 const { locales, setLocale } = useI18n();
 const localePath = useLocalePath();
+const colorMode = useColorMode();
+const isDark = computed({
+  get() {
+    return colorMode.value === "dark";
+  },
+  set() {
+    colorMode.preference = colorMode.value === "dark" ? "light" : "dark";
+  },
+});
 </script>
