@@ -32,5 +32,6 @@ export default defineNuxtConfig({
       alwaysRedirect: false,
       redirectOn: "root",
     },
+    skipSettingLocaleOnNavigate: true
   },
 });
