@@ -8,14 +8,14 @@
         />
         <span class="text-xl font-bold hidden md:block">S3 Image Port</span>
       </div>
-      <div class="flex space-x-4">
+      <div class="flex space-x-4 font-semibold">
         <ULink
           :to="localePath('/')"
           class="flex flex-row items-center gap-1"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          <UIcon name="i-mingcute-upload-3-line" />
+          <UIcon name="i-mingcute-upload-3-fill" />
           <span>{{ $t("upload.title") }}</span>
         </ULink>
         <ULink
@@ -24,7 +24,7 @@
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          <UIcon name="i-mingcute-photo-album-line" />
+          <UIcon name="i-mingcute-photo-album-fill" />
           <span> {{ $t("photos.title") }}</span>
         </ULink>
         <ULink
@@ -33,7 +33,7 @@
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          <UIcon name="i-mingcute-settings-3-line" />
+          <UIcon name="i-mingcute-settings-3-fill" />
           <span>{{ $t("settings.title") }} </span>
         </ULink>
       </div>
