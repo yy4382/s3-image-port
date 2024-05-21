@@ -4,7 +4,7 @@
       <div class="flex-1 justify-start flex items-center gap-2">
         <Icon
           name="i-mingcute-photo-album-fill"
-          class="text-3xl text-primary"
+          class="text-4xl text-primary"
         />
         <span class="text-xl font-bold hidden md:block">S3 Image Port</span>
       </div>
@@ -15,8 +15,11 @@
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          <UIcon name="i-mingcute-upload-3-fill" />
-          <span>{{ $t("upload.title") }}</span>
+          <UIcon
+            name="i-mingcute-upload-3-fill"
+            class="text-2xl md:text-base"
+          />
+          <span class="hidden md:block">{{ $t("upload.title") }}</span>
         </ULink>
         <ULink
           :to="localePath('/photos')"
@@ -24,8 +27,11 @@
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          <UIcon name="i-mingcute-photo-album-fill" />
-          <span> {{ $t("photos.title") }}</span>
+          <UIcon
+            name="i-mingcute-photo-album-2-fill"
+            class="text-2xl md:text-base"
+          />
+          <span class="hidden md:block"> {{ $t("photos.title") }}</span>
         </ULink>
         <ULink
           :to="localePath('/settings')"
@@ -33,8 +39,11 @@
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          <UIcon name="i-mingcute-settings-3-fill" />
-          <span>{{ $t("settings.title") }} </span>
+          <UIcon
+            name="i-mingcute-settings-3-fill"
+            class="text-2xl md:text-base"
+          />
+          <span class="hidden md:block">{{ $t("settings.title") }} </span>
         </ULink>
       </div>
       <div class="flex-1 flex justify-end items-center gap-1">
