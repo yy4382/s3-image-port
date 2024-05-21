@@ -2,10 +2,7 @@
   <UContainer class="w-full">
     <nav class="flex items-center justify-between h-16 gap-2">
       <div class="flex-1 justify-start flex items-center gap-2">
-        <Icon
-          name="i-mingcute-photo-album-fill"
-          class="text-4xl text-primary"
-        />
+        <img src="~/public/favicon.svg" alt="favicon" class="h-6" />
         <span class="text-xl font-bold hidden md:block">S3 Image Port</span>
       </div>
       <div class="flex space-x-4 font-semibold">
