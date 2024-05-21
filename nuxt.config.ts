@@ -5,9 +5,7 @@ export default defineNuxtConfig({
   ui: {
     icons: ["mingcute"],
   },
-  css: [
-    '~/assets/css/global.css'
-  ],
+  css: ["~/assets/css/global.css"],
   i18n: {
     locales: [
       {
@@ -28,10 +26,13 @@ export default defineNuxtConfig({
     langDir: "locales",
     detectBrowserLanguage: {
       useCookie: true,
-      fallbackLocale: 'en',
+      fallbackLocale: "en",
       alwaysRedirect: false,
       redirectOn: "root",
     },
-    skipSettingLocaleOnNavigate: true
+    skipSettingLocaleOnNavigate: true,
+  },
+  experimental: {
+    viewTransition: true,
   },
 });

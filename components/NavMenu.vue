@@ -18,6 +18,7 @@
           <UIcon
             name="i-mingcute-upload-3-fill"
             class="text-2xl md:text-base"
+            style="view-transition-name: nav-upload"
           />
           <span class="hidden md:block">{{ $t("upload.title") }}</span>
         </ULink>
@@ -30,6 +31,7 @@
           <UIcon
             name="i-mingcute-photo-album-2-fill"
             class="text-2xl md:text-base"
+            style="view-transition-name: nav-gallery"
           />
           <span class="hidden md:block"> {{ $t("photos.title") }}</span>
         </ULink>
@@ -42,6 +44,7 @@
           <UIcon
             name="i-mingcute-settings-3-fill"
             class="text-2xl md:text-base"
+            style="view-transition-name: nav-settings"
           />
           <span class="hidden md:block">{{ $t("settings.title") }} </span>
         </ULink>
