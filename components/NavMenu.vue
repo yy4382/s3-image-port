@@ -47,15 +47,18 @@
             variant="ghost"
           />
           <template #panel>
-            <div class="flex flex-col">
-              <a
+            <div class="flex flex-col p-3 gap-2">
+              <UButton
                 v-for="locale in locales"
                 :key="locale.code"
-                href="#"
+                :padded="false"
+                variant="link"
+                class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:no-underline"
+                :disabled="$i18n.locale === locale.code"
                 @click.prevent.stop="setLocale(locale.code)"
               >
                 {{ locale.name }}
-              </a>
+              </UButton>
             </div>
           </template>
         </UPopover>
