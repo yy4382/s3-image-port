@@ -1,5 +1,5 @@
 <template>
-  <UForm :state="state" :schema="appSettingsSchema" class="space-y-4">
+  <UForm :state="state" :schema="appSettingsSchema" class="space-y-4 mt-4">
     <!--auto refresh switch-->
     <div class="flex justify-between">
       <UFormGroup
