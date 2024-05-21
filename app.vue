@@ -54,8 +54,9 @@ const onBeforeEnter = async () => {
 .my-leave-active {
   transition: opacity 0.3s;
 }
-.my-enter,
-.my-leave-active {
+.my-enter-from,
+.my-leave-to {
   opacity: 0;
+  filter: blur(1rem);
 }
 </style>
