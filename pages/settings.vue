@@ -2,7 +2,10 @@
   <UContainer class="w-full">
     <UCard class="max-w-md w-full m-auto">
       <template #header>
-        <h2>{{ $t("settings.title") }}</h2>
+        <h2 class="flex flex-row items-center gap-1">
+          <UIcon name="i-mingcute-settings-3-fill" />
+          {{ $t("settings.title") }}
+        </h2>
       </template>
       <UTabs
         :items="[
