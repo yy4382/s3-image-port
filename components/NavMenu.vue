@@ -120,9 +120,9 @@ const icon = computed(() => {
     case "light":
       return "i-mingcute-sun-fill";
     case "auto":
-      return "i-mingcute-computer-line";
+      return "i-mingcute-imac-fill";
     default:
-      return "i-mingcute-computer-line";
+      return "i-mingcute-imac-fill";
   }
 });
 
