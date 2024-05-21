@@ -11,23 +11,31 @@
       <div class="flex space-x-4">
         <ULink
           :to="localePath('/')"
+          class="flex flex-row items-center gap-1"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
-          {{ $t("upload.title") }}</ULink
-        >
+          <UIcon name="i-mingcute-upload-3-line" />
+          <span>{{ $t("upload.title") }}</span>
+        </ULink>
         <ULink
           :to="localePath('/photos')"
+          class="flex flex-row items-center gap-1"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >{{ $t("photos.title") }}</ULink
         >
+          <UIcon name="i-mingcute-photo-album-line" />
+          <span> {{ $t("photos.title") }}</span>
+        </ULink>
         <ULink
           :to="localePath('/settings')"
+          class="flex flex-row items-center gap-1"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          >{{ $t("settings.title") }}</ULink
         >
+          <UIcon name="i-mingcute-settings-3-line" />
+          <span>{{ $t("settings.title") }} </span>
+        </ULink>
       </div>
       <div class="flex-1 flex justify-end items-center gap-1">
         <USelectMenu
