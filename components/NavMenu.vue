@@ -38,12 +38,27 @@
         </ULink>
       </div>
       <div class="flex-1 flex justify-end items-center gap-1">
-        <USelectMenu
-          v-model="localeNameSelected"
-          icon="i-mingcute-translate-2-line"
-          :options="localeNames"
-          @change="localeRedirect"
-        />
+        <UPopover>
+          <UButton
+            icon="i-mingcute-translate-2-fill"
+            size="md"
+            color="primary"
+            square
+            variant="ghost"
+          />
+          <template #panel>
+            <div class="flex flex-col">
+              <a
+                v-for="locale in locales"
+                :key="locale.code"
+                href="#"
+                @click.prevent.stop="setLocale(locale.code)"
+              >
+                {{ locale.name }}
+              </a>
+            </div>
+          </template>
+        </UPopover>
         <UButton
           icon="i-mingcute-github-fill"
           size="md"
@@ -59,23 +74,6 @@
 </template>
 
 <script setup lang="ts">
-import getLocale from "~/utils/getLocale";
-
-const i18n = useI18n();
+const { locales, setLocale } = useI18n();
 const localePath = useLocalePath();
-const localeNames = ["English", "简体中文"];
-const localeNameSelected = ref(getLocale() === "zh" ? "简体中文" : "English");
-let locale = getLocale();
-
-const localeRedirect = () => {
-  if (localeNameSelected.value === "English") {
-    locale = "en";
-  } else if (localeNameSelected.value === "简体中文") {
-    locale = "zh";
-  } else {
-    // assert false;
-    locale = "en"; // default
-  }
-  i18n.setLocale(locale);
-};
 </script>

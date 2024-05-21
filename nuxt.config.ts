@@ -12,17 +12,15 @@ export default defineNuxtConfig({
     locales: [
       {
         code: "en",
-        flag: "us",
         iso: "en-US",
         file: "en.json",
         name: "English",
       },
       {
         code: "zh",
-        flag: "cn",
         iso: "zh-CN",
         file: "zh.json",
-        name: "中文",
+        name: "简体中文",
       },
     ],
     defaultLocale: "en",
