@@ -156,7 +156,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       <UInput v-model="state.pubUrl" />
     </UFormGroup>
 
-    <UButton type="submit">
+    <UButton type="submit" block>
       {{ $t("settings.s3.submitFormButton.title") }}
     </UButton>
   </UForm>
