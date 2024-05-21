@@ -2,6 +2,13 @@
 import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 import { s3SettingsSchema } from "~/types";
+import generateTestKeyAndContent from "~/utils/generateTestKeyAndContent";
+import {
+  checkGrantedToUpload,
+  checkGrantedToList,
+  checkGrantedToDelete,
+  checkObjectExists,
+} from "~/utils/testOps";
 
 const toast = useToast();
 const { s3Settings: state } = useSettings();
@@ -11,24 +18,39 @@ const form = ref();
 const showAccessKeyId = ref(false);
 const showSecretAccessKey = ref(false);
 
+const uploadChipColor = ref<"green" | "red" | "gray">("gray");
+const listChipColor = ref<"green" | "red" | "gray">("gray");
+const deleteChipColor = ref<"green" | "red" | "gray">("gray");
+
 type Schema = z.output<typeof s3SettingsSchema>;
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
-  // Do something with data
-  try {
-    toast.add({
-      title: t("settings.s3.submitFormButton.message.try.title"),
-    });
-    await listObj(state.value);
-    toast.add({
-      title: t("settings.s3.submitFormButton.message.success.title"),
-    });
-  } catch (err) {
-    toast.add({
-      title: t("settings.s3.submitFormButton.message.fail.title"),
-      description: t("settings.s3.submitFormButton.message.fail.description"),
-    });
+  toast.add({
+    title: t("settings.s3.submitFormButton.message.try.title"),
+  });
+  console.log("Start testing S3 connectivity...");
+  console.log("Generating test key and content...");
+  let { testKey, testContent } = generateTestKeyAndContent();
+  console.log("Generated test key and content:", testKey, testContent);
+  while (checkObjectExists(testKey)) {
+    console.log(
+      "Object already exists, generating new test key and content..."
+    );
+    ({ testKey, testContent } = generateTestKeyAndContent());
   }
+  console.log("Unique test key and content generated.");
+
+  uploadChipColor.value = (await checkGrantedToUpload(testKey, testContent))
+    ? "green"
+    : "red";
+  listChipColor.value = (await checkGrantedToList(testKey, testContent))
+    ? "green"
+    : "red";
+  deleteChipColor.value = (await checkGrantedToDelete(testKey, testContent))
+    ? "green"
+    : "red";
+
+  // TODO: toast
 }
 </script>
 
@@ -156,8 +178,21 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       <UInput v-model="state.pubUrl" />
     </UFormGroup>
 
-    <UButton type="submit" block>
-      {{ $t("settings.s3.submitFormButton.title") }}
-    </UButton>
+    <div class="flex flex-row justify-between">
+      <div class="flex flex-row gap-2 items-center justify-start">
+        <UChip :color="uploadChipColor">
+          <UIcon name="i-mingcute-file-upload-line" class="text-xl" />
+        </UChip>
+        <UChip :color="listChipColor">
+          <UIcon name="i-mingcute-directory-line" class="text-xl" />
+        </UChip>
+        <UChip :color="deleteChipColor">
+          <UIcon name="i-mingcute-delete-2-line" class="text-xl" />
+        </UChip>
+      </div>
+      <UButton type="submit">
+        {{ $t("settings.s3.submitFormButton.title") }}
+      </UButton>
+    </div>
   </UForm>
 </template>

@@ -5,7 +5,7 @@ import newClient from "./newClient";
 export const defaultKeyTemplate =
   "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
 export default async function (
-  file: Blob | Buffer,
+  file: string | Blob | Buffer,
   key: string,
   config: S3Settings,
 ) {
