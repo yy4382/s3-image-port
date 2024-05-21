@@ -34,6 +34,7 @@
     </div>
     <!--fuzzy search threshold-->
     <UFormGroup
+      v-if="state.enableFuzzySearch"
       :label="$t('settings.app.fuzzySearchThreshold.title')"
       :description="$t('settings.app.fuzzySearchThreshold.description')"
       name="fuzzySearchThreshold"
