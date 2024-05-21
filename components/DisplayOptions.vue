@@ -98,7 +98,7 @@
 
                 <DatePicker
                   v-model="dateRange"
-                  :locale="getLocale() === 'zh' ? 'zh-CN' : 'en'"
+                  :locale="$i18n.locale === 'zh' ? 'zh-CN' : 'en'"
                   @close="close"
                 />
               </div>
@@ -177,9 +177,8 @@
 import { sub, format, isSameDay, type Duration } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
 import type { SortByOpts } from "~/types";
-import getLocale from "~/utils/getLocale";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const props = defineProps<{
   availablePrefixes: string[];
@@ -248,7 +247,7 @@ const ranges = [
 ];
 
 const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
-  const localeForDateFns = getLocale() === "zh" ? zhCN : enUS;
+  const localeForDateFns = locale.value === "zh" ? zhCN : enUS;
   const formatString =
     localeForDateFns === zhCN ? "yyyy 年 M 月 d 日" : "d MMM, yyyy";
   const formattedDate = (date: Date) =>
