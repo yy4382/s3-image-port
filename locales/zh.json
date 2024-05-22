@@ -2,8 +2,8 @@
   "general": {
     "message": {
       "invalidS3Setting": {
-        "title": "无效的S3设置",
-        "description": "请在设置页面检查S3设置。"
+        "title": "无效的 S3 设置",
+        "description": "请在设置页面检查 S3 设置。"
       },
       "invalidAppSetting": {
         "title": "无效的应用设置",
@@ -224,7 +224,7 @@
         "moreInfo": {
           "warning": {
             "title": "警告",
-            "description":"如果 Key（路径）模板不唯一，可能会导致文件覆盖。"
+            "description": "如果 Key（路径）模板不唯一，可能会导致文件覆盖。"
           },
           "placeholders": {
             "title": "可用占位符",
