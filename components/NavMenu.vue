@@ -50,6 +50,21 @@
         </ULink>
       </div>
       <div class="flex-1 flex justify-end items-center gap-1">
+        <ClientOnly>
+          <UPopover v-if="smallerThanMd">
+            <UButton
+              :icon="icon"
+              size="md"
+              color="primary"
+              square
+              variant="ghost"
+            />
+            <template #panel>
+              <ThemeSwitcher />
+            </template>
+          </UPopover>
+          <ThemeSwitcher v-else />
+        </ClientOnly>
         <UPopover>
           <UButton
             icon="i-mingcute-translate-2-fill"
@@ -74,16 +89,7 @@
             </div>
           </template>
         </UPopover>
-        <ClientOnly>
-          <UButton
-            :icon="icon"
-            size="md"
-            color="primary"
-            square
-            variant="ghost"
-            @click="toggleTheme"
-          />
-        </ClientOnly>
+
         <UButton
           icon="i-mingcute-github-fill"
           size="md"
@@ -99,98 +105,27 @@
 </template>
 
 <script setup lang="ts">
-import { useColorMode } from "@vueuse/core";
+import { useColorMode, breakpointsTailwind } from "@vueuse/core";
 const { locales, setLocale } = useI18n();
 const localePath = useLocalePath();
-const { system: systemColorMode, store: colorMode } = useColorMode({
+const { store: colorMode, system: SystemColorMode } = useColorMode({
   emitAuto: true,
 });
-
-const { state, next, prev } = useCycleList(["dark", "light", "auto"], {
-  initialValue: colorMode,
-});
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-watchEffect(() => (colorMode.value = state.value as any));
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const smallerThanMd = breakpoints.smallerOrEqual("md");
 
 const icon = computed(() => {
-  switch (state.value) {
+  switch (colorMode.value) {
     case "dark":
       return "i-mingcute-moon-fill";
     case "light":
       return "i-mingcute-sun-fill";
     case "auto":
-      return "i-mingcute-imac-fill";
+      return SystemColorMode.value === "dark"
+        ? "i-mingcute-moon-fill"
+        : "i-mingcute-sun-fill";
     default:
-      return "i-mingcute-imac-fill";
+      return "i-mingcute-sun-fill";
   }
 });
-
-const toggleTheme = (event: MouseEvent) => {
-  // if system preferred color mode is same as next color mode, skip transition
-  // useCycleList don't give me a choice to get the next value, so I achieve it in a hacky way
-  // shouldn't be a performance issue since vue only update the DOM in the next tick
-  next();
-  const willChangeToDark =
-    state.value === "dark" ||
-    (state.value === "auto" && systemColorMode.value === "dark");
-  if (systemColorMode.value === state.value) return;
-  prev();
-
-  const x = event.clientX;
-  const y = event.clientY;
-  const endRadius = Math.hypot(
-    Math.max(x, innerWidth - x),
-    Math.max(y, innerHeight - y)
-  );
-
-  // 兼容性处理
-  if (!document.startViewTransition) {
-    next();
-    return;
-  }
-  const transition = document.startViewTransition(async () => {
-    next();
-  });
-
-  transition.ready.then(() => {
-    const clipPath = [
-      `circle(0px at ${x}px ${y}px)`,
-      `circle(${endRadius}px at ${x}px ${y}px)`,
-    ];
-    document.documentElement.animate(
-      {
-        clipPath: willChangeToDark ? clipPath : [...clipPath].reverse(),
-      },
-      {
-        duration: 500,
-        easing: "ease-in",
-        pseudoElement: willChangeToDark
-          ? "::view-transition-new(root)"
-          : "::view-transition-old(root)",
-      }
-    );
-  });
-};
 </script>
-<style>
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-.dark::view-transition-old(root) {
-  z-index: 1;
-}
-.dark::view-transition-new(root) {
-  z-index: 999;
-}
-
-::view-transition-old(root) {
-  z-index: 999;
-}
-::view-transition-new(root) {
-  z-index: 1;
-}
-</style>
