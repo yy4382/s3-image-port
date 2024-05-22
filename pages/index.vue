@@ -55,7 +55,8 @@
           <img
             src="~/public/favicon.svg"
             alt="logo"
-            class="w-72 h-72 absolute top-1/2 left-1/2 -translate-x-[64%] -translate-y-1/2 blur-3xl opacity-0 hover:opacity-25 transition-opacity duration-700 ease-in-out"
+            draggable="false"
+            class="w-72 h-72 absolute top-1/2 left-1/2 -translate-x-[64%] -translate-y-1/2 blur-3xl opacity-0 hover:opacity-50 dark:hover:opacity-25 transition-opacity duration-700 ease-in-out"
           />
         </div>
       </div>
