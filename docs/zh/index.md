@@ -6,6 +6,9 @@ hero:
   name: "S3 Image Port"
   text: "管理 S3 中的图片"
   tagline: S3 中的图片管理面板，适用于 S3 和兼容 S3 的服务
+  image:
+    src: /favicon.svg
+    alt: S3 Image Port Logo
   actions:
     - theme: brand
       text: 开始使用

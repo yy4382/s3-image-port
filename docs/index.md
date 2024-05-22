@@ -6,6 +6,9 @@ hero:
   name: "S3 Image Port"
   text: "Manage your images in S3 buckets"
   tagline: Dashboard for images in S3, and S3 compatible services
+  image:
+    src: /favicon.svg
+    alt: S3 Image Port Logo
   actions:
     - theme: brand
       text: Getting Started
