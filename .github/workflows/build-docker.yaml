@@ -1,56 +1,44 @@
-name: build-docker
+name: Build and Notify
 
 on:
   push:
     branches:
-      - 'main'
-    tags:
-      - 'v[0123].[0-9]+.[0-9]+'
-    paths-ignore: 
-      - 'docs/**'
-      - 'README.md'
-      - 'doc/**'
-      - 'vercel.json'
-  pull_request:
-    branches:
-      - 'main'
-    paths-ignore: 
-      - 'docs/**'
-      - 'README.md'
-      - 'doc/**'
-      - 'vercel.json'
+      - main
 
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          install: true
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/s3-image-port
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            latest
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/s3-image-port:latest
+        platforms: linux/amd64,linux/arm64
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Send Telegram Notification
+      run: |
+        curl -s -X POST https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TG_CHAT_ID }} \
+          -d text="🎉 *构建成功* 🎉%0A%0A镜像名称: \`vectorzhao/s3imageport:latest\`%0A编译日期: $(date '+%Y\\-m\\-d %H:%M:%S')%0A🚀 镜像已经推送至Docker Hub" \
+          -d parse_mode=MarkdownV2
