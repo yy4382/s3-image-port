@@ -40,6 +40,13 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern=v{{major}}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
       -
         name: Login to DockerHub
         if: github.event_name != 'pull_request'
@@ -51,6 +58,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v5
         with:
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
