@@ -6,6 +6,7 @@ import { zh } from "./zh";
 export default defineConfig({
   title: "S3 Image Port",
   description: "A dashboard to manage your images in S3 and S3-like buckets",
+  head: [["link", { rel: "icon", href: "/favicon.ico" }]],
   locales: {
     root: {
       label: "English",
