@@ -4,7 +4,7 @@ import { zh } from "./zh";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "S3 image port",
+  title: "S3 Image Port",
   description: "A dashboard to manage your images in S3 and S3-like buckets",
   locales: {
     root: {

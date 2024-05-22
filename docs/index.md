@@ -3,13 +3,13 @@
 layout: home
 
 hero:
-  name: "S3 image port"
+  name: "S3 Image Port"
   text: "Manage your images in S3 buckets"
   tagline: Dashboard for images in S3, and S3 compatible services
   actions:
     - theme: brand
       text: Getting Started
-      link: /guide/getting-started
+      link: /guide/what-is-sip
     - theme: alt
       text: Official Instance
       link: https://iport.yfi.moe
