@@ -40,7 +40,6 @@ const selectedMode = computed({
   },
   set(index) {
     toggleTheme(items[index].label);
-    console.log(colorMode.value);
   },
 });
 const toggleTheme = (nextColorMode: string) => {
@@ -48,7 +47,7 @@ const toggleTheme = (nextColorMode: string) => {
     colorMode.value === "auto" ? systemColorMode.value : colorMode.value;
   const nextColor =
     nextColorMode === "auto" ? systemColorMode.value : nextColorMode;
-  const willChangeToDark = nextColorMode === "dark";
+  const willChangeToDark = nextColor === "dark";
   if (currentColor === nextColor) {
     // @ts-expect-error known set of string to a union type
     colorMode.value = nextColorMode;
