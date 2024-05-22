@@ -4,8 +4,7 @@ export const en = defineConfig({
   description: "A dashboard to manage your images in S3 and S3-like buckets.",
   themeConfig: {
     nav: [
-      { text: "Home", link: "/" },
-      { text: "Guide", link: "/guide/getting-started", activeMatch: "/guide/" },
+      { text: "Guide", link: "/guide/what-is-sip", activeMatch: "/guide/" },
       { text: "Official Instance", link: "https://iport.yfi.moe" },
     ],
     sidebar: {
@@ -19,7 +18,10 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     {
       text: "Introduction",
       collapsed: false,
-      items: [{ text: "Getting Started", link: "getting-started" }],
+      items: [
+        { text: "What is S3 Image Port?", link: "what-is-sip" },
+        { text: "Getting Started", link: "getting-started" },
+      ],
     },
   ];
 }

@@ -4,7 +4,7 @@ export const zh = defineConfig({
   description: "A dashboard to manage your images in S3 and S3-like buckets.",
   themeConfig: {
     nav: [
-      { text: "指南", link: "/guide/getting-started", activeMatch: "/zh/guide/" },
+      { text: "指南", link: "/guide/what-is-sip", activeMatch: "/zh/guide/" },
       { text: "官方实例", link: "https://iport.yfi.moe" },
     ],
     sidebar: {
@@ -18,7 +18,10 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     {
       text: "介绍",
       collapsed: false,
-      items: [{ text: "开始使用", link: "getting-started" }],
+      items: [
+        { text: "什么是 S3 Image Port？", link: "what-is-sip" },
+        { text: "开始使用", link: "getting-started" },
+      ],
     },
   ];
 }
