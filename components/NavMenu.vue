@@ -1,13 +1,16 @@
 <template>
   <UContainer class="w-full">
     <nav class="flex items-center justify-between h-16 gap-2">
-      <div class="flex-1 justify-start flex items-center gap-2">
+      <ULink
+        class="flex-1 justify-start flex items-center gap-2"
+        :to="localePath('/')"
+      >
         <img src="~/public/favicon.svg" alt="favicon" class="h-6" />
         <span class="text-xl font-bold hidden md:block">S3 Image Port</span>
-      </div>
+      </ULink>
       <div class="flex space-x-4 font-semibold">
         <ULink
-          :to="localePath('/')"
+          :to="localePath('/upload')"
           class="flex flex-row items-center gap-1"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"

@@ -14,6 +14,16 @@
       "goToSettings": "前往设置"
     }
   },
+  "index": {
+    "slogan": "你在 S3 中的图片管家",
+    "description": "轻松上传、查看和删除图片。",
+    "comment": "同样适用于各种 S3 兼容服务。",
+    "actions": {
+      "haveATry": "试一试",
+      "readTheDocs": "看文档",
+      "viewOnGithub": "GitHub 仓库"
+    }
+  },
   "upload": {
     "title": "上传",
     "fileUploader": {
