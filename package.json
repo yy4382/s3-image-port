@@ -7,7 +7,10 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.2.0",
@@ -17,7 +20,8 @@
     "@types/mime-types": "^2.1.4",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
-    "nuxt": "^3.11.2"
+    "nuxt": "^3.11.2",
+    "vitepress": "^1.2.2"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.572.0",
