@@ -2,6 +2,9 @@
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
+title: S3 Image Port Docs
+titleTemplate: 
+
 hero:
   name: "S3 Image Port"
   text: "管理 S3 中的图片"
