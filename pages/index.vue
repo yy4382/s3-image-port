@@ -10,11 +10,10 @@
           S3 Image Port
         </div>
         <div
-          class="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600"
+          class="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
         >
           {{ $t("index.slogan") }}
         </div>
-        <br />
         <div class="flex flex-col space-y-2">
           <p class="text-2xl text-gray-700 dark:text-gray-300">
             {{ $t("index.description") }}
