@@ -1,15 +1,12 @@
 # S3 Image Port
 
-<p>
-<a href="README.md">English</a>
-·
-<a href="./doc/readme_zh.md">简体中文</a>
-</p>
+[English](README.md) · [简体中文](./docs/readme_zh.md)
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
-![upload](doc/images/screenshot_upload.png)
-![photos](doc/images/screenshot_photos.png)
+![homepage](/docs/images/index-page.jpg)
+![upload](/docs/images/upload-page.jpg)
+![photos](/docs/images/gallery-page.jpg)
 
 ## Live Instance and Deployment
 
@@ -53,11 +50,6 @@ The random placeholder is not completely random. It concatenates the millisecond
 ## Feedback and Contributions
 
 Feel free to raise an [Issue](https://github.com/yy4382/s3-image-port/issues/new/choose) if you encounter any problems or have suggestions.
+
 If you have ideas for new features, don’t hesitate to create an [Issue](https://github.com/yy4382/s3-image-port/issues/new/choose)for those as well—no idea is too far-fetched!
 
-## Known Issues / Roadmap
-
-- [x] Customize upload key
-- [ ] Image preview before upload
-- [ ] Not able to fetch all image if there are more than 1000 objects in the bucket
-- [x] Distinguish image files from other files

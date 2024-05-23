@@ -1,9 +1,12 @@
 # S3 Image Port
 
+[English](README.md) · [简体中文](./docs/readme_zh.md)
+
 这是一个定制的前端面板，用于管理托管在**类 S3**存储服务（如 Cloudflare R2）上的图片。传统上这些存储服务没有专门的图片管理面板，该解决方案为图片的**上传**、**管理**和**集成**提供了一个简单而强大的界面。
 
-![upload](images/screenshot_upload.png)
-![photos](images/screenshot_photos.png)
+![homepage](/docs/zh/images/index-page.jpg)
+![upload](/docs/zh/images/upload-page.jpg)
+![photos](/docs/zh/images/gallery-page.jpg)
 
 ## 在线实例和部署
 
@@ -49,10 +52,3 @@
 如果您遇到任何问题或有任何建议，请随时提出 [Issue](https://github.com/yy4382/s3-image-port/issues/new/choose)。
 
 如果您有关于新功能的想法，也可以创建一个 [Issue](https://github.com/yy4382/s3-image-port/issues/new/choose)，任何想法都不会太牵强！
-
-## 已知问题 / 发展路线图
-
-- [x] 自定义上传密钥
-- [ ] 上传前预览图片
-- [ ] 如果存储桶中的对象超过 1000 个，则无法获取所有图片
-- [x] 区分图像文件和其他文件
