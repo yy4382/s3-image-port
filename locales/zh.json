@@ -15,13 +15,13 @@
     }
   },
   "index": {
-    "slogan": "你在 S3 中的图片管家",
-    "description": "轻松上传、查看和删除图片。",
-    "comment": "同样适用于各种 S3 兼容服务。",
+    "slogan": "您的终极 S3 图片管家",
+    "description": "轻松上传、查看和删除您位于 S3 存储桶中的图片",
+    "comment": "同样适用于各种 S3 兼容服务",
     "actions": {
-      "haveATry": "试一试",
-      "readTheDocs": "看文档",
-      "viewOnGithub": "GitHub 仓库"
+      "getStarted": "快速上手",
+      "readTheDocs": "阅读文档",
+      "viewOnGithub": "查看仓库"
     }
   },
   "upload": {

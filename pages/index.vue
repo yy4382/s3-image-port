@@ -28,9 +28,9 @@
             color="primary"
             variant="solid"
             :to="localePath('/upload')"
-            icon="i-mingcute-play-fill"
+            icon="i-mingcute-rocket-fill"
           >
-            {{ $t("index.actions.haveATry") }}
+            {{ $t("index.actions.getStarted") }}
           </UButton>
           <UButton
             color="blue"
