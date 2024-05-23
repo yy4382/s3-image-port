@@ -32,11 +32,11 @@
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >Nuxt UI</ULink
           >.
-          <span class="hidden md:block">
+          <span class="hidden md:inline-block">
             {{ hostingProvider ? `Hosted on ${hostingProvider}.` : "" }}
           </span>
         </span>
-        <span class="hidden md:block"
+        <span class="hidden md:inline-block"
           >Source at
           <ULink
             to="https://github.com/yy4382/s3-image-port"
