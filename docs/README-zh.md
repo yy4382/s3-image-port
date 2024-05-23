@@ -1,12 +1,12 @@
 # S3 Image Port
 
-[English](README.md) · [简体中文](./docs/readme_zh.md)
+[English](/README.md) · [简体中文](/docs/README-zh.md)
 
 这是一个定制的前端面板，用于管理托管在**类 S3**存储服务（如 Cloudflare R2）上的图片。传统上这些存储服务没有专门的图片管理面板，该解决方案为图片的**上传**、**管理**和**集成**提供了一个简单而强大的界面。
 
-![homepage](/docs/zh/images/index-page.jpg)
-![upload](/docs/zh/images/upload-page.jpg)
-![photos](/docs/zh/images/gallery-page.jpg)
+![homepage](./zh/images/index-page.jpg)
+![upload](./zh/images/upload-page.jpg)
+![photos](./zh/images/gallery-page.jpg)
 
 ## 在线实例和部署
 
@@ -43,7 +43,7 @@
 
 该选项提供了一种自定义存储桶中上传图片的路径的方法，也称为 `Key`。默认情况下，它的值是 `i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}`，也就是说，如果你在 2024-05-15 上传了一张 `png` 图片，那么图片在存储桶中的相对路径可能是 `i/2024/05/15/kgj7e-1z.png`。
 
-可用的占位符（或变量）包括 `year`, `month`, `day`, `random`, `filename` 和 `ext`。它们应该用 `{{` 和 `}}` 括起来，否则无法被动态解析。
+可用的占位符（或变量）包括 `year`, `month`, `day`, `random`, `filename` 和 `ext`。它们应该用 <code v-pre>{{</code> 和 <code v-pre>}}</code> 括起来，否则无法被动态解析。
 
 随机占位符 `random` 并非是完全随机的。它将 0:00 开始的毫秒数和一个两位数的随机数连接起来生成数值。因此，建议将此占位符配合年、月和/或日占位符一起使用。
 

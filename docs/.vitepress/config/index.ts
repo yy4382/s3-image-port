@@ -20,6 +20,11 @@ export default defineConfig({
     },
   },
   cleanUrls: true,
+  ignoreDeadLinks: [
+    (url) => {
+      return url.toLowerCase().includes("readme");
+    },
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
 

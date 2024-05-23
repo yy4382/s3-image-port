@@ -1,6 +1,6 @@
 # S3 Image Port
 
-[English](README.md) · [简体中文](./docs/readme_zh.md)
+[English](README.md) · [简体中文](/docs/README-zh.md)
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
