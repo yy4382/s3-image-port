@@ -20,7 +20,7 @@
     "comment": "Also works with lots of S3-compatible services",
     "actions": {
       "getStarted": "Get Started",
-      "readTheDocs": "Read the Docs",
+      "readTheDocs": "Read Docs",
       "viewOnGithub": "View on Github"
     }
   },
