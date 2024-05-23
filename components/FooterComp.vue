@@ -19,7 +19,7 @@
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >Yunfi</ULink
           >.
-          <br>
+          <br />
           Powered by
           <ULink
             to="https://nuxt.com/"
@@ -32,9 +32,11 @@
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >Nuxt UI</ULink
           >.
-          {{ hostingProvider ? `Hosted on ${hostingProvider}.` : "" }}
+          <span class="hidden md:block">
+            {{ hostingProvider ? `Hosted on ${hostingProvider}.` : "" }}
+          </span>
         </span>
-        <span
+        <span class="hidden md:block"
           >Source at
           <ULink
             to="https://github.com/yy4382/s3-image-port"
