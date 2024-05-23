@@ -194,7 +194,14 @@
         "title": "测试连接",
         "message": {
           "try": { "title": "正在测试连通性 ..." },
-          "success": { "title": "测试连接成功" },
+          "success": { 
+            "title": "测试连接成功", 
+            "description": ""
+          },
+          "warning": {
+            "title": "部分权限未获取",
+            "description": "打开控制台以查看详细信息。"
+          },
           "fail": {
             "title": "测试连接失败",
             "description": "打开控制台以查看详细信息。"

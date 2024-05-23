@@ -50,7 +50,32 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     ? "green"
     : "red";
 
-  // TODO: toast
+  const i18nSectionInToast = computed(() => {
+    if (
+      uploadChipColor.value === "green" &&
+      listChipColor.value === "green" &&
+      deleteChipColor.value === "green"
+    ) {
+      return "success";
+    } else if (
+      uploadChipColor.value === "red" &&
+      listChipColor.value === "red" &&
+      deleteChipColor.value === "red"
+    ) {
+      return "fail";
+    } else {
+      return "warning";
+    }
+  });
+
+  toast.add({
+    title: t(
+      `settings.s3.submitFormButton.message.${i18nSectionInToast.value}.title`
+    ),
+    description: t(
+      `settings.s3.submitFormButton.message.${i18nSectionInToast.value}.description`
+    ),
+  });
 }
 </script>
 

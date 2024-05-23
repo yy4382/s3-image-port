@@ -194,7 +194,14 @@
         "title": "Test Connectivity",
         "message": {
           "try": { "title": "Testing connectivity ..." },
-          "success": { "title": "Successfully connected to S3" },
+          "success": { 
+            "title": "Successfully connected to S3",
+            "description": ""
+         },
+          "warning": { 
+            "title": "Some permissions are not granted",
+            "description": "Open dev console for more info."
+          },
           "fail": {
             "title": "Failed to connect",
             "description": "Open dev console for more info."
