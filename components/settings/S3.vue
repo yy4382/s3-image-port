@@ -22,9 +22,12 @@ const uploadChipColor = ref<"green" | "red" | "gray">("gray");
 const listChipColor = ref<"green" | "red" | "gray">("gray");
 const deleteChipColor = ref<"green" | "red" | "gray">("gray");
 
+const isTestingConnectivity = ref(false);
+
 type Schema = z.output<typeof s3SettingsSchema>;
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
+  isTestingConnectivity.value = true;
   toast.add({
     title: t("settings.s3.submitFormButton.message.try.title"),
   });
@@ -50,6 +53,8 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     ? "green"
     : "red";
 
+  isTestingConnectivity.value = false;
+
   const i18nSectionInToast = computed(() => {
     if (
       uploadChipColor.value === "green" &&
@@ -67,7 +72,6 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       return "warning";
     }
   });
-
   toast.add({
     title: t(
       `settings.s3.submitFormButton.message.${i18nSectionInToast.value}.title`
@@ -215,7 +219,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
           <UIcon name="i-mingcute-delete-2-line" class="text-xl" />
         </UChip>
       </div>
-      <UButton type="submit">
+      <UButton type="submit" :loading="isTestingConnectivity">
         {{ $t("settings.s3.submitFormButton.title") }}
       </UButton>
     </div>
