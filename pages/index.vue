@@ -56,7 +56,7 @@
             icon="i-mingcute-book-2-fill"
             :size="width < 640 ? 'xs' : 'md'"
           >
-            {{ $t("index.actions.readTheDocs") }}
+            {{ $t("index.actions.readDocs") }}
           </UButton>
           <UButton
             v-if="width >= 640"

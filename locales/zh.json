@@ -24,7 +24,7 @@
     "comment": "同样适用于各种 S3 兼容服务",
     "actions": {
       "getStarted": "快速上手",
-      "readTheDocs": "阅读文档",
+      "readDocs": "阅读文档",
       "viewSource": "查看源码"
     }
   },
