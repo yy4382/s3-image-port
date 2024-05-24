@@ -15,7 +15,11 @@
     }
   },
   "index": {
-    "slogan": "您的终极 S3 图片管家",
+    "slogan": {
+      "part1": "您的",
+      "part2": "终极",
+      "part3": " S3 图片管家"
+      },
     "description": "轻松上传、查看和删除您位于 S3 存储桶中的图片",
     "comment": "同样适用于各种 S3 兼容服务",
     "actions": {

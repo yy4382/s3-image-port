@@ -16,7 +16,14 @@
         <div
           class="text-center text-5xl md:text-6xl lg:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
         >
-          {{ $t("index.slogan") }}
+          <span class="text-gray-800 dark:text-inherit">{{
+            $t("index.slogan.part1")
+          }}</span>
+          <span>{{ $t("index.slogan.part2") }}</span>
+          <br />
+          <span class="text-gray-800 dark:text-inherit">{{
+            $t("index.slogan.part3")
+          }}</span>
         </div>
         <div class="flex flex-col space-y-2">
           <p
