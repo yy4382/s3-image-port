@@ -49,7 +49,7 @@
                     size="xs"
                     :label="
                       $t(
-                        'photos.photoCard.deleteButton.confirm.actions.confirm'
+                        'photos.photoCard.deleteButton.confirm.actions.confirm',
                       )
                     "
                     color="red"

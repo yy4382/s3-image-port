@@ -75,7 +75,7 @@ const availablePrefixes: ComputedRef<string[]> = computed(() => [
       return parts
         .slice(0, -1)
         .map((_, index) => parts.slice(0, index + 1).join("/"));
-    })
+    }),
   ),
 ]);
 
@@ -96,7 +96,7 @@ const filterByPrefix = (photos: Photo[], prefix: string) => {
 
 const filterByDate = (
   photos: Photo[],
-  dateRange: { start: Date; end: Date }
+  dateRange: { start: Date; end: Date },
 ) => {
   return photos.filter((photo) => {
     const date = new Date(photo.LastModified);
@@ -107,7 +107,7 @@ const filterByDate = (
 const photosToDisplay = computed(() => {
   const photosFilteredByPrefixAndDate = filterByDate(
     filterByPrefix(photos.value, prefix.value),
-    dateRange.value
+    dateRange.value,
   );
 
   if (debouncedSearchTerm.value.trim() === "") {
@@ -116,13 +116,13 @@ const photosToDisplay = computed(() => {
       return photosFilteredByPrefixAndDate.sort((a, b) =>
         !sortOrderIsDescending.value
           ? a.Key.localeCompare(b.Key)
-          : b.Key.localeCompare(a.Key)
+          : b.Key.localeCompare(a.Key),
       );
     } else {
       return photosFilteredByPrefixAndDate.sort((a, b) =>
         !sortOrderIsDescending.value
           ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
-          : compareDesc(new Date(a.LastModified), new Date(b.LastModified))
+          : compareDesc(new Date(a.LastModified), new Date(b.LastModified)),
       );
     }
   }
@@ -136,18 +136,18 @@ const photosToDisplay = computed(() => {
           threshold: appSettings.value.fuzzySearchThreshold,
           useExtendedSearch: true,
         },
-      }
+      },
     );
     const keys = results.value.map((result) => result.item);
     const searchResultPhotos = photosFilteredByPrefixAndDate.filter((photo) =>
-      keys.includes(photo.Key)
+      keys.includes(photo.Key),
     );
     return searchResultPhotos.sort(
-      (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key)
+      (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key),
     );
   } else {
     return photosFilteredByPrefixAndDate.filter((photo) =>
-      photo.Key.includes(debouncedSearchTerm.value.trim())
+      photo.Key.includes(debouncedSearchTerm.value.trim()),
     );
   }
 });

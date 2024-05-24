@@ -25,4 +25,4 @@ export default async function (file: File): Promise<File> {
   //   `from ${file.type} to ${compressedFile.type}`
   // );
   return compressedFile;
-};
+}

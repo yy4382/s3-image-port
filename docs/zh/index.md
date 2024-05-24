@@ -3,7 +3,7 @@
 layout: home
 
 title: S3 Image Port Docs
-titleTemplate: 
+titleTemplate:
 
 hero:
   name: "S3 Image Port"

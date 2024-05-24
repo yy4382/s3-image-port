@@ -68,7 +68,7 @@
               {{
                 isRangeSelected({ years: 1000 })
                   ? $t(
-                      "photos.displayOptions.filter.dateFilter.calendar.labels.allTime"
+                      "photos.displayOptions.filter.dateFilter.calendar.labels.allTime",
                     )
                   : getDateRangeString(dateRange)
               }}
@@ -198,7 +198,7 @@ const sortOrderIsDescending = defineModel<boolean>("sortOrderIsDescending", {
 });
 
 const hasFilters = computed<boolean>(
-  () => prefix.value !== "" || !isRangeSelected({ years: 1000 })
+  () => prefix.value !== "" || !isRangeSelected({ years: 1000 }),
 );
 
 const openFilter = ref(false);
@@ -206,37 +206,37 @@ const openSort = ref(false);
 const ranges = [
   {
     label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last7Days"
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last7Days",
     ),
     duration: { days: 7 },
   },
   {
     label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last14Days"
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last14Days",
     ),
     duration: { days: 14 },
   },
   {
     label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last30Days"
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last30Days",
     ),
     duration: { days: 30 },
   },
   {
     label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last3Months"
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last3Months",
     ),
     duration: { months: 3 },
   },
   {
     label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last6Months"
+      "photos.displayOptions.filter.dateFilter.calendar.labels.last6Months",
     ),
     duration: { months: 6 },
   },
   {
     label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.lastYear"
+      "photos.displayOptions.filter.dateFilter.calendar.labels.lastYear",
     ),
     duration: { years: 1 },
   },
@@ -279,8 +279,8 @@ const displayAvailablePrefixes = computed(() =>
   availablePrefixes.value.map((prefix) =>
     prefix === ""
       ? t("photos.displayOptions.filter.prefixFilter.noPrefixPlaceholder")
-      : prefix
-  )
+      : prefix,
+  ),
 );
 watch(prefix, (newValue) => {
   if (

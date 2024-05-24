@@ -72,12 +72,12 @@ onMounted(() => {
 const uploadedLinks: Ref<UploadedFileLinkObj[]> = ref(
   import.meta.env.DEV
     ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
-    : []
+    : [],
 );
 const uploadedLinksFormatted = computed(() =>
   uploadedLinks.value.map((link) => ({
     link: link.link,
     markdown: `![${link.name}](${link.link})`,
-  }))
+  })),
 );
 </script>

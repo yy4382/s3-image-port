@@ -155,7 +155,7 @@
                     "
                     :description="
                       $t(
-                        'settings.app.keyTemplate.moreInfo.warning.description'
+                        'settings.app.keyTemplate.moreInfo.warning.description',
                       )
                     "
                   />
@@ -165,7 +165,7 @@
                     "
                     :description="
                       $t(
-                        'settings.app.keyTemplate.moreInfo.placeholders.description'
+                        'settings.app.keyTemplate.moreInfo.placeholders.description',
                       )
                     "
                   />
@@ -204,7 +204,7 @@ const { appSettings: state } = useSettings();
 const isDefaultKeyTemplate = computed(
   () =>
     state.value.keyTemplate === defaultKeyTemplate ||
-    state.value.keyTemplate === ""
+    state.value.keyTemplate === "",
 );
 const selectMenuOptions = computed(() => convertTypes.map((type) => type));
 </script>

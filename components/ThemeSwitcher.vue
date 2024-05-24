@@ -80,7 +80,7 @@ const toggleTheme = (nextColorMode: string) => {
         pseudoElement: willChangeToDark
           ? "::view-transition-new(root)"
           : "::view-transition-old(root)",
-      }
+      },
     );
   });
 };

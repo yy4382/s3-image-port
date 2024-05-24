@@ -57,7 +57,7 @@ const updateFilesByName = (toUpdateFiles: File[], newFiles: File[]): File[] => {
   const updatedFiles: File[] = [];
   updatedFiles.push(...newFiles); // new files are always added
   updatedFiles.push(
-    ...toUpdateFiles.filter((file) => !newFileNames.includes(file.name)) // old files are added if not in new files
+    ...toUpdateFiles.filter((file) => !newFileNames.includes(file.name)), // old files are added if not in new files
   );
   return updatedFiles;
 };

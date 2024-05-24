@@ -60,6 +60,6 @@ const { data: hostingProvider } = await useAsyncData(
     };
     const env = Object.keys(hostEnvMap).find((key) => process.env[key]);
     return env ? hostEnvMap[env] : undefined;
-  }
+  },
 );
 </script>

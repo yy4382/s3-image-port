@@ -4,7 +4,7 @@ export default function (file: File, type: string) {
   const { appSettings } = useValidSettings();
   const keyTemplate =
     appSettings.value.keyTemplate === undefined ||
-      appSettings.value.keyTemplate.trim().length === 0
+    appSettings.value.keyTemplate.trim().length === 0
       ? defaultKeyTemplate
       : appSettings.value.keyTemplate.trim();
   const now = DateTime.now();

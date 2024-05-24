@@ -40,4 +40,4 @@ export const useWrongSettingToast = (type: "app" | "s3" | undefined) => {
       timeout: 0,
     });
   }
-}
+};

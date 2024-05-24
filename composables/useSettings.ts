@@ -1,4 +1,4 @@
-import { useStorage } from "@vueuse/core"
+import { useStorage } from "@vueuse/core";
 import type { AppSettings, S3Settings } from "~/types";
 export const useSettings = () => {
   const appSettings = useStorage("app-settings", {
@@ -21,4 +21,4 @@ export const useSettings = () => {
   } satisfies S3Settings as S3Settings);
 
   return { appSettings, s3Settings };
-}
+};
