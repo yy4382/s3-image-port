@@ -5,20 +5,24 @@
     <div
       class="w-full flex flex-col md:flex-row gap-12 md:gap-12 lg:gap-16 items-center px-8 md:px-0"
     >
-      <div class="flex flex-col space-y-4 items-start justify-center md:w-full">
-        <div class="text-5xl font-extrabold text-gray-800 dark:text-gray-200">
+      <div
+        class="flex flex-col space-y-4 items-center justify-center md:w-full"
+      >
+        <div
+          class="text-center text-5xl font-extrabold text-gray-800 dark:text-gray-200"
+        >
           S3 Image Port
         </div>
         <div
-          class="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
+          class="text-center text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
         >
           {{ $t("index.slogan") }}
         </div>
         <div class="flex flex-col space-y-2">
-          <p class="text-2xl text-gray-700 dark:text-gray-300">
+          <p class="text-center text-2xl text-gray-700 dark:text-gray-300">
             {{ $t("index.description") }}
           </p>
-          <p class="text-xl text-gray-600 dark:text-gray-400">
+          <p class="text-center text-xl text-gray-600 dark:text-gray-400">
             {{ $t("index.comment") }}
           </p>
         </div>
