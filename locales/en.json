@@ -15,13 +15,17 @@
     }
   },
   "index": {
-    "slogan": "Your Ultimate Manager of Images in S3 Buckets",
-    "description": "Upload, view and delete images in your S3 bucket with ease.",
-    "comment": "Also works with lots of S3-compatible services.",
+    "slogan": {
+      "part1": "Your ",
+      "part2": "Ultimate",
+      "part3": " Manager of Images in S3 Buckets"
+      },
+    "description": "Upload, view and delete images in your S3 bucket with ease",
+    "comment": "Also works with lots of S3-compatible services",
     "actions": {
-      "haveATry": "Have a Try",
-      "readTheDocs": "Read the Docs",
-      "viewOnGithub": "View on Github"
+      "getStarted": "Get Started",
+      "readDocs": "Read Docs",
+      "viewSource": "View Source"
     }
   },
   "upload": {
