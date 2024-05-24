@@ -4,7 +4,7 @@ import type { S3Settings } from "~/types";
 const checkGrantedToUpload = async (
   s3Settings: S3Settings,
   key: string,
-  content: string
+  content: string,
 ) => {
   try {
     debug("Checking if granted to upload...");
@@ -46,7 +46,7 @@ const checkObjectExists = async (s3Settings: S3Settings, key: string) => {
       new GetObjectCommand({
         Bucket: s3Settings.bucket,
         Key: key,
-      })
+      }),
     );
     debug("Object exists!");
     return true;

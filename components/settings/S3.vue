@@ -41,9 +41,8 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     console.error(e);
     toast.add({
       title: t("settings.s3.submitFormButton.message.fail.title"),
-      description: t(
-        "settings.s3.submitFormButton.message.fail.desc4configOrCors"
-      ),
+      // prettier-ignore
+      description: t("settings.s3.submitFormButton.message.fail.desc4configOrCors"),
       // !TODO add action link to docs
     });
     uploadChipColor.value = "red";
@@ -57,7 +56,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   uploadChipColor.value = (await checkOp.upload(
     state.value,
     testKey,
-    testContent
+    testContent,
   ))
     ? "green"
     : "red";
@@ -87,10 +86,10 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   })();
   toast.add({
     title: t(
-      `settings.s3.submitFormButton.message.${i18nSectionInToast}.title`
+      `settings.s3.submitFormButton.message.${i18nSectionInToast}.title`,
     ),
     description: t(
-      `settings.s3.submitFormButton.message.${i18nSectionInToast}.description`
+      `settings.s3.submitFormButton.message.${i18nSectionInToast}.description`,
     ),
   });
 }
@@ -166,10 +165,9 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
           class="w-full"
           :type="showSecretAccessKey ? 'text' : 'password'"
         />
+        <!-- prettier-ignore-attribute :icon -->
         <UButton
-          :icon="
-            showSecretAccessKey ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'
-          "
+          :icon="showSecretAccessKey ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'"
           color="gray"
           @click="showSecretAccessKey = !showSecretAccessKey"
         />
@@ -201,16 +199,10 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
                     },
                   }"
                 >
-                  <p>
-                    {{
-                      $t("settings.s3.form.publicUrl.descriptionExtended.line1")
-                    }}
-                  </p>
-                  <p>
-                    {{
-                      $t("settings.s3.form.publicUrl.descriptionExtended.line2")
-                    }}
-                  </p>
+                  <!-- prettier-ignore -->
+                  <p>{{ $t("settings.s3.form.publicUrl.descriptionExtended.line1") }}</p>
+                  <!-- prettier-ignore -->
+                  <p>{{ $t("settings.s3.form.publicUrl.descriptionExtended.line2") }}</p>
                 </UCard>
               </template>
             </UPopover>

@@ -16,7 +16,6 @@ export default async function (
     return contents;
   }
   let limit = 200;
-  console.log(IsTruncated, limit, NextContinuationToken);
   while (IsTruncated && limit-- > 0) {
     const response = await list(config, NextContinuationToken);
     contents.push(...response.contents);
