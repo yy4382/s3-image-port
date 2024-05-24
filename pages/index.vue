@@ -9,11 +9,6 @@
         class="flex flex-col space-y-4 items-center justify-center md:w-full"
       >
         <div
-          class="text-center text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-800 dark:text-gray-200"
-        >
-          S3 Image Port
-        </div>
-        <div
           class="text-center text-5xl md:text-6xl lg:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
         >
           <span class="text-gray-800 dark:text-inherit">{{
