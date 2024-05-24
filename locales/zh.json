@@ -192,6 +192,11 @@
       },
       "submitFormButton": {
         "title": "测试连接",
+        "icons": {
+          "upload": "上传",
+          "list": "列出",
+          "delete": "删除"
+        },
         "message": {
           "try": { "title": "正在测试连通性 ..." },
           "success": {

@@ -222,15 +222,21 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
 
     <div class="flex flex-row justify-between">
       <div class="flex flex-row gap-2 items-center justify-start">
-        <UChip :color="uploadChipColor">
-          <UIcon name="i-mingcute-file-upload-line" class="text-xl" />
-        </UChip>
-        <UChip :color="listChipColor">
-          <UIcon name="i-mingcute-directory-line" class="text-xl" />
-        </UChip>
-        <UChip :color="deleteChipColor">
-          <UIcon name="i-mingcute-delete-2-line" class="text-xl" />
-        </UChip>
+        <UTooltip :text="$t('settings.s3.submitFormButton.icons.upload')">
+          <UChip :color="uploadChipColor">
+            <UIcon name="i-mingcute-file-upload-line" class="text-xl" />
+          </UChip>
+        </UTooltip>
+        <UTooltip :text="$t('settings.s3.submitFormButton.icons.list')">
+          <UChip :color="listChipColor">
+            <UIcon name="i-mingcute-directory-line" class="text-xl" />
+          </UChip>
+        </UTooltip>
+        <UTooltip :text="$t('settings.s3.submitFormButton.icons.delete')">
+          <UChip :color="deleteChipColor">
+            <UIcon name="i-mingcute-delete-2-line" class="text-xl" />
+          </UChip>
+        </UTooltip>
       </div>
       <UButton type="submit" :loading="isTestingConnectivity">
         {{ $t("settings.s3.submitFormButton.title") }}

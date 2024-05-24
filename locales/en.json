@@ -192,6 +192,11 @@
       },
       "submitFormButton": {
         "title": "Test Connectivity",
+        "icons": {
+          "upload": "Upload",
+          "list": "List",
+          "delete": "Delete"
+        },
         "message": {
           "try": { "title": "Testing connectivity ..." },
           "success": {
