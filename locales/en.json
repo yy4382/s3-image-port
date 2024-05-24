@@ -21,7 +21,7 @@
     "actions": {
       "getStarted": "Get Started",
       "readTheDocs": "Read Docs",
-      "viewOnGithub": "View on Github"
+      "viewSource": "View Source"
     }
   },
   "upload": {

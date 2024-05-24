@@ -45,7 +45,7 @@
             to="https://github.com/yy4382/s3-image-port"
             icon="i-mingcute-github-fill"
           >
-            {{ $t("index.actions.viewOnGithub") }}
+            {{ $t("index.actions.viewSource") }}
           </UButton>
         </div>
       </div>

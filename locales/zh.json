@@ -21,7 +21,7 @@
     "actions": {
       "getStarted": "快速上手",
       "readTheDocs": "阅读文档",
-      "viewOnGithub": "查看仓库"
+      "viewSource": "查看源码"
     }
   },
   "upload": {
