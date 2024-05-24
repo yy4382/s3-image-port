@@ -1,2 +1,2 @@
-presets
 pnpm-lock.yaml
+.husky/pre-commit

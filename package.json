@@ -10,7 +10,10 @@
     "postinstall": "nuxt prepare",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "prepare": "husky",
+    "lint": "eslint . ; prettier --check .",
+    "lint:fix": "eslint --fix . ; prettier --write ."
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.2.0",
@@ -20,6 +23,8 @@
     "@types/mime-types": "^2.1.4",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.4",
     "nuxt": "^3.11.2",
     "vitepress": "^1.2.2"
   },
@@ -35,5 +40,12 @@
     "mime-types": "^2.1.35",
     "v-calendar": "^3.1.2",
     "zod": "^3.23.8"
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write .",
+      "eslint --fix .",
+      "eslint"
+    ]
   }
 }
