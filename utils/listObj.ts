@@ -1,10 +1,39 @@
 import { type S3Settings, type Photo } from "~/types";
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
-interface s3Photo {
+interface S3Photo {
   Key: string;
   LastModified: Date;
 }
-export default async function (config: S3Settings): Promise<Photo[]> {
+
+export default async function (
+  config: S3Settings,
+  onlyOnce?: false
+): Promise<Photo[]> {
+  const listResponse = await list(config);
+  let { IsTruncated, NextContinuationToken } = listResponse;
+  const contents = listResponse.contents;
+  if (onlyOnce) {
+    return contents;
+  }
+  let limit = 200;
+  console.log(IsTruncated, limit, NextContinuationToken);
+  while (IsTruncated && limit-- > 0) {
+    const response = await list(config, NextContinuationToken);
+    contents.push(...response.contents);
+    IsTruncated = response.IsTruncated;
+    NextContinuationToken = response.NextContinuationToken;
+  }
+  return contents;
+}
+
+async function list(
+  config: S3Settings,
+  NextContinuationToken?: string
+): Promise<{
+  contents: Photo[];
+  IsTruncated: boolean | undefined;
+  NextContinuationToken: string | undefined;
+}> {
   let client;
   try {
     client = newClient(config);
@@ -13,6 +42,7 @@ export default async function (config: S3Settings): Promise<Photo[]> {
   }
   const command = new ListObjectsV2Command({
     Bucket: config.bucket,
+    ContinuationToken: NextContinuationToken,
   });
   const response = await client.send(command);
 
@@ -21,9 +51,8 @@ export default async function (config: S3Settings): Promise<Photo[]> {
   if (httpStatusCode >= 300) {
     throw new Error(`List operation get http code: ${httpStatusCode}`);
   }
-
-  return (response.Contents as s3Photo[])
-    .map((photo: s3Photo) => {
+  const contents = (response.Contents as S3Photo[])
+    .map((photo: S3Photo) => {
       return {
         Key: photo.Key,
         LastModified: photo.LastModified.toISOString(),
@@ -32,4 +61,9 @@ export default async function (config: S3Settings): Promise<Photo[]> {
       };
     })
     .filter((photo) => !photo.Key.endsWith("/")) as Photo[];
+  return {
+    contents,
+    IsTruncated: response.IsTruncated,
+    NextContinuationToken: response.NextContinuationToken,
+  };
 }
