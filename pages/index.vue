@@ -9,29 +9,36 @@
         class="flex flex-col space-y-4 items-center justify-center md:w-full"
       >
         <div
-          class="text-center text-5xl font-extrabold text-gray-800 dark:text-gray-200"
+          class="text-center text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-800 dark:text-gray-200"
         >
           S3 Image Port
         </div>
         <div
-          class="text-center text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
+          class="text-center text-5xl md:text-6xl lg:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
         >
           {{ $t("index.slogan") }}
         </div>
         <div class="flex flex-col space-y-2">
-          <p class="text-center text-2xl text-gray-700 dark:text-gray-300">
+          <p
+            class="text-center text-base md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300"
+          >
             {{ $t("index.description") }}
           </p>
-          <p class="text-center text-xl text-gray-600 dark:text-gray-400">
+          <p
+            class="text-center text-sm md:text-base lg:text-xl text-gray-600 dark:text-gray-400"
+          >
             {{ $t("index.comment") }}
           </p>
         </div>
-        <div class="flex flex-wrap gap-4 pt-6">
+        <div
+          class="flex flex-wrap gap-2 sm:gap-4 md:pt-6 justify-center items-center"
+        >
           <UButton
             color="primary"
             variant="solid"
             :to="localePath('/upload')"
             icon="i-mingcute-rocket-fill"
+            :size="width < 640 ? 'xs' : 'md'"
           >
             {{ $t("index.actions.getStarted") }}
           </UButton>
@@ -40,10 +47,12 @@
             variant="solid"
             to="https://docs.iport.yfi.moe"
             icon="i-mingcute-book-2-fill"
+            :size="width < 640 ? 'xs' : 'md'"
           >
             {{ $t("index.actions.readTheDocs") }}
           </UButton>
           <UButton
+            v-if="width >= 640"
             color="gray"
             variant="solid"
             to="https://github.com/yy4382/s3-image-port"
@@ -59,4 +68,5 @@
 
 <script lang="ts" setup>
 const localePath = useLocalePath();
+const { width } = useWindowSize();
 </script>
