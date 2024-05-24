@@ -194,17 +194,18 @@
         "title": "测试连接",
         "message": {
           "try": { "title": "正在测试连通性 ..." },
-          "success": { 
-            "title": "测试连接成功", 
-            "description": ""
+          "success": {
+            "title": "测试连接成功",
+            "description": "所有操作均可使用。"
           },
           "warning": {
             "title": "部分权限未获取",
-            "description": "打开控制台以查看详细信息。"
+            "description": "更多信息请查看按钮旁边的指示器。"
           },
           "fail": {
             "title": "测试连接失败",
-            "description": "打开控制台以查看详细信息。"
+            "description": "似乎您有获取 (Get) 对象的权限，但没有上传 (upload)、列出 (list) 或删除 (delete) 对象的权限。",
+            "desc4configOrCors": "请检查 S3 设置或存储桶的 CORS 配置。"
           }
         }
       }

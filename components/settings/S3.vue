@@ -3,12 +3,7 @@ import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 import { s3SettingsSchema } from "~/types";
 import generateTestKeyAndContent from "~/utils/generateTestKeyAndContent";
-import {
-  checkGrantedToUpload,
-  checkGrantedToList,
-  checkGrantedToDelete,
-  checkObjectExists,
-} from "~/utils/testOps";
+import * as checkOp from "~/utils/testOps";
 
 const toast = useToast();
 const { s3Settings: state } = useSettings();
@@ -31,31 +26,49 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   toast.add({
     title: t("settings.s3.submitFormButton.message.try.title"),
   });
-  console.log("Start testing S3 connectivity...");
-  console.log("Generating test key and content...");
+  debug("Start testing S3 connectivity...");
+  debug("Generating test key and content...");
   let { testKey, testContent } = generateTestKeyAndContent();
-  console.log("Generated test key and content:", testKey, testContent);
-  while (checkObjectExists(testKey)) {
-    console.log(
-      "Object already exists, generating new test key and content..."
-    );
-    ({ testKey, testContent } = generateTestKeyAndContent());
+  debug("Generated test key and content:", testKey, testContent);
+  try {
+    let limit = 3;
+    while ((await checkOp.exists(state.value, testKey)) && limit-- > 0) {
+      debug("Object already exists, generating new test key and content...");
+      ({ testKey, testContent } = generateTestKeyAndContent());
+    }
+  } catch (e) {
+    debug("Error occurred while checking if object exists:", e);
+    console.error(e);
+    toast.add({
+      title: t("settings.s3.submitFormButton.message.fail.title"),
+      description: t(
+        "settings.s3.submitFormButton.message.fail.desc4configOrCors"
+      ),
+      // !TODO add action link to docs
+    });
+    uploadChipColor.value = "red";
+    listChipColor.value = "red";
+    deleteChipColor.value = "red";
+    isTestingConnectivity.value = false;
+    return;
   }
-  console.log("Unique test key and content generated.");
+  debug("Unique test key and content generated.");
 
-  uploadChipColor.value = (await checkGrantedToUpload(testKey, testContent))
+  uploadChipColor.value = (await checkOp.upload(
+    state.value,
+    testKey,
+    testContent
+  ))
     ? "green"
     : "red";
-  listChipColor.value = (await checkGrantedToList(testKey, testContent))
-    ? "green"
-    : "red";
-  deleteChipColor.value = (await checkGrantedToDelete(testKey, testContent))
+  listChipColor.value = (await checkOp.list(state.value)) ? "green" : "red";
+  deleteChipColor.value = (await checkOp.delete(state.value, testKey))
     ? "green"
     : "red";
 
   isTestingConnectivity.value = false;
 
-  const i18nSectionInToast = computed(() => {
+  const i18nSectionInToast = (() => {
     if (
       uploadChipColor.value === "green" &&
       listChipColor.value === "green" &&
@@ -71,13 +84,13 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     } else {
       return "warning";
     }
-  });
+  })();
   toast.add({
     title: t(
-      `settings.s3.submitFormButton.message.${i18nSectionInToast.value}.title`
+      `settings.s3.submitFormButton.message.${i18nSectionInToast}.title`
     ),
     description: t(
-      `settings.s3.submitFormButton.message.${i18nSectionInToast.value}.description`
+      `settings.s3.submitFormButton.message.${i18nSectionInToast}.description`
     ),
   });
 }

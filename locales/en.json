@@ -194,17 +194,18 @@
         "title": "Test Connectivity",
         "message": {
           "try": { "title": "Testing connectivity ..." },
-          "success": { 
+          "success": {
             "title": "Successfully connected to S3",
-            "description": ""
-         },
-          "warning": { 
+            "description": "All Operations are available."
+          },
+          "warning": {
             "title": "Some permissions are not granted",
-            "description": "Open dev console for more info."
+            "description": "Check the indicator beside the button for more info."
           },
           "fail": {
             "title": "Failed to connect",
-            "description": "Open dev console for more info."
+            "description": "It seems that you have permission to get objects, but not to upload, list, or delete objects.",
+            "desc4configOrCors": "Please check the S3 settings, or the CORS configuration of the bucket."
           }
         }
       }

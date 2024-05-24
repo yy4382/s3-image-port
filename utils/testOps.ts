@@ -1,53 +1,73 @@
-import uploadObj from "~/utils/uploadObj";
-import listObj from "~/utils/listObj";
-import deleteObj from "~/utils/deleteObj";
-import { S3 } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import type { S3Settings } from "~/types";
 
-const { s3Settings } = useValidSettings();
-
-export const checkGrantedToUpload = async (key: string, content: string) => {
+const checkGrantedToUpload = async (
+  s3Settings: S3Settings,
+  key: string,
+  content: string
+) => {
   try {
-    console.log("Checking if granted to upload...");
-    await uploadObj(content, key, s3Settings.value);
-    console.log("Granted to upload!");
+    debug("Checking if granted to upload...");
+    await uploadObj(content, key, s3Settings);
+    debug("Granted to upload!");
     return true;
   } catch (e) {
     return false;
   }
-}
+};
 
-export const checkGrantedToList = async () => {
+const checkGrantedToList = async (s3Settings: S3Settings) => {
   try {
-    console.log("Checking if granted to list...");
-    await listObj(s3Settings.value);
-    console.log("Granted to list!");
+    debug("Checking if granted to list...");
+    await listObj(s3Settings, false);
+    debug("Granted to list!");
     return true;
   } catch (e) {
     return false;
   }
-}
+};
 
-export const checkGrantedToDelete = async (key: string) => {
+const checkGrantedToDelete = async (s3Settings: S3Settings, key: string) => {
   try {
-    console.log("Checking if granted to delete...");
-    await deleteObj(key, s3Settings.value);
-    console.log("Granted to delete!");
+    debug("Checking if granted to delete...");
+    await deleteObj(key, s3Settings);
+    debug("Granted to delete!");
     return true;
   } catch (e) {
     return false;
   }
-}
+};
 
-export const checkObjectExists = (key: string) => {
-  console.log("Checking if object exists...");
-  (new S3(s3Settings.value)).getObject({
-    Bucket: s3Settings.value.bucket,
-    Key: key
-  }).then(() => {
-    console.log("Object exists!");
+const checkObjectExists = async (s3Settings: S3Settings, key: string) => {
+  debug("Checking if object exists...");
+  try {
+    const client = newClient(s3Settings);
+    await client.send(
+      new GetObjectCommand({
+        Bucket: s3Settings.bucket,
+        Key: key,
+      })
+    );
+    debug("Object exists!");
     return true;
-  }).catch(() => {
-    console.log("Object does not exist!");
+  } catch (e) {
+    if (!(e instanceof Error)) {
+      debug("Unknown error!", e);
+      throw new Error("Unknown error when checking object existence!");
+    }
+    if (e.message.includes("NoSuchKey")) {
+      debug("Object does not exist!", e);
+    } else if (e.message.includes("fetch")) {
+      console.error("Config error or CORS issue!");
+      throw e;
+    }
     return false;
-  })
-}
+  }
+};
+
+export {
+  checkGrantedToUpload as upload,
+  checkGrantedToList as list,
+  checkGrantedToDelete as delete,
+  checkObjectExists as exists,
+};
