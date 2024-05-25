@@ -1,3 +1,4 @@
+import { z } from "zod";
 type Size = [number, number];
 export const useMasonry = (
   originSizes: Ref<Size[]>,
@@ -5,10 +6,15 @@ export const useMasonry = (
   options: {
     defaultSize: Size;
     gap: number;
+    maxItems?: number;
   },
-) => {
-  const { defaultSize, gap } = options;
-  const outputSize = ref<Size[]>(Array.from(originSizes.value));
+): Ref<Size[]> => {
+  const { defaultSize, gap, maxItems } = options;
+  const outputSize = ref<Size[]>(
+    maxItems !== undefined
+      ? Array.from({ length: maxItems }, () => defaultSize)
+      : Array.from(originSizes.value),
+  );
   watch(
     [originSizes, wrapperWidth],
     ([nINS, nWrapperWidth]) => {
@@ -32,7 +38,21 @@ export const useMasonry = (
       });
       if (curGroup.length > 1) computeCurGroup(curGroup, nWrapperWidth, gap);
       grouped.push(curGroup);
-      outputSize.value = grouped.flat();
+      outputSize.value = z
+        .tuple([z.number(), z.number()])
+        .array()
+        .parse(grouped.flat());
+      if (maxItems !== undefined && outputSize.value.length < maxItems) {
+        // avoid error when routed from a page with 10 items to a page with 15 items
+        debug("filling");
+        outputSize.value = [
+          ...outputSize.value,
+          ...Array.from(
+            { length: maxItems - outputSize.value.length },
+            () => defaultSize,
+          ),
+        ];
+      }
       debug("layout updated");
     },
     { deep: true },

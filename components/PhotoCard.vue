@@ -81,24 +81,37 @@
 import { DateTime } from "luxon";
 import { type Photo } from "../types";
 const loadedImage = ref<null | HTMLImageElement>(null);
-defineProps<{
+const props = defineProps<{
   photo: Photo;
   disabled: boolean;
   selected: boolean;
 }>();
-const emit = defineEmits<{
-  (e: "deletePhoto", key: string): void;
-  (e: "imageLoaded", size: [number, number]): void;
-}>();
+
+defineEmits<{ deletePhoto: [key: string] }>();
+
+const key = computed(() => props.photo.Key);
+const naturalSize = ref<[number, number] | undefined>(undefined);
+defineExpose({
+  key,
+  naturalSize,
+});
+
 const toast = useToast();
 const { t } = useI18n();
 function copy(photo: Photo) {
   navigator.clipboard.writeText(photo.url);
   toast.add({ title: t("photos.message.copyLink.title") });
 }
+
 function onImageLoad() {
   if (!loadedImage.value) return;
   const { naturalWidth, naturalHeight } = loadedImage.value;
-  emit("imageLoaded", [naturalWidth, naturalHeight]);
+  naturalSize.value = [naturalWidth, naturalHeight];
 }
+onMounted(() => {
+  if (loadedImage.value?.complete) {
+    // If the image is already loaded, call onImageLoad directly
+    onImageLoad();
+  }
+});
 </script>
