@@ -25,17 +25,15 @@
           />
         </UForm>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div
+      <div class="flex flex-wrap gap-4">
+        <PhotoCard
           v-for="photo in photosToDisplay.slice((page - 1) * 9, page * 9)"
           :key="photo.Key"
-        >
-          <PhotoCard
-            :photo="photo"
-            :disabled="!validS3Setting"
-            @delete-photo="deletePhoto"
-          />
-        </div>
+          :photo="photo"
+          :disabled="!validS3Setting"
+          class="min-w-28 h-52"
+          @delete-photo="deletePhoto"
+        />
       </div>
       <UPagination
         v-if="photosToDisplay.length > 0"
