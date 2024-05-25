@@ -1,6 +1,6 @@
 import { type S3Settings } from "~/types";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import mime from "mime-types";
+import mime from "mime";
 import newClient from "./newClient";
 export const defaultKeyTemplate =
   "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
@@ -23,7 +23,7 @@ export default async function (
     Bucket: config.bucket,
     Key: key,
     Body: file,
-    ContentType: mime.types[fileExt] || "application/octet-stream",
+    ContentType: mime.getType(fileExt) || "application/octet-stream",
   });
   const response = await client.send(command);
   // If the HTTP status code is not 200, throw an error
