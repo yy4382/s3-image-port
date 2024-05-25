@@ -11,11 +11,7 @@
       :class="selected && '!opacity-100'"
     >
       <div class="absolute top-4 left-4">
-        <input
-          v-model="selected"
-          type="checkbox"
-          class="dark:checked:bg-current dark:checked:border-transparent dark:indeterminate:bg-current dark:indeterminate:border-transparent disabled:opacity-50 disabled:cursor-not-allowed focus:ring-0 focus:ring-transparent focus:ring-offset-transparent w-8 h-8 form-checkbox rounded bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 text-primary-500 dark:text-primary-400"
-        />
+        <slot name="checkbox" />
       </div>
       <div
         class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 text-white"
@@ -88,12 +84,12 @@ const loadedImage = ref<null | HTMLImageElement>(null);
 defineProps<{
   photo: Photo;
   disabled: boolean;
+  selected: boolean;
 }>();
 const emit = defineEmits<{
   (e: "deletePhoto", key: string): void;
   (e: "imageLoaded", size: [number, number]): void;
 }>();
-const selected = defineModel<boolean>("selected");
 const toast = useToast();
 const { t } = useI18n();
 function copy(photo: Photo) {

@@ -4,17 +4,66 @@
       <div class="w-full flex flex-col-reverse gap-4">
         <div id="display-settings"></div>
         <UForm class="flex gap-4 justify-between" :state="{}">
-          <UButton
-            :label="
-              photos.length === 0
-                ? $t('photos.loadOrRefreshButton.loadButton')
-                : $t('photos.loadOrRefreshButton.refreshButton')
-            "
-            :disabled="!validS3Setting"
-            variant="outline"
-            :loading="isLoading"
-            @click="listPhotos"
-          />
+          <div class="flex gap-4 items-center">
+            <UButton
+              :label="
+                photos.length === 0
+                  ? $t('photos.loadOrRefreshButton.loadButton')
+                  : $t('photos.loadOrRefreshButton.refreshButton')
+              "
+              :disabled="!validS3Setting"
+              variant="outline"
+              :loading="isLoading"
+              @click="listPhotos"
+            />
+
+            <UPopover v-if="selectedPhotos.length > 0" overlay>
+              <UButton
+                aria-label="Delete"
+                :label="'Delete ' + selectedPhotos.length + ' Photos'"
+                icon="i-mingcute-delete-3-line"
+                color="red"
+                :disabled="!validS3Setting"
+              />
+              <template #panel="{ close }">
+                <div class="flex p-4 gap-3 items-center">
+                  <div
+                    class="text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    {{ $t("photos.photoCard.deleteButton.confirm.title") }}
+                  </div>
+                  <div class="flex items-center gap-2 flex-shrink-0 mt-0">
+                    <UButton
+                      size="xs"
+                      :label="
+                        $t(
+                          'photos.photoCard.deleteButton.confirm.actions.cancel',
+                        )
+                      "
+                      color="gray"
+                      @click="close()"
+                    />
+                    <UButton
+                      size="xs"
+                      :label="
+                        $t(
+                          'photos.photoCard.deleteButton.confirm.actions.confirm',
+                        )
+                      "
+                      color="red"
+                      @click="
+                        selectedPhotos.forEach((key) => {
+                          deletePhoto(key);
+                        });
+                        selectedPhotos.length = 0;
+                        close();
+                      "
+                    />
+                  </div>
+                </div>
+              </template>
+            </UPopover>
+          </div>
           <DisplayOptions
             v-model:date-range="dateRange"
             v-model:sort-by="sortBy"
@@ -26,21 +75,34 @@
         </UForm>
       </div>
       <div ref="imageWrapper" class="flex flex-wrap gap-4">
-        <PhotoCard
+        <div
           v-for="(photo, index) in photosToDisplay.slice(
             (page - 1) * imagePerPage,
             page * imagePerPage,
           )"
           :key="photo.Key"
-          :photo="photo"
-          :disabled="!validS3Setting"
-          :style="{
-            width: `${imageSize[index][0]}px`,
-            height: `${imageSize[index][1]}px`,
-          }"
-          @delete-photo="deletePhoto"
-          @image-loaded="(size) => (imageNaturalSize[index] = size)"
-        />
+        >
+          <PhotoCard
+            :photo="photo"
+            :disabled="!validS3Setting"
+            :style="{
+              width: `${imageSize[index][0]}px`,
+              height: `${imageSize[index][1]}px`,
+            }"
+            :selected="selectedPhotos.includes(photo.Key)"
+            @delete-photo="deletePhoto"
+            @image-loaded="(size) => (imageNaturalSize[index] = size)"
+          >
+            <template #checkbox>
+              <input
+                :id="photo.Key"
+                v-model="selectedPhotos"
+                type="checkbox"
+                :value="photo.Key"
+              />
+            </template>
+          </PhotoCard>
+        </div>
       </div>
       <UPagination
         v-if="photosToDisplay.length > 0"
@@ -62,6 +124,9 @@ import { sub, compareAsc, compareDesc } from "date-fns";
 const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
+
+const selectedPhotos = ref<string[]>([]);
+
 const { s3Settings, appSettings, validS3Setting, validAppSetting } =
   useValidSettings();
 const page = ref(1);
@@ -212,6 +277,7 @@ watch(
     if (curGroup.length > 1) computeCurGroup(curGroup, nWrapperWidth);
     grouped.push(curGroup);
     imageSize.value = grouped.flat();
+    debug("layout updated");
   },
   { deep: true },
 );
