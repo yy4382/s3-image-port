@@ -78,6 +78,7 @@
         <PhotoCard
           v-for="(photo, index) in currentDisplayed"
           :key="photo.Key"
+          ref="photoCardRefs"
           :photo="photo"
           :disabled="!validS3Setting"
           :style="{
@@ -86,11 +87,6 @@
           }"
           :selected="selectedPhotos.includes(photo.Key)"
           @delete-photo="deletePhoto"
-          @image-loaded="
-            (size) => {
-              imageNaturalSize[index] = size;
-            }
-          "
         >
           <template #checkbox>
             <input
@@ -118,6 +114,8 @@ import type { SortByOpts, Photo } from "~/types";
 import { useStorage } from "@vueuse/core";
 import { useFuse } from "@vueuse/integrations/useFuse";
 import { sub, compareAsc, compareDesc } from "date-fns";
+import { PhotoCard } from "#components";
+import { z } from "zod";
 
 const router = useRouter();
 const toast = useToast();
@@ -228,13 +226,31 @@ const currentDisplayed = computed(() =>
   ),
 );
 
-const defaultImageSize: [number, number] = [384, 208];
-const gap = 16;
+/**
+ * Brief explanation of the following masonry layout
+ *
+ * First, the calculation is encapsulated in the composable `useMasonry`.
+ * The most important param it takes is an array of image natural sizes, which
+ * should be sorted in the same order as the images in the DOM.
+ *
+ * And actually, the hardest part is to get the responsive size of the images.
+ * I encountered many counterintuitive behaviors in reactive part of Vue.
+ * Finally, my choice is to ask child components to calculate their own natural
+ * sizes (need to be reactive; watching it from parent component don't work for
+ * unknown reason) and expose them to parent components.
+ * Then the watchEffect hook in this component will collect the natural sizes they
+ * exposed, sort (because the order of ref array in v-for is not guaranteed
+ * to be the same as dom), give them default size if they are not ready, and
+ * pass them to the `useMasonry` composable.
+ *
+ * Another notable part is that the watchEffect must watch the `currentDisplayed`,
+ * because when images are just added or deleted, the natural sizes of child
+ * components are not changed, but the place they should be in the list is changed.
+ */
 
-const imageNaturalSize = ref<[number, number][]>(
-  Array.from({ length: imagePerPage }, () => defaultImageSize),
-);
-const deBouncedImageNaturalSize = useDebounce(imageNaturalSize, 300);
+type Size = [number, number];
+const defaultImageSize: Size = [384, 208];
+const gap = 16;
 
 const wrapperWidth = useElementSize(imageWrapper).width;
 useResizeObserver(imageWrapper, (entries) => {
@@ -242,11 +258,42 @@ useResizeObserver(imageWrapper, (entries) => {
   const { width } = entry.contentRect;
   wrapperWidth.value = width;
 });
-const deBouncedWrapperWidth = useDebounce(wrapperWidth, 100);
+const deBouncedWrapperWidth = refDebounced(wrapperWidth, 50);
+
+// Calculate the natural size of images
+
+const imageNaturalSize = ref<Size[]>(
+  Array.from({ length: imagePerPage }, () => defaultImageSize),
+);
+const deBouncedImageNaturalSize = refDebounced(imageNaturalSize, 300);
+
+const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
+
+watchEffect(() => {
+  const sortedPhotoCardRefs = currentDisplayed.value.map((photo) => {
+    return photoCardRefs.value.find((ref) => ref?.key === photo.Key);
+  });
+  const sizes: (Size | undefined)[] = sortedPhotoCardRefs.map((ref) => {
+    return ref?.naturalSize;
+  });
+  const processedSizes = sizes.map((size) => {
+    if (size === undefined) size = defaultImageSize;
+    return size;
+  });
+  try {
+    imageNaturalSize.value = z
+      .tuple([z.number(), z.number()])
+      .array()
+      .parse(processedSizes);
+  } catch (error) {
+    console.error((error as z.ZodError).errors);
+  }
+});
 
 const imageSize = useMasonry(deBouncedImageNaturalSize, deBouncedWrapperWidth, {
   gap,
   defaultSize: defaultImageSize,
+  maxItems: imagePerPage,
 });
 
 onMounted(() => {
