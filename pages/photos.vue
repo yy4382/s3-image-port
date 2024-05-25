@@ -25,14 +25,21 @@
           />
         </UForm>
       </div>
-      <div class="flex flex-wrap gap-4">
+      <div ref="imageWrapper" class="flex flex-wrap gap-4">
         <PhotoCard
-          v-for="photo in photosToDisplay.slice((page - 1) * 9, page * 9)"
+          v-for="(photo, index) in photosToDisplay.slice(
+            (page - 1) * imagePerPage,
+            page * imagePerPage,
+          )"
           :key="photo.Key"
           :photo="photo"
           :disabled="!validS3Setting"
-          class="min-w-28 h-52"
+          :style="{
+            width: `${imageSize[index][0]}px`,
+            height: `${imageSize[index][1]}px`,
+          }"
           @delete-photo="deletePhoto"
+          @image-loaded="(size) => (imageNaturalSize[index] = size)"
         />
       </div>
       <UPagination
@@ -40,7 +47,7 @@
         v-model="page"
         class="mx-auto max-w-fit"
         :total="photosToDisplay.length"
-        :per-page="9"
+        :page-count="imagePerPage"
       />
     </ClientOnly>
   </UContainer>
@@ -58,17 +65,18 @@ const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 const { s3Settings, appSettings, validS3Setting, validAppSetting } =
   useValidSettings();
 const page = ref(1);
+const imagePerPage = 16;
 const { t } = useI18n();
 const localePath = useLocalePath();
 const isLoading = ref(false);
 const searchTerm = ref("");
 const debouncedSearchTerm = refDebounced(searchTerm, 300);
+const imageWrapper = ref<HTMLElement | null>(null);
 
 const availablePrefixes: ComputedRef<string[]> = computed(() => [
   "",
   ...new Set(
     photos.value.flatMap((photo) => {
-      // 将每一个可能的前缀提出，ru abc/def/ghi -> [ru, ru abc, ru abc/def, ru abc/def]
       const parts = photo.Key.split("/");
       return parts
         .slice(0, -1)
@@ -149,6 +157,64 @@ const photosToDisplay = computed(() => {
     );
   }
 });
+
+const defaultImageSize = [384, 208];
+const gap = 16;
+const imageNaturalSize = ref<[number, number][]>(
+  Array.from({ length: imagePerPage }, () => [384, 208]),
+);
+const wrapperWidth = useElementSize(imageWrapper).width;
+useResizeObserver(imageWrapper, (entries) => {
+  const entry = entries[0];
+  const { width } = entry.contentRect;
+  wrapperWidth.value = width;
+});
+const deBouncedWrapperWidth = useDebounce(wrapperWidth, 100);
+
+const computeCurGroup = (
+  curGroup: [number, number][],
+  wrapperWidth: number,
+) => {
+  const widthWithoutGap = wrapperWidth - gap * (curGroup.length - 1);
+  const scale =
+    widthWithoutGap / curGroup.reduce((acc, [width]) => acc + width, 0);
+  curGroup.forEach(([width, height], index) => {
+    curGroup[index] = [width * scale, height * scale];
+  });
+};
+
+const imageSize = ref<[number, number][]>(
+  Array.from({ length: imagePerPage }, () => [384, 208]),
+);
+
+const deBouncedImageNaturalSize = useDebounce(imageNaturalSize, 300);
+watch(
+  [deBouncedImageNaturalSize, deBouncedWrapperWidth],
+  ([nINS, nWrapperWidth]) => {
+    if (!nINS || !nWrapperWidth) return;
+    const withSameHeight: [number, number][] = nINS.map(([width, height]) => {
+      const ratio = width / height;
+      return [defaultImageSize[1] * ratio, defaultImageSize[1]];
+    });
+    const grouped: [number, number][][] = [];
+    let curWidth = 0;
+    let curGroup: [number, number][] = [];
+    withSameHeight.forEach((size) => {
+      if (curWidth + size[0] + gap > nWrapperWidth) {
+        curWidth = 0;
+        computeCurGroup(curGroup, nWrapperWidth);
+        grouped.push(curGroup);
+        curGroup = [];
+      }
+      curWidth += size[0] + gap;
+      curGroup.push(size);
+    });
+    if (curGroup.length > 1) computeCurGroup(curGroup, nWrapperWidth);
+    grouped.push(curGroup);
+    imageSize.value = grouped.flat();
+  },
+  { deep: true },
+);
 
 onMounted(() => {
   if (!validS3Setting.value) {
