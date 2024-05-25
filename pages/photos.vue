@@ -75,34 +75,32 @@
         </UForm>
       </div>
       <div ref="imageWrapper" class="flex flex-wrap gap-4">
-        <div
-          v-for="(photo, index) in photosToDisplay.slice(
-            (page - 1) * imagePerPage,
-            page * imagePerPage,
-          )"
+        <PhotoCard
+          v-for="(photo, index) in currentDisplayed"
           :key="photo.Key"
+          :photo="photo"
+          :disabled="!validS3Setting"
+          :style="{
+            width: `${imageSize[index][0]}px`,
+            height: `${imageSize[index][1]}px`,
+          }"
+          :selected="selectedPhotos.includes(photo.Key)"
+          @delete-photo="deletePhoto"
+          @image-loaded="
+            (size) => {
+              imageNaturalSize[index] = size;
+            }
+          "
         >
-          <PhotoCard
-            :photo="photo"
-            :disabled="!validS3Setting"
-            :style="{
-              width: `${imageSize[index][0]}px`,
-              height: `${imageSize[index][1]}px`,
-            }"
-            :selected="selectedPhotos.includes(photo.Key)"
-            @delete-photo="deletePhoto"
-            @image-loaded="(size) => (imageNaturalSize[index] = size)"
-          >
-            <template #checkbox>
-              <input
-                :id="photo.Key"
-                v-model="selectedPhotos"
-                type="checkbox"
-                :value="photo.Key"
-              />
-            </template>
-          </PhotoCard>
-        </div>
+          <template #checkbox>
+            <input
+              :id="photo.Key"
+              v-model="selectedPhotos"
+              type="checkbox"
+              :value="photo.Key"
+            />
+          </template>
+        </PhotoCard>
       </div>
       <UPagination
         v-if="photosToDisplay.length > 0"
@@ -223,11 +221,21 @@ const photosToDisplay = computed(() => {
   }
 });
 
-const defaultImageSize = [384, 208];
-const gap = 16;
-const imageNaturalSize = ref<[number, number][]>(
-  Array.from({ length: imagePerPage }, () => [384, 208]),
+const currentDisplayed = computed(() =>
+  photosToDisplay.value.slice(
+    (page.value - 1) * imagePerPage,
+    page.value * imagePerPage,
+  ),
 );
+
+const defaultImageSize: [number, number] = [384, 208];
+const gap = 16;
+
+const imageNaturalSize = ref<[number, number][]>(
+  Array.from({ length: imagePerPage }, () => defaultImageSize),
+);
+const deBouncedImageNaturalSize = useDebounce(imageNaturalSize, 300);
+
 const wrapperWidth = useElementSize(imageWrapper).width;
 useResizeObserver(imageWrapper, (entries) => {
   const entry = entries[0];
@@ -236,51 +244,10 @@ useResizeObserver(imageWrapper, (entries) => {
 });
 const deBouncedWrapperWidth = useDebounce(wrapperWidth, 100);
 
-const computeCurGroup = (
-  curGroup: [number, number][],
-  wrapperWidth: number,
-) => {
-  const widthWithoutGap = wrapperWidth - gap * (curGroup.length - 1);
-  const scale =
-    widthWithoutGap / curGroup.reduce((acc, [width]) => acc + width, 0);
-  curGroup.forEach(([width, height], index) => {
-    curGroup[index] = [width * scale, height * scale];
-  });
-};
-
-const imageSize = ref<[number, number][]>(
-  Array.from({ length: imagePerPage }, () => [384, 208]),
-);
-
-const deBouncedImageNaturalSize = useDebounce(imageNaturalSize, 300);
-watch(
-  [deBouncedImageNaturalSize, deBouncedWrapperWidth],
-  ([nINS, nWrapperWidth]) => {
-    if (!nINS || !nWrapperWidth) return;
-    const withSameHeight: [number, number][] = nINS.map(([width, height]) => {
-      const ratio = width / height;
-      return [defaultImageSize[1] * ratio, defaultImageSize[1]];
-    });
-    const grouped: [number, number][][] = [];
-    let curWidth = 0;
-    let curGroup: [number, number][] = [];
-    withSameHeight.forEach((size) => {
-      if (curWidth + size[0] + gap > nWrapperWidth) {
-        curWidth = 0;
-        computeCurGroup(curGroup, nWrapperWidth);
-        grouped.push(curGroup);
-        curGroup = [];
-      }
-      curWidth += size[0] + gap;
-      curGroup.push(size);
-    });
-    if (curGroup.length > 1) computeCurGroup(curGroup, nWrapperWidth);
-    grouped.push(curGroup);
-    imageSize.value = grouped.flat();
-    debug("layout updated");
-  },
-  { deep: true },
-);
+const imageSize = useMasonry(deBouncedImageNaturalSize, deBouncedWrapperWidth, {
+  gap,
+  defaultSize: defaultImageSize,
+});
 
 onMounted(() => {
   if (!validS3Setting.value) {
