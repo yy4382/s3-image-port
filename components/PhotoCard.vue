@@ -17,6 +17,7 @@
           transparent
         );
       "
+      @click="modalOpen = true"
     ></div>
     <UCheckbox
       v-model="selected"
@@ -76,6 +77,17 @@
       class="absolute bottom-4 right-4 hover-to-show"
       @click="copy(photo)"
     />
+    <UModal v-model="modalOpen" fullscreen>
+      <PhotoCardModal
+        :photo="photo"
+        :close-modal="() => (modalOpen = false)"
+        @delete-photo="
+          (key) => {
+            $emit('deletePhoto', key), (modalOpen = false);
+          }
+        "
+      />
+    </UModal>
   </div>
 </template>
 
@@ -100,6 +112,8 @@ defineExpose({
   selected,
   naturalSize,
 });
+
+const modalOpen = ref(false);
 
 const toast = useToast();
 const { t } = useI18n();
