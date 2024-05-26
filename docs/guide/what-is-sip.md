@@ -6,9 +6,9 @@ Traditionally, no dedicated image management panel exists for S3-link buckets. T
 
 ## Features
 
-- :cloud: **Upload Photos:** Upload images with options to convert formats before uploading.
-- :framed_picture: **Display Image List:** View a gallery of all uploaded images.
-- :link: **Copy Image Links:** Easily copy direct and markdown formatted image links.
-- :wastebasket: **Delete Images:** Remove images from storage directly through the panel.
+- :cloud: **Upload Photos:** Easily upload your images with support for automatic compression and format conversion.
+- :framed_picture: **Display Image List:** View and find all uploaded images in the gallery, support filtering options.
+- :link: **Copy Image Links:** One-click copying of links to uploaded images in raw or markdown format.
+- :wastebasket: **Delete Images:** Remove images from your bucket directly through the panel.
 
 The interface is fully responsive and works seamlessly on mobile devices as well.

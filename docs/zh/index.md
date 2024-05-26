@@ -21,10 +21,12 @@ hero:
       link: https://iport.yfi.moe
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: "☁️ 上传图片"
+    details: 轻松上传您的图片，支持上传前压缩及格式转换
+  - title: "🖼️ 图库"
+    details: 在图库中浏览和查找所有您已经上传的图片，支持丰富的过滤选项
+  - title: "🔗 复制图片地址"
+    details: 只需一次点击，就可以复制图片的纯链接或 Markdown 格式链接
+  - title: "🗑️ 删除图片"
+    details: 在管理面板中快速删除您已上传的图片
 ---

@@ -21,10 +21,12 @@ hero:
       link: https://iport.yfi.moe
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: "☁️ Upload Photos"
+    details: Easily upload your images with support for automatic compression and format conversion
+  - title: "🖼️ Display Image List"
+    details: View and find all uploaded images in the gallery, support filtering options
+  - title: "🔗 Copy Image Links"
+    details: One-click copying of links to uploaded images in raw or markdown format
+  - title: "🗑️ Delete Images"
+    details: Remove images from your bucket directly through the panel
 ---
