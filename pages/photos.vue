@@ -269,22 +269,21 @@ const deBouncedImageNaturalSize = refDebounced(imageNaturalSize, 300);
 
 const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
 
+// update imageNaturalSize when currentDisplayed or child components' state changes
 watchEffect(() => {
+  // sort the refs in the same order as the photos in the DOM
   const sortedPhotoCardRefs = currentDisplayed.value.map((photo) => {
     return photoCardRefs.value.find((ref) => ref?.key === photo.Key);
   });
-  const sizes: (Size | undefined)[] = sortedPhotoCardRefs.map((ref) => {
-    return ref?.naturalSize;
-  });
-  const processedSizes = sizes.map((size) => {
-    if (size === undefined) size = defaultImageSize;
-    return size;
+  // get the natural size of each image, if not ready, returns default size
+  const sizes: Size[] = sortedPhotoCardRefs.map((ref) => {
+    return ref?.naturalSize ?? defaultImageSize;
   });
   try {
     imageNaturalSize.value = z
       .tuple([z.number(), z.number()])
       .array()
-      .parse(processedSizes);
+      .parse(sizes);
   } catch (error) {
     console.error((error as z.ZodError).errors);
   }
@@ -339,6 +338,7 @@ async function listPhotos() {
   }
   isLoading.value = false;
 }
+
 async function deletePhoto(key: string) {
   try {
     toast.add({
