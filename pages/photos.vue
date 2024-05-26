@@ -52,9 +52,7 @@
                       "
                       color="red"
                       @click="
-                        selectedPhotos.forEach((key) => {
-                          deletePhoto(key);
-                        });
+                        deletePhoto(selectedPhotos);
                         selectedPhotos.length = 0;
                         close();
                       "
@@ -336,22 +334,19 @@ async function listPhotos() {
   }
   isLoading.value = false;
 }
-
-async function deletePhoto(key: string) {
+// async function deletePhoto(key: string): Promise<void>;
+async function deletePhoto(keyOrKeys: string | string[]) {
+  const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
   try {
-    toast.add({
-      title: t("photos.message.deletePhoto.try.title"),
-    });
-    await deleteObj(key, s3Settings.value);
-    toast.add({
-      title: t("photos.message.deletePhoto.success.title"),
-    });
-    await listPhotos();
+    toast.add({ title: t("photos.message.deletePhoto.try.title") });
+    await Promise.all(keys.map((key) => deleteObj(key, s3Settings.value)));
+    toast.add({ title: t("photos.message.deletePhoto.success.title") });
   } catch (error) {
-    toast.add({
-      title: t("photos.message.deletePhoto.fail.title"),
-    });
+    toast.add({ title: t("photos.message.deletePhoto.fail.title") });
     console.error((error as Error).message);
+  } finally {
+    selectedPhotos.value = [];
+    await listPhotos();
   }
 }
 </script>
