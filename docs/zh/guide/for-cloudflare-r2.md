@@ -1,6 +1,8 @@
 # Cloudflare R2 逐步指南
 
-> Cloudflare R2 Storage 允许开发人员存储大量非结构化数据，而无需支付与典型云存储服务相关的昂贵出口带宽费用。
+::: info Cloudflare R2
+Cloudflare R2 Storage 允许开发人员存储大量非结构化数据，而无需支付与典型云存储服务相关的昂贵出口带宽费用。
+:::
 
 Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月 100 万次 A 类操作请求和每月 1,000 万次 B 类操作请求，加之其无出口费用的特点，使之成为了个人小型图床云存储的良好选择。
 
@@ -18,7 +20,9 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 
 ## 公开您的存储桶
 
-由于我们是在创建一个图床服务，所以我们必须使该 R2 存储桶的内容是公开的。这里，我们选择以 Cloudflare 管理的子域的形式在 `https://r2.dev` 下公开：
+由于我们是在创建一个图床服务，所以我们必须使该 R2 存储桶的内容是公开的。有两种方法：以 Cloudflare 管理的子域的形式在 `r2.dev` 下公开，或是使用自己的域名：
+
+### 以 Cloudflare 管理的子域的形式公开
 
 - 前往 [Cloudflare dashboard](https://dash.cloudflare.com/) 并在左侧选择 R2；
 - 选择您刚刚创建的存储桶；
@@ -26,6 +30,14 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 - 现在 `公共 R2.dev 存储桶 URL` 即为您的 `Public URL`。
 
 更多信息，请查看 [Public buckets · Cloudflare R2 docs](https://developers.cloudflare.com/r2/buckets/public-buckets/)
+
+### 以自定义域名的形式公开
+
+- 前往 [Cloudflare dashboard](https://dash.cloudflare.com/) 并在左侧选择 R2；
+- 选择您刚刚创建的存储桶；
+- 点击 `设置`，在 `自定义域名` 标题右侧的 `连接域名` 按钮；
+- 使用您在 Cloudflare 上托管的域名的子域名。例如，我使用 `i.yfi.moe` 作为我的域名 `yfi.moe` 的子域名；
+- 完成！现在您的 `Public URL` 即为 `https://i.yfi.moe` 或您设置的任何内容。
 
 ## 配置 CORS
 
