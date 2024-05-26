@@ -1,6 +1,8 @@
 # Step-By-Step Guide for Cloudflare R2
 
-> Cloudflare R2 Storage allows developers to store large amounts of unstructured data without the costly egress bandwidth fees associated with typical cloud storage services.
+::: info Cloudflare R2
+Cloudflare R2 Storage allows developers to store large amounts of unstructured data without the costly egress bandwidth fees associated with typical cloud storage services.
+:::
 
 Cloudflare R2 Storage's free plan includes 10 GB of storage per month, 1 million Class A operation requests per month, and 10 million Class B operation requests per month, which, combined with its no-egress-fee feature, makes it a good choice for cloud storage for small personal image hosting service.
 
@@ -18,7 +20,10 @@ You need an "R2 Storage Bucket" as a container for your images. To do this:
 
 ## Exposing your bucket
 
-Since we are creating a image hosting service, we must make the contents of this R2 storage bucket public. Here, we have chosen to make it public as a Cloudflare-managed subdomain under `https://r2.dev`:
+Since we are creating a image hosting service, we must make the contents of this R2 storage bucket public.
+There are two ways: make it public as a Cloudflare-managed subdomain under `https://r2.dev`, or expose it as a custom domain.
+
+### Exposing as a Cloudflare-managed subdomain
 
 - Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
 - Select the storage bucket you just created;
@@ -26,6 +31,14 @@ Since we are creating a image hosting service, we must make the contents of this
 - The `Public R2.dev Bucket URL` is now your `Public URL`.
 
 For more information, see [Public buckets - Cloudflare R2 docs](https://developers.cloudflare.com/r2/buckets/public-buckets/)
+
+### Exposing as a custom domain
+
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
+- Select the storage bucket you just created;
+- Click `Settings`, and click the "Connect Domain" button on the right side of the "Custom Domains" title
+- Use a subdomain of your domain hosted on Cloudflare. For example, I'm using `i.yfi.moe` for my domain `yfi.moe`.
+- That's it! Now your Public URL is `https://i.yfi.moe` or whatever you set it to be.
 
 ## Configuring CORS
 
