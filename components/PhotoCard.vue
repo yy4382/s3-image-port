@@ -1,19 +1,58 @@
 <template>
-  <div class="relative group">
+  <div ref="rootDiv" class="relative group bg-gray-200">
     <img
       ref="loadedImage"
       :src="photo.url"
-      class="h-full w-full border"
+      class="h-full w-full transition-transform"
+      :class="selected && 'scale-90 rounded-lg'"
       @load="onImageLoad"
     />
     <div
-      class="absolute top-0 bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 bg-[rgba(0,_0,_0,_0.7)] transition-opacity duration-200 has-[:focus-visible]:opacity-100 flex items-end justify-start p-4"
-      :class="selected && '!opacity-100'"
-    >
-      <div class="absolute top-4 left-4">
-        <input v-model="selected" type="checkbox" />
-      </div>
+      class="absolute top-0 bottom-0 left-0 right-0 hover-to-show"
+      style="
+        background-image: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.6),
+          transparent 100px,
+          transparent
+        );
+      "
+    ></div>
+    <UCheckbox
+      v-model="selected"
+      class="absolute top-4 left-4 hover-to-show"
+      :class="selected && '!opacity-100 !pointer-events-auto'"
+      :ui="{
+        container: 'h-6',
+        base: 'w-6 h-6',
+      }"
+    />
+    <div class="hover-to-show absolute left-4 bottom-4">
+      <UPopover v-if="width && width < 270" mode="hover">
+        <UIcon name="i-mingcute-information-line" class="text-white w-5 h-5" />
+        <template #panel>
+          <div
+            class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 p-2"
+          >
+            <div class="text-sm items-center inline-flex">
+              <Icon name="i-mingcute-time-line" class="shrink-0 mr-2" />
+              <span class="truncate block">
+                {{
+                  DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd")
+                }}
+              </span>
+            </div>
+            <div class="text-sm items-center inline-flex">
+              <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
+              <span :title="photo.Key" class="truncate block">
+                {{ photo.Key }}
+              </span>
+            </div>
+          </div>
+        </template>
+      </UPopover>
       <div
+        v-else-if="width"
         class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 text-white"
       >
         <div class="text-sm items-center inline-flex">
@@ -29,51 +68,14 @@
           </span>
         </div>
       </div>
-      <div class="absolute top-4 right-4 flex flex-nowrap gap-2">
-        <UButton
-          aria-label="Copy Link"
-          icon="i-mingcute-copy-2-line"
-          color="gray"
-          @click="copy(photo)"
-        />
-        <UPopover overlay>
-          <UButton
-            aria-label="Delete"
-            icon="i-mingcute-delete-3-line"
-            color="gray"
-            :disabled="disabled"
-          />
-          <template #panel="{ close }">
-            <div class="flex p-4 gap-3 items-center">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ $t("photos.photoCard.deleteButton.confirm.title") }}
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0 mt-0">
-                <UButton
-                  size="xs"
-                  :label="
-                    $t('photos.photoCard.deleteButton.confirm.actions.cancel')
-                  "
-                  color="gray"
-                  @click="close()"
-                />
-                <UButton
-                  size="xs"
-                  :label="
-                    $t('photos.photoCard.deleteButton.confirm.actions.confirm')
-                  "
-                  color="red"
-                  @click="
-                    $emit('deletePhoto', photo.Key);
-                    close();
-                  "
-                />
-              </div>
-            </div>
-          </template>
-        </UPopover>
-      </div>
     </div>
+    <UButton
+      aria-label="Copy Link"
+      icon="i-mingcute-copy-2-line"
+      color="gray"
+      class="absolute bottom-4 right-4 hover-to-show"
+      @click="copy(photo)"
+    />
   </div>
 </template>
 
@@ -81,6 +83,7 @@
 import { DateTime } from "luxon";
 import { type Photo } from "../types";
 const loadedImage = ref<null | HTMLImageElement>(null);
+const rootDiv = ref<HTMLDivElement | null>(null);
 const props = defineProps<{
   photo: Photo;
   disabled: boolean;
@@ -91,6 +94,7 @@ defineEmits<{ deletePhoto: [key: string] }>();
 const key = computed(() => props.photo.Key);
 const selected = ref(false);
 const naturalSize = ref<[number, number] | undefined>(undefined);
+const width = ref<number | undefined>(undefined);
 defineExpose({
   key,
   selected,
@@ -103,6 +107,11 @@ function copy(photo: Photo) {
   navigator.clipboard.writeText(photo.url);
   toast.add({ title: t("photos.message.copyLink.title") });
 }
+useResizeObserver(rootDiv, (entries) => {
+  const entry = entries[0];
+  const { width: entryWidth } = entry.contentRect;
+  width.value = entryWidth;
+});
 
 function onImageLoad() {
   if (!loadedImage.value) return;
@@ -116,3 +125,13 @@ onMounted(() => {
   }
 });
 </script>
+
+<style scoped lang="postcss">
+@tailwind utilities;
+@layer utilities {
+  .hover-to-show {
+    @apply pointer-events-none group-hover:pointer-events-auto focus-visible:pointer-events-auto
+     opacity-0 group-hover:opacity-100 focus-within:opacity-100 focus-visible:opacity-100 transition-opacity duration-200;
+  }
+}
+</style>

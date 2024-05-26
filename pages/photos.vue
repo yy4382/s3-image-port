@@ -20,7 +20,7 @@
             <UPopover v-if="selectedPhotos.length > 0" overlay>
               <UButton
                 aria-label="Delete"
-                :label="'Delete ' + selectedPhotos.length + ' Photos'"
+                :label="selectedPhotos.length + ''"
                 icon="i-mingcute-delete-3-line"
                 color="red"
                 :disabled="!validS3Setting"
@@ -72,7 +72,7 @@
           />
         </UForm>
       </div>
-      <div ref="imageWrapper" class="flex flex-wrap gap-4">
+      <div ref="imageWrapper" class="flex flex-wrap gap-2">
         <PhotoCard
           v-for="(photo, index) in currentDisplayed"
           :key="photo.Key"
@@ -248,7 +248,7 @@ watchEffect(() => {
 
 type Size = [number, number];
 const defaultImageSize: Size = [384, 208];
-const gap = 16;
+const gap = 8;
 
 const wrapperWidth = useElementSize(imageWrapper).width;
 useResizeObserver(imageWrapper, (entries) => {
