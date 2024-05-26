@@ -4,6 +4,7 @@
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
+![poster](/docs/images/devices.png)
 ![homepage](/docs/images/index-page.jpg)
 ![upload](/docs/images/upload-page.jpg)
 ![photos](/docs/images/gallery-page.jpg)
