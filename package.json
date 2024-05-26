@@ -45,8 +45,7 @@
   "lint-staged": {
     "*": [
       "prettier --write .",
-      "eslint --fix .",
-      "eslint"
+      "eslint --fix ."
     ]
   }
 }
