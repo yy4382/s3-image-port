@@ -21,6 +21,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "什么是 S3 Image Port？", link: "what-is-sip" },
         { text: "开始使用", link: "getting-started" },
+        { text: "Cloudflare R2 逐步指南", link: "for-cloudflare-r2" },
       ],
     },
   ];
