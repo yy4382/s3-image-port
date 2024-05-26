@@ -85,18 +85,8 @@
             width: `${imageSize[index][0]}px`,
             height: `${imageSize[index][1]}px`,
           }"
-          :selected="selectedPhotos.includes(photo.Key)"
           @delete-photo="deletePhoto"
-        >
-          <template #checkbox>
-            <input
-              :id="photo.Key"
-              v-model="selectedPhotos"
-              type="checkbox"
-              :value="photo.Key"
-            />
-          </template>
-        </PhotoCard>
+        />
       </div>
       <UPagination
         v-if="photosToDisplay.length > 0"
@@ -121,8 +111,6 @@ const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 
-const selectedPhotos = ref<string[]>([]);
-
 const { s3Settings, appSettings, validS3Setting, validAppSetting } =
   useValidSettings();
 const page = ref(1);
@@ -132,6 +120,9 @@ const localePath = useLocalePath();
 const isLoading = ref(false);
 const searchTerm = ref("");
 const debouncedSearchTerm = refDebounced(searchTerm, 300);
+
+// template refs
+const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
 const imageWrapper = ref<HTMLElement | null>(null);
 
 const availablePrefixes: ComputedRef<string[]> = computed(() => [
@@ -226,6 +217,15 @@ const currentDisplayed = computed(() =>
   ),
 );
 
+// selected related
+const selectedPhotos = ref<string[]>([]);
+watchEffect(() => {
+  selectedPhotos.value = photoCardRefs.value
+    .filter((ref) => ref?.selected)
+    .map((ref) => ref?.key)
+    .filter((keyOrUd) => keyOrUd !== undefined) as string[];
+});
+
 /**
  * Brief explanation of the following masonry layout
  *
@@ -266,8 +266,6 @@ const imageNaturalSize = ref<Size[]>(
   Array.from({ length: imagePerPage }, () => defaultImageSize),
 );
 const deBouncedImageNaturalSize = refDebounced(imageNaturalSize, 300);
-
-const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
 
 // update imageNaturalSize when currentDisplayed or child components' state changes
 watchEffect(() => {

@@ -11,7 +11,7 @@
       :class="selected && '!opacity-100'"
     >
       <div class="absolute top-4 left-4">
-        <slot name="checkbox" />
+        <input v-model="selected" type="checkbox" />
       </div>
       <div
         class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 text-white"
@@ -84,15 +84,16 @@ const loadedImage = ref<null | HTMLImageElement>(null);
 const props = defineProps<{
   photo: Photo;
   disabled: boolean;
-  selected: boolean;
 }>();
 
 defineEmits<{ deletePhoto: [key: string] }>();
 
 const key = computed(() => props.photo.Key);
+const selected = ref(false);
 const naturalSize = ref<[number, number] | undefined>(undefined);
 defineExpose({
   key,
+  selected,
   naturalSize,
 });
 
