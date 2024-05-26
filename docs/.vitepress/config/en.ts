@@ -21,8 +21,14 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "What is S3 Image Port?", link: "what-is-sip" },
         { text: "Getting Started", link: "getting-started" },
+      ],
+    },
+    {
+      text: "Bucket Setup Guides",
+      collapsed: false,
+      items: [
         {
-          text: "Step-By-Step Guide for Cloudflare R2",
+          text: "Cloudflare R2",
           link: "for-cloudflare-r2",
         },
       ],
