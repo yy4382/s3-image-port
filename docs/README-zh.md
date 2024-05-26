@@ -29,10 +29,7 @@
 
 在使用本面板前，请在 “设置” 选项卡中配置 “S3 存储桶设置”。必填字段包括 `Endpoint`、`Bucket Name`、`Region` 和两个密钥（`Access Key ID` 和 `Secret Access Key`）。如果 S3 存储桶使用的是自定义域，则可以使用可选的高级设置，如设置 `Public URL`。
 
-关于获取 S3 相关密钥，请参考存储服务提供商的文档。例如，对于 Cloudflare 管理的 R2 存储桶，密钥可在 “管理 R2 API 令牌” 处获取，`Region` 字段应为 `auto`。
-
-> [!TIP]
-> 您需要的是 `Access Key ID` 和 `Secret Access Key`，而不是 Cloudflare 提供的 `Token`。
+关于获取 S3 相关密钥，请参考存储服务提供商的文档。如果您使用的是 Cloudflare R2 Storage，可以查看文档站的 [Cloudflare R2 逐步指南](https://docs.iport.yfi.moe/zh/guide/for-cloudflare-r2)。
 
 然后，您可以在一定程度上自定义此应用面板了。进入 "应用设置 "页面，您可以配置一些重要选项。特别地，如果您要修改 Key 模板，请仔细阅读[关于 `Key（路径）模板` 的特别说明](#关于-key路径模板-的特别说明)。
 
