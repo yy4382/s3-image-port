@@ -2,7 +2,7 @@
 
 > Cloudflare R2 Storage allows developers to store large amounts of unstructured data without the costly egress bandwidth fees associated with typical cloud storage services.
 
-Cloudflare R2 Storage's free plan includes 10 GB of storage per month, 1 million Class A operation requests per month, and 10 million Class B operation requests per month, which, combined with its no-export-fee feature, makes it a good choice for cloud storage for small personal image hosting service.
+Cloudflare R2 Storage's free plan includes 10 GB of storage per month, 1 million Class A operation requests per month, and 10 million Class B operation requests per month, which, combined with its no-egress-fee feature, makes it a good choice for cloud storage for small personal image hosting service.
 
 This guide will take you step-by-step through how to configure R2 storage buckets, starting with turning on Cloudflare R2 Storage, and building a small image hosting service that is unique to you, in conjunction with S3 Image Port.
 
