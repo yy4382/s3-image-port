@@ -78,28 +78,11 @@
           />
         </UForm>
       </div>
-      <div ref="imageWrapper" class="flex flex-wrap gap-2">
-        <PhotoCard
-          v-for="(photo, index) in currentDisplayed"
-          :key="photo.Key"
-          ref="photoCardRefs"
-          :photo="photo"
-          :disabled="!validS3Setting"
-          :select-mode="selectedPhotos.length > 0"
-          class="transition-all"
-          :style="{
-            width: `${imageSize[index][0]}px`,
-            height: `${imageSize[index][1]}px`,
-          }"
-          @delete-photo="deletePhoto"
-        />
-      </div>
-      <UPagination
-        v-if="photosToDisplay.length > 0"
-        v-model="page"
-        class="mx-auto max-w-fit"
-        :total="photosToDisplay.length"
-        :page-count="imagePerPage"
+      <PhotoGrid
+        ref="photoGridRef"
+        v-model="selectedPhotos"
+        :photos="photosToDisplay"
+        @delete-photo="deletePhoto"
       />
     </ClientOnly>
   </UContainer>
@@ -110,8 +93,7 @@ import type { SortByOpts, Photo } from "~/types";
 import { useStorage } from "@vueuse/core";
 import { useFuse } from "@vueuse/integrations/useFuse";
 import { sub, compareAsc, compareDesc } from "date-fns";
-import { PhotoCard } from "#components";
-import { z } from "zod";
+import type { PhotoGrid } from "#components";
 
 const router = useRouter();
 const toast = useToast();
@@ -119,17 +101,11 @@ const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 
 const { s3Settings, appSettings, validS3Setting, validAppSetting } =
   useValidSettings();
-const page = ref(1);
-const imagePerPage = 16;
 const { t } = useI18n();
 const localePath = useLocalePath();
 const isLoading = ref(false);
 const searchTerm = ref("");
 const debouncedSearchTerm = refDebounced(searchTerm, 300);
-
-// template refs
-const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
-const imageWrapper = ref<HTMLElement | null>(null);
 
 const availablePrefixes: ComputedRef<string[]> = computed(() => [
   "",
@@ -216,98 +192,12 @@ const photosToDisplay = computed(() => {
   }
 });
 
-const currentDisplayed = computed(() =>
-  photosToDisplay.value.slice(
-    (page.value - 1) * imagePerPage,
-    page.value * imagePerPage,
-  ),
-);
-
 // selected related
 const selectedPhotos = ref<string[]>([]);
-watchEffect(() => {
-  selectedPhotos.value = photoCardRefs.value
-    .filter((ref) => ref?.selected)
-    .map((ref) => ref?.key)
-    .filter((keyOrUd) => keyOrUd !== undefined) as string[];
-});
+const photoGridRef = ref<InstanceType<typeof PhotoGrid> | null>(null);
 function clearSelectedPhotos() {
-  selectedPhotos.value.length = 0;
-  for (const ref of photoCardRefs.value) {
-    ref && (ref.selected = false);
-  }
+  photoGridRef.value?.clearSelectedPhotos();
 }
-
-/**
- * Brief explanation of the following masonry layout
- *
- * First, the calculation is encapsulated in the composable `useMasonry`.
- * The most important param it takes is an array of image natural sizes, which
- * should be sorted in the same order as the images in the DOM.
- *
- * And actually, the hardest part is to get the responsive size of the images.
- * I encountered many counterintuitive behaviors in reactive part of Vue.
- * Finally, my choice is to ask child components to calculate their own natural
- * sizes (need to be reactive; watching it from parent component don't work for
- * unknown reason) and expose them to parent components.
- * Then the watchEffect hook in this component will collect the natural sizes they
- * exposed, sort (because the order of ref array in v-for is not guaranteed
- * to be the same as dom), give them default size if they are not ready, and
- * pass them to the `useMasonry` composable.
- *
- * Another notable part is that the watchEffect must watch the `currentDisplayed`,
- * because when images are just added or deleted, the natural sizes of child
- * components are not changed, but the place they should be in the list is changed.
- */
-
-type Size = [number, number];
-const defaultImageSize: Size = [384, 208];
-const gap = 8;
-
-const wrapperWidth = useElementSize(imageWrapper).width;
-useResizeObserver(imageWrapper, (entries) => {
-  const entry = entries[0];
-  const { width } = entry.contentRect;
-  wrapperWidth.value = width;
-});
-const deBouncedWrapperWidth = refDebounced(wrapperWidth, 300);
-
-// Calculate the natural size of images
-
-const imageNaturalSize = ref<Size[]>(
-  Array.from({ length: imagePerPage }, () => defaultImageSize),
-);
-
-// update imageNaturalSize when currentDisplayed or child components' state changes
-watch(
-  () => {
-    // sort the refs in the same order as the photos in the DOM
-    const sortedPhotoCardRefs = currentDisplayed.value.map((photo) => {
-      return photoCardRefs.value.find((ref) => ref?.key === photo.Key);
-    });
-    // get the natural size of each image, if not ready, returns default size
-    const sizes: Size[] = sortedPhotoCardRefs.map((ref) => {
-      return ref?.naturalSize ?? defaultImageSize;
-    });
-    return sizes;
-  },
-  (sizes: Size[]) => {
-    try {
-      imageNaturalSize.value = z
-        .tuple([z.number(), z.number()])
-        .array()
-        .parse(sizes);
-    } catch (error) {
-      console.error((error as z.ZodError).errors);
-    }
-  },
-);
-
-const imageSize = useMasonry(imageNaturalSize, deBouncedWrapperWidth, {
-  gap,
-  defaultSize: defaultImageSize,
-  maxItems: imagePerPage,
-});
 
 onMounted(() => {
   if (!validS3Setting.value) {

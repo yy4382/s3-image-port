@@ -101,7 +101,7 @@ const loadedImage = ref<null | HTMLImageElement>(null);
 const rootDiv = ref<HTMLDivElement | null>(null);
 const props = defineProps<{
   photo: Photo;
-  disabled: boolean;
+  disabled?: boolean;
   selectMode: boolean;
 }>();
 
