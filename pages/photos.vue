@@ -13,6 +13,15 @@
               @click="listPhotos"
             />
 
+            <UButton
+              v-if="selectedPhotos.length > 0"
+              icon="i-mingcute-checkbox-line"
+              :label="selectedPhotos.length + ''"
+              variant="outline"
+              color="gray"
+              @click="clearSelectedPhotos"
+            />
+
             <UPopover v-if="selectedPhotos.length > 0" overlay>
               <UButton
                 aria-label="Delete"
@@ -58,14 +67,6 @@
                 </div>
               </template>
             </UPopover>
-
-            <UButton
-              v-if="selectedPhotos.length > 0"
-              icon="i-mingcute-checkbox-line"
-              variant="outline"
-              color="gray"
-              @click="clearSelectedPhotos"
-            />
           </div>
           <DisplayOptions
             v-model:date-range="dateRange"
