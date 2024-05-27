@@ -25,7 +25,12 @@
           transparent
         );
       "
-      @click="modalOpen = true"
+      @click="
+        () => {
+          if (selectMode) selected = !selected;
+          else modalOpen = true;
+        }
+      "
     ></div>
     <UCheckbox
       v-model="selected"
@@ -62,11 +67,16 @@
       </UPopover>
     </div>
     <UButton
-      aria-label="Copy Link"
-      icon="i-mingcute-copy-2-line"
+      :aria-label="selectMode ? 'Open fullscreen' : 'Copy Link'"
+      :icon="selectMode ? 'i-mingcute-zoom-in-line' : 'i-mingcute-copy-2-line'"
       color="gray"
       class="absolute bottom-4 right-4 hover-to-show"
-      @click="copy(photo)"
+      @click="
+        () => {
+          if (selectMode) modalOpen = true;
+          else copy(photo);
+        }
+      "
     />
     <UModal v-model="modalOpen" fullscreen>
       <PhotoCardModal
@@ -90,6 +100,7 @@ const rootDiv = ref<HTMLDivElement | null>(null);
 const props = defineProps<{
   photo: Photo;
   disabled: boolean;
+  selectMode: boolean;
 }>();
 
 defineEmits<{ deletePhoto: [key: string] }>();

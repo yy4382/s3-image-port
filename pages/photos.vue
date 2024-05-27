@@ -79,6 +79,7 @@
           ref="photoCardRefs"
           :photo="photo"
           :disabled="!validS3Setting"
+          :select-mode="selectedPhotos.length > 0"
           class="transition-all"
           :style="{
             width: `${imageSize[index][0]}px`,
