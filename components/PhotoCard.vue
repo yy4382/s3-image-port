@@ -37,7 +37,7 @@
       }"
     />
     <div class="hover-to-show absolute left-4 bottom-4">
-      <UPopover v-if="width && width < 270" mode="hover">
+      <UPopover v-if="width" mode="hover">
         <UIcon name="i-mingcute-information-line" class="text-white w-5 h-5" />
         <template #panel>
           <div
@@ -60,23 +60,6 @@
           </div>
         </template>
       </UPopover>
-      <div
-        v-else-if="width"
-        class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 text-white"
-      >
-        <div class="text-sm items-center inline-flex">
-          <Icon name="i-mingcute-time-line" class="shrink-0 mr-2" />
-          <span class="truncate block">
-            {{ DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd") }}
-          </span>
-        </div>
-        <div class="text-sm items-center inline-flex">
-          <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
-          <span :title="photo.Key" class="truncate block">
-            {{ photo.Key }}
-          </span>
-        </div>
-      </div>
     </div>
     <UButton
       aria-label="Copy Link"
