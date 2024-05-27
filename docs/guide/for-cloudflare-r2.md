@@ -18,12 +18,12 @@ You need an "R2 Storage Bucket" as a container for your images. To do this:
 - Select `Create Bucket`;
 - Fill in a name for this bucket, keep the location as `Automatic` and click `Create Bucket`.
 
-## Exposing your bucket
+## Exposing Your Bucket
 
 Since we are creating a image hosting service, we must make the contents of this R2 storage bucket public.
 There are two ways: make it public as a Cloudflare-managed subdomain under `https://r2.dev`, or expose it as a custom domain.
 
-### Exposing as a Cloudflare-managed subdomain
+### Exposing as a Cloudflare-Managed Subdomain
 
 - Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
 - Select the storage bucket you just created;
@@ -32,7 +32,7 @@ There are two ways: make it public as a Cloudflare-managed subdomain under `http
 
 For more information, see [Public buckets - Cloudflare R2 docs](https://developers.cloudflare.com/r2/buckets/public-buckets/)
 
-### Exposing as a custom domain
+### Exposing as a Custom Domain
 
 - Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
 - Select the storage bucket you just created;
