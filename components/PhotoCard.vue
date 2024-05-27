@@ -80,6 +80,7 @@
     />
     <UModal v-model="modalOpen" fullscreen>
       <PhotoCardModal
+        v-model="selected"
         :photo="photo"
         :close-modal="() => (modalOpen = false)"
         @delete-photo="
