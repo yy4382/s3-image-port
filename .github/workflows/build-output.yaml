@@ -41,13 +41,20 @@ jobs:
 
       - name: build outputs
         run: |
-          pnpm run build
           pnpm run generate
+          pnpm run build
 
       - name: compress outputs
         run: |
-          tar -czf static.tar.gz .output/public
-          tar -czf server.tar.gz .output/server
+          ls ./.output
+          tar -czf static.tar.gz ./.output/public
+          tar -czf server.tar.gz ./.output/server
+
+      - name: Set up git-cliff
+        uses: kenji-miyake/setup-git-cliff@v1
+
+      - name: Generate changelog
+        run: git-cliff --current > CHANGELOG.md
 
       - name: Release to GitHub
         uses: softprops/action-gh-release@v2
@@ -56,6 +63,6 @@ jobs:
           files: |
             static.tar.gz
             server.tar.gz
-          token: ${{ secrets.GITHUB_TOKEN }}
+          body_path: CHANGELOG.md
           draft: true
           prerelease: false

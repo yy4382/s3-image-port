@@ -9,8 +9,9 @@ on:
     paths-ignore:
       - "docs/**"
       - "README.md"
-      - "doc/**"
       - "vercel.json"
+      - ".github/workflows/build-output.yaml"
+      - ".github/workflows/ci.yaml"
 
 jobs:
   docker:
