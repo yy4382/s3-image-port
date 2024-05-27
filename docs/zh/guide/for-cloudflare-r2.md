@@ -47,7 +47,7 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 - 选择您刚刚创建的存储桶；
 - 点击 `设置`，在 `CORS 策略` 板块右侧点击 `添加/编辑 CORS 策略`，并按您的需要进行修改。
 
-下面是使 [公共示例](https://iport.yfi.moe) 能正常工作的一个 CORS 策略的例子：
+下面是使 [官方实例](https://iport.yfi.moe) 能正常工作的一个 CORS 策略的例子：
 
 ```json
 [
