@@ -6,11 +6,13 @@ on:
       - "v[0123].[0-9]+.[0-9]+"
 
 jobs:
-  lint:
+  build-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -54,7 +56,7 @@ jobs:
         uses: kenji-miyake/setup-git-cliff@v1
 
       - name: Generate changelog
-        run: git-cliff --current > CHANGELOG.md
+        run: git-cliff --current | tee CHANGELOG.md
 
       - name: Release to GitHub
         uses: softprops/action-gh-release@v2

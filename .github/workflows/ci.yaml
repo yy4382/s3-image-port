@@ -6,10 +6,14 @@ on:
     paths-ignore:
       - "docs/**"
       - "README.md"
+      - ".github/workflows/**"
+      - ".husky/**"
   pull_request:
     paths-ignore:
       - "docs/**"
       - "README.md"
+      - ".github/workflows/**"
+      - ".husky/**"
 
 jobs:
   lint:
