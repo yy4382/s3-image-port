@@ -21,9 +21,9 @@
     />
     <div class="absolute flex justify-center items-center right-2 top-2">
       <!-- Info Button -->
-      <UPopover mode="hover">
+      <UPopover :popper="{ placement: 'bottom-end' }" :overlay="isMobile">
         <UButton
-          aria-label="Delete"
+          aria-label="Info"
           icon="i-mingcute-information-line"
           variant="ghost"
           color="white"
@@ -95,7 +95,9 @@
 
 <script lang="ts" setup>
 import { DateTime } from "luxon";
+import { breakpointsTailwind } from "@vueuse/core";
 import type { Photo } from "~/types";
+const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");
 defineProps<{
   photo: Photo;
   closeModal: () => void;
