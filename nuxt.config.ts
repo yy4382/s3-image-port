@@ -1,7 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ["@nuxt/ui", "@vueuse/nuxt", "@nuxtjs/i18n", "@nuxt/eslint"],
+  modules: [
+    "@nuxt/ui",
+    "@vueuse/nuxt",
+    "@nuxtjs/i18n",
+    "@nuxt/eslint",
+    "@nuxt/test-utils/module",
+  ],
   ui: {
     icons: ["mingcute"],
   },
