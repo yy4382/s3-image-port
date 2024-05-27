@@ -19,6 +19,7 @@
                 :label="selectedPhotos.length + ''"
                 icon="i-mingcute-delete-3-line"
                 color="red"
+                variant="outline"
                 :disabled="!validS3Setting"
               />
               <template #panel="{ close }">
@@ -57,6 +58,14 @@
                 </div>
               </template>
             </UPopover>
+
+            <UButton
+              v-if="selectedPhotos.length > 0"
+              icon="i-mingcute-checkbox-line"
+              variant="outline"
+              color="gray"
+              @click="clearSelectedPhotos"
+            />
           </div>
           <DisplayOptions
             v-model:date-range="dateRange"
@@ -221,6 +230,12 @@ watchEffect(() => {
     .map((ref) => ref?.key)
     .filter((keyOrUd) => keyOrUd !== undefined) as string[];
 });
+function clearSelectedPhotos() {
+  selectedPhotos.value.length = 0;
+  for (const ref of photoCardRefs.value) {
+    ref && (ref.selected = false);
+  }
+}
 
 /**
  * Brief explanation of the following masonry layout
