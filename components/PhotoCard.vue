@@ -1,19 +1,20 @@
 <template>
-  <div ref="rootDiv" class="relative group bg-gray-200">
+  <div ref="rootDiv" class="relative group">
     <USkeleton
       v-show="!showImg"
       class="h-full w-full"
       :ui="{ base: 'rounded-lg' }"
     />
     <Transition>
-      <img
-        v-show="showImg"
-        ref="loadedImage"
-        :src="photo.url"
-        class="h-full w-full transition-all"
-        :class="selected && 'scale-90 rounded-lg'"
-        @load="onImageLoad"
-      />
+      <div v-show="showImg" class="bg-gray-200">
+        <img
+          ref="loadedImage"
+          :src="photo.url"
+          class="h-full w-full transition-transform"
+          :class="selected && 'scale-90 rounded-lg'"
+          @load="onImageLoad"
+        />
+      </div>
     </Transition>
     <div
       class="absolute top-0 bottom-0 left-0 right-0 hover-to-show"
