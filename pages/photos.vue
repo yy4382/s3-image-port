@@ -4,13 +4,9 @@
       <div class="w-full flex flex-col-reverse gap-4">
         <div id="display-settings"></div>
         <UForm class="flex gap-4 justify-between" :state="{}">
-          <div class="flex gap-4 items-center">
+          <div class="flex gap-2 items-center">
             <UButton
-              :label="
-                photos.length === 0
-                  ? $t('photos.loadOrRefreshButton.loadButton')
-                  : $t('photos.loadOrRefreshButton.refreshButton')
-              "
+              icon="i-mingcute-refresh-2-line"
               :disabled="!validS3Setting"
               variant="outline"
               :loading="isLoading"

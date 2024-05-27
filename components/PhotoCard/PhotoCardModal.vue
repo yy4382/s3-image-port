@@ -19,6 +19,14 @@
       size="lg"
       @click="closeModal"
     />
+    <UCheckbox
+      v-model="selected"
+      class="absolute top-4 left-14"
+      :ui="{
+        container: 'h-6',
+        base: 'w-6 h-6',
+      }"
+    />
     <div class="absolute flex justify-center items-center right-2 top-2">
       <!-- Info Button -->
       <UPopover :popper="{ placement: 'bottom-end' }" :overlay="isMobile">
@@ -97,6 +105,7 @@
 import { DateTime } from "luxon";
 import { breakpointsTailwind } from "@vueuse/core";
 import type { Photo } from "~/types";
+const selected = defineModel<boolean>({ required: true });
 const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");
 defineProps<{
   photo: Photo;
