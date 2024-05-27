@@ -21,8 +21,8 @@
       style="
         background-image: linear-gradient(
           to top,
-          rgba(0, 0, 0, 0.6),
-          transparent 100px,
+          rgba(0, 0, 0, 0.5),
+          transparent 50px,
           transparent
         );
       "
@@ -43,7 +43,7 @@
       }"
     />
     <div class="hover-to-show absolute left-4 bottom-4">
-      <UPopover v-if="width" mode="hover">
+      <UPopover v-if="width" mode="hover" :ui="{ wrapper: 'h-5' }">
         <UIcon name="i-mingcute-information-line" class="text-white w-5 h-5" />
         <template #panel>
           <div
