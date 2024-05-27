@@ -3,14 +3,14 @@
     <USkeleton
       v-show="!showImg"
       class="h-full w-full"
-      :ui="{ base: 'rounded-lg' }"
+      :ui="{ rounded: 'rounded-none' }"
     />
     <Transition>
       <div v-show="showImg" class="bg-gray-200">
         <img
           ref="loadedImage"
           :src="photo.url"
-          class="h-full w-full transition-transform"
+          class="h-full w-full transition-all"
           :class="selected && 'scale-90 rounded-lg'"
           @load="onImageLoad"
         />
