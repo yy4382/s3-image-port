@@ -13,7 +13,8 @@
     "docs:preview": "vitepress preview docs",
     "prepare": "husky",
     "lint": "eslint . ; prettier --check .",
-    "lint:fix": "eslint --fix . ; prettier --write ."
+    "lint:fix": "eslint --fix . ; prettier --write .",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.2.0",
