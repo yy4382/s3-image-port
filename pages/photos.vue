@@ -68,7 +68,7 @@
               </template>
             </UPopover>
           </div>
-          <DisplayOptions
+          <PhotoDisplayOptions
             v-model:date-range="dateRange"
             v-model:sort-by="sortBy"
             v-model:sort-order-is-descending="sortOrderIsDescending"

@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import { DateTime } from "luxon";
-import { type Photo } from "../types";
+import { type Photo } from "~/types";
 const loadedImage = ref<null | HTMLImageElement>(null);
 const rootDiv = ref<HTMLDivElement | null>(null);
 const props = defineProps<{
