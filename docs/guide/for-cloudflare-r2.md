@@ -14,8 +14,8 @@ This guide will only cover the necessary parts related to S3 Image Port, for mor
 
 You need an "R2 Storage Bucket" as a container for your images. To do this:
 
-- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
-- Select `Create Bucket`;
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
+- Select `Create Bucket`.
 - Fill in a name for this bucket, keep the location as `Automatic` and click `Create Bucket`.
 
 ## Exposing Your Bucket
@@ -25,17 +25,17 @@ There are two ways: make it public as a Cloudflare-managed subdomain under `http
 
 ### Exposing as a Cloudflare-Managed Subdomain
 
-- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
-- Select the storage bucket you just created;
-- Click `Settings`, and to the right of the `R2.dev subdomain` of the `Public access` board, click `Allow Access`, and type `allow` to confirm permission;
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
+- Select the storage bucket you just created.
+- Click `Settings`, and to the right of the `R2.dev subdomain` of the `Public access` board, click `Allow Access`, and type `allow` to confirm permission.
 - The `Public R2.dev Bucket URL` is now your `Public URL`.
 
 For more information, see [Public buckets - Cloudflare R2 docs](https://developers.cloudflare.com/r2/buckets/public-buckets/)
 
 ### Exposing as a Custom Domain
 
-- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
-- Select the storage bucket you just created;
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
+- Select the storage bucket you just created.
 - Click `Settings`, and click the "Connect Domain" button on the right side of the "Custom Domains" title
 - Use a subdomain of your domain hosted on Cloudflare. For example, I'm using `i.yfi.moe` for my domain `yfi.moe`.
 - That's it! Now your Public URL is `https://i.yfi.moe` or whatever you set it to be.
@@ -44,8 +44,8 @@ For more information, see [Public buckets - Cloudflare R2 docs](https://develope
 
 In order for S3 Image Port to be able to access and manipulate your data in Cloudflare R2 storage buckets across domains, you need to configure the bucket's [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS):
 
-- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
-- Select the storage bucket you just created;
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
+- Select the storage bucket you just created.
 - Click `Settings` and on the right side of the `CORS Policy` board click `Add/Edit CORS Policy` and modify it as you wish.
 
 Below is an example of a CORS policy that makes the [official instance](https://iport.yfi.moe) work:
@@ -66,9 +66,9 @@ For more information, see [Configure CORS - Cloudflare R2 docs](https://develope
 
 On the `S3 Settings` page of the S3 Image Port, you need to fill in the `Access Key ID` and `Secret Access Key` keys as credentials to access the storage bucket. To do this:
 
-- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
-- Click `Manage R2 API Tokens` under `Account details`;
-- Click `Create API Token` and set up the token as you want it (e.g. permissions are `Object Read & Write`, Specify bucket(s) as the one you just created);
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
+- Click `Manage R2 API Tokens` under `Account details`.
+- Click `Create API Token` and set up the token as you want it (e.g. permissions are `Object Read & Write`, Specify bucket(s) as the one you just created).
 - Click `Create API Token`, and on the next page under `Use the following credentials for S3 clients` you will find `Access Key ID` and `Secret Access Key`.
 
 Note: For security reasons, this page will only appear once.
@@ -77,8 +77,8 @@ For more information, see [Authentication - Cloudflare R2 docs](https://develope
 
 ## Checking the Endpoint
 
-- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left;
-- Select the bucket you just created;
+- Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
+- Select the bucket you just created.
 - Under the `Bucket Details` board, there is a field called `S3 API`, which ends with the name of your bucket, and the Endpoint is the result of removing that part (e.g. if the `S3 API` is `https://example.r2.cloudflarestorage.com/example`, then the Endpoint is `https://example.r2.cloudflarestorage.com/`).
 
 ## Fill in S3 Image Port's Settings Page
