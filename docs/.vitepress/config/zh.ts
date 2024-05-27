@@ -4,7 +4,11 @@ export const zh = defineConfig({
   description: "A dashboard to manage your images in S3 and S3-like buckets.",
   themeConfig: {
     nav: [
-      { text: "指南", link: "/guide/what-is-sip", activeMatch: "/zh/guide/" },
+      {
+        text: "指南",
+        link: "/zh/guide/what-is-sip",
+        activeMatch: "/zh/guide/",
+      },
       { text: "官方实例", link: "https://iport.yfi.moe" },
     ],
     sidebar: {
