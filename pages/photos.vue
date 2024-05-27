@@ -79,6 +79,7 @@
           ref="photoCardRefs"
           :photo="photo"
           :disabled="!validS3Setting"
+          class="transition-all"
           :style="{
             width: `${imageSize[index][0]}px`,
             height: `${imageSize[index][1]}px`,
@@ -256,36 +257,40 @@ useResizeObserver(imageWrapper, (entries) => {
   const { width } = entry.contentRect;
   wrapperWidth.value = width;
 });
-const deBouncedWrapperWidth = refDebounced(wrapperWidth, 50);
+const deBouncedWrapperWidth = refDebounced(wrapperWidth, 300);
 
 // Calculate the natural size of images
 
 const imageNaturalSize = ref<Size[]>(
   Array.from({ length: imagePerPage }, () => defaultImageSize),
 );
-const deBouncedImageNaturalSize = refDebounced(imageNaturalSize, 300);
 
 // update imageNaturalSize when currentDisplayed or child components' state changes
-watchEffect(() => {
-  // sort the refs in the same order as the photos in the DOM
-  const sortedPhotoCardRefs = currentDisplayed.value.map((photo) => {
-    return photoCardRefs.value.find((ref) => ref?.key === photo.Key);
-  });
-  // get the natural size of each image, if not ready, returns default size
-  const sizes: Size[] = sortedPhotoCardRefs.map((ref) => {
-    return ref?.naturalSize ?? defaultImageSize;
-  });
-  try {
-    imageNaturalSize.value = z
-      .tuple([z.number(), z.number()])
-      .array()
-      .parse(sizes);
-  } catch (error) {
-    console.error((error as z.ZodError).errors);
-  }
-});
+watch(
+  () => {
+    // sort the refs in the same order as the photos in the DOM
+    const sortedPhotoCardRefs = currentDisplayed.value.map((photo) => {
+      return photoCardRefs.value.find((ref) => ref?.key === photo.Key);
+    });
+    // get the natural size of each image, if not ready, returns default size
+    const sizes: Size[] = sortedPhotoCardRefs.map((ref) => {
+      return ref?.naturalSize ?? defaultImageSize;
+    });
+    return sizes;
+  },
+  (sizes: Size[]) => {
+    try {
+      imageNaturalSize.value = z
+        .tuple([z.number(), z.number()])
+        .array()
+        .parse(sizes);
+    } catch (error) {
+      console.error((error as z.ZodError).errors);
+    }
+  },
+);
 
-const imageSize = useMasonry(deBouncedImageNaturalSize, deBouncedWrapperWidth, {
+const imageSize = useMasonry(imageNaturalSize, deBouncedWrapperWidth, {
   gap,
   defaultSize: defaultImageSize,
   maxItems: imagePerPage,

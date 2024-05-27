@@ -1,12 +1,20 @@
 <template>
   <div ref="rootDiv" class="relative group bg-gray-200">
-    <img
-      ref="loadedImage"
-      :src="photo.url"
-      class="h-full w-full transition-transform"
-      :class="selected && 'scale-90 rounded-lg'"
-      @load="onImageLoad"
+    <USkeleton
+      v-show="!showImg"
+      class="h-full w-full"
+      :ui="{ base: 'rounded-lg' }"
     />
+    <Transition>
+      <img
+        v-show="showImg"
+        ref="loadedImage"
+        :src="photo.url"
+        class="h-full w-full transition-all"
+        :class="selected && 'scale-90 rounded-lg'"
+        @load="onImageLoad"
+      />
+    </Transition>
     <div
       class="absolute top-0 bottom-0 left-0 right-0 hover-to-show"
       style="
@@ -82,7 +90,7 @@
         :photo="photo"
         :close-modal="() => (modalOpen = false)"
         @delete-photo="
-          (key) => {
+          (key: string) => {
             $emit('deletePhoto', key), (modalOpen = false);
           }
         "
@@ -107,6 +115,7 @@ const key = computed(() => props.photo.Key);
 const selected = ref(false);
 const naturalSize = ref<[number, number] | undefined>(undefined);
 const width = ref<number | undefined>(undefined);
+const showImg = ref(false);
 defineExpose({
   key,
   selected,
@@ -123,8 +132,18 @@ function copy(photo: Photo) {
 }
 useResizeObserver(rootDiv, (entries) => {
   const entry = entries[0];
-  const { width: entryWidth } = entry.contentRect;
+  const { width: entryWidth, height: entryHeight } = entry.contentRect;
   width.value = entryWidth;
+  if (
+    naturalSize.value &&
+    Math.abs(
+      entryWidth / entryHeight - naturalSize.value[0] / naturalSize.value[1],
+    ) < 0.001
+  ) {
+    setTimeout(() => {
+      showImg.value = true;
+    }, 150);
+  }
 });
 
 function onImageLoad() {
@@ -147,5 +166,12 @@ onMounted(() => {
     @apply pointer-events-none group-hover:pointer-events-auto focus-visible:pointer-events-auto
      opacity-0 group-hover:opacity-100 focus-within:opacity-100 focus-visible:opacity-100 transition-opacity duration-200;
   }
+}
+.v-enter-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from {
+  opacity: 0;
 }
 </style>
