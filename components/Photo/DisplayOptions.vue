@@ -5,14 +5,8 @@
       icon="i-heroicons-magnifying-glass-20-solid"
       :placeholder="$t('photos.displayOptions.search.placeholder')"
     />
-    <UChip :show="hasFilters" :text="getNumberOfFilters()" size="lg">
-      <UButton
-        icon="i-mingcute-filter-line"
-        @click="
-          console.log(prefix !== '', !isRangeSelected({ years: 1000 }));
-          openFilter = true;
-        "
-      />
+    <UChip :show="numberOfFilters > 0" :text="numberOfFilters" size="lg">
+      <UButton icon="i-mingcute-filter-line" @click="openFilter = true" />
     </UChip>
     <UButton
       :icon="
@@ -50,11 +44,22 @@
           <USelectMenu
             v-model="prefix"
             searchable
-            :options="displayAvailablePrefixes"
+            :options="availablePrefixes4Display"
             :placeholder="
               $t('photos.displayOptions.filter.prefixFilter.placeholder')
             "
-          />
+            value-attribute="prefix"
+            option-attribute="display"
+          >
+            <template #option="{ option }">
+              <span
+                :style="{ paddingLeft: option.indentation + 'rem' }"
+                class="truncate"
+              >
+                {{ option.display }}
+              </span>
+            </template>
+          </USelectMenu>
           <UDivider />
           <UFormGroup
             :label="$t('photos.displayOptions.filter.dateFilter.title')"
@@ -66,7 +71,7 @@
           <UPopover :popper="{ placement: 'bottom-start' }">
             <UButton icon="i-heroicons-calendar-days-20-solid">
               {{
-                isRangeSelected({ years: 1000 })
+                selectedAllTime
                   ? $t(
                       "photos.displayOptions.filter.dateFilter.calendar.labels.allTime",
                     )
@@ -80,7 +85,7 @@
               >
                 <div class="hidden sm:flex flex-col py-4">
                   <UButton
-                    v-for="(range, index) in ranges"
+                    v-for="(range, index) in timeRanges"
                     :key="index"
                     :label="range.label"
                     color="gray"
@@ -92,7 +97,12 @@
                         : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
                     ]"
                     truncate
-                    @click="selectRange(range.duration)"
+                    @click="
+                      dateRange = {
+                        start: sub(new Date(), range.duration),
+                        end: new Date(),
+                      }
+                    "
                   />
                 </div>
 
@@ -174,75 +184,105 @@
 </template>
 
 <script lang="ts" setup>
-import { sub, format, isSameDay, type Duration } from "date-fns";
-import { enUS, zhCN } from "date-fns/locale";
-import type { SortByOpts } from "~/types";
+import {
+  sub,
+  format,
+  isSameDay,
+  type Duration,
+  compareAsc,
+  compareDesc,
+} from "date-fns";
+import { zhCN, enUS } from "date-fns/locale";
+import type { SortByOpts, Photo } from "~/types";
+import { useFuse } from "@vueuse/integrations/useFuse";
 
 const { t, locale } = useI18n();
 
 const props = defineProps<{
-  availablePrefixes: string[];
+  photos: Photo[];
+  enableFuzzySearch: boolean;
+  fuzzySearchThreshold: number;
 }>();
-const { availablePrefixes } = toRefs(props);
+const { photos, enableFuzzySearch, fuzzySearchThreshold } = toRefs(props);
 
-const prefix = defineModel<string>("prefix", { required: true });
-const searchTerm = defineModel<string>("searchTerm", { required: true });
-const dateRange = defineModel<{ start: Date; end: Date }>("dateRange", {
-  required: true,
-  default: { start: sub(new Date(), { years: 1 }), end: new Date() },
-});
-const sortByOptions = ["key", "date"];
-const sortBy = defineModel<SortByOpts>("sortBy", { required: true });
-const sortOrderIsDescending = defineModel<boolean>("sortOrderIsDescending", {
-  required: true,
-});
-
-const hasFilters = computed<boolean>(
-  () => prefix.value !== "" || !isRangeSelected({ years: 1000 }),
-);
+const emit = defineEmits(["update:photosToDisplay"]);
 
 const openFilter = ref(false);
 const openSort = ref(false);
-const ranges = [
+
+// Three filters: search, prefix, date
+
+// search
+const searchTerm = ref("");
+const debouncedSearchTerm = refDebounced(searchTerm, 300);
+
+// prefix
+const prefix: Ref<string> = ref("");
+const availablePrefixes: ComputedRef<string[]> = computed(() => [
+  "",
+  ...new Set(
+    photos.value.flatMap((photo) => {
+      const parts = photo.Key.split("/");
+      return parts
+        .slice(0, -1)
+        .map((_, index) => parts.slice(0, index + 1).join("/"));
+    }),
+  ),
+]);
+const availablePrefixes4Display = computed(() =>
+  availablePrefixes.value.map((prefix) => ({
+    prefix,
+    display:
+      prefix === ""
+        ? t("photos.displayOptions.filter.prefixFilter.noPrefixPlaceholder")
+        : prefix,
+    indentation: (prefix.match(/\//g) || []).length,
+  })),
+);
+
+// date
+
+/**
+ * Range that should be seen as "all time"
+ */
+const allTimeRange: Duration = { years: 1000 };
+
+const dateRange: Ref<{ start: Date; end: Date }> = ref({
+  start: sub(new Date(), allTimeRange),
+  end: new Date(),
+});
+
+const selectedAllTime = computed(() => isRangeSelected(allTimeRange));
+
+// prettier-ignore
+const timeRanges = [
   {
-    label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last7Days",
-    ),
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last7Days"),
     duration: { days: 7 },
   },
   {
-    label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last14Days",
-    ),
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last14Days"),
     duration: { days: 14 },
   },
   {
-    label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last30Days",
-    ),
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last30Days"),
     duration: { days: 30 },
   },
   {
-    label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last3Months",
-    ),
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last3Months"),
     duration: { months: 3 },
   },
   {
-    label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.last6Months",
-    ),
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last6Months"),
     duration: { months: 6 },
   },
   {
-    label: t(
-      "photos.displayOptions.filter.dateFilter.calendar.labels.lastYear",
-    ),
+    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.lastYear"),
     duration: { years: 1 },
   },
   {
     label: t("photos.displayOptions.filter.dateFilter.calendar.labels.allTime"),
-    duration: { years: 1000 },
+    duration: allTimeRange,
   },
 ];
 
@@ -256,14 +296,6 @@ const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
     });
   return `${formattedDate(dateRange.start)} - ${formattedDate(dateRange.end)}`;
 };
-
-const getNumberOfFilters = () => {
-  let count = 0;
-  if (prefix.value !== "") ++count;
-  if (!isRangeSelected({ years: 1000 })) ++count;
-  return count;
-};
-
 function isRangeSelected(duration: Duration) {
   return (
     isSameDay(dateRange.value.start, sub(new Date(), duration)) &&
@@ -271,23 +303,77 @@ function isRangeSelected(duration: Duration) {
   );
 }
 
-function selectRange(duration: Duration) {
-  dateRange.value = { start: sub(new Date(), duration), end: new Date() };
-}
+// sort
+const sortBy: Ref<SortByOpts> = ref("key");
+const sortOrderIsDescending: Ref<boolean> = ref(true);
+const sortByOptions = ["key", "date"];
 
-const displayAvailablePrefixes = computed(() =>
-  availablePrefixes.value.map((prefix) =>
-    prefix === ""
-      ? t("photos.displayOptions.filter.prefixFilter.noPrefixPlaceholder")
-      : prefix,
-  ),
-);
-watch(prefix, (newValue) => {
-  if (
-    newValue ===
-    t("photos.displayOptions.filter.prefixFilter.noPrefixPlaceholder")
-  ) {
-    prefix.value = "";
-  }
+/**
+ * Number of filters applied
+ * Used for the badge on the filter button
+ */
+const numberOfFilters = computed(() => {
+  let count = 0;
+  if (prefix.value !== "") ++count;
+  if (!selectedAllTime.value) ++count;
+  return count;
 });
+
+const photosFilteredByPrefixAndDate = computed(() => {
+  const filteredByPrefix = photos.value.filter((photo) =>
+    photo.Key.startsWith(prefix.value),
+  );
+  return filteredByPrefix.filter((photo) => {
+    const date = new Date(photo.LastModified);
+    return date >= dateRange.value.start && date <= dateRange.value.end;
+  });
+});
+
+const photosToDisplay = computed(() => {
+  const preFiltered = photosFilteredByPrefixAndDate.value;
+
+  if (debouncedSearchTerm.value.trim() === "") {
+    // Sort related options are only available when search term is empty
+    if (sortBy.value === "key") {
+      return preFiltered.sort((a, b) =>
+        !sortOrderIsDescending.value
+          ? a.Key.localeCompare(b.Key)
+          : b.Key.localeCompare(a.Key),
+      );
+    } else {
+      return preFiltered.sort((a, b) =>
+        !sortOrderIsDescending.value
+          ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
+          : compareDesc(new Date(a.LastModified), new Date(b.LastModified)),
+      );
+    }
+  }
+
+  // Fuzzy search
+
+  if (!enableFuzzySearch.value)
+    // not enabled, use simple search
+    return preFiltered.filter((photo) =>
+      photo.Key.includes(debouncedSearchTerm.value.trim()),
+    );
+
+  const { results } = useFuse(
+    debouncedSearchTerm.value,
+    preFiltered.map((photo) => photo.Key),
+    {
+      fuseOptions: {
+        threshold: fuzzySearchThreshold.value,
+        useExtendedSearch: true,
+      },
+    },
+  );
+  const keys = results.value.map((result) => result.item);
+  const searchResultPhotos = preFiltered.filter((photo) =>
+    keys.includes(photo.Key),
+  );
+  return searchResultPhotos.sort(
+    (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key),
+  );
+});
+watchEffect(() => emit("update:photosToDisplay", photosToDisplay.value));
 </script>
