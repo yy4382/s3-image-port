@@ -59,7 +59,6 @@ export const useMasonry = (
       // fill to maxItems if needed
       if (maxItems !== undefined && outputSize.value.length < maxItems) {
         // avoid error when routed from a page with 10 items to a page with 15 items
-        debug("filling");
         outputSize.value = [
           ...outputSize.value,
           ...Array.from(
