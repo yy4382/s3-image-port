@@ -8,10 +8,13 @@
       "invalidAppSetting": {
         "title": "无效的应用设置",
         "description": "请在设置页面检查应用设置。"
-      }
+      },
+      "askConfirm": "您确定吗？"
     },
     "actions": {
-      "goToSettings": "前往设置"
+      "goToSettings": "前往设置",
+      "confirm": "确认",
+      "cancel": "取消"
     }
   },
   "index": {

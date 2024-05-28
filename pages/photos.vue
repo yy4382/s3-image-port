@@ -21,8 +21,16 @@
               color="gray"
               @click="clearSelectedPhotos"
             />
-
-            <UPopover v-if="selectedPhotos.length > 0" overlay>
+            <BaseSecondConfirm
+              v-if="selectedPhotos.length > 0"
+              :action="
+                () => {
+                  deletePhoto(selectedPhotos);
+                  selectedPhotos.length = 0;
+                }
+              "
+              danger
+            >
               <UButton
                 aria-label="Delete"
                 :label="selectedPhotos.length + ''"
@@ -31,42 +39,7 @@
                 variant="outline"
                 :disabled="!validS3Setting"
               />
-              <template #panel="{ close }">
-                <div class="flex p-4 gap-3 items-center">
-                  <div
-                    class="text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    {{ $t("photos.photoCard.deleteButton.confirm.title") }}
-                  </div>
-                  <div class="flex items-center gap-2 flex-shrink-0 mt-0">
-                    <UButton
-                      size="xs"
-                      :label="
-                        $t(
-                          'photos.photoCard.deleteButton.confirm.actions.cancel',
-                        )
-                      "
-                      color="gray"
-                      @click="close()"
-                    />
-                    <UButton
-                      size="xs"
-                      :label="
-                        $t(
-                          'photos.photoCard.deleteButton.confirm.actions.confirm',
-                        )
-                      "
-                      color="red"
-                      @click="
-                        deletePhoto(selectedPhotos);
-                        selectedPhotos.length = 0;
-                        close();
-                      "
-                    />
-                  </div>
-                </div>
-              </template>
-            </UPopover>
+            </BaseSecondConfirm>
           </div>
           <PhotoDisplayOptions
             v-model:date-range="dateRange"
