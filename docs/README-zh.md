@@ -4,6 +4,7 @@
 
 这是一个定制的前端面板，用于管理托管在**类 S3**存储服务（如 Cloudflare R2）上的图片。传统上这些存储服务没有专门的图片管理面板，该解决方案为图片的**上传**、**管理**和**集成**提供了一个简单而强大的界面。
 
+![poster](./zh/images/devices.png)
 ![homepage](./zh/images/index-page.jpg)
 ![upload](./zh/images/upload-page.jpg)
 ![photos](./zh/images/gallery-page.jpg)
