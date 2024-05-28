@@ -29,37 +29,9 @@
     />
     <div class="absolute flex justify-center items-center right-2 top-2">
       <!-- Info Button -->
-      <UPopover :popper="{ placement: 'bottom-end' }" :overlay="isMobile">
-        <UButton
-          aria-label="Info"
-          icon="i-mingcute-information-line"
-          variant="ghost"
-          color="white"
-          size="lg"
-        />
-        <template #panel>
-          <div
-            class="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 p-2"
-          >
-            <div class="text-sm items-center inline-flex">
-              <Icon name="i-mingcute-time-line" class="shrink-0 mr-2" />
-              <span class="truncate block">
-                {{
-                  DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd")
-                }}
-              </span>
-            </div>
-            <div class="text-sm items-center inline-flex">
-              <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
-              <span :title="photo.Key" class="truncate block">
-                {{ photo.Key }}
-              </span>
-            </div>
-          </div>
-        </template>
-      </UPopover>
+      <PhotoCardInfo :photo="photo" :popper="{ placement: 'bottom-end' }" />
       <!-- Delete Button -->
-      <UPopover overlay>
+      <BaseSecondConfirm :action="() => $emit('deletePhoto', photo.Key)" danger>
         <UButton
           aria-label="Delete"
           icon="i-mingcute-delete-3-line"
@@ -67,46 +39,15 @@
           color="white"
           size="lg"
         />
-        <template #panel="{ close }">
-          <div class="flex p-4 gap-3 items-center">
-            <div class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ $t("photos.photoCard.deleteButton.confirm.title") }}
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0 mt-0">
-              <UButton
-                size="xs"
-                :label="
-                  $t('photos.photoCard.deleteButton.confirm.actions.cancel')
-                "
-                color="gray"
-                @click="close()"
-              />
-              <UButton
-                size="xs"
-                :label="
-                  $t('photos.photoCard.deleteButton.confirm.actions.confirm')
-                "
-                color="red"
-                @click="
-                  $emit('deletePhoto', photo.Key);
-                  close();
-                "
-              />
-            </div>
-          </div>
-        </template>
-      </UPopover>
+      </BaseSecondConfirm>
     </div>
     <img :src="photo.url" class="w-full h-full object-contain" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { DateTime } from "luxon";
-import { breakpointsTailwind } from "@vueuse/core";
 import type { Photo } from "~/types";
 const selected = defineModel<boolean>({ required: true });
-const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");
 defineProps<{
   photo: Photo;
   closeModal: () => void;

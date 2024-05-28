@@ -8,10 +8,13 @@
       "invalidAppSetting": {
         "title": "Invalid App Setting",
         "description": "Please check the app settings in the settings page."
-      }
+      },
+      "askConfirm": "Are you sure?"
     },
     "actions": {
-      "goToSettings": "Go to settings"
+      "goToSettings": "Go to settings",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
     }
   },
   "index": {
