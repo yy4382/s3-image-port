@@ -47,7 +47,11 @@
           <UButton
             color="blue"
             variant="solid"
-            to="https://docs.iport.yfi.moe"
+            :to="
+              $i18n.locale === 'zh'
+                ? 'https://docs.iport.yfi.moe/zh'
+                : 'https://docs.iport.yfi.moe'
+            "
             icon="i-mingcute-book-2-fill"
             :size="width < 640 ? 'xs' : 'md'"
           >
