@@ -213,7 +213,9 @@
           "fail": {
             "title": "Failed to connect",
             "description": "It seems that you have permission to get objects, but not to upload, list, or delete objects.",
-            "desc4configOrCors": "Please check the S3 settings, or the CORS configuration of the bucket."
+            "desc4configOrCors": "Please check the S3 settings, or the CORS configuration of the bucket.",
+            "actionLabel": "Go to Docs",
+            "actionLink": "https://docs.iport.yfi.moe/guide/getting-started#configure-s3-or-its-compatible-services"
           }
         }
       }

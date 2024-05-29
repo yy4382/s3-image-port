@@ -213,7 +213,9 @@
           "fail": {
             "title": "测试连接失败",
             "description": "似乎您有获取 (Get) 对象的权限，但没有上传 (upload)、列出 (list) 或删除 (delete) 对象的权限。",
-            "desc4configOrCors": "请检查 S3 设置或存储桶的 CORS 配置。"
+            "desc4configOrCors": "请检查 S3 设置或存储桶的 CORS 配置。",
+            "actionLabel": "查看文档",
+            "actionLink": "https://docs.iport.yfi.moe/zh/guide/getting-started#配置-s3-或其兼容服务"
           }
         }
       }

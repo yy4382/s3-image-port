@@ -43,7 +43,17 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       title: t("settings.s3.submitFormButton.message.fail.title"),
       // prettier-ignore
       description: t("settings.s3.submitFormButton.message.fail.desc4configOrCors"),
-      // !TODO add action link to docs
+      actions: [
+        {
+          label: t("settings.s3.submitFormButton.message.fail.actionLabel"),
+          click: () => {
+            window.open(
+              t("settings.s3.submitFormButton.message.fail.actionLink"),
+              "_blank",
+            );
+          },
+        },
+      ],
     });
     uploadChipColor.value = "red";
     listChipColor.value = "red";
@@ -91,6 +101,20 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     description: t(
       `settings.s3.submitFormButton.message.${i18nSectionInToast}.description`,
     ),
+    actions:
+      i18nSectionInToast === "success"
+        ? undefined
+        : [
+            {
+              label: t("settings.s3.submitFormButton.message.fail.actionLabel"),
+              click: () => {
+                window.open(
+                  t("settings.s3.submitFormButton.message.fail.actionLink"),
+                  "_blank",
+                );
+              },
+            },
+          ],
   });
 }
 </script>
