@@ -4,10 +4,7 @@
 
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
-![poster](/docs/images/devices.png)
-![homepage](/docs/images/index-page.jpg)
-![upload](/docs/images/upload-page.jpg)
-![photos](/docs/images/gallery-page.jpg)
+![poster](/docs/images/poster.png)
 
 ## Live Instance and Deployment
 
@@ -23,6 +20,8 @@ While it is open-source and all your data remains in your local browser without 
 - :framed_picture: **Display Image List**: View and find all uploaded images in the gallery, support filtering options.
 - :link: **Copy Image Links**: One-click copying of links to uploaded images in raw or markdown format.
 - :wastebasket: **Delete Images**: Remove images from your bucket directly through the panel.
+
+![features](/docs/images/features.jpg)
 
 The interface is fully responsive and works seamlessly on mobile devices as well.
 
