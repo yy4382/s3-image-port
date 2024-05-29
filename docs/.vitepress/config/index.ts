@@ -26,11 +26,15 @@ export default defineConfig({
       return url.toLowerCase().includes("readme");
     },
   ],
+  lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
 
     socialLinks: [
       { icon: "github", link: "https://github.com/yy4382/s3-image-port" },
     ],
+    editLink: {
+      pattern: "https://github.com/yy4382/s3-image-port/edit/main/docs/:path",
+    },
   },
 });
