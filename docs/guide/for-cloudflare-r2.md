@@ -37,7 +37,7 @@ For more information, see [Public buckets - Cloudflare R2 docs](https://develope
 - Go to [Cloudflare dashboard](https://dash.cloudflare.com/) and select R2 on the left.
 - Select the storage bucket you just created.
 - Click `Settings`, and click the `Connect Domain` button on the right side of the `Custom Domains` title.
-- Use a subdomain of your domain hosted on Cloudflare. For example, I'm using `i.yfi.moe` for my domain `yfi.moe`.
+- Use a subdomain of your domain hosted on Cloudflare. For example, the author of the project [@Yunfi](https://github.com/yy4382) uses `i.yfi.moe` as a subdomain of his domain `yfi.moe`.
 - That's it! Now your Public URL is `https://i.yfi.moe` or whatever you set it to be.
 
 ## Configuring CORS

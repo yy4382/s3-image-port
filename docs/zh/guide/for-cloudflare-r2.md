@@ -36,7 +36,7 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 - 前往 [Cloudflare dashboard](https://dash.cloudflare.com/) 并在左侧选择 R2；
 - 选择您刚刚创建的存储桶；
 - 点击 `设置`，在 `自定义域名` 标题右侧的 `连接域名` 按钮；
-- 使用您在 Cloudflare 上托管的域名的子域名。例如，我使用 `i.yfi.moe` 作为我的域名 `yfi.moe` 的子域名；
+- 使用您在 Cloudflare 上托管的域名的子域名。例如，该项目的作者 [@Yunfi](https://github.com/yy4382) 使用 `i.yfi.moe` 作为其域名 `yfi.moe` 的子域名；
 - 完成！现在您的 `Public URL` 即为 `https://i.yfi.moe` 或您设置的任何内容。
 
 ## 配置 CORS
