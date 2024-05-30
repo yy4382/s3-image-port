@@ -161,8 +161,18 @@
     "s3": {
       "title": "S3 Settings",
       "info": {
-        "title": "Privacy Statement",
-        "description": "All data on this site is stored in your local browser and is not uploaded to a server."
+        "privacy": {
+          "title": "Privacy Statement",
+          "description": "All data on this site is stored in your local browser and is not uploaded to a server."
+        },
+        "howTo": {
+          "title": "How to fill in these fields?",
+          "description": {
+            "part1": "Please check out our ",
+            "part2": "documentation",
+            "part3": "."
+          }
+        }
       },
       "form": {
         "endpoint": {

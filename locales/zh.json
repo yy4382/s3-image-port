@@ -161,8 +161,18 @@
     "s3": {
       "title": "S3 存储桶设置",
       "info": {
-        "title": "隐私声明",
-        "description": "你的 S3 访问密钥将被保存在浏览器的本地存储中，不会被上传到任何服务器。"
+        "privacy": {
+          "title": "隐私声明",
+          "description": "你的 S3 访问密钥将被保存在浏览器的本地存储中，不会被上传到任何服务器。"
+        },
+        "howTo": {
+          "title": "如何填充这些字段？",
+          "description": {
+            "part1": "请查阅我们的",
+            "part2": "文档",
+            "part3": "。"
+          }
+        }
       },
       "form": {
         "endpoint": {
