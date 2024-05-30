@@ -12,6 +12,12 @@ export default defineNuxtConfig({
     icons: ["mingcute"],
   },
   css: ["~/assets/css/global.css"],
+  routeRules: {
+    "/": { prerender: true },
+    "/upload": { ssr: false },
+    "/photos": { ssr: false },
+    "/settings": { ssr: false },
+  },
   i18n: {
     locales: [
       {
