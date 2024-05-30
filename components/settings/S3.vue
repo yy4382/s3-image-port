@@ -120,11 +120,30 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UAlert
-    :title="$t('settings.s3.info.title')"
-    :description="$t('settings.s3.info.description')"
-    class="my-4"
-  />
+  <div class="flex flex-col space-y-2 my-4">
+    <UAlert
+      :title="$t('settings.s3.info.privacy.title')"
+      :description="$t('settings.s3.info.privacy.description')"
+    />
+    <UAlert :title="$t('settings.s3.info.howTo.title')">
+      <template #description>
+        <span>{{ $t("settings.s3.info.howTo.description.part1") }}</span>
+        <ULink
+          :to="
+            $i18n.locale === 'zh'
+              ? 'https://docs.iport.yfi.moe/zh/guide/getting-started'
+              : 'https://docs.iport.yfi.moe/guide/getting-started'
+          "
+          inactive-class="text-primary-500 dark:text-primary-400
+          hover:text-primary-600 dark:hover:text-primary-500 hover:underline
+          hover:underline-offset-2 transition-colors"
+        >
+          {{ $t("settings.s3.info.howTo.description.part2") }}</ULink
+        >
+        <span>{{ $t("settings.s3.info.howTo.description.part3") }}</span>
+      </template>
+    </UAlert>
+  </div>
   <UForm
     ref="form"
     :schema="s3SettingsSchema"
