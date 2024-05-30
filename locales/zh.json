@@ -178,25 +178,25 @@
         "endpoint": {
           "title": "Endpoint",
           "description": "S3 存储桶的 Endpoint，不包含存储桶名称。",
-          "error": "您必须填入 S3 存储桶的 Endpoint。"
+          "error": "S3 存储桶的 Endpoint 是必需的。"
         },
         "bucketName": {
           "title": "Bucket Name",
           "description": "存储桶名称。",
-          "error": "您必须填入 S3 存储桶的名称。"
+          "error": "S3 存储桶的名称是必需的。"
         },
         "region": {
           "title": "Region",
-          "description": "S3 存储桶的 Region。",
-          "error": "您必须填入 S3 存储桶的 Region。"
+          "description": "S3 存储桶的所属区域。",
+          "error": "S3 存储桶的所属区域是必需的。"
         },
         "accessKeyId": {
           "title": "Access Key ID",
-          "error": "您必须填入 Access Key ID"
+          "error": "Access Key ID 是必需的。"
         },
         "secretAccessKey": {
           "title": "Secret Access Key",
-          "error": "您必须填入 Secret Access Key。"
+          "error": "Secret Access Key 是必需的。"
         },
         "publicUrl": {
           "title": "Public URL",

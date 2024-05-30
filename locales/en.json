@@ -178,25 +178,25 @@
         "endpoint": {
           "title": "Endpoint",
           "description": "The URL of the S3 endpoint. Bucket name is not included.",
-          "error": "You must enter your S3 endpoint."
+          "error": "Your S3 endpoint is required."
         },
         "bucketName": {
           "title": "Bucket Name",
           "description": "The name of the S3 bucket.",
-          "error": "You must enter the bucket name."
+          "error": "Your bucket name is required."
         },
         "region": {
           "title": "Region",
           "description": "The region of the S3 bucket.",
-          "error": "You must enter the region of your bucket."
+          "error": "The region of your bucket is required."
         },
         "accessKeyId": {
           "title": "Access Key ID",
-          "error": "You must enter your access key ID."
+          "error": "Your access key ID is required."
         },
         "secretAccessKey": {
           "title": "Secret Access Key",
-          "error": "You must enter your secret access key."
+          "error": "Your secret access key is required."
         },
         "publicUrl": {
           "title": "Public URL",
