@@ -125,7 +125,16 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :title="$t('settings.s3.info.privacy.title')"
       :description="$t('settings.s3.info.privacy.description')"
     />
-    <UAlert :title="$t('settings.s3.info.howTo.title')">
+    <UAlert
+      v-if="
+        !state.endpoint ||
+        !state.bucket ||
+        !state.region ||
+        !state.accKeyId ||
+        !state.secretAccKey
+      "
+      :title="$t('settings.s3.info.howTo.title')"
+    >
       <template #description>
         <span>{{ $t("settings.s3.info.howTo.description.part1") }}</span>
         <ULink
