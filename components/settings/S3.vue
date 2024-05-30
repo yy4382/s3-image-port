@@ -133,42 +133,68 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     @submit="onSubmit"
   >
     <UFormGroup
+      v-slot="{ error }"
       :label="$t('settings.s3.form.endpoint.title')"
       :description="$t('settings.s3.form.endpoint.description')"
       name="endpoint"
       required
+      :error="!state.endpoint && 'You must enter your S3 endpoint.'"
     >
-      <UInput v-model="state.endpoint" />
+      <UInput
+        v-model="state.endpoint"
+        :trailing-icon="
+          error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined
+        "
+      />
     </UFormGroup>
 
     <UFormGroup
+      v-slot="{ error }"
       :label="$t('settings.s3.form.bucketName.title')"
       :description="$t('settings.s3.form.bucketName.description')"
       name="bucket"
       required
+      :error="!state.bucket && 'You must enter the bucket name.'"
     >
-      <UInput v-model="state.bucket" />
+      <UInput
+        v-model="state.bucket"
+        :trailing-icon="
+          error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined
+        "
+      />
     </UFormGroup>
 
     <UFormGroup
+      v-slot="{ error }"
       :label="$t('settings.s3.form.region.title')"
       :description="$t('settings.s3.form.region.description')"
       name="region"
       required
+      :error="!state.region && 'You must enter the region of your bucket.'"
     >
-      <UInput v-model="state.region" />
+      <UInput
+        v-model="state.region"
+        :trailing-icon="
+          error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined
+        "
+      />
     </UFormGroup>
 
     <UFormGroup
+      v-slot="{ error }"
       :label="$t('settings.s3.form.accessKeyId.title')"
       name="accKeyId"
       required
+      :error="!state.accKeyId && 'You must enter your access key ID.'"
     >
       <UButtonGroup class="w-full">
         <UInput
           v-model="state.accKeyId"
           class="w-full"
           :type="showAccessKeyId ? 'text' : 'password'"
+          :trailing-icon="
+            error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined
+          "
         />
         <UButton
           :icon="showAccessKeyId ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'"
@@ -179,15 +205,20 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     </UFormGroup>
 
     <UFormGroup
+      v-slot="{ error }"
       :label="$t('settings.s3.form.secretAccessKey.title')"
       name="secretAccKey"
       required
+      :error="!state.secretAccKey && 'You must enter your secret access key.'"
     >
       <UButtonGroup class="w-full">
         <UInput
           v-model="state.secretAccKey"
           class="w-full"
           :type="showSecretAccessKey ? 'text' : 'password'"
+          :trailing-icon="
+            error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined
+          "
         />
         <!-- prettier-ignore-attribute :icon -->
         <UButton
