@@ -7,7 +7,7 @@ interface S3Photo {
 
 export default async function (
   config: S3Settings,
-  onlyOnce?: false,
+  onlyOnce?: boolean,
 ): Promise<Photo[]> {
   const listResponse = await list(config);
   let { IsTruncated, NextContinuationToken } = listResponse;
