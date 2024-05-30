@@ -167,21 +167,26 @@
       "form": {
         "endpoint": {
           "title": "Endpoint",
-          "description": "The URL of the S3 endpoint. Bucket name is not included."
+          "description": "The URL of the S3 endpoint. Bucket name is not included.",
+          "error": "You must enter your S3 endpoint."
         },
         "bucketName": {
           "title": "Bucket Name",
-          "description": "The name of the S3 bucket."
+          "description": "The name of the S3 bucket.",
+          "error": "You must enter the bucket name."
         },
         "region": {
           "title": "Region",
-          "description": "The region of the S3 bucket."
+          "description": "The region of the S3 bucket.",
+          "error": "You must enter the region of your bucket."
         },
         "accessKeyId": {
-          "title": "Access Key ID"
+          "title": "Access Key ID",
+          "error": "You must enter your access key ID."
         },
         "secretAccessKey": {
-          "title": "Secret Access Key"
+          "title": "Secret Access Key",
+          "error": "You must enter your secret access key."
         },
         "publicUrl": {
           "title": "Public URL",

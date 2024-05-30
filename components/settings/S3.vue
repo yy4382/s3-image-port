@@ -138,7 +138,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :description="$t('settings.s3.form.endpoint.description')"
       name="endpoint"
       required
-      :error="!state.endpoint && 'You must enter your S3 endpoint.'"
+      :error="!state.endpoint && $t('settings.s3.form.endpoint.error')"
     >
       <UInput
         v-model="state.endpoint"
@@ -154,7 +154,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :description="$t('settings.s3.form.bucketName.description')"
       name="bucket"
       required
-      :error="!state.bucket && 'You must enter the bucket name.'"
+      :error="!state.bucket && $t('settings.s3.form.bucketName.error')"
     >
       <UInput
         v-model="state.bucket"
@@ -170,7 +170,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :description="$t('settings.s3.form.region.description')"
       name="region"
       required
-      :error="!state.region && 'You must enter the region of your bucket.'"
+      :error="!state.region && $t('settings.s3.form.region.error')"
     >
       <UInput
         v-model="state.region"
@@ -185,7 +185,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :label="$t('settings.s3.form.accessKeyId.title')"
       name="accKeyId"
       required
-      :error="!state.accKeyId && 'You must enter your access key ID.'"
+      :error="!state.accKeyId && $t('settings.s3.form.accessKeyId.error')"
     >
       <UButtonGroup class="w-full">
         <UInput
@@ -209,7 +209,9 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :label="$t('settings.s3.form.secretAccessKey.title')"
       name="secretAccKey"
       required
-      :error="!state.secretAccKey && 'You must enter your secret access key.'"
+      :error="
+        !state.secretAccKey && $t('settings.s3.form.secretAccessKey.error')
+      "
     >
       <UButtonGroup class="w-full">
         <UInput
