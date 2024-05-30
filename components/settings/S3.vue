@@ -2,11 +2,10 @@
 import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 import { s3SettingsSchema } from "~/types";
-import generateTestKeyAndContent from "~/utils/generateTestKeyAndContent";
-import * as checkOp from "~/utils/testOps";
 
 const toast = useToast();
-const { s3Settings: state } = useSettings();
+const settings = useSettingsStore();
+const { s3Settings: state } = storeToRefs(settings);
 const { t } = useI18n();
 
 const form = ref();
@@ -21,39 +20,30 @@ const isTestingConnectivity = ref(false);
 
 type Schema = z.output<typeof s3SettingsSchema>;
 
+const failActions = [
+  {
+    label: t("settings.s3.submitFormButton.message.fail.actionLabel"),
+    click: () => {
+      window.open(
+        t("settings.s3.submitFormButton.message.fail.actionLink"),
+        "_blank",
+      );
+    },
+  },
+];
+
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
   isTestingConnectivity.value = true;
   toast.add({
     title: t("settings.s3.submitFormButton.message.try.title"),
   });
-  debug("Start testing S3 connectivity...");
-  debug("Generating test key and content...");
-  let { testKey, testContent } = generateTestKeyAndContent();
-  debug("Generated test key and content:", testKey, testContent);
-  try {
-    let limit = 3;
-    while ((await checkOp.exists(state.value, testKey)) && limit-- > 0) {
-      debug("Object already exists, generating new test key and content...");
-      ({ testKey, testContent } = generateTestKeyAndContent());
-    }
-  } catch (e) {
-    debug("Error occurred while checking if object exists:", e);
-    console.error(e);
+  const { get, upload, delete: del, list } = await settings.test();
+  if (!get) {
     toast.add({
       title: t("settings.s3.submitFormButton.message.fail.title"),
       // prettier-ignore
       description: t("settings.s3.submitFormButton.message.fail.desc4configOrCors"),
-      actions: [
-        {
-          label: t("settings.s3.submitFormButton.message.fail.actionLabel"),
-          click: () => {
-            window.open(
-              t("settings.s3.submitFormButton.message.fail.actionLink"),
-              "_blank",
-            );
-          },
-        },
-      ],
+      actions: failActions,
     });
     uploadChipColor.value = "red";
     listChipColor.value = "red";
@@ -61,60 +51,28 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
     isTestingConnectivity.value = false;
     return;
   }
-  debug("Unique test key and content generated.");
 
-  uploadChipColor.value = (await checkOp.upload(
-    state.value,
-    testKey,
-    testContent,
-  ))
-    ? "green"
-    : "red";
-  listChipColor.value = (await checkOp.list(state.value)) ? "green" : "red";
-  deleteChipColor.value = (await checkOp.delete(state.value, testKey))
-    ? "green"
-    : "red";
+  uploadChipColor.value = upload ? "green" : "red";
+  listChipColor.value = list ? "green" : "red";
+  deleteChipColor.value = del ? "green" : "red";
 
   isTestingConnectivity.value = false;
 
   const i18nSectionInToast = (() => {
-    if (
-      uploadChipColor.value === "green" &&
-      listChipColor.value === "green" &&
-      deleteChipColor.value === "green"
-    ) {
+    if (upload && list && del) {
       return "success";
-    } else if (
-      uploadChipColor.value === "red" &&
-      listChipColor.value === "red" &&
-      deleteChipColor.value === "red"
-    ) {
+    } else if (!upload && !list && !del) {
       return "fail";
     } else {
       return "warning";
     }
   })();
   toast.add({
-    title: t(
-      `settings.s3.submitFormButton.message.${i18nSectionInToast}.title`,
-    ),
-    description: t(
-      `settings.s3.submitFormButton.message.${i18nSectionInToast}.description`,
-    ),
-    actions:
-      i18nSectionInToast === "success"
-        ? undefined
-        : [
-            {
-              label: t("settings.s3.submitFormButton.message.fail.actionLabel"),
-              click: () => {
-                window.open(
-                  t("settings.s3.submitFormButton.message.fail.actionLink"),
-                  "_blank",
-                );
-              },
-            },
-          ],
+    // prettier-ignore
+    title: t(`settings.s3.submitFormButton.message.${i18nSectionInToast}.title`),
+    // prettier-ignore
+    description: t(`settings.s3.submitFormButton.message.${i18nSectionInToast}.description`),
+    actions: i18nSectionInToast === "success" ? undefined : failActions,
   });
 }
 </script>
