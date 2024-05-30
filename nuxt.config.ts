@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     "@nuxtjs/i18n",
     "@nuxt/eslint",
     "@nuxt/test-utils/module",
+    "@pinia/nuxt",
   ],
   ui: {
     icons: ["mingcute"],
