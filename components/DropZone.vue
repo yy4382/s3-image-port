@@ -33,38 +33,15 @@
         </div>
       </div>
     </div>
-    <!--for debug-->
-    <!-- <div v-if="filesData.length > 0">
-      <h3>Dropped Files:</h3>
-      <ul>
-        <li v-for="(file, index) in filesData" :key="index">
-          {{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)
-        </li>
-      </ul>
-    </div> -->
-    <!--for debug-->
   </div>
 </template>
 
 <script setup lang="ts">
-// const filesData = ref<File[]>([]);
-const filesData = defineModel<File[]>("filesData", {
-  default: [],
-});
-
-const updateFilesByName = (toUpdateFiles: File[], newFiles: File[]): File[] => {
-  const newFileNames = newFiles.map((file) => file.name);
-  const updatedFiles: File[] = [];
-  updatedFiles.push(...newFiles); // new files are always added
-  updatedFiles.push(
-    ...toUpdateFiles.filter((file) => !newFileNames.includes(file.name)), // old files are added if not in new files
-  );
-  return updatedFiles;
-};
+const uploadStore = useUploadStore();
 
 const onDrop = (files: File[] | null) => {
   if (files) {
-    filesData.value = updateFilesByName(filesData.value, files);
+    uploadStore.push(files);
   }
 };
 const dropZoneRef = ref<HTMLElement | null>(null);
@@ -78,8 +55,7 @@ const { open, onChange } = useFileDialog({
 });
 onChange((fileList) => {
   if (fileList) {
-    const files = Array.from(fileList);
-    filesData.value = updateFilesByName(filesData.value, files);
+    uploadStore.push(Array.from(fileList));
   }
 });
 </script>

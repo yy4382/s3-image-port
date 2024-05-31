@@ -10,7 +10,7 @@
           name="i-mingcute-pic-line"
           class="align-middle -translate-y-[0.1em]"
         />
-        <span>{{ props.file?.name }}</span>
+        <span>{{ file.name }}</span>
       </span>
       <span
         class="absolute right-2 top-1/2 -translate-y-1/2 bg-none group-hover:bg-white group-hover:dark:bg-gray-800 rounded-lg transition-all group-hover:opacity-100 opacity-0"
@@ -21,7 +21,7 @@
           variant="solid"
           icon="i-heroicons-x-mark-20-solid"
           class=""
-          @click="$emit('remove', file)"
+          @click="$emit('remove', index)"
         />
       </span>
     </div>
@@ -34,13 +34,16 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
-  file: File,
-});
+const uploadStore = useUploadStore();
+const props = defineProps<{ index: number }>();
+
+const { index } = toRefs(props);
+const file = computed(() => uploadStore.files[index.value]);
+
 defineEmits(["remove"]);
 const previewImage = computed(() => {
-  if (!props.file) return "";
-  return URL.createObjectURL(props.file);
+  if (!file.value) return "";
+  return URL.createObjectURL(file.value);
 });
 onBeforeUnmount(() => {
   URL.revokeObjectURL(previewImage.value);
