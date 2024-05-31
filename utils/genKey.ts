@@ -1,12 +1,7 @@
 import { DateTime, Interval } from "luxon";
 
 export default function (file: File, type: string, keyTemplate: string) {
-  const settings = useSettingsStore();
-
-  if (
-    settings.app.keyTemplate === undefined ||
-    settings.app.keyTemplate.trim().length === 0
-  ) {
+  if (keyTemplate === undefined || keyTemplate.trim().length === 0) {
     // If key template is not provided, use default
     keyTemplate = defaultKeyTemplate;
   }
