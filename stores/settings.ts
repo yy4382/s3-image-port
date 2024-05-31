@@ -1,10 +1,11 @@
 import type { AppSettings, S3Settings } from "~/types";
 import { appSettingsSchema, s3SettingsSchema } from "~/types";
 import * as checkOp from "~/utils/testOps";
+import key2UrlUtil from "~/utils/key2Url";
 
 export const useSettingsStore = defineStore("settings", () => {
   // MARK: states
-  const s3Settings = useLocalStorage("s3-settings", {
+  const s3 = useLocalStorage("s3-settings", {
     endpoint: "",
     bucket: "",
     accKeyId: "",
@@ -12,7 +13,7 @@ export const useSettingsStore = defineStore("settings", () => {
     region: "",
     pubUrl: "",
   } satisfies S3Settings as S3Settings);
-  const appSettings = useLocalStorage("app-settings", {
+  const app = useLocalStorage("app-settings", {
     enableAutoRefresh: false,
     enableFuzzySearch: true,
     fuzzySearchThreshold: 0.6,
@@ -22,12 +23,13 @@ export const useSettingsStore = defineStore("settings", () => {
     keyTemplate: "",
   } satisfies AppSettings as AppSettings);
 
-  const validAppSetting = computed(
-    () => appSettingsSchema.safeParse(appSettings.value).success,
-  );
-  const validS3Setting = computed(
-    () => s3SettingsSchema.safeParse(s3Settings.value).success,
-  );
+  const validity = computed(() => ({
+    app: appSettingsSchema.safeParse(app.value).success,
+    s3: s3SettingsSchema.safeParse(s3.value).success,
+    all:
+      appSettingsSchema.safeParse(app.value).success &&
+      s3SettingsSchema.safeParse(s3.value).success,
+  }));
 
   //MARK: actions
 
@@ -42,7 +44,7 @@ export const useSettingsStore = defineStore("settings", () => {
     debug("Generated test key and content:", testKey, testContent);
     try {
       let limit = 3;
-      while ((await checkOp.exists(s3Settings.value, testKey)) && limit-- > 0) {
+      while ((await checkOp.exists(s3.value, testKey)) && limit-- > 0) {
         debug("Object already exists, generating new test key and content...");
         ({ testKey, testContent } = generateTestKeyAndContent());
       }
@@ -57,9 +59,9 @@ export const useSettingsStore = defineStore("settings", () => {
     }
     debug("Unique test key and content generated.");
 
-    const upload = await checkOp.upload(s3Settings.value, testKey, testContent);
-    const list = await checkOp.list(s3Settings.value);
-    const del = await checkOp.delete(s3Settings.value, testKey);
+    const upload = await checkOp.upload(s3.value, testKey, testContent);
+    const list = await checkOp.list(s3.value);
+    const del = await checkOp.del(s3.value, testKey);
     return {
       get: true,
       upload,
@@ -68,28 +70,32 @@ export const useSettingsStore = defineStore("settings", () => {
     };
   };
 
-  const list = (onlyOnce: boolean) => {
-    listObj(s3Settings.value, onlyOnce);
+  const list = (onlyOnce?: boolean) => {
+    return listObj(s3.value, onlyOnce);
   };
 
   const del = (key: string) => {
-    deleteObj(key, s3Settings.value);
+    return deleteObj(key, s3.value);
   };
 
   const upload = (file: string | Blob | Buffer, key: string) => {
-    uploadObj(file, key, s3Settings.value);
+    return uploadObj(file, key, s3.value);
+  };
+
+  const key2Url = (key: string) => {
+    return key2UrlUtil(key, s3.value);
   };
 
   return {
-    s3Settings,
-    appSettings,
-    validAppSetting,
-    validS3Setting,
+    s3,
+    app,
+    validity,
 
     test,
     list,
     del,
     upload,
+    key2Url,
   };
 });
 

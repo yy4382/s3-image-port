@@ -1,22 +1,16 @@
 import imageCompression from "browser-image-compression";
+import mime from "mime";
 
 export default async function (file: File): Promise<File> {
-  const { appSettings } = useValidSettings();
-  let fileType = file.type;
-  switch (appSettings.value.convertType) {
-    case "none":
-      break;
-    case "webp":
-      fileType = "image/webp";
-      break;
-    case "jpg":
-      fileType = "image/jpeg";
-      break;
-  }
+  const { app: appSettings } = useSettingsStore();
+  const fileType =
+    appSettings.convertType === "none"
+      ? file.type
+      : mime.getType(appSettings.convertType) || "image/jpeg";
+
   const compressedFile = await imageCompression(file, {
-    maxSizeMB: appSettings.value.compressionMaxSize || undefined,
-    maxWidthOrHeight:
-      appSettings.value.compressionMaxWidthOrHeight || undefined,
+    maxSizeMB: appSettings.compressionMaxSize || undefined,
+    maxWidthOrHeight: appSettings.compressionMaxWidthOrHeight || undefined,
     useWebWorker: true,
     fileType,
   });

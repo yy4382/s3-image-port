@@ -200,7 +200,7 @@
 import { convertTypes, appSettingsSchema } from "~/types";
 import { defaultKeyTemplate } from "~/utils/uploadObj";
 
-const { appSettings: state } = useSettings();
+const { app: state } = storeToRefs(useSettingsStore());
 const isDefaultKeyTemplate = computed(
   () =>
     state.value.keyTemplate === defaultKeyTemplate ||

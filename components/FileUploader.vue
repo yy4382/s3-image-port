@@ -14,7 +14,7 @@
         :label="$t('upload.fileUploader.uploadButton')"
         variant="outline"
         :loading="uploading"
-        :disabled="!validS3Setting || !validAppSetting"
+        :disabled="!settings.validity.all"
         block
         @click="upload"
       />
@@ -26,8 +26,7 @@
 import type { UploadedFileLinkObj } from "~/types";
 
 const { t } = useI18n();
-const { s3Settings, appSettings, validS3Setting, validAppSetting } =
-  useValidSettings();
+const settings = useSettingsStore();
 const localePath = useLocalePath();
 const router = useRouter();
 const toast = useToast();
@@ -44,18 +43,18 @@ const removeFileData = (fileToRemove: File) => {
 const upload = async () => {
   uploading.value = true;
   for (const file of filesData.value) {
-    const key = genKey(file, appSettings.value.convertType);
+    const key = genKey(file, settings.app.convertType);
     const compressedFile = await compressAndConvert(file);
 
     try {
-      await uploadObj(compressedFile, key, s3Settings.value);
+      await settings.upload(compressedFile, key);
       removeFileData(file);
       toast.add({
         title: t("upload.message.uploaded.title"),
         description: key,
       });
       uploadedLinks.value.push({
-        link: key2Url(key, s3Settings.value),
+        link: settings.key2Url(key),
         name: file.name,
       });
     } catch (e) {

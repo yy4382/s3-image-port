@@ -7,7 +7,7 @@
           <div class="flex gap-2 items-center">
             <UButton
               icon="i-mingcute-refresh-2-line"
-              :disabled="!validS3Setting"
+              :disabled="!settings.validity.s3"
               variant="outline"
               :loading="isLoading"
               @click="listPhotos"
@@ -37,15 +37,15 @@
                 icon="i-mingcute-delete-3-line"
                 color="red"
                 variant="outline"
-                :disabled="!validS3Setting"
+                :disabled="!settings.validity.s3"
               />
             </BaseSecondConfirm>
           </div>
           <!-- prettier-ignore-attribute @update:photos-to-display -->
           <PhotoDisplayOptions
             :photos="photos"
-            :enable-fuzzy-search="appSettings.enableFuzzySearch"
-            :fuzzy-search-threshold="appSettings.fuzzySearchThreshold"
+            :enable-fuzzy-search="settings.app.enableFuzzySearch"
+            :fuzzy-search-threshold="settings.app.fuzzySearchThreshold"
             @update:photos-to-display="(v) => { photosToDisplay = v; }"
           />
         </div>
@@ -69,8 +69,7 @@ const router = useRouter();
 const toast = useToast();
 const photos: Ref<Photo[]> = useStorage("s3-photos", []);
 
-const { s3Settings, appSettings, validS3Setting, validAppSetting } =
-  useValidSettings();
+const settings = useSettingsStore();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const isLoading = ref(false);
@@ -90,15 +89,15 @@ function clearSelectedPhotos() {
 }
 
 onMounted(() => {
-  if (!validS3Setting.value) {
+  if (!settings.validity.s3) {
     useWrongSettingToast("s3");
     console.error("Invalid S3 settings");
   }
-  if (!validAppSetting.value) {
+  if (!settings.validity.app) {
     useWrongSettingToast("app");
     console.error("Invalid app settings");
   }
-  if (appSettings.value.enableAutoRefresh) {
+  if (settings.app.enableAutoRefresh) {
     listPhotos();
   }
 });
@@ -109,7 +108,7 @@ async function listPhotos() {
     toast.add({
       title: t("photos.message.listPhotos.try.title"),
     });
-    photos.value = (await listObj(s3Settings.value)).reverse();
+    photos.value = await settings.list();
     toast.add({
       title: t("photos.message.listPhotos.success.title"),
     });
@@ -137,7 +136,7 @@ async function deletePhoto(keyOrKeys: string | string[]) {
   const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
   try {
     toast.add({ title: t("photos.message.deletePhoto.try.title") });
-    await Promise.all(keys.map((key) => deleteObj(key, s3Settings.value)));
+    await Promise.all(keys.map((key) => settings.del(key)));
     toast.add({ title: t("photos.message.deletePhoto.success.title") });
   } catch (error) {
     toast.add({ title: t("photos.message.deletePhoto.fail.title") });

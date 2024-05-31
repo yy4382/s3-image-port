@@ -68,6 +68,6 @@ const checkObjectExists = async (s3Settings: S3Settings, key: string) => {
 export {
   checkGrantedToUpload as upload,
   checkGrantedToList as list,
-  checkGrantedToDelete as delete,
+  checkGrantedToDelete as del,
   checkObjectExists as exists,
 };
