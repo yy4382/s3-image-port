@@ -32,14 +32,10 @@ export const s3SettingsSchema = z.object({
 
 export type ConvertType = "none" | "jpg" | "webp";
 export const convertTypes = ["none", "jpg", "webp"] as const;
-export interface AppSettings {
+export interface AppSettings extends UploadFileConfig {
   enableAutoRefresh: boolean;
   enableFuzzySearch: boolean;
   fuzzySearchThreshold: number;
-  convertType: ConvertType;
-  compressionMaxSize: number | "";
-  compressionMaxWidthOrHeight: number | "";
-  keyTemplate: string;
 }
 
 export const appSettingsSchema = z.object({
@@ -56,3 +52,12 @@ export const appSettingsSchema = z.object({
 });
 
 export type SortByOpts = "date" | "key";
+
+export interface ConvertSettings {
+  convertType: ConvertType;
+  compressionMaxSize: number | "";
+  compressionMaxWidthOrHeight: number | "";
+}
+export interface UploadFileConfig extends ConvertSettings {
+  keyTemplate: string;
+}

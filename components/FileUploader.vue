@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-2">
-    <DropZone v-model:files-data="filesData" />
-    <div v-if="filesData.length !== 0" class="space-y-2">
+    <DropZone />
+    <div v-if="uploadStore.length !== 0" class="space-y-2">
       <div class="flex flex-wrap gap-2">
         <FileBar
-          v-for="fileData of filesData"
-          :key="fileData.name"
-          :file="fileData"
+          v-for="(key, index) of uploadStore.keys"
+          :key="key"
+          :index="index"
           @remove="removeFileData"
         />
       </div>
@@ -35,30 +35,33 @@ const uploadedLinks = defineModel("uploadedLinks", {
   default: [],
 });
 const uploading = ref(false);
-const filesData = ref<File[]>([]);
-const removeFileData = (fileToRemove: File) => {
-  filesData.value = filesData.value.filter((file) => file !== fileToRemove);
+const uploadStore = useUploadStore();
+const removeFileData = (index: number) => {
+  uploadStore.remove(index);
 };
 
 const upload = async () => {
   uploading.value = true;
-  for (const file of filesData.value) {
-    const key = genKey(file, settings.app.convertType);
-    const compressedFile = await compressAndConvert(file);
 
-    try {
-      await settings.upload(compressedFile, key);
-      removeFileData(file);
+  // TODO: localize the toast messages
+  toast.add({
+    title: "Uploading...",
+    description: "Please wait...",
+  });
+
+  uploadStore.upload((key, name, success) => {
+    debug(key, name, success);
+    if (success) {
       toast.add({
         title: t("upload.message.uploaded.title"),
         description: key,
       });
       uploadedLinks.value.push({
         link: settings.key2Url(key),
-        name: file.name,
+        name: name,
       });
-    } catch (e) {
-      // console.error(e);
+      uploadStore.reset();
+    } else {
       toast.add({
         title: t("upload.message.uploadFailed.title"),
         description: key,
@@ -70,7 +73,7 @@ const upload = async () => {
         ],
       });
     }
-  }
+  });
   uploading.value = false;
 };
 </script>
