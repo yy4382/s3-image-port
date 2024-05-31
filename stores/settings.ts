@@ -1,3 +1,4 @@
+import { skipHydrate } from "pinia";
 import type { AppSettings, S3Settings } from "~/types";
 import { appSettingsSchema, s3SettingsSchema } from "~/types";
 import * as checkOp from "~/utils/testOps";
@@ -87,9 +88,9 @@ export const useSettingsStore = defineStore("settings", () => {
   };
 
   return {
-    s3,
-    app,
-    validity,
+    s3: skipHydrate(s3),
+    app: skipHydrate(app),
+    validity: skipHydrate(validity),
 
     test,
     list,
