@@ -19,14 +19,14 @@ export const useUploadStore = defineStore("upload", () => {
   );
 
   watch(convertSettings, (newVal, oldVal) => {
-    configs.value.forEach((config) => {
+    configs.value.forEach((config, index) => {
       if (
         config.convertType === oldVal.convertType &&
         config.compressionMaxSize === oldVal.compressionMaxSize &&
         config.compressionMaxWidthOrHeight ===
           oldVal.compressionMaxWidthOrHeight
       ) {
-        config = { ...newVal, keyTemplate: config.keyTemplate };
+        configs.value[index] = { ...newVal, keyTemplate: config.keyTemplate };
       }
     });
   });
@@ -45,6 +45,31 @@ export const useUploadStore = defineStore("upload", () => {
         }
       });
     },
+  );
+  watch(
+    () =>
+      configs.value.map((config) => [config.keyTemplate, config.convertType]),
+    (newPartialConfigs, oldPartialConfigs) => {
+      if (oldPartialConfigs.length === 0)
+        oldPartialConfigs = Array(4).fill([
+          settings.app.keyTemplate,
+          settings.app.convertType,
+        ]);
+      if (newPartialConfigs.length !== oldPartialConfigs.length) return;
+      keys.value = newPartialConfigs.map(
+        ([keyTemplate, convertType], index) => {
+          if (
+            keyTemplate === oldPartialConfigs[index][0] &&
+            convertType === oldPartialConfigs[index][1]
+          ) {
+            return keys.value[index];
+          } else {
+            return genKey(files.value[index], convertType, keyTemplate);
+          }
+        },
+      );
+    },
+    { deep: true },
   );
 
   const keysAreDifferent = computed(() => {
