@@ -1,15 +1,17 @@
 import { DateTime, Interval } from "luxon";
 
 export default function (file: File, type: string) {
-  const { appSettings } = useValidSettings();
+  const settings = useSettingsStore();
+
   const keyTemplate =
-    appSettings.value.keyTemplate === undefined ||
-    appSettings.value.keyTemplate.trim().length === 0
+    settings.app.keyTemplate === undefined ||
+    settings.app.keyTemplate.trim().length === 0
       ? defaultKeyTemplate
-      : appSettings.value.keyTemplate.trim();
+      : settings.app.keyTemplate.trim();
+
   const now = DateTime.now();
-  const todayStart = now.startOf("day");
-  const interval = Interval.fromDateTimes(todayStart, now);
+  const interval = Interval.fromDateTimes(now.startOf("day"), now);
+
   const data: Record<string, string> = {
     year: now.toFormat("yyyy"),
     month: now.toFormat("LL"),

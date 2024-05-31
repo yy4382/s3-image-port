@@ -5,7 +5,7 @@ import { s3SettingsSchema } from "~/types";
 
 const toast = useToast();
 const settings = useSettingsStore();
-const { s3Settings: state } = storeToRefs(settings);
+const { s3: state } = storeToRefs(settings);
 const { t } = useI18n();
 
 const form = ref();

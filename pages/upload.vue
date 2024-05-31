@@ -58,14 +58,13 @@
 import { UseClipboard } from "@vueuse/components";
 import type { UploadedFileLinkObj } from "~/types";
 const toast = useToast();
-const { validS3Setting, validAppSetting } = useValidSettings();
-
+const settings = useSettingsStore();
 onMounted(() => {
-  if (!validS3Setting.value) {
+  if (!settings.validity.s3) {
     useWrongSettingToast("s3");
     console.error("Invalid S3 settings");
   }
-  if (!validAppSetting.value) {
+  if (!settings.validity.app) {
     useWrongSettingToast("app");
     console.error("Invalid App settings");
   }
