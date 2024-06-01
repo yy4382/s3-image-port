@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-2">
-    <DropZone />
+    <UploadDropZone />
     <div v-if="uploadStore.length !== 0" class="space-y-2">
       <div class="flex flex-wrap gap-2">
-        <FileBar
+        <UploadPreviewBar
           v-for="(key, index) of uploadStore.keys"
           :key="key"
           :index="index"
