@@ -72,6 +72,12 @@ export const useUploadStore = defineStore("upload", () => {
     { deep: true },
   );
 
+  const processedSize = computed(() =>
+    processedFiles.value.map((processedFile) =>
+      processedFile?.size ? humanFileSize(processedFile.size) : undefined,
+    ),
+  );
+
   const keysAreDifferent = computed(() => {
     for (let i = 0; i < keys.value.length; i++) {
       for (let j = i + 1; j < keys.value.length; j++) {
@@ -149,6 +155,8 @@ export const useUploadStore = defineStore("upload", () => {
     configs,
     keysAreDifferent,
     length,
+    processedSize,
+    processFile,
     push,
     upload,
     remove,
@@ -165,5 +173,17 @@ function isSameFile(file1: File, file2: File) {
     file1.name === file2.name &&
     file1.size === file2.size &&
     file1.lastModified === file2.lastModified
+  );
+}
+
+/**
+ * Convert a number with a unit Byte to human readable string using KB, MB
+ */
+function humanFileSize(size: number) {
+  const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return (
+    (size / Math.pow(1024, i)).toFixed(2) +
+    " " +
+    ["B", "KB", "MB", "GB", "TB"][i]
   );
 }
