@@ -79,7 +79,7 @@ export const useSettingsStore = defineStore("settings", () => {
     return deleteObj(key, s3.value);
   };
 
-  const upload = (file: string | Blob | Buffer, key: string) => {
+  const upload = (file: File | string, key: string) => {
     return uploadObj(file, key, s3.value);
   };
 

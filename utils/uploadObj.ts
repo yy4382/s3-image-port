@@ -5,7 +5,7 @@ import newClient from "./newClient";
 export const defaultKeyTemplate =
   "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
 export default async function (
-  file: string | Blob | Buffer,
+  file: File | string,
   key: string,
   config: S3Settings,
 ) {
@@ -16,14 +16,25 @@ export default async function (
     throw new Error("Failed construct client: " + e);
   }
   const fileExt = key.split(".").pop();
-  if (!fileExt) {
-    throw new Error("File extension not found");
+
+  let mimeType = "application/octet-stream";
+  if (file instanceof String) {
+    mimeType = "text/plain";
+  } else if (file instanceof File) {
+    if (file.type) {
+      mimeType = file.type;
+    } else if (fileExt) {
+      mimeType = mime.getType(fileExt) ?? "application/octet-stream";
+    } else {
+      mimeType = "application/octet-stream";
+    }
   }
+
   const command = new PutObjectCommand({
     Bucket: config.bucket,
     Key: key,
     Body: file,
-    ContentType: mime.getType(fileExt) || "application/octet-stream",
+    ContentType: mimeType,
   });
   const response = await client.send(command);
   // If the HTTP status code is not 200, throw an error
