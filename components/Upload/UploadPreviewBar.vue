@@ -13,14 +13,22 @@
         <span>{{ file.name }}</span>
       </span>
       <span
-        class="absolute right-2 top-1/2 -translate-y-1/2 bg-none group-hover:bg-white group-hover:dark:bg-gray-800 rounded-lg transition-all group-hover:opacity-100 opacity-0"
+        class="absolute right-2 top-1/2 -translate-y-1/2 transition-all group-hover:opacity-100 opacity-0 flex gap-[0.125rem]"
       >
+        <UButton
+          icon="i-mingcute-edit-2-line"
+          size="xs"
+          color="white"
+          variant="solid"
+          class="bg-none group-hover:bg-white group-hover:dark:bg-gray-800 rounded-lg transition-all"
+          @click="modalOpen = true"
+        />
         <UButton
           size="xs"
           color="white"
           variant="solid"
           icon="i-heroicons-x-mark-20-solid"
-          class=""
+          class="bg-none group-hover:bg-white group-hover:dark:bg-gray-800 rounded-lg transition-all"
           @click="$emit('remove', index)"
         />
       </span>
@@ -31,14 +39,116 @@
       </div>
     </template>
   </UPopover>
+  <UModal v-model="modalOpen">
+    <UCard>
+      <div class="flex flex-col gap-2 mb-4">
+        <p class="text-sm items-center inline-flex">
+          <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
+          <span :title="key" class="truncate block">
+            Upload Path: {{ key }}
+          </span>
+        </p>
+        <p class="text-sm items-center inline-flex">
+          <Icon name="i-mingcute-file-line" class="shrink-0 mr-2" />
+          <span>Processed Size:&nbsp;</span>
+          <USkeleton v-if="isProcessing" class="w-12 h-5" />
+          <span v-else class="truncate block">
+            {{
+              uploadStore.processedSize[index] === undefined
+                ? "??"
+                : uploadStore.processedSize[index]
+            }}
+          </span>
+          <UButton
+            icon="i-mingcute-refresh-2-line"
+            variant="link"
+            size="xs"
+            @click="
+              isProcessing = true;
+              uploadStore
+                .processFile(index, true)
+                .finally(() => (isProcessing = false));
+            "
+          />
+        </p>
+      </div>
+      <div class="flex flex-col gap-4">
+        <UFormGroup :label="$t('settings.app.keyTemplate.title')">
+          <UInput v-model="keyTemplate" />
+        </UFormGroup>
+        <!--convert-->
+        <UFormGroup
+          :label="$t('settings.app.convert.title')"
+          :description="$t('settings.app.convert.description')"
+          name="convertType"
+        >
+          <USelectMenu
+            v-model="uploadStore.configs[index].convertType"
+            :options="Array.from(convertTypes)"
+          />
+        </UFormGroup>
+        <!--compress-->
+        <div>
+          <div class="flex content-center items-center justify-between text-sm">
+            {{ $t("settings.app.compress.title") }}
+          </div>
+          <p class="text-gray-500 dark:text-gray-400 text-sm">
+            {{ $t("settings.app.compress.description") }}
+          </p>
+          <div class="flex flex-row gap-2 mt-1">
+            <UFormGroup name="compressionMaxSize" class="w-full">
+              <UInput
+                v-model="uploadStore.configs[index].compressionMaxSize"
+                :placeholder="$t('settings.app.compress.options.maxSize.title')"
+                type="number"
+                min="0"
+              >
+                <template #trailing>
+                  <span class="text-gray-500 dark:text-gray-400 text-xs"
+                    >MB</span
+                  >
+                </template>
+              </UInput>
+            </UFormGroup>
+            <UFormGroup name="compressionMaxWidthOrHeight" class="w-full">
+              <UInput
+                v-model="uploadStore.configs[index].compressionMaxWidthOrHeight"
+                :placeholder="
+                  $t('settings.app.compress.options.maxWidthOrHeight.title')
+                "
+                type="number"
+                min="1"
+              >
+                <template #trailing>
+                  <span class="text-gray-500 dark:text-gray-400 text-xs"
+                    >px</span
+                  >
+                </template>
+              </UInput>
+            </UFormGroup>
+          </div>
+        </div>
+      </div>
+    </UCard>
+  </UModal>
 </template>
 
 <script setup lang="ts">
+import { convertTypes } from "~/types";
 const uploadStore = useUploadStore();
 const props = defineProps<{ index: number }>();
 
 const { index } = toRefs(props);
 const file = computed(() => uploadStore.files[index.value]);
+const key = computed(() => uploadStore.keys[index.value]);
+
+const keyTemplate = computed({
+  get: () => uploadStore.configs[index.value].keyTemplate,
+  set: (v) => (uploadStore.configs[index.value].keyTemplate = v),
+});
+
+const modalOpen = ref(false);
+const isProcessing = ref(false);
 
 defineEmits(["remove"]);
 const previewImage = computed(() => {
