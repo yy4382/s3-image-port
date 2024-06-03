@@ -335,22 +335,26 @@ const photosToDisplay = computed(() => {
   if (debouncedSearchTerm.value.trim() === "") {
     // Sort related options are only available when search term is empty
     if (sortBy.value === "key") {
-      return preFiltered.sort((a, b) =>
-        !sortOrderIsDescending.value
-          ? a.Key.localeCompare(b.Key)
-          : b.Key.localeCompare(a.Key),
-      );
+      return preFiltered
+        .slice()
+        .sort((a, b) =>
+          !sortOrderIsDescending.value
+            ? a.Key.localeCompare(b.Key)
+            : b.Key.localeCompare(a.Key),
+        );
     } else {
-      return preFiltered.sort((a, b) =>
-        !sortOrderIsDescending.value
-          ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
-          : compareDesc(new Date(a.LastModified), new Date(b.LastModified)),
-      );
+      // assert sortBy.value === "date"
+      return preFiltered
+        .slice()
+        .sort((a, b) =>
+          !sortOrderIsDescending.value
+            ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
+            : compareDesc(new Date(a.LastModified), new Date(b.LastModified)),
+        );
     }
   }
 
   // Fuzzy search
-
   if (!enableFuzzySearch.value)
     // not enabled, use simple search
     return preFiltered.filter((photo) =>
@@ -375,5 +379,6 @@ const photosToDisplay = computed(() => {
     (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key),
   );
 });
+
 watchEffect(() => emit("update:photosToDisplay", photosToDisplay.value));
 </script>
