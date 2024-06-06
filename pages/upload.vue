@@ -18,11 +18,12 @@
                 <UButton
                   color="black"
                   variant="link"
+                  class="w-full"
                   @click="
                     copy() && toast.add({ title: $t('upload.message.copied') })
                   "
                 >
-                  {{ link.link }}
+                  <span class="truncate">{{ link.link }}</span>
                 </UButton>
               </UseClipboard>
             </li>
@@ -37,11 +38,12 @@
                 <UButton
                   color="black"
                   variant="link"
+                  class="w-full"
                   @click="
                     copy() && toast.add({ title: $t('upload.message.copied') })
                   "
                 >
-                  {{ link.markdown }}
+                  <span class="truncate">{{ link.markdown }}</span>
                 </UButton>
               </UseClipboard>
             </li>
@@ -71,7 +73,12 @@ onMounted(() => {
 
 const uploadedLinks: Ref<UploadedFileLinkObj[]> = ref(
   import.meta.env.DEV
-    ? [{ link: "https://example.com/abc.png", name: "abc.png" }]
+    ? [
+        {
+          link: "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabc.png",
+          name: "abc.png",
+        },
+      ]
     : [],
 );
 const uploadedLinksFormatted = computed(() =>
