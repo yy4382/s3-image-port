@@ -133,7 +133,8 @@ describe("Upload Store", async () => {
       "i/2021/02/01/4e77u-i.jpg",
       "i/2021/02/01/4e77v-i.jpg",
     ]);
-    // await nextTick();
+
+    await nextTick(); // wait watcher's old value to be set
 
     uploadStore.configs[0].keyTemplate = "a";
     await nextTick();
@@ -189,6 +190,8 @@ describe("Upload Store", async () => {
       "i/2021/02/01/4e77u-i.jpg",
       "i/2021/02/01/4e77v-i.jpg",
     ]);
+
+    await nextTick(); // wait watcher's old value to be set
 
     uploadStore.configs[0].keyTemplate = "a";
     uploadStore.configs[1].compressionMaxSize = 10;
