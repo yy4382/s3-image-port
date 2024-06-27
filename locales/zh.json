@@ -53,6 +53,10 @@
       "fileTypeNotSupported": {
         "title": "不支持的文件类型"
       },
+      "uploadStarted": {
+        "title": "上传中 ...",
+        "description": "请稍等"
+      },
       "uploaded": {
         "title": "文件已上传"
       },

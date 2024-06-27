@@ -39,10 +39,9 @@ const uploadStore = useUploadStore();
 const upload = async () => {
   uploading.value = true;
 
-  // TODO: localize the toast messages
   toast.add({
-    title: "Uploading...",
-    description: "Please wait...",
+    title: t("upload.message.uploadStarted.title"),
+    description: t("upload.message.uploadStarted.description"),
   });
 
   uploadStore.upload((key, name, success) => {
