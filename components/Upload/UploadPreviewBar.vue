@@ -29,49 +29,29 @@
           variant="solid"
           icon="i-heroicons-x-mark-20-solid"
           class="bg-none group-hover:bg-white group-hover:dark:bg-gray-800 rounded-lg transition-all"
-          @click="$emit('remove', index)"
+          @click="uploadStore.remove(index)"
         />
       </span>
     </div>
     <template #panel>
-      <div class="p-2">
+      <div class="p-4 flex flex-col gap-4">
+        <UploadPreviewInfo :index="index" />
+        <UButton
+          icon="i-mingcute-edit-2-line"
+          color="white"
+          variant="solid"
+          block
+          @click="modalOpen = true"
+        >
+          Edit Config
+        </UButton>
         <img :src="previewImage" class="w-72" />
       </div>
     </template>
   </UPopover>
   <UModal v-model="modalOpen">
     <UCard>
-      <div class="flex flex-col gap-2 mb-4">
-        <p class="text-sm items-center inline-flex">
-          <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
-          <span :title="key" class="truncate block">
-            Upload Path: {{ key }}
-          </span>
-        </p>
-        <p class="text-sm items-center inline-flex">
-          <Icon name="i-mingcute-file-line" class="shrink-0 mr-2" />
-          <span>Processed Size:&nbsp;</span>
-          <USkeleton v-if="isProcessing" class="w-12 h-5" />
-          <span v-else class="truncate block">
-            {{
-              uploadStore.processedSize[index] === undefined
-                ? "??"
-                : uploadStore.processedSize[index]
-            }}
-          </span>
-          <UButton
-            icon="i-mingcute-refresh-2-line"
-            variant="link"
-            size="xs"
-            @click="
-              isProcessing = true;
-              uploadStore
-                .processFile(index, true)
-                .finally(() => (isProcessing = false));
-            "
-          />
-        </p>
-      </div>
+      <UploadPreviewInfo :index="index" class="mb-4" />
       <div class="flex flex-col gap-4">
         <UFormGroup :label="$t('settings.app.keyTemplate.title')">
           <UInput v-model="keyTemplate" />
@@ -140,7 +120,6 @@ const props = defineProps<{ index: number }>();
 
 const { index } = toRefs(props);
 const file = computed(() => uploadStore.files[index.value]);
-const key = computed(() => uploadStore.keys[index.value]);
 
 const keyTemplate = computed({
   get: () => uploadStore.configs[index.value].keyTemplate,
@@ -148,9 +127,7 @@ const keyTemplate = computed({
 });
 
 const modalOpen = ref(false);
-const isProcessing = ref(false);
 
-defineEmits(["remove"]);
 const previewImage = computed(() => {
   if (!file.value) return "";
   return URL.createObjectURL(file.value);
