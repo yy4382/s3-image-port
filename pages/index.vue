@@ -58,15 +58,25 @@
             {{ $t("index.actions.readDocs") }}
           </UButton>
           <UButton
-            v-if="width >= 640"
             color="gray"
             variant="solid"
             to="https://github.com/yy4382/s3-image-port"
             icon="i-mingcute-github-fill"
+            :size="width < 640 ? 'xs' : 'md'"
           >
             {{ $t("index.actions.viewSource") }}
           </UButton>
         </div>
+        <UCheckbox
+          v-model="settingsStore.app.noLongerShowRootPage"
+          name="notifications"
+          :label="$t('index.noLongerShow')"
+          :class="{
+            'opacity-40 hover:opacity-80':
+              !settingsStore.app.noLongerShowRootPage,
+          }"
+          class="pt-2 transition-opacity"
+        />
       </div>
     </div>
   </UContainer>
@@ -75,4 +85,30 @@
 <script lang="ts" setup>
 const localePath = useLocalePath();
 const { width } = useWindowSize();
+const toast = useToast();
+const route = useRoute();
+const { t } = useI18n();
+const settingsStore = useSettingsStore();
+watch(
+  () => settingsStore.app.noLongerShowRootPage,
+  (value) => {
+    if (value) {
+      toast.add({
+        title: t("index.toast.noLongerShow.title"),
+        description: t("index.toast.noLongerShow.description"),
+      });
+    }
+  },
+);
+
+onBeforeMount(() => {
+  /* cSpell:ignore noredirect */
+  if (route.query.noredirect) {
+    useRouter().replace(localePath("/"));
+    return;
+  }
+  if (settingsStore.app.noLongerShowRootPage) {
+    navigateTo(localePath("/upload"));
+  }
+});
 </script>

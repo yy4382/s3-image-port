@@ -29,6 +29,13 @@
       "getStarted": "Get Started",
       "readDocs": "Read Docs",
       "viewSource": "View Source"
+    },
+    "noLongerShow": "Don't show this page again",
+    "toast": {
+      "noLongerShow": {
+        "title": "The index page will not be shown again.",
+        "description": "Go to Settings to re-enable it."
+      }
     }
   },
   "upload": {
@@ -220,7 +227,9 @@
           "delete": "Delete"
         },
         "message": {
-          "try": { "title": "Testing connectivity ..." },
+          "try": {
+            "title": "Testing connectivity ..."
+          },
           "success": {
             "title": "Successfully connected to S3",
             "description": "All Operations are available."
@@ -288,6 +297,10 @@
           }
         },
         "reset": "Reset to default"
+      },
+      "noLongerShowRootPage": {
+        "description": "If enabled, the home page will be redirected to upload page. Link in Footer is always availble.",
+        "title": "Disable Home Page"
       }
     }
   }

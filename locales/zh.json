@@ -29,6 +29,13 @@
       "getStarted": "快速上手",
       "readDocs": "阅读文档",
       "viewSource": "查看源码"
+    },
+    "noLongerShow": "不再显示该页面",
+    "toast": {
+      "noLongerShow": {
+        "title": "首页将不再显示",
+        "description": "前往设置以启用它。"
+      }
     }
   },
   "upload": {
@@ -220,7 +227,9 @@
           "delete": "删除"
         },
         "message": {
-          "try": { "title": "正在测试连通性 ..." },
+          "try": {
+            "title": "正在测试连通性 ..."
+          },
           "success": {
             "title": "测试连接成功",
             "description": "所有操作均可使用。"
@@ -288,6 +297,10 @@
           }
         },
         "reset": "重置为默认值"
+      },
+      "noLongerShowRootPage": {
+        "description": "如果启用，主页将重定向到上传页面。\n页脚中的链接始终可用。",
+        "title": "禁用主页"
       }
     }
   }

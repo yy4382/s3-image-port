@@ -22,6 +22,7 @@ export const useSettingsStore = defineStore("settings", () => {
     compressionMaxSize: "",
     compressionMaxWidthOrHeight: "",
     keyTemplate: "",
+    noLongerShowRootPage: false,
   } satisfies AppSettings as AppSettings);
 
   const validity = computed(() => ({
