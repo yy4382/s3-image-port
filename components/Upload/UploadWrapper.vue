@@ -4,8 +4,8 @@
     <div v-if="uploadStore.length !== 0" class="space-y-2">
       <div class="flex flex-wrap gap-2">
         <UploadPreviewBar
-          v-for="(file, index) of uploadStore.files"
-          :key="file.name"
+          v-for="index of uploadStore.length"
+          :key="uploadStore.getFile(index).name"
           :index="index"
         />
       </div>

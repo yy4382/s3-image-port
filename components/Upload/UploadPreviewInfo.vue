@@ -38,7 +38,7 @@ const { index } = toRefs(props);
 
 const isProcessing = ref(false);
 const uploadStore = useUploadStore();
-const key = computed(() => uploadStore.keys[index.value]);
+const key = computed(() => uploadStore.getKey(index.value));
 </script>
 
 <style></style>

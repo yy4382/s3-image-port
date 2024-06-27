@@ -80,28 +80,28 @@ describe("Upload Store", async () => {
     const file2 = createFileFromImage("tests/assets/logo_副本.png");
 
     uploadStore.push([file1]);
-    expect(uploadStore.files.length).toBe(1);
+    expect(uploadStore._files.length).toBe(1);
 
     mockDate = new Date(2021, 1, 1, 2, 3, 3, 4);
     vi.setSystemTime(mockDate);
 
     uploadStore.push([file1, file2]);
-    expect(uploadStore.files.length).toBe(2);
+    expect(uploadStore._files.length).toBe(2);
 
-    expect(uploadStore.keys[0]).toBe("i/2021/02/01/4e77v-i.png");
-    expect(uploadStore.keys[1]).toBe("i/2021/02/01/4e8rg-i.png");
+    expect(uploadStore._keys[0]).toBe("i/2021/02/01/4e77v-i.png");
+    expect(uploadStore._keys[1]).toBe("i/2021/02/01/4e8rg-i.png");
     expect(uploadStore.configs[0].convertType).toBe("none");
 
     uploadStore.remove(0);
-    expect(uploadStore.files.length).toBe(1);
-    expect(uploadStore.keys.length).toBe(1);
+    expect(uploadStore._files.length).toBe(1);
+    expect(uploadStore._keys.length).toBe(1);
     expect(uploadStore.configs.length).toBe(1);
     expect(uploadStore.length).toBe(1);
-    expect(uploadStore.keys[0]).toBe("i/2021/02/01/4e8rg-i.png");
+    expect(uploadStore._keys[0]).toBe("i/2021/02/01/4e8rg-i.png");
 
     uploadStore.reset();
-    expect(uploadStore.files.length).toBe(0);
-    expect(uploadStore.keys.length).toBe(0);
+    expect(uploadStore._files.length).toBe(0);
+    expect(uploadStore._keys.length).toBe(0);
     expect(uploadStore.configs.length).toBe(0);
     expect(uploadStore.length).toBe(0);
   });
@@ -127,7 +127,7 @@ describe("Upload Store", async () => {
       ]);
     }
     expect(uploadStore.keysAreDifferent).toBe(true);
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "i/2021/02/01/4e77s-i.jpg",
       "i/2021/02/01/4e77t-i.jpg",
       "i/2021/02/01/4e77u-i.jpg",
@@ -138,7 +138,7 @@ describe("Upload Store", async () => {
 
     uploadStore.configs[0].keyTemplate = "a";
     await nextTick();
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "a",
       "i/2021/02/01/4e77t-i.jpg",
       "i/2021/02/01/4e77u-i.jpg",
@@ -147,7 +147,7 @@ describe("Upload Store", async () => {
 
     uploadStore.configs[1].keyTemplate = "{{year}}";
     await nextTick();
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "a",
       "2021",
       "i/2021/02/01/4e77u-i.jpg",
@@ -157,7 +157,7 @@ describe("Upload Store", async () => {
     vi.setSystemTime(new Date(2021, 1, 1, 2, 3, 1, 2));
     uploadStore.configs[2].convertType = "webp";
     await nextTick();
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "a",
       "2021",
       "i/2021/02/01/4e77u-i.webp",
@@ -167,7 +167,7 @@ describe("Upload Store", async () => {
     uploadStore.configs[3].convertType = "webp";
     uploadStore.configs[3].keyTemplate = "a.{{ext}}";
     await nextTick();
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "a",
       "2021",
       "i/2021/02/01/4e77u-i.webp",
@@ -184,7 +184,7 @@ describe("Upload Store", async () => {
       ]);
     }
     expect(uploadStore.keysAreDifferent).toBe(true);
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "i/2021/02/01/4e77s-i.jpg",
       "i/2021/02/01/4e77t-i.jpg",
       "i/2021/02/01/4e77u-i.jpg",
@@ -200,7 +200,7 @@ describe("Upload Store", async () => {
 
     await nextTick();
 
-    expect(uploadStore.keys).toEqual([
+    expect(uploadStore._keys).toEqual([
       "a",
       "i/2021/02/01/4e77t-i.jpg",
       "i/2021/02/01/4e77v-i.webp", // 77u->77v because system time mock is updated
@@ -236,7 +236,7 @@ describe("Upload Store", async () => {
     settingsStore.app.convertType = "jpg";
     settingsStore.app.compressionMaxSize = 40;
     await nextTick();
-    expect(uploadStore.keys).toEqual(["a", "b.jpg", "b.webp", "a.jpg"]);
+    expect(uploadStore._keys).toEqual(["a", "b.jpg", "b.webp", "a.jpg"]);
     expect(uploadStore.configs).toEqual([
       {
         convertType: "jpg",

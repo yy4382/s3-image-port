@@ -11,6 +11,16 @@ export const useUploadStore = defineStore("upload", () => {
   const processedFiles = ref<(File | null)[]>([]);
 
   /**
+   * Getter for files
+   */
+  const getFile = (index: number) => files.value[index];
+
+  /**
+   * Getter for keys
+   */
+  const getKey = (index: number) => keys.value[index];
+
+  /**
    * Represents the convert settings in overall settings.
    */
   const convertSettings = computed(
@@ -207,9 +217,11 @@ export const useUploadStore = defineStore("upload", () => {
   };
 
   return {
-    files,
-    keys,
+    _files: files,
+    _keys: keys,
     configs,
+    getFile,
+    getKey,
     keysAreDifferent,
     length,
     processedSize,
