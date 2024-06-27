@@ -1,0 +1,3 @@
+# Treat pnpm-lock.yaml as binary to avoid dependency conflicts caused by git merge
+# https://stackoverflow.com/questions/11162267/how-do-i-make-git-treat-a-file-as-binary
+pnpm-lock.yaml -merge -text
