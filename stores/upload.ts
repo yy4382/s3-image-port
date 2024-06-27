@@ -1,6 +1,7 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import type { UploadFileConfig, ConvertSettings } from "~/types";
 type FinishEachCb = (key: string, name: string, success: boolean) => void;
+
 export const useUploadStore = defineStore("upload", () => {
   const settings = useSettingsStore();
 
@@ -9,6 +10,9 @@ export const useUploadStore = defineStore("upload", () => {
   const keys = ref<string[]>([]);
   const processedFiles = ref<(File | null)[]>([]);
 
+  /**
+   * Represents the convert settings in overall settings.
+   */
   const convertSettings = computed(
     () =>
       ({
@@ -18,8 +22,13 @@ export const useUploadStore = defineStore("upload", () => {
       }) satisfies ConvertSettings,
   );
 
+  /**
+   * This watcher is used to update the convert settings of each file when the overall convert settings change.
+   */
   watch(convertSettings, (newVal, oldVal) => {
     configs.value.forEach((config, index) => {
+      // Only update the convert settings if the settings are the same as the old value,
+      // which indicates that the settings were not specifically set for this file.
       if (
         config.convertType === oldVal.convertType &&
         config.compressionMaxSize === oldVal.compressionMaxSize &&
@@ -31,10 +40,15 @@ export const useUploadStore = defineStore("upload", () => {
     });
   });
 
+  /**
+   * This watcher is used to update the keys when the key template in overall settings changes.
+   */
   watch(
     () => settings.app.keyTemplate,
     (newVal, oldVal) => {
       configs.value.forEach((config, index) => {
+        // Only update the key if the key template is the same as the old value,
+        // which indicates that the template was not specifically set for this file.
         if (config.keyTemplate === oldVal) {
           config.keyTemplate = newVal;
           keys.value[index] = genKey(
@@ -46,38 +60,56 @@ export const useUploadStore = defineStore("upload", () => {
       });
     },
   );
+
+  /**
+   * This watcher is used to update the keys when the convert type or key template changes.
+   */
   watch(
     () =>
-      configs.value.map((config) => [config.keyTemplate, config.convertType]),
+      configs.value.map(
+        (config) =>
+          [config.keyTemplate, config.convertType] as [string, string],
+      ),
     (newPartialConfigs, oldPartialConfigs) => {
-      if (oldPartialConfigs.length === 0)
-        oldPartialConfigs = Array(4).fill([
-          settings.app.keyTemplate,
-          settings.app.convertType,
-        ]);
+      // `push`, `remove` like methods will take care of keys when files are added or removed
       if (newPartialConfigs.length !== oldPartialConfigs.length) return;
-      keys.value = newPartialConfigs.map(
-        ([keyTemplate, convertType], index) => {
-          if (
-            keyTemplate === oldPartialConfigs[index][0] &&
-            convertType === oldPartialConfigs[index][1]
-          ) {
-            return keys.value[index];
-          } else {
-            return genKey(files.value[index], convertType, keyTemplate);
-          }
-        },
-      );
+
+      // Helper function to check if two partial configs are equal
+      type PartialConfig = [string, string];
+      const isEqual = (config1: PartialConfig, config2: PartialConfig) =>
+        config1[0] === config2[0] && config1[1] === config2[1];
+
+      // Update keys if the partial configs are different
+      for (let i = 0; i < newPartialConfigs.length; i++) {
+        if (!isEqual(newPartialConfigs[i], oldPartialConfigs[i])) {
+          keys.value[i] = genKey(
+            files.value[i],
+            newPartialConfigs[i][1],
+            newPartialConfigs[i][0],
+          );
+        }
+      }
     },
-    { deep: true },
   );
 
+  /**
+   * Represents the computed size of processed files.
+   *
+   * @remarks
+   * This value is calculated based on the size of each processed file.
+   *
+   * @returns An array of human-readable file sizes for each processed file.
+   */
   const processedSize = computed(() =>
     processedFiles.value.map((processedFile) =>
       processedFile?.size ? humanFileSize(processedFile.size) : undefined,
     ),
   );
 
+  /**
+   * Computed property that checks if the keys in the `keys` array are different.
+   * @returns {boolean} Returns `true` if all keys are different, otherwise `false`.
+   */
   const keysAreDifferent = computed(() => {
     for (let i = 0; i < keys.value.length; i++) {
       for (let j = i + 1; j < keys.value.length; j++) {
@@ -89,6 +121,10 @@ export const useUploadStore = defineStore("upload", () => {
     return true;
   });
 
+  /**
+   * Pushes new files to the existing files array.
+   * @param newFiles - An array of new files to be added.
+   */
   const push = (newFiles: File[]) => {
     newFiles.map((newFile) => {
       const index = files.value.findIndex((file) => isSameFile(file, newFile));
@@ -106,6 +142,12 @@ export const useUploadStore = defineStore("upload", () => {
     });
   };
 
+  /**
+   * Processes a file by compressing and converting it, if not converted yet.
+   *
+   * @param index - The index of the file to process.
+   * @param force - Optional parameter to force reprocessing of the file.
+   */
   const processFile = async (index: number, force?: boolean) => {
     if (processedFiles.value[index] === null || force) {
       processedFiles.value[index] = await compressAndConvert(
@@ -115,7 +157,13 @@ export const useUploadStore = defineStore("upload", () => {
     }
   };
 
-  const upload = async (finishedEachCb: FinishEachCb) => {
+  /**
+   * Uploads all files to the server.
+   *
+   * @param {FinishEachCb} finishedEachCb - Callback function called after each file upload is finished.
+   * @returns {Promise<void>} - A Promise that resolves when all files are uploaded.
+   */
+  const upload = async (finishedEachCb: FinishEachCb): Promise<void> => {
     await Promise.all(
       files.value.map(async (file, index) => {
         try {
@@ -132,6 +180,11 @@ export const useUploadStore = defineStore("upload", () => {
     );
   };
 
+  /**
+   * Removes an item from the arrays at the specified index.
+   *
+   * @param index - The index of the item to remove.
+   */
   const remove = (index: number) => {
     if (index !== -1) {
       files.value.splice(index, 1);
@@ -140,8 +193,12 @@ export const useUploadStore = defineStore("upload", () => {
       configs.value.splice(index, 1);
     }
   };
+
   const length = computed(() => files.value.length);
 
+  /**
+   * Resets the state of the upload store.
+   */
   const reset = () => {
     files.value = [];
     keys.value = [];
