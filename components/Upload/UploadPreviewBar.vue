@@ -119,7 +119,7 @@ const uploadStore = useUploadStore();
 const props = defineProps<{ index: number }>();
 
 const { index } = toRefs(props);
-const file = computed(() => uploadStore.files[index.value]);
+const file = computed(() => uploadStore.getFile(index.value));
 
 const keyTemplate = computed({
   get: () => uploadStore.configs[index.value].keyTemplate,
