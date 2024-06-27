@@ -53,6 +53,10 @@
       "fileTypeNotSupported": {
         "title": "File Type Not Supported"
       },
+      "uploadStarted": {
+        "title": "Uploading ...",
+        "description": "Please wait a moment"
+      },
       "uploaded": {
         "title": "File Uploaded"
       },
