@@ -7,7 +7,6 @@
           v-for="(file, index) of uploadStore.files"
           :key="file.name"
           :index="index"
-          @remove="removeFileData"
         />
       </div>
       <UButton
@@ -36,9 +35,6 @@ const uploadedLinks = defineModel("uploadedLinks", {
 });
 const uploading = ref(false);
 const uploadStore = useUploadStore();
-const removeFileData = (index: number) => {
-  uploadStore.remove(index);
-};
 
 const upload = async () => {
   uploading.value = true;
