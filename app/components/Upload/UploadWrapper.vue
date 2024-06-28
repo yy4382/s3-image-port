@@ -5,14 +5,14 @@
       v-if="showProgress"
       :value="uploadProgress"
       :max="uploadProgressMax"
-      class="p-4"
     />
     <div v-if="fileList.length !== 0" class="space-y-2">
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-col w-full gap-2">
         <UploadPreviewBar
           v-for="(file, index) of fileList"
           :key="file.name"
           ref="previewBars"
+          class="transition-all"
           :file
           @delete-file="
             () => {
