@@ -3,18 +3,12 @@
     <UContainer class="!px-0">
       <UploadWrapper v-model:uploadedLinks="uploadedLinks" class="w-full" />
     </UContainer>
-    <UTabs
-      v-if="uploadedLinksFormatted.length > 0"
-      :items="[
-        { slot: 'links', label: $t('upload.uploadedLinks.pureLink.title') },
-        { slot: 'markdown', label: $t('upload.uploadedLinks.markdown.title') },
-      ]"
-    >
-      <template #links>
+    <UTabs v-if="uploadedLinks.length > 0" :items="items">
+      <template #item="{ item }">
         <UCard>
           <ul class="space-y-3">
-            <li v-for="link in uploadedLinksFormatted" :key="link.link">
-              <UseClipboard v-slot="{ copy }" :source="link.link">
+            <li v-for="link in item.links" :key="link">
+              <UseClipboard v-slot="{ copy }" :source="link">
                 <UButton
                   color="black"
                   variant="link"
@@ -23,27 +17,7 @@
                     copy() && toast.add({ title: $t('upload.message.copied') })
                   "
                 >
-                  <span class="truncate">{{ link.link }}</span>
-                </UButton>
-              </UseClipboard>
-            </li>
-          </ul>
-        </UCard>
-      </template>
-      <template #markdown>
-        <UCard>
-          <ul class="space-y-3">
-            <li v-for="link in uploadedLinksFormatted" :key="link.markdown">
-              <UseClipboard v-slot="{ copy }" :source="link.markdown">
-                <UButton
-                  color="black"
-                  variant="link"
-                  class="w-full"
-                  @click="
-                    copy() && toast.add({ title: $t('upload.message.copied') })
-                  "
-                >
-                  <span class="truncate">{{ link.markdown }}</span>
+                  <span class="truncate">{{ link }}</span>
                 </UButton>
               </UseClipboard>
             </li>
@@ -57,8 +31,10 @@
 <script setup lang="ts">
 import { UseClipboard } from "@vueuse/components";
 import type { UploadedFileLinkObj } from "~/types";
+const { t } = useI18n();
 const toast = useToast();
 const settings = useSettingsStore();
+
 onMounted(() => {
   if (!settings.validity.s3) {
     useWrongSettingToast("s3");
@@ -80,10 +56,17 @@ const uploadedLinks: Ref<UploadedFileLinkObj[]> = ref(
       ]
     : [],
 );
-const uploadedLinksFormatted = computed(() =>
-  uploadedLinks.value.map((link) => ({
-    link: link.link,
-    markdown: `![${link.name}](${link.link})`,
-  })),
-);
+
+const items = computed(() => [
+  {
+    type: "pureLink",
+    links: uploadedLinks.value.map((link) => link.link),
+    label: t("upload.uploadedLinks.pureLink.title"),
+  },
+  {
+    type: "markdown",
+    links: uploadedLinks.value.map((link) => `![${link.name}](${link.link})`),
+    label: t("upload.uploadedLinks.markdown.title"),
+  },
+]);
 </script>

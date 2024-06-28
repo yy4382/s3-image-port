@@ -2,18 +2,16 @@
   <div class="flex flex-col gap-2">
     <p class="text-sm items-center inline-flex">
       <Icon name="i-mingcute-key-2-line" class="shrink-0 mr-2" />
-      <span :title="key" class="truncate block"> Upload Path: {{ key }} </span>
+      <span :title="keyStr" class="truncate block">
+        Upload Path: {{ keyStr }}
+      </span>
     </p>
     <p class="text-sm items-center inline-flex">
       <Icon name="i-mingcute-file-line" class="shrink-0 mr-2" />
       <span>Processed Size:&nbsp;</span>
       <USkeleton v-if="isProcessing" class="w-12 h-5" />
       <span v-else class="truncate block">
-        {{
-          uploadStore.processedSize[index] === undefined
-            ? "??"
-            : uploadStore.processedSize[index]
-        }}
+        {{ processedSize === undefined ? "??" : processedSize }}
       </span>
       <UButton
         icon="i-mingcute-refresh-2-line"
@@ -21,9 +19,9 @@
         size="xs"
         @click="
           isProcessing = true;
-          uploadStore
-            .processFile(index, true)
-            .finally(() => (isProcessing = false));
+          $emit('processFile', () => {
+            isProcessing = false;
+          });
         "
       />
     </p>
@@ -31,14 +29,10 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{
-  index: number;
+defineProps<{
+  keyStr: string;
+  processedSize: string | undefined;
 }>();
-const { index } = toRefs(props);
-
+defineEmits(["processFile"]);
 const isProcessing = ref(false);
-const uploadStore = useUploadStore();
-const key = computed(() => uploadStore.getKey(index.value));
 </script>
-
-<style></style>
