@@ -112,6 +112,7 @@ function copy(photo: Photo) {
 }
 useResizeObserver(rootDiv, (entries) => {
   const entry = entries[0];
+  if (!entry) return;
   const { width: entryWidth, height: entryHeight } = entry.contentRect;
   width.value = entryWidth;
   if (

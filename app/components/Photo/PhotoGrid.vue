@@ -8,8 +8,8 @@
       :select-mode="selectedPhotos.length > 0"
       class="transition-all"
       :style="{
-        width: `${imageSize[index][0]}px`,
-        height: `${imageSize[index][1]}px`,
+        width: `${imageSize[index]![0]}px`,
+        height: `${imageSize[index]![1]}px`,
       }"
       @delete-photo="(key) => $emit('deletePhoto', key)"
     />
@@ -88,6 +88,7 @@ const gap = 8;
 const wrapperWidth = useElementSize(imageWrapper).width;
 useResizeObserver(imageWrapper, (entries) => {
   const entry = entries[0];
+  if (!entry) return;
   const { width } = entry.contentRect;
   wrapperWidth.value = width;
 });
