@@ -37,12 +37,11 @@
 </template>
 
 <script setup lang="ts">
-const uploadStore = useUploadStore();
+const fileList = defineModel<File[]>({ required: true });
+const fileMap = new WeakMap<File, boolean>();
 
 const onDrop = (files: File[] | null) => {
-  if (files) {
-    uploadStore.push(files);
-  }
+  pushFiles(files ?? []);
 };
 const dropZoneRef = ref<HTMLElement | null>(null);
 const { isOverDropZone } = useDropZone(dropZoneRef, onDrop);
@@ -54,8 +53,15 @@ const { open, onChange } = useFileDialog({
   multiple: true,
 });
 onChange((fileList) => {
-  if (fileList) {
-    uploadStore.push(Array.from(fileList));
-  }
+  pushFiles(Array.from(fileList ?? []));
 });
+
+function pushFiles(files: File[]) {
+  files.map((file) => {
+    if (!fileMap.has(file)) {
+      fileList.value.push(file);
+      fileMap.set(file, true);
+    }
+  });
+}
 </script>

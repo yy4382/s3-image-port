@@ -11,7 +11,7 @@
         "
       >
         <img
-          src="~/public/favicon.svg"
+          src="~/../public/favicon.svg"
           alt="favicon"
           class="h-6 pointer-events-none"
         />

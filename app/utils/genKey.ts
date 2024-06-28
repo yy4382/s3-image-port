@@ -1,6 +1,12 @@
 import { DateTime, Interval } from "luxon";
 
-export default function (file: File, type: string, keyTemplate: string) {
+export default function (
+  file: File,
+  options: { type: string; keyTemplate: string },
+) {
+  const type = options.type;
+  let keyTemplate = options.keyTemplate;
+
   if (keyTemplate === undefined || keyTemplate.trim().length === 0) {
     // If key template is not provided, use default
     keyTemplate = defaultKeyTemplate;
