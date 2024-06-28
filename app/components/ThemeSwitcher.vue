@@ -39,7 +39,7 @@ const selectedMode = computed({
     return items.findIndex((item) => item.label === colorMode.value);
   },
   set(index) {
-    toggleTheme(items[index].label);
+    toggleTheme(items[index]!.label);
   },
 });
 const toggleTheme = (nextColorMode: string) => {
