@@ -48,4 +48,7 @@ export default defineNuxtConfig({
   experimental: {
     viewTransition: true,
   },
+  future: {
+    compatibilityVersion: 4,
+  },
 });
