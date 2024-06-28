@@ -2,10 +2,19 @@
   <UContainer class="w-full">
     <nav class="flex items-center justify-between h-16 gap-2">
       <ULink
-        class="flex-1 justify-start flex items-center gap-2"
-        :to="localePath('/')"
+        class="flex-1 justify-start flex items-center gap-2 select-none"
+        as="div"
+        :to="
+          useSettingsStore().app.noLongerShowRootPage
+            ? undefined
+            : localePath('/')
+        "
       >
-        <img src="~/public/favicon.svg" alt="favicon" class="h-6" />
+        <img
+          src="~/public/favicon.svg"
+          alt="favicon"
+          class="h-6 pointer-events-none"
+        />
         <span class="text-xl font-bold hidden md:block">S3 Image Port</span>
       </ULink>
       <div class="flex space-x-4 font-semibold">

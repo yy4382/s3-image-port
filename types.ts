@@ -36,6 +36,7 @@ export interface AppSettings extends UploadFileConfig {
   enableAutoRefresh: boolean;
   enableFuzzySearch: boolean;
   fuzzySearchThreshold: number;
+  noLongerShowRootPage: boolean;
 }
 
 export const appSettingsSchema = z.object({
@@ -49,6 +50,7 @@ export const appSettingsSchema = z.object({
     z.string().length(0),
   ]),
   keyTemplate: z.union([z.string().endsWith(".{{ext}}"), z.string().length(0)]),
+  noLongerShowRootPage: z.boolean(),
 });
 
 export type SortByOpts = "date" | "key";

@@ -289,6 +289,7 @@ const initLocalStorage = () => {
       compressionMaxSize: "",
       compressionMaxWidthOrHeight: "",
       keyTemplate: "",
+      noLongerShowRootPage: false,
     }),
   );
 };

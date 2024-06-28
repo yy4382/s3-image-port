@@ -36,11 +36,15 @@
             {{ hostingProvider ? `Hosted on ${hostingProvider}.` : "" }}
           </span>
         </span>
-        <span class="hidden md:inline-block"
-          >Source at
+        <span class="hidden md:inline-flex gap-4">
+          <ULink
+            :to="localePath('/?noredirect=true')"
+            class="hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            >Home</ULink
+          >
           <ULink
             to="https://github.com/yy4382/s3-image-port"
-            inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            class="hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
             >GitHub</ULink
           ></span
         >
@@ -62,4 +66,5 @@ const { data: hostingProvider } = await useAsyncData(
     return env ? hostEnvMap[env] : undefined;
   },
 );
+const localePath = useLocalePath();
 </script>
