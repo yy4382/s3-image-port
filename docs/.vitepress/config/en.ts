@@ -33,5 +33,15 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
         },
       ],
     },
+    {
+      text: "Tips & Tricks",
+      collapsed: false,
+      items: [
+        {
+          text: "Extending Public URL Functionality with WebP Cloud Services",
+          link: "use-webp-cloud-services",
+        },
+      ],
+    },
   ];
 }
