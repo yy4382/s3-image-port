@@ -32,5 +32,15 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       collapsed: false,
       items: [{ text: "Cloudflare R2 逐步指南", link: "for-cloudflare-r2" }],
     },
+    {
+      text: "小技巧",
+      collapsed: false,
+      items: [
+        {
+          text: "利用 WebP Cloud Services 扩展 Public URL 功能 ",
+          link: "use-webp-cloud-services",
+        },
+      ],
+    },
   ];
 }
