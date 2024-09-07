@@ -1,7 +1,7 @@
 <template>
   <UContainer class="space-y-8 max-w-xl w-full">
     <UContainer class="!px-0">
-      <UploadWrapper v-model:uploadedLinks="uploadedLinks" class="w-full" />
+      <UploadWrapper v-model:uploaded-links="uploadedLinks" class="w-full" />
     </UContainer>
     <UTabs v-if="uploadedLinks.length > 0" :items="items">
       <template #item="{ item }">
