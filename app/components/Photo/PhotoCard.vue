@@ -9,7 +9,8 @@
       <div v-show="showImg" class="bg-gray-200">
         <img
           ref="loadedImage"
-          :src="photo.url"
+          v-if="imageUrl"
+          :src="imageUrl"
           class="h-full w-full transition-all"
           :class="selected && 'scale-90 rounded-lg'"
           @load="onImageLoad"
@@ -103,6 +104,9 @@ defineExpose({
 });
 
 const modalOpen = ref(false);
+
+const { imageBlob, isImage } = useImageDisplay(key);
+const imageUrl = useObjectUrl(imageBlob);
 
 const toast = useToast();
 const { t } = useI18n();
