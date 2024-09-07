@@ -9,9 +9,6 @@ export default defineNuxtConfig({
     "@nuxt/test-utils/module",
     "@pinia/nuxt",
   ],
-  ui: {
-    icons: ["mingcute"],
-  },
   css: ["~/assets/css/global.css"],
   routeRules: {
     "/": { prerender: true },
