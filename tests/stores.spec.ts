@@ -30,17 +30,6 @@ describe("Settings Store", async () => {
     expect(settingsStore.validity.all).toBe(false);
     expect(settingsStore.validity.s3).toBe(false);
   });
-
-  test("should generate correct URLs", async () => {
-    const settingsStore = useSettingsStore();
-    expect(settingsStore.key2Url("a/b/c.jpg")).toBe(
-      "https://public.example.com/a/b/c.jpg",
-    );
-    settingsStore.s3.pubUrl = "";
-    expect(settingsStore.key2Url("a/b/c.jpg")).toBe(
-      "https://example.com/image-test/a/b/c.jpg",
-    );
-  });
 });
 
 // MARK: Utils

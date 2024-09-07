@@ -108,7 +108,7 @@ async function listPhotos() {
     toast.add({
       title: t("photos.message.listPhotos.try.title"),
     });
-    photos.value = await settings.list();
+    photos.value = await new ImageS3Client(settings.s3).list();
     toast.add({
       title: t("photos.message.listPhotos.success.title"),
     });
@@ -136,7 +136,9 @@ async function deletePhoto(keyOrKeys: string | string[]) {
   const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
   try {
     toast.add({ title: t("photos.message.deletePhoto.try.title") });
-    await Promise.all(keys.map((key) => settings.del(key)));
+    await Promise.all(
+      keys.map((key) => new ImageS3Client(settings.s3).delete(key)),
+    );
     toast.add({ title: t("photos.message.deletePhoto.success.title") });
   } catch (error) {
     toast.add({ title: t("photos.message.deletePhoto.fail.title") });

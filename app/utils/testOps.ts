@@ -8,7 +8,7 @@ const checkGrantedToUpload = async (
 ) => {
   try {
     debug("Checking if granted to upload...");
-    await uploadObj(content, key, s3Settings);
+    await new ImageS3Client(s3Settings).upload(content, key);
     debug("Granted to upload!");
     return true;
   } catch (e) {
@@ -19,7 +19,7 @@ const checkGrantedToUpload = async (
 const checkGrantedToList = async (s3Settings: S3Settings) => {
   try {
     debug("Checking if granted to list...");
-    await listObj(s3Settings, false);
+    await new ImageS3Client(s3Settings).list(true);
     debug("Granted to list!");
     return true;
   } catch (e) {
@@ -30,7 +30,7 @@ const checkGrantedToList = async (s3Settings: S3Settings) => {
 const checkGrantedToDelete = async (s3Settings: S3Settings, key: string) => {
   try {
     debug("Checking if granted to delete...");
-    await deleteObj(key, s3Settings);
+    await new ImageS3Client(s3Settings).delete(key);
     debug("Granted to delete!");
     return true;
   } catch (e) {
@@ -41,7 +41,7 @@ const checkGrantedToDelete = async (s3Settings: S3Settings, key: string) => {
 const checkObjectExists = async (s3Settings: S3Settings, key: string) => {
   debug("Checking if object exists...");
   try {
-    const client = newClient(s3Settings);
+    const client = new ImageS3Client(s3Settings).client;
     await client.send(
       new GetObjectCommand({
         Bucket: s3Settings.bucket,

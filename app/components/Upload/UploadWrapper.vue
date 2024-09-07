@@ -88,7 +88,7 @@ const upload = async () => {
         (file) => file.name === state.name,
       );
       uploadedLinks.value.push({
-        link: settings.key2Url(state.key),
+        link: key2Url(state.key, settings.s3),
         name: state.name,
       });
       if (index !== -1) {

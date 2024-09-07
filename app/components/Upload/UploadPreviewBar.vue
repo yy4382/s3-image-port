@@ -171,7 +171,10 @@ const upload = async (finishedEachCb?: FinishEachCb) => {
   try {
     debug("Uploaded", key.value);
     await processFile();
-    await uploadObj(processedFile.value!, key.value, settingsStore.s3);
+    await new ImageS3Client(settingsStore.s3).upload(
+      processedFile.value!,
+      key.value,
+    );
     finishedEachCb && finishedEachCb(key.value, file.value.name, true);
     return { key: key.value, name: file.value.name, success: true };
   } catch (e) {

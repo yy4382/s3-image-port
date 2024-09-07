@@ -8,7 +8,6 @@ export interface UploadedFileLinkObj {
 export interface Photo {
   Key: string;
   LastModified: string;
-  category: string;
   url: string;
 }
 

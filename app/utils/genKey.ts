@@ -1,5 +1,8 @@
 import { DateTime, Interval } from "luxon";
 
+export const defaultKeyTemplate =
+  "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
+
 export default function (
   file: File,
   options: { type: string; keyTemplate: string },

@@ -213,7 +213,7 @@
 
 <script setup lang="ts">
 import { convertTypes, appSettingsSchema } from "~/types";
-import { defaultKeyTemplate } from "~/utils/uploadObj";
+import { defaultKeyTemplate } from "~/utils/genKey";
 
 const { app: state } = storeToRefs(useSettingsStore());
 const isDefaultKeyTemplate = computed(
