@@ -3,6 +3,7 @@ import {
   ListObjectsV2Command,
   DeleteObjectCommand,
   PutObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { type S3Settings, type Photo } from "~/types";
 import mime from "mime";
@@ -45,6 +46,21 @@ class ImageS3Client {
     const httpStatusCode = response.$metadata.httpStatusCode!;
     if (httpStatusCode >= 300) {
       throw new Error(`List operation get http code: ${httpStatusCode}`);
+    }
+
+    return response;
+  }
+
+  async get(key: string) {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+    const response = await this.client.send(command);
+    // If the HTTP status code is not 200, throw an error
+    const httpStatusCode = response.$metadata.httpStatusCode!;
+    if (httpStatusCode >= 300) {
+      throw new Error(`Get operation get http code: ${httpStatusCode}`);
     }
 
     return response;
