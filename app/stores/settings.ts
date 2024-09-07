@@ -2,7 +2,6 @@ import { skipHydrate } from "pinia";
 import type { AppSettings, S3Settings } from "~/types";
 import { appSettingsSchema, s3SettingsSchema } from "~/types";
 import * as checkOp from "~/utils/testOps";
-import key2UrlUtil from "~/utils/key2Url";
 
 export const useSettingsStore = defineStore("settings", () => {
   // MARK: states
@@ -72,32 +71,12 @@ export const useSettingsStore = defineStore("settings", () => {
     };
   };
 
-  const list = (onlyOnce?: boolean) => {
-    return listObj(s3.value, onlyOnce);
-  };
-
-  const del = (key: string) => {
-    return deleteObj(key, s3.value);
-  };
-
-  const upload = (file: File | string, key: string) => {
-    return uploadObj(file, key, s3.value);
-  };
-
-  const key2Url = (key: string) => {
-    return key2UrlUtil(key, s3.value);
-  };
-
   return {
     s3: skipHydrate(s3),
     app: skipHydrate(app),
     validity: skipHydrate(validity),
 
     test,
-    list,
-    del,
-    upload,
-    key2Url,
   };
 });
 
