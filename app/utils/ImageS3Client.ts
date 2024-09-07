@@ -123,19 +123,20 @@ class ImageS3Client {
     return response;
   }
 
-  static calculateMIME(file: File | string, key: string) {
+  static calculateMIME(file: File | Blob | string, key: string) {
     const defaultMIME = "application/octet-stream";
     const keyExt = key.split(".").pop();
 
     switch (true) {
       case file instanceof String:
         return "text/plain";
-      case file instanceof File:
+      case file instanceof File || file instanceof Blob:
         if (file.type) {
           return file.type;
         } else if (keyExt) {
           return mime.getType(keyExt) ?? defaultMIME;
         } else {
+          console.error("Unexpected file type", key);
           return defaultMIME;
         }
       default:
