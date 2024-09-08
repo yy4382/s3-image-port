@@ -31,7 +31,10 @@
       <!-- Info Button -->
       <PhotoCardInfo :photo="photo" :popper="{ placement: 'bottom-end' }" />
       <!-- Delete Button -->
-      <BaseSecondConfirm :action="() => $emit('deletePhoto', photo.Key)" danger>
+      <BaseSecondConfirm
+        :action="() => galleryState.deletePhoto([photo.Key])"
+        danger
+      >
         <UButton
           aria-label="Delete"
           icon="i-mingcute-delete-3-line"
@@ -52,5 +55,5 @@ defineProps<{
   photo: Photo;
   closeModal: () => void;
 }>();
-defineEmits<{ deletePhoto: [key: string] }>();
+const galleryState = useGalleryStateStore();
 </script>
