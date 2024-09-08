@@ -1,5 +1,12 @@
 <template>
-  <div ref="rootDiv" class="relative group">
+  <div
+    ref="rootDiv"
+    class="relative group"
+    :style="{
+      width: `${masonryState.imageSizes.get(key)![0]}px`,
+      height: `${masonryState.imageSizes.get(key)![1]}px`,
+    }"
+  >
     <USkeleton
       v-show="!showImg"
       class="h-full w-full"
@@ -8,8 +15,8 @@
     <Transition>
       <div v-show="showImg" class="bg-gray-200">
         <img
-          ref="loadedImage"
           v-if="imageUrl"
+          ref="loadedImage"
           :src="imageUrl"
           class="h-full w-full transition-all"
           :class="selected && 'scale-90 rounded-lg'"
@@ -105,8 +112,13 @@ defineExpose({
 
 const modalOpen = ref(false);
 
-const { imageBlob, isImage } = useImageDisplay(key);
+const { imageBlob } = useImageDisplay(key);
 const imageUrl = useObjectUrl(imageBlob);
+
+const masonryState = useMasonryStateStore();
+watchEffect(() => {
+  masonryState.setNaturalSize(key.value, naturalSize.value);
+});
 
 const toast = useToast();
 const { t } = useI18n();
