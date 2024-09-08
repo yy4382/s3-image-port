@@ -7,7 +7,6 @@ export const useWrongSettingToast = (type: "app" | "s3" | undefined) => {
   const toast = useToast();
   const { t } = useI18n();
   const localePath = useLocalePath();
-  const router = useRouter();
 
   if (!type || type === "s3") {
     toast.add({
@@ -16,7 +15,7 @@ export const useWrongSettingToast = (type: "app" | "s3" | undefined) => {
       actions: [
         {
           label: t("general.actions.goToSettings"),
-          click: () => router.push(localePath("/settings")),
+          click: () => navigateTo(localePath("/settings/s3")),
         },
       ],
       color: "red",
@@ -32,7 +31,7 @@ export const useWrongSettingToast = (type: "app" | "s3" | undefined) => {
       actions: [
         {
           label: t("general.actions.goToSettings"),
-          click: () => router.push(localePath("/settings")),
+          click: () => navigateTo(localePath("/settings")),
         },
       ],
       color: "red",

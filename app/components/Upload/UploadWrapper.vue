@@ -40,7 +40,6 @@ import { type UploadPreviewBar } from "#components";
 const { t } = useI18n();
 const settings = useSettingsStore();
 const localePath = useLocalePath();
-const router = useRouter();
 const toast = useToast();
 const uploadedLinks = defineModel("uploadedLinks", {
   type: Array as PropType<UploadedFileLinkObj[]>,
@@ -106,7 +105,7 @@ const upload = async () => {
       actions: [
         {
           label: t("upload.message.uploadFailed.actions.goToSettings"),
-          click: () => router.push(localePath("/settings")),
+          click: () => navigateTo(localePath("/settings/s3")),
         },
       ],
     });

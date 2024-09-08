@@ -6,7 +6,6 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
 
   const toast = useToast();
   const { t } = useI18n();
-  const router = useRouter();
   const localePath = useLocalePath();
   /**
    * All photos fetched from S3
@@ -33,7 +32,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
           },
           {
             label: t("photos.message.listPhotos.fail.actions.goToSettings"),
-            click: () => router.push(localePath("/settings")),
+            click: () => navigateTo(localePath("/settings/s3")),
           },
         ],
       });
