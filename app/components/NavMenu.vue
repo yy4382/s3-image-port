@@ -47,6 +47,7 @@
         <ULink
           :to="localePath('/settings')"
           class="flex flex-row items-center gap-1"
+          :active="useRoute().path.startsWith(localePath('/settings'))"
           active-class="text-primary"
           inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >

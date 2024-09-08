@@ -12,9 +12,7 @@ export default defineNuxtConfig({
   css: ["~/assets/css/global.css"],
   routeRules: {
     "/": { prerender: true },
-    "/*/upload": { ssr: false },
-    "/*/photos": { ssr: false },
-    "/*/settings": { ssr: false },
+    "/**": { ssr: false },
   },
   i18n: {
     locales: [

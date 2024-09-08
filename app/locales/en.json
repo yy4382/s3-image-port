@@ -255,6 +255,11 @@
     },
     "app": {
       "title": "App Settings",
+      "titles": {
+        "upload": "Upload Settings",
+        "gallery": "Gallery Settings",
+        "misc": "Misc Settings"
+      },
       "autoRefresh": {
         "title": "Enable Gallery Auto-Refresh",
         "description": "Auto refresh the gallery when you navigate back to the gallery page."
