@@ -78,7 +78,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="flex flex-col space-y-2 my-4">
+  <div class="flex flex-col space-y-2 mb-4">
     <UAlert
       :title="$t('settings.s3.info.privacy.title')"
       :description="$t('settings.s3.info.privacy.description')"

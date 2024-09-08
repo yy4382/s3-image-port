@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { convertTypes } from "~/types";
-import type { UploadFileConfig } from "~/types";
+import type { FileUploadSettings } from "~/types";
 const settingsStore = useSettingsStore();
 
 defineEmits(["deleteFile"]);
@@ -135,7 +135,7 @@ defineEmits(["deleteFile"]);
 const props = defineProps<{ file: File }>();
 
 const { file } = toRefs(props);
-const config = ref<UploadFileConfig>({
+const config = ref<FileUploadSettings>({
   compressionMaxSize: settingsStore.app.compressionMaxSize,
   compressionMaxWidthOrHeight: settingsStore.app.compressionMaxWidthOrHeight,
   convertType: settingsStore.app.convertType,
