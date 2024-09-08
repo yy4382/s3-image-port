@@ -76,7 +76,7 @@
     }
   },
   "photos": {
-    "title": "Photos",
+    "title": "Gallery",
     "loadOrRefreshButton": {
       "loadButton": "Load",
       "refreshButton": "Refresh"
