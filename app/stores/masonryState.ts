@@ -4,10 +4,13 @@ const defaultImageSize: [number, number] = [384, 208];
 const gap = 8;
 
 export const useMasonryStateStore = defineStore("masonryState", () => {
+  const galleryState = useGalleryStateStore();
   const imagePerPage = ref<number>(16);
   const wrapperWidth = ref<number>(0);
   // key -> index, managed by the parent component
-  const keyList = ref<string[]>([]);
+  const keyList = computed(() =>
+    galleryState.imageDisplayed.map((photo) => photo.Key),
+  );
   const keyPlaceMap = computed(() => {
     const map = new Map<string, number>();
     for (const [index, key] of keyList.value.entries()) {
@@ -34,6 +37,14 @@ export const useMasonryStateStore = defineStore("masonryState", () => {
     naturalSizes.value = Array(keyList.value.length).fill(defaultImageSize);
   };
 
+  watch(
+    keyList,
+    () => {
+      resetNaturalSizes();
+    },
+    { immediate: true, deep: true },
+  );
+
   const imageSizesByPlace = useMasonry(naturalSizes, wrapperWidth, {
     gap,
     defaultSize: defaultImageSize,
@@ -52,7 +63,6 @@ export const useMasonryStateStore = defineStore("masonryState", () => {
     imagePerPage,
     wrapperWidth,
 
-    keyList,
     setNaturalSize,
     resetNaturalSizes,
 

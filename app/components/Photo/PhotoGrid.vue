@@ -48,12 +48,6 @@ watchEffect(() => {
 // MARK: masonry layout
 const masonryState = useMasonryStateStore();
 masonryState.imagePerPage = imagePerPage;
-watchEffect(() => {
-  masonryState.resetNaturalSizes();
-  masonryState.$patch({
-    keyList: currentDisplayed.value.map((photo) => photo.Key),
-  });
-});
 
 const imageWrapper = useTemplateRef("imageWrapper");
 const wrapperWidth = useElementSize(imageWrapper).width;
