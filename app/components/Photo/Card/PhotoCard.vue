@@ -74,12 +74,17 @@ const props = defineProps<{
 }>();
 
 const imageDisplay = useTemplateRef("imageDisplay");
-
+const galleryState = useGalleryStateStore();
 const key = computed(() => props.photo.Key);
-const selected = ref(false);
-defineExpose({
-  key,
-  selected,
+const selected = computed({
+  get: () => galleryState.imageSelected.includes(key.value),
+  set: (value) => {
+    if (value) galleryState.imageSelected.push(key.value);
+    else
+      galleryState.imageSelected = galleryState.imageSelected.filter(
+        (galleryKey) => galleryKey !== key.value,
+      );
+  },
 });
 
 const modalOpen = ref(false);

@@ -3,7 +3,6 @@
     <PhotoCard
       v-for="photo in currentDisplayed"
       :key="photo.Key"
-      ref="photoCardRefs"
       :photo="photo"
       :select-mode="galleryState.imageSelected.length > 0"
     />
@@ -22,8 +21,6 @@ import type { PhotoCard } from "#components";
 
 const galleryState = useGalleryStateStore();
 
-const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
-
 // MARK: pagination
 const photos = computed(() => galleryState.imageFiltered);
 const page = ref(1);
@@ -36,14 +33,6 @@ const currentDisplayed = computed(() =>
   ),
 );
 watchEffect(() => (galleryState.imageDisplayed = currentDisplayed.value));
-
-// MARK: selected related
-watchEffect(() => {
-  galleryState.imageSelected = photoCardRefs.value
-    .filter((ref) => ref?.selected)
-    .map((ref) => ref?.key)
-    .filter((keyOrUd) => keyOrUd !== undefined) as string[];
-});
 
 // MARK: masonry layout
 const masonryState = useMasonryStateStore();
