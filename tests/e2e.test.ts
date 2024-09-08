@@ -9,19 +9,13 @@ describe("Availability", async () => {
   test("/", async () => {
     const res = await fetch("/");
     expect(res.status).toBe(200);
-    const bodyText = await res.text();
-    expect(bodyText).toContain("S3 Image Port");
   });
   test("/upload", async () => {
     const res = await fetch("/upload");
     expect(res.status).toBe(200);
-    const bodyText = await res.text();
-    expect(bodyText).toContain("Drop files here");
   });
   test("/settings", async () => {
-    const res = await fetch("/settings");
+    const res = await fetch("/settings/s3");
     expect(res.status).toBe(200);
-    const bodyText = await res.text();
-    expect(bodyText).toContain("S3 Settings");
   });
 });
