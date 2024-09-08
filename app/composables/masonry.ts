@@ -6,14 +6,14 @@ export const useMasonry = (
   options: {
     defaultSize: Size;
     gap: number;
-    maxItems?: number;
+    maxItems?: MaybeRefOrGetter<number>;
   },
 ): Ref<Size[]> => {
   const { defaultSize, gap, maxItems } = options;
   const outputSize = ref<Size[]>(
     // init with defaultSize, and fill to maxItems if defined
     maxItems !== undefined
-      ? Array.from({ length: maxItems }, () => defaultSize)
+      ? Array.from({ length: toValue(maxItems) }, () => defaultSize)
       : Array.from(originSizes.value),
   );
   watch(
@@ -57,12 +57,15 @@ export const useMasonry = (
         .parse(grouped.flat());
 
       // fill to maxItems if needed
-      if (maxItems !== undefined && outputSize.value.length < maxItems) {
+      if (
+        maxItems !== undefined &&
+        outputSize.value.length < toValue(maxItems)
+      ) {
         // avoid error when routed from a page with 10 items to a page with 15 items
         outputSize.value = [
           ...outputSize.value,
           ...Array.from(
-            { length: maxItems - outputSize.value.length },
+            { length: toValue(maxItems) - outputSize.value.length },
             () => defaultSize,
           ),
         ];
