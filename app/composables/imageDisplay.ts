@@ -3,14 +3,16 @@ export const useImageDisplay = (key: MaybeRefOrGetter<string>) => {
 
   const imageBlob = shallowRef<Blob | null>(null);
   const isImage = ref<boolean | null>(null);
+  const mimeType = ref<string | null>(null);
   onMounted(async () => {
     watchEffect(async () => {
       const resp = await new ImageS3Client(settings.s3).get(toValue(key));
       imageBlob.value = await streamToBlob(resp.Body as ReadableStream);
-      isImage.value = resp.ContentType?.startsWith("image/") ?? null;
+      mimeType.value = resp.ContentType ?? "unknown";
+      isImage.value = mimeType.value.startsWith("image/") ?? null;
     });
   });
-  return { imageBlob, isImage };
+  return { imageBlob, isImage, mimeType };
 };
 
 async function streamToBlob(stream: ReadableStream) {

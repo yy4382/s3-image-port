@@ -6,7 +6,6 @@
       ref="photoCardRefs"
       :photo="photo"
       :select-mode="selectedPhotos.length > 0"
-      class="transition-all"
       @delete-photo="(key) => $emit('deletePhoto', key)"
     />
   </div>
