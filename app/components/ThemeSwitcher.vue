@@ -15,7 +15,7 @@
   >
     <template #default="{ item, selected }">
       <UIcon
-        :name="item.icon"
+        :name="item.iconName"
         class="w-5 h-5 flex-shrink-0"
         :class="selected && 'text-primary-500'"
       />
@@ -30,9 +30,9 @@ const { system: systemColorMode, store: colorMode } = useColorMode({
   emitAuto: true,
 });
 const items = [
-  { icon: "i-mingcute-sun-fill", label: "light" },
-  { icon: "i-mingcute-imac-fill", label: "auto" },
-  { icon: "i-mingcute-moon-fill", label: "dark" },
+  { iconName: "i-mingcute-sun-fill", label: "light" },
+  { iconName: "i-mingcute-imac-fill", label: "auto" },
+  { iconName: "i-mingcute-moon-fill", label: "dark" },
 ];
 const selectedMode = computed({
   get() {
