@@ -48,14 +48,20 @@ watchEffect(() => {
   masonryState.setNaturalSize(key.value, naturalSize.value);
 });
 
+const wrapperSize = ref<[number, number] | undefined>(undefined);
 useResizeObserver(wrapper, (entries) => {
   const entry = entries[0];
   if (!entry) return;
   const { width: entryWidth, height: entryHeight } = entry.contentRect;
+  wrapperSize.value = [entryWidth, entryHeight];
+});
+watchEffect(() => {
   if (
+    wrapperSize.value &&
     naturalSize.value &&
     Math.abs(
-      entryWidth / entryHeight - naturalSize.value[0] / naturalSize.value[1],
+      wrapperSize.value[0] / wrapperSize.value[1] -
+        naturalSize.value[0] / naturalSize.value[1],
     ) < 0.001
   ) {
     setTimeout(() => {
