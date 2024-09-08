@@ -132,6 +132,11 @@
             "cancel": "取消"
           }
         }
+      },
+      "notPhotoIndicator": {
+        "refresh": "刷新",
+        "show": "显示",
+        "title": "这可能不是一张图片"
       }
     },
     "message": {

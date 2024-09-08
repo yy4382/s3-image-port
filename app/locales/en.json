@@ -124,6 +124,11 @@
       }
     },
     "photoCard": {
+      "notPhotoIndicator": {
+        "title": "This may not be an image",
+        "show": "Show",
+        "refresh": "Refresh"
+      },
       "deleteButton": {
         "confirm": {
           "title": "Confirm to delete this photo?",

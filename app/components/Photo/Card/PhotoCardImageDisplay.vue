@@ -12,14 +12,15 @@ const props = defineProps<{
 const key = toRefs(props).s3Key;
 
 // step 1: get objectUrl
-const { imageBlob, isImage, mimeType } = useImageDisplay(key);
+const { imageData, isImage, mimeType, refresh } = useImageDisplay(key, {
+  loadMethod: "head",
+});
 const forceShowImage = ref(false);
-const shownImageBlob = computed(() => {
-  if (forceShowImage.value) return imageBlob.value;
-  else if (isImage.value) return imageBlob.value;
+const imageUrl = computed(() => {
+  if (forceShowImage.value) return imageData.value;
+  else if (isImage.value) return imageData.value;
   else return undefined;
 });
-const imageUrl = useObjectUrl(shownImageBlob);
 
 // step 2: update masonry state when image is loaded
 const imageTag = useTemplateRef("imageTag");
@@ -81,9 +82,17 @@ defineExpose({ imageLoaded });
         class="size-full flex items-center justify-center border-2 dark:border-gray-700"
       >
         <div class="flex flex-col items-center justify-center gap-2">
-          <p>This may not be an image</p>
+          <p>{{ $t("photos.photoCard.notPhotoIndicator.title") }}</p>
+          <p class="text-xs">Key: {{ key }}</p>
           <p class="text-xs">Mime: {{ mimeType }}</p>
-          <UButton @click="forceShowImage = true">Show</UButton>
+          <div class="flex gap-2">
+            <UButton @click="forceShowImage = true">{{
+              $t("photos.photoCard.notPhotoIndicator.show")
+            }}</UButton>
+            <UButton @click="refresh">{{
+              $t("photos.photoCard.notPhotoIndicator.refresh")
+            }}</UButton>
+          </div>
         </div>
       </div>
       <USkeleton v-else class="size-full" :ui="{ rounded: 'rounded-none' }" />
