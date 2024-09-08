@@ -59,11 +59,6 @@
           v-model="selected"
           :photo="photo"
           :close-modal="() => (modalOpen = false)"
-          @delete-photo="
-            (key: string) => {
-              $emit('deletePhoto', key), (modalOpen = false);
-            }
-          "
         />
       </UModal>
     </div>
@@ -77,8 +72,6 @@ const props = defineProps<{
   disabled?: boolean;
   selectMode: boolean;
 }>();
-
-defineEmits<{ deletePhoto: [key: string] }>();
 
 const imageDisplay = useTemplateRef("imageDisplay");
 

@@ -5,8 +5,7 @@
       :key="photo.Key"
       ref="photoCardRefs"
       :photo="photo"
-      :select-mode="selectedPhotos.length > 0"
-      @delete-photo="(key) => $emit('deletePhoto', key)"
+      :select-mode="galleryState.imageSelected.length > 0"
     />
   </div>
   <UPagination
@@ -20,16 +19,13 @@
 
 <script lang="ts" setup>
 import type { PhotoCard } from "#components";
-import type { Photo } from "~/types";
 
-const props = defineProps<{ photos: Photo[] }>();
-defineExpose({ clearSelectedPhotos });
-defineEmits<{ deletePhoto: [key: string] }>();
+const galleryState = useGalleryStateStore();
 
 const photoCardRefs = ref<(InstanceType<typeof PhotoCard> | null)[]>([]);
 
 // MARK: pagination
-const { photos } = toRefs(props);
+const photos = computed(() => galleryState.imageFiltered);
 const page = ref(1);
 const imagePerPage = 16;
 
@@ -39,22 +35,15 @@ const currentDisplayed = computed(() =>
     page.value * imagePerPage,
   ),
 );
+watchEffect(() => (galleryState.imageDisplayed = currentDisplayed.value));
 
 // MARK: selected related
-const selectedPhotos = defineModel<string[]>({ required: true });
 watchEffect(() => {
-  selectedPhotos.value = photoCardRefs.value
+  galleryState.imageSelected = photoCardRefs.value
     .filter((ref) => ref?.selected)
     .map((ref) => ref?.key)
     .filter((keyOrUd) => keyOrUd !== undefined) as string[];
 });
-
-function clearSelectedPhotos() {
-  selectedPhotos.value.length = 0;
-  for (const ref of photoCardRefs.value) {
-    ref && (ref.selected = false);
-  }
-}
 
 // MARK: masonry layout
 const masonryState = useMasonryStateStore();

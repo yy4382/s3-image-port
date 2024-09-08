@@ -193,19 +193,17 @@ import {
   compareDesc,
 } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
-import type { SortByOpts, Photo } from "~/types";
+import type { SortByOpts } from "~/types";
 import { useFuse } from "@vueuse/integrations/useFuse";
 
 const { t, locale } = useI18n();
 
-const props = defineProps<{
-  photos: Photo[];
-  enableFuzzySearch: boolean;
-  fuzzySearchThreshold: number;
-}>();
-const { photos, enableFuzzySearch, fuzzySearchThreshold } = toRefs(props);
+const settings = useSettingsStore();
+const enableFuzzySearch = computed(() => settings.app.enableFuzzySearch);
+const fuzzySearchThreshold = computed(() => settings.app.fuzzySearchThreshold);
 
-const emit = defineEmits(["update:photosToDisplay"]);
+const galleryState = useGalleryStateStore();
+const photos = computed(() => galleryState.imageAll);
 
 const openFilter = ref(false);
 const openSort = ref(false);
@@ -380,5 +378,5 @@ const photosToDisplay = computed(() => {
   );
 });
 
-watchEffect(() => emit("update:photosToDisplay", photosToDisplay.value));
+watchEffect(() => (galleryState.imageFiltered = photosToDisplay.value));
 </script>
