@@ -1,28 +1,12 @@
 <script lang="ts" setup>
-/**
- *  Basic workflow of this component:
- * 1. When mounted, GetObject from S3 and set the ObjectUrl to <img>
- * 2. When <img> is loaded, set the natural size to the masonry state
- * 3. The masonry state will set size for wrapper
- * 4. When wrapper has the same ratio as the image, set showImg to true to show the image
- */
 const props = defineProps<{
   s3Key: string;
 }>();
 const key = toRefs(props).s3Key;
 
-// step 1: get objectUrl
-const { imageData, isImage, mimeType, refresh } = useImageDisplay(key, {
-  loadMethod: "head",
-});
-const forceShowImage = ref(false);
-const imageUrl = computed(() => {
-  if (forceShowImage.value) return imageData.value;
-  else if (isImage.value) return imageData.value;
-  else return undefined;
-});
+const state = ref<"loading" | "loaded" | "error">("loading");
 
-// step 2: update masonry state when image is loaded
+// load the image and tell natural size to masonry
 const imageTag = useTemplateRef("imageTag");
 const naturalSize = ref<[number, number] | undefined>(undefined);
 const masonryState = useMasonryStateStore();
@@ -39,11 +23,13 @@ function onImageLoad() {
   const { naturalWidth, naturalHeight } = imageTag.value;
   naturalSize.value = [naturalWidth, naturalHeight];
 }
+function onImageError() {
+  state.value = "error";
+}
 
-// step 3: show image when wrapper has the same ratio as the image
+// show image when wrapper has the same ratio as the image
 // (masonry has completed calculation)
 const wrapper = useTemplateRef("wrapper");
-const imageLoaded = ref(false);
 watchEffect(() => {
   masonryState.setNaturalSize(key.value, naturalSize.value);
 });
@@ -65,11 +51,12 @@ watchEffect(() => {
     ) < 0.001
   ) {
     setTimeout(() => {
-      imageLoaded.value = true;
+      state.value = "loaded";
     }, 50);
   }
 });
 
+const imageLoaded = computed(() => state.value == "loaded");
 defineExpose({ imageLoaded });
 </script>
 
@@ -82,34 +69,19 @@ defineExpose({ imageLoaded });
       height: `${masonryState.imageSizes.get(key)![1]}px`,
     }"
   >
-    <div v-show="!imageLoaded" class="size-full">
-      <div
-        v-if="!isImage && isImage !== null && !forceShowImage"
-        class="size-full flex items-center justify-center border-2 dark:border-gray-700"
-      >
-        <div class="flex flex-col items-center justify-center gap-2">
-          <p>{{ $t("photos.photoCard.notPhotoIndicator.title") }}</p>
-          <p class="text-xs">Key: {{ key }}</p>
-          <p class="text-xs">Mime: {{ mimeType }}</p>
-          <div class="flex gap-2">
-            <UButton @click="forceShowImage = true">{{
-              $t("photos.photoCard.notPhotoIndicator.show")
-            }}</UButton>
-            <UButton @click="refresh">{{
-              $t("photos.photoCard.notPhotoIndicator.refresh")
-            }}</UButton>
-          </div>
-        </div>
-      </div>
-      <USkeleton v-else class="size-full" :ui="{ rounded: 'rounded-none' }" />
-    </div>
-    <div v-show="imageLoaded" class="bg-gray-200">
+    <PhotoCardImageDisplayError v-if="state == 'error'" :s3-key="key" />
+    <USkeleton
+      v-if="state == 'loading'"
+      class="size-full"
+      :ui="{ rounded: 'rounded-none' }"
+    />
+    <div v-show="state == 'loaded'" class="bg-gray-200">
       <img
-        v-if="imageUrl"
         ref="imageTag"
-        :src="imageUrl"
+        :src="key2Url(key, useSettingsStore().s3)"
         class="size-full transition-all"
         @load="onImageLoad"
+        @error="onImageError"
       />
     </div>
   </div>
