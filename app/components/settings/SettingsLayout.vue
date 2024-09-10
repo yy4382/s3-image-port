@@ -24,7 +24,7 @@ const links = computed(() => [
 </script>
 
 <template>
-  <div class="size-full flex gap-4">
+  <div class="size-full flex gap-4 flex-col md:flex-row">
     <div class="flex flex-col gap-8">
       <h2 class="flex flex-row items-center gap-1 text-lg font-semibold">
         <UIcon name="i-mingcute-settings-3-fill" />
