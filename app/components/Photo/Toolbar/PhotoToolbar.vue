@@ -13,7 +13,7 @@ const selectedPhotos = computed(() => galleryState.imageSelected);
       v-if="selectedPhotos.length > 0"
       icon="i-mingcute-checkbox-line"
       :label="selectedPhotos.length + ''"
-      variant="outline"
+      variant="solid"
       color="gray"
       @click="galleryState.clearSelectedPhotos"
     />
@@ -32,7 +32,7 @@ const selectedPhotos = computed(() => galleryState.imageSelected);
         :label="selectedPhotos.length + ''"
         icon="i-mingcute-delete-3-line"
         color="red"
-        variant="outline"
+        variant="solid"
         :disabled="!settings.validity.s3"
       />
     </BaseSecondConfirm>
