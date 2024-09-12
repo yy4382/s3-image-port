@@ -29,12 +29,9 @@ export type AppSettings = Prettify<
 
 export const fileUploadSettingsSchema = z.object({
   convertType: z.enum(convertTypes),
-  compressionMaxSize: z.union([z.number().min(0), z.string().length(0)]),
-  compressionMaxWidthOrHeight: z.union([
-    z.number().min(1),
-    z.string().length(0),
-  ]),
-  keyTemplate: z.union([z.string().endsWith(".{{ext}}"), z.string().length(0)]),
+  compressionMaxSize: z.union([z.number().min(0), z.literal("")]),
+  compressionMaxWidthOrHeight: z.union([z.number().min(1), z.literal("")]),
+  keyTemplate: z.union([z.string().endsWith(".{{ext}}"), z.literal("")]),
 });
 
 export const gallerySettingsSchema = z.object({

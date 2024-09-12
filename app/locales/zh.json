@@ -312,6 +312,13 @@
         "misc": "杂项",
         "upload": "上传设置"
       }
+    },
+    "importExport": {
+      "invalid": "无效的剪贴板数据",
+      "clipboard": {
+        "unsupported_description": "这可能是由于浏览器版本较低所致。"
+      },
+      "success": "成功"
     }
   }
 }

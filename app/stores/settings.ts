@@ -71,12 +71,35 @@ export const useSettingsStore = defineStore("settings", () => {
     };
   };
 
+  const exportSettings = () => {
+    return {
+      s3: s3.value,
+      app: app.value,
+    };
+  };
+
+  const importSettings = (settings: { s3: S3Settings; app: AppSettings }) => {
+    const { success: appSuccess, data: appData } = appSettingsSchema.safeParse(
+      settings.app,
+    );
+    const { success: s3Success, data: s3Data } = s3SettingsSchema.safeParse(
+      settings.s3,
+    );
+    if (!appSuccess || !s3Success) {
+      throw new Error("Invalid settings format");
+    }
+    app.value = appData;
+    s3.value = s3Data;
+  };
+
   return {
     s3: skipHydrate(s3),
     app: skipHydrate(app),
     validity: skipHydrate(validity),
 
     test,
+    exportSettings,
+    importSettings,
   };
 });
 

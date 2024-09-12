@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { useClipboard } from "@vueuse/core";
+const toast = useToast();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const links = computed(() => [
@@ -21,15 +23,83 @@ const links = computed(() => [
     },
   ],
 ]);
+
+const settingsStore = useSettingsStore();
+const { copy, isSupported } = useClipboard();
+
+// Add these lines
+const handleImportSettings = async () => {
+  if (!isSupported) {
+    toast.add({
+      title: t("settings.importExport.clipboard.unsupported"),
+      description: t("settings.importExport.clipboard.unsupported_description"),
+      color: "red",
+    });
+    return;
+  }
+  const clipboardData = await navigator.clipboard.readText();
+  try {
+    const settings = JSON.parse(clipboardData);
+    settingsStore.importSettings(settings);
+    toast.add({
+      title: t("settings.importExport.success"),
+      color: "green",
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      toast.add({
+        title: t("settings.importExport.invalid"),
+        description: error.message,
+        color: "red",
+      });
+    }
+  }
+};
+
+const handleExportSettings = async () => {
+  if (!isSupported) {
+    const toast = useToast();
+    toast.add({
+      title: t("settings.importExport.clipboard.unsupported"),
+      description: t("settings.importExport.clipboard.unsupported_description"),
+      color: "red",
+    });
+    return;
+  }
+  const settings = settingsStore.exportSettings();
+  await copy(JSON.stringify(settings, null, 2));
+  toast.add({
+    title: t("settings.importExport.success"),
+    color: "green",
+  });
+};
 </script>
 
 <template>
   <div class="size-full flex gap-4 flex-col md:flex-row">
     <div class="flex flex-col gap-8">
-      <h2 class="flex flex-row items-center gap-1 text-lg font-semibold">
-        <UIcon name="i-mingcute-settings-3-fill" />
-        {{ $t("settings.title") }}
-      </h2>
+      <div class="flex flex-row items-center justify-between">
+        <h2 class="flex flex-row items-center gap-1 text-lg font-semibold">
+          <UIcon name="i-mingcute-settings-3-fill" />
+          {{ $t("settings.title") }}
+        </h2>
+        <div class="flex gap-1">
+          <UButton
+            size="xs"
+            variant="ghost"
+            color="gray"
+            icon="i-mingcute-copy-2-fill"
+            @click="handleExportSettings"
+          />
+          <UButton
+            size="xs"
+            variant="ghost"
+            color="gray"
+            icon="i-mingcute-download-fill"
+            @click="handleImportSettings"
+          />
+        </div>
+      </div>
       <UVerticalNavigation :links="links" class="min-w-[10rem]" />
     </div>
     <div class="w-full max-w-md mx-auto">

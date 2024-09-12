@@ -14,5 +14,5 @@ export const s3SettingsSchema = z.object({
   region: z.string().min(1, "Required"),
   accKeyId: z.string().min(1, "Required"),
   secretAccKey: z.string().min(1, "Required"),
-  pubUrl: z.union([z.string().url(), z.string().length(0)]),
+  pubUrl: z.union([z.string().url(), z.literal("")]),
 });

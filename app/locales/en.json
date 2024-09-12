@@ -312,6 +312,14 @@
         "description": "If enabled, the home page will be redirected to upload page. Link in Footer is always availble.",
         "title": "Disable Home Page"
       }
+    },
+    "importExport": {
+      "invalid": "Invalid clipboard data",
+      "clipboard": {
+        "unsupported": "Clipboard not supported",
+        "unsupported_description": "This maybe due to a low-version browser."
+      },
+      "success": "Success"
     }
   }
 }
