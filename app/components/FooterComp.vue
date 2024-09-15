@@ -9,14 +9,15 @@
         },
       }"
     >
-      <div
+      <footer
         class="inline-flex items-center justify-between w-full dark:text-gray-400 text-gray-600 text-sm"
       >
-        <span>
+        <p>
           Copyright © 2024
           <ULink
             to="https://yfi.moe"
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            :aria-label="$t('a11y.footer.yunfi')"
             >Yunfi</ULink
           >.
           <br />
@@ -24,31 +25,35 @@
           <ULink
             to="https://nuxt.com/"
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            :aria-label="$t('a11y.footer.nuxt')"
             >Nuxt</ULink
           >
           &
           <ULink
             to="https://ui.nuxt.com/"
             inactive-class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            :aria-label="$t('a11y.footer.nuxt-ui')"
             >Nuxt UI</ULink
           >.
-          <span class="hidden md:inline-block">
+          <span class="hidden md:inline-block" aria-hidden="true">
             {{ hostingProvider ? `Hosted on ${hostingProvider}.` : "" }}
           </span>
-        </span>
+        </p>
         <span class="hidden md:inline-flex gap-4">
           <ULink
             :to="localePath('/?noredirect=true')"
             class="hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            :aria-label="$t('a11y.footer.home')"
             >Home</ULink
           >
           <ULink
             to="https://github.com/yy4382/s3-image-port"
             class="hover:text-primary-600 dark:hover:text-primary-500 hover:underline hover:underline-offset-2 transition-colors"
+            :aria-label="$t('a11y.footer.github')"
             >GitHub</ULink
           ></span
         >
-      </div>
+      </footer>
     </UCard>
   </UContainer>
 </template>

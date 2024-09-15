@@ -1,4 +1,18 @@
 {
+  "a11y": {
+    "nav": {
+      "logo": "S3 图片管家的 Logo",
+      "language-switcher": "切换语言",
+      "github": "前往 GitHub 仓库"
+    },
+    "footer": {
+      "yunfi": "访问作者 Yunfi 的网站",
+      "nuxt": "访问 Nuxt.js 的网站",
+      "nuxt-ui": "访问 Nuxt UI 的网站",
+      "home": "返回主页",
+      "github": "前往 GitHub 仓库"
+    }
+  },
   "general": {
     "message": {
       "invalidS3Setting": {
