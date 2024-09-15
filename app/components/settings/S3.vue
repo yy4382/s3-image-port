@@ -94,20 +94,22 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       :title="$t('settings.s3.info.howTo.title')"
     >
       <template #description>
-        <span>{{ $t("settings.s3.info.howTo.description.part1") }}</span>
-        <ULink
-          :to="
-            $i18n.locale === 'zh'
-              ? 'https://docs.iport.yfi.moe/zh/guide/getting-started'
-              : 'https://docs.iport.yfi.moe/guide/getting-started'
-          "
-          inactive-class="text-primary-500 dark:text-primary-400
+        <p>
+          {{ $t("settings.s3.info.howTo.description.part1") }}
+          <ULink
+            :to="
+              $i18n.locale === 'zh'
+                ? 'https://docs.iport.yfi.moe/zh/guide/getting-started'
+                : 'https://docs.iport.yfi.moe/guide/getting-started'
+            "
+            inactive-class="text-primary-500 dark:text-primary-400
           hover:text-primary-600 dark:hover:text-primary-500 hover:underline
           hover:underline-offset-2 transition-colors"
-        >
-          {{ $t("settings.s3.info.howTo.description.part2") }}</ULink
-        >
-        <span>{{ $t("settings.s3.info.howTo.description.part3") }}</span>
+          >
+            {{ $t("settings.s3.info.howTo.description.part2") }}</ULink
+          >
+          {{ $t("settings.s3.info.howTo.description.part3") }}
+        </p>
       </template>
     </UAlert>
   </div>
@@ -185,6 +187,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         <UButton
           :icon="showAccessKeyId ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'"
           color="gray"
+          aria-hidden="true"
           @click="showAccessKeyId = !showAccessKeyId"
         />
       </UButtonGroup>
@@ -212,6 +215,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         <UButton
           :icon="showSecretAccessKey ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'"
           color="gray"
+          aria-hidden="true"
           @click="showSecretAccessKey = !showSecretAccessKey"
         />
       </UButtonGroup>
@@ -247,6 +251,11 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
                 color="primary"
                 square
                 variant="link"
+                :aria-label="
+                  $t(
+                    'a11y.settings.s3.form.publicUrl.description.learnMoreButton',
+                  )
+                "
               />
               <template #panel>
                 <UCard

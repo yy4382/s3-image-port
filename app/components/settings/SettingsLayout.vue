@@ -79,16 +79,17 @@ const handleExportSettings = async () => {
   <div class="size-full flex gap-4 flex-col md:flex-row">
     <div class="flex flex-col gap-8">
       <div class="flex flex-row items-center justify-between">
-        <h2 class="flex flex-row items-center gap-1 text-lg font-semibold">
+        <h1 class="flex flex-row items-center gap-1 text-lg font-semibold">
           <UIcon name="i-mingcute-settings-3-fill" />
           {{ $t("settings.title") }}
-        </h2>
+        </h1>
         <div class="flex gap-1">
           <UButton
             size="xs"
             variant="ghost"
             color="gray"
             icon="i-mingcute-copy-2-fill"
+            :aria-label="$t('a11y.settings.importExport.export')"
             @click="handleExportSettings"
           />
           <UButton
@@ -96,11 +97,16 @@ const handleExportSettings = async () => {
             variant="ghost"
             color="gray"
             icon="i-mingcute-download-fill"
+            :aria-label="$t('a11y.settings.importExport.import')"
             @click="handleImportSettings"
           />
         </div>
       </div>
-      <UVerticalNavigation :links="links" class="min-w-[10rem]" />
+      <UVerticalNavigation
+        :links="links"
+        class="min-w-[10rem]"
+        :aria-label="$t('a11y.settings.list')"
+      />
     </div>
     <div class="w-full max-w-md mx-auto">
       <slot />
