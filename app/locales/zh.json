@@ -11,6 +11,22 @@
       "nuxt-ui": "访问 Nuxt UI 的网站",
       "home": "返回主页",
       "github": "前往 GitHub 仓库"
+    },
+    "settings": {
+      "importExport": {
+        "import": "从剪贴板导入设置",
+        "export": "导出设置到剪贴板"
+      },
+      "list": "设置列表",
+      "s3": {
+        "form": {
+          "publicUrl": {
+            "description": {
+              "learnMoreButton": "了解更多关于 Public URL 的信息"
+            }
+          }
+        }
+      }
     }
   },
   "general": {

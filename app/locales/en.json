@@ -11,6 +11,22 @@
       "nuxt-ui": "Visit the website of Nuxt UI, the UI library of this project",
       "home": "Go to Home Page",
       "github": "View the source code of this project on GitHub"
+    },
+    "settings": {
+      "importExport": {
+        "import": "Import settings from clipboard",
+        "export": "Export settings to clipboard"
+      },
+      "list": "List of settings",
+      "s3": {
+        "form": {
+          "publicUrl": {
+            "description": {
+              "learnMoreButton": "Learn more about Public URL"
+            }
+          }
+        }
+      }
     }
   },
   "general": {
