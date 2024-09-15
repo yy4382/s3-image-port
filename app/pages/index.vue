@@ -8,7 +8,7 @@
       <div
         class="flex flex-col space-y-4 items-center justify-center md:w-full"
       >
-        <div
+        <h1
           class="text-center text-5xl md:text-6xl lg:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-primary-400 to-primary-600 pb-2"
         >
           <span class="text-gray-800 dark:text-inherit">{{
@@ -19,18 +19,18 @@
           <span class="text-gray-800 dark:text-inherit">{{
             $t("index.slogan.part3")
           }}</span>
-        </div>
+        </h1>
         <div class="flex flex-col space-y-2">
-          <p
+          <h2
             class="text-center text-base md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300"
           >
             {{ $t("index.description") }}
-          </p>
-          <p
+          </h2>
+          <h2
             class="text-center text-sm md:text-base lg:text-xl text-gray-600 dark:text-gray-400"
           >
             {{ $t("index.comment") }}
-          </p>
+          </h2>
         </div>
         <div
           class="flex flex-wrap gap-2 sm:gap-4 md:pt-6 justify-center items-center"

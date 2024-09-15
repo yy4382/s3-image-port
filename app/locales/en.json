@@ -1,4 +1,18 @@
 {
+  "a11y": {
+    "nav": {
+      "logo": "Logo of S3 Image Port",
+      "language-switcher": "Language Switcher",
+      "github": "View the source code of this project on GitHub"
+    },
+    "footer": {
+      "yunfi": "Visit the website of Yunfi, the author of this project",
+      "nuxt": "Visit the website of Nuxt.js, the framework of this project",
+      "nuxt-ui": "Visit the website of Nuxt UI, the UI library of this project",
+      "home": "Go to Home Page",
+      "github": "View the source code of this project on GitHub"
+    }
+  },
   "general": {
     "message": {
       "invalidS3Setting": {
