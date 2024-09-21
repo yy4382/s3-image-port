@@ -169,7 +169,8 @@
         "fail": {
           "title": "Failed to delete photo"
         }
-      }
+      },
+      "noPhotoFound": "No photos found."
     }
   },
   "settings": {

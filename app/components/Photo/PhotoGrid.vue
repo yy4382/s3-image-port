@@ -1,4 +1,20 @@
 <template>
+  <div
+    v-if="photos.length === 0"
+    class="flex flex-col items-center gap-4 w-full max-w-md mx-auto"
+  >
+    <div class="text-center text-gray-500">
+      {{ $t("photos.message.noPhotoFound") }}
+    </div>
+    <UButton
+      icon="i-mingcute-refresh-2-line"
+      :disabled="!useSettingsStore().validity.s3"
+      variant="outline"
+      @click="galleryState.listImages()"
+    >
+      {{ $t("photos.loadOrRefreshButton.loadButton") }}
+    </UButton>
+  </div>
   <div ref="imageWrapper" class="flex flex-wrap gap-2">
     <PhotoCard
       v-for="photo in currentDisplayed"
@@ -17,8 +33,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { PhotoCard } from "#components";
-
 const galleryState = useGalleryStateStore();
 
 // MARK: pagination

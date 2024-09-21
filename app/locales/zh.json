@@ -169,7 +169,8 @@
         "fail": {
           "title": "删除图片失败"
         }
-      }
+      },
+      "noPhotoFound": "未找到图片"
     }
   },
   "settings": {
@@ -316,7 +317,8 @@
     "importExport": {
       "invalid": "无效的剪贴板数据",
       "clipboard": {
-        "unsupported_description": "这可能是由于浏览器版本较低所致。"
+        "unsupported_description": "这可能是由于浏览器版本较低所致。",
+        "unsupported": "剪贴板不受支持"
       },
       "success": "成功"
     }
