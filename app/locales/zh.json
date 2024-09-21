@@ -223,6 +223,10 @@
             "line1": "默认情况下，输出 URL 将根据 `Endpoint/BucketName/PathToImage` 来拼接。",
             "line2": "如果您有一个自定义域名指向存储桶，或者无法通过Endpoint 拼接而成的链接访问图像文件（例如 R2），您可以在此处指定自定义域名。它将构造成 `PublicUrl/PathToImage`。"
           }
+        },
+        "forcePathStyle": {
+          "title": "使用路径格式",
+          "description": "使用 end.point/bucket/key 而不是 bucket.end.point/key"
         }
       },
       "submitFormButton": {

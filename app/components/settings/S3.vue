@@ -216,6 +216,20 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         />
       </UButtonGroup>
     </UFormGroup>
+    <div class="flex justify-between">
+      <UFormGroup
+        :label="$t('settings.s3.form.forcePathStyle.title')"
+        :description="$t('settings.s3.form.forcePathStyle.description')"
+        name="forcePathStyle"
+      />
+      <div class="flex flex-col justify-center">
+        <UToggle
+          v-model="state.forcePathStyle"
+          on-icon="i-heroicons-check-20-solid"
+          off-icon="i-heroicons-x-mark-20-solid"
+        />
+      </div>
+    </div>
 
     <UFormGroup
       :label="$t('settings.s3.form.publicUrl.title')"

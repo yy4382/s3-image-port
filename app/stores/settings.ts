@@ -5,24 +5,33 @@ import * as checkOp from "~/utils/testOps";
 
 export const useSettingsStore = defineStore("settings", () => {
   // MARK: states
-  const s3 = useLocalStorage("s3-settings", {
-    endpoint: "",
-    bucket: "",
-    accKeyId: "",
-    secretAccKey: "",
-    region: "",
-    pubUrl: "",
-  } satisfies S3Settings as S3Settings);
-  const app = useLocalStorage("app-settings", {
-    enableAutoRefresh: false,
-    enableFuzzySearch: true,
-    fuzzySearchThreshold: 0.6,
-    convertType: "none",
-    compressionMaxSize: "",
-    compressionMaxWidthOrHeight: "",
-    keyTemplate: "",
-    noLongerShowRootPage: false,
-  } satisfies AppSettings as AppSettings);
+  const s3 = useLocalStorage(
+    "s3-settings",
+    {
+      endpoint: "",
+      bucket: "",
+      accKeyId: "",
+      secretAccKey: "",
+      region: "",
+      pubUrl: "",
+      forcePathStyle: false,
+    } satisfies S3Settings as S3Settings,
+    { mergeDefaults: true },
+  );
+  const app = useLocalStorage(
+    "app-settings",
+    {
+      enableAutoRefresh: false,
+      enableFuzzySearch: true,
+      fuzzySearchThreshold: 0.6,
+      convertType: "none",
+      compressionMaxSize: "",
+      compressionMaxWidthOrHeight: "",
+      keyTemplate: "",
+      noLongerShowRootPage: false,
+    } satisfies AppSettings as AppSettings,
+    { mergeDefaults: true },
+  );
 
   const validity = computed(() => ({
     app: appSettingsSchema.safeParse(app.value).success,
