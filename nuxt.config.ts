@@ -18,13 +18,13 @@ export default defineNuxtConfig({
     locales: [
       {
         code: "en",
-        iso: "en-US",
+        language: "en-US",
         file: "en.json",
         name: "English",
       },
       {
         code: "zh",
-        iso: "zh-CN",
+        language: "zh-CN",
         file: "zh.json",
         name: "简体中文",
       },
@@ -46,4 +46,5 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
+  compatibilityDate: "2024-09-21",
 });
