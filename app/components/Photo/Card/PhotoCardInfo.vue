@@ -16,7 +16,7 @@
         <div class="text-sm items-center inline-flex">
           <Icon name="i-mingcute-time-line" class="shrink-0 mr-2" />
           <span class="truncate block">
-            {{ DateTime.fromISO(photo.LastModified).toFormat("yyyy-LL-dd") }}
+            {{ format(new Date(photo.LastModified), "yyyy-MM-dd") }}
           </span>
         </div>
         <div class="text-sm items-center inline-flex">
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DateTime } from "luxon";
+import { format } from "date-fns";
 import type { Photo } from "~/types";
 import { breakpointsTailwind } from "@vueuse/core";
 const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");

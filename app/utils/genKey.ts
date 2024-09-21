@@ -1,4 +1,4 @@
-import { DateTime, Interval } from "luxon";
+import { format, differenceInMilliseconds, startOfDay } from "date-fns";
 
 export const defaultKeyTemplate =
   "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
@@ -15,16 +15,16 @@ export default function (
     keyTemplate = defaultKeyTemplate;
   }
 
-  const now = DateTime.now();
-  const interval = Interval.fromDateTimes(now.startOf("day"), now);
+  const now = new Date();
+  const msFromStartOfDay = differenceInMilliseconds(now, startOfDay(now));
 
   const data: Record<string, string> = {
-    year: now.toFormat("yyyy"),
-    month: now.toFormat("LL"),
-    day: now.toFormat("dd"),
+    year: format(now, "yyyy"),
+    month: format(now, "MM"),
+    day: format(now, "dd"),
     filename: file.name.split(".").shift() || "",
     ext: type === "none" ? file.name.split(".").pop() || "" : type,
-    random: `${interval.length("milliseconds").toString(36)}-${Math.random()
+    random: `${msFromStartOfDay.toString(36)}-${Math.random()
       .toString(36)
       .substring(2, 4)}`,
   };
