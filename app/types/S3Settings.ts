@@ -6,6 +6,7 @@ export interface S3Settings {
   accKeyId: string;
   secretAccKey: string;
   pubUrl: string;
+  forcePathStyle: boolean;
 }
 
 export const s3SettingsSchema = z.object({
@@ -15,4 +16,5 @@ export const s3SettingsSchema = z.object({
   accKeyId: z.string().min(1, "Required"),
   secretAccKey: z.string().min(1, "Required"),
   pubUrl: z.union([z.string().url(), z.literal("")]),
+  forcePathStyle: z.boolean(),
 });

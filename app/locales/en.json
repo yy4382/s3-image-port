@@ -223,6 +223,10 @@
             "line1": "By default, the output URL will be constructed based on `Endpoint/BucketName/PathToImage`.",
             "line2": "If you have a custom domain pointing to the bucket, or the image file cannot be accessed by endpoint url (e.g. R2), you can specify the custom domain here. It will be constructed into `PublicUrl/PathToImage`."
           }
+        },
+        "forcePathStyle": {
+          "title": "Use Path Style",
+          "description": "Use end.point/bucket/key instead of bucket.end.point/key"
         }
       },
       "submitFormButton": {

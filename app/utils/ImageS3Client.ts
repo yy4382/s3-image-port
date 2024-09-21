@@ -18,6 +18,7 @@ class ImageS3Client {
     this.config = s3Settings;
     this.client = new S3Client({
       region: s3Settings.region,
+      forcePathStyle: s3Settings.forcePathStyle,
       credentials: {
         accessKeyId: s3Settings.accKeyId,
         secretAccessKey: s3Settings.secretAccKey,
