@@ -12,6 +12,7 @@ const checkGrantedToUpload = async (
     debug("Granted to upload!");
     return true;
   } catch (e) {
+    console.error(e);
     return false;
   }
 };
@@ -23,6 +24,7 @@ const checkGrantedToList = async (s3Settings: S3Settings) => {
     debug("Granted to list!");
     return true;
   } catch (e) {
+    console.error(e);
     return false;
   }
 };
@@ -34,6 +36,7 @@ const checkGrantedToDelete = async (s3Settings: S3Settings, key: string) => {
     debug("Granted to delete!");
     return true;
   } catch (e) {
+    console.error(e);
     return false;
   }
 };

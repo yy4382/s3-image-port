@@ -6,7 +6,7 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
-import { type S3Settings, type Photo } from "~/types";
+import type { S3Settings, Photo } from "~/types";
 import mime from "mime";
 
 class ImageS3Client {

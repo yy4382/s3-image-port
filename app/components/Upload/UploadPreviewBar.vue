@@ -175,11 +175,11 @@ const upload = async (finishedEachCb?: FinishEachCb) => {
       processedFile.value!,
       key.value,
     );
-    finishedEachCb && finishedEachCb(key.value, file.value.name, true);
+    if (finishedEachCb) finishedEachCb(key.value, file.value.name, true);
     return { key: key.value, name: file.value.name, success: true };
   } catch (e) {
     console.error(e);
-    finishedEachCb && finishedEachCb(key.value, file.value.name, false);
+    if (finishedEachCb) finishedEachCb(key.value, file.value.name, false);
     return { key: key.value, name: file.value.name, success: false };
   }
 };

@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 import type { UploadedFileLinkObj } from "~/types";
-import { type UploadPreviewBar } from "#components";
 
 const { t } = useI18n();
 const settings = useSettingsStore();
@@ -48,7 +47,7 @@ const uploadedLinks = defineModel("uploadedLinks", {
 const uploading = ref(false);
 
 const fileList = ref<File[]>([]);
-const previewBars = ref<InstanceType<typeof UploadPreviewBar>[] | null>(null);
+const previewBars = useTemplateRef("previewBars");
 
 const uploadProgress = ref(0);
 const uploadProgressMax = ref(0);
@@ -67,7 +66,7 @@ const upload = async () => {
 
   const uploadPromises =
     previewBars.value?.map((previewBar) => {
-      return previewBar.upload(() => {
+      return previewBar?.upload(() => {
         uploadProgress.value++;
       });
     }) ?? [];
@@ -82,6 +81,7 @@ const upload = async () => {
 
   // delete successful uploaded files
   uploadedStates.forEach((state) => {
+    if (!state) return;
     if (state.success) {
       const index = fileList.value.findIndex(
         (file) => file.name === state.name,
@@ -101,7 +101,7 @@ const upload = async () => {
   if (failedUploads.length > 0) {
     toast.add({
       title: t("upload.message.uploadFailed.title"),
-      description: failedUploads.map((state) => state.key).join(", "),
+      description: failedUploads.map((state) => state?.key).join(", "),
       actions: [
         {
           label: t("upload.message.uploadFailed.actions.goToSettings"),
