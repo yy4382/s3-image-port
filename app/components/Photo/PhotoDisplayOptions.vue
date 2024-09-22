@@ -1,12 +1,20 @@
 <template>
   <div class="flex gap-2">
+    <label for="search" class="sr-only">
+      {{ $t("photos.displayOptions.search.label") }}
+    </label>
     <UInput
+      id="search"
       v-model="searchTerm"
       icon="i-heroicons-magnifying-glass-20-solid"
       :placeholder="$t('photos.displayOptions.search.placeholder')"
     />
     <UChip :show="numberOfFilters > 0" :text="numberOfFilters" size="lg">
-      <UButton icon="i-mingcute-filter-line" @click="openFilter = true" />
+      <UButton
+        icon="i-mingcute-filter-line"
+        :aria-label="$t('photos.displayOptions.filter.title')"
+        @click="openFilter = true"
+      />
     </UChip>
     <UButton
       :icon="
@@ -15,6 +23,7 @@
           : 'i-mingcute-sort-ascending-line'
       "
       :color="openSort ? 'primary' : 'gray'"
+      :aria-label="$t('photos.displayOptions.sort.title')"
       @click="openSort = true"
     />
 
@@ -22,14 +31,15 @@
       <UCard>
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">
+            <h1 class="text-base font-semibold">
               {{ $t("photos.displayOptions.filter.title") }}
-            </h3>
+            </h1>
             <UButton
               color="gray"
               variant="ghost"
               icon="i-heroicons-x-mark-20-solid"
               class="-my-1"
+              :aria-label="$t('photos.displayOptions.filter.close')"
               @click="openFilter = false"
             />
           </div>
@@ -127,9 +137,9 @@
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex flex-col">
-              <h3 class="text-base font-semibold">
+              <h1 class="text-base font-semibold">
                 {{ $t("photos.displayOptions.sort.title") }}
-              </h3>
+              </h1>
               <p class="text-gray-500 dark:text-gray-400 text-sm">
                 {{ $t("photos.displayOptions.sort.description") }}
               </p>
@@ -139,6 +149,7 @@
               variant="ghost"
               icon="i-heroicons-x-mark-20-solid"
               class="-my-1"
+              :aria-label="$t('photos.displayOptions.sort.close')"
               @click="openSort = false"
             />
           </div>
