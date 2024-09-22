@@ -21,16 +21,16 @@
           }}</span>
         </h1>
         <div class="flex flex-col space-y-2">
-          <h2
+          <p
             class="text-center text-base md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300"
           >
             {{ $t("index.description") }}
-          </h2>
-          <h2
+          </p>
+          <p
             class="text-center text-sm md:text-base lg:text-xl text-gray-600 dark:text-gray-400"
           >
             {{ $t("index.comment") }}
-          </h2>
+          </p>
         </div>
         <div
           class="flex flex-wrap gap-2 sm:gap-4 md:pt-6 justify-center items-center"
