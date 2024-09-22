@@ -78,11 +78,15 @@
       "uploadButton": "Upload"
     },
     "uploadedLinks": {
+      "description": "List of uploaded images in pure link or markdown format",
+      "clickToCopy": "Click to copy",
       "pureLink": {
-        "title": "Link"
+        "title": "Link",
+        "description": "List of uploaded images in pure link format"
       },
       "markdown": {
-        "title": "Markdown"
+        "title": "Markdown",
+        "description": "List of uploaded images in markdown format"
       }
     },
     "message": {

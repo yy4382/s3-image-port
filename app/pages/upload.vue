@@ -3,16 +3,24 @@
     <UContainer class="!px-0">
       <UploadWrapper v-model:uploaded-links="uploadedLinks" class="w-full" />
     </UContainer>
-    <UTabs v-if="uploadedLinks.length > 0" :items="items">
+    <UTabs
+      v-if="uploadedLinks.length > 0"
+      :items="items"
+      :aria-label="$t('upload.uploadedLinks.description')"
+    >
       <template #item="{ item }">
         <UCard>
-          <ul class="space-y-3">
+          <ul
+            class="space-y-3"
+            :aria-label="$t(`upload.uploadedLinks.${item.type}.description`)"
+          >
             <li v-for="link in item.links" :key="link">
               <UseClipboard v-slot="{ copy }" :source="link">
                 <UButton
                   color="black"
                   variant="link"
                   class="w-full"
+                  :aria-label="$t('upload.uploadedLinks.clickToCopy') + link"
                   @click="
                     copy() && toast.add({ title: $t('upload.message.copied') })
                   "

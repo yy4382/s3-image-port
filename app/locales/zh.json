@@ -78,11 +78,15 @@
       "uploadButton": "上传"
     },
     "uploadedLinks": {
+      "description": "已上传图片的纯链接或 Markdown 格式",
+      "clickToCopy": "点击以复制",
       "pureLink": {
-        "title": "纯链接"
+        "title": "纯链接",
+        "description": "已上传图片的纯链接格式"
       },
       "markdown": {
-        "title": "Markdown"
+        "title": "Markdown",
+        "description": "已上传图片的 Markdown 格式"
       }
     },
     "message": {
