@@ -30,11 +30,12 @@ useSeoMeta({
     "A dashboard to manage your images in S3 buckets. Can be used as a image hosting service.",
   ogTitle: "S3 Image Port",
   ogDescription: "A dashboard to manage your images in S3 buckets.",
-  ogImage: "/cover.png",
+  ogImage: "https://iport.yfi.moe/cover.png",
   ogUrl: "https://iport.yfi.moe",
+  ogSiteName: "S3 Image Port",
   twitterTitle: "S3 Image Port",
   twitterDescription: "A dashboard to manage your images in S3 buckets.",
-  twitterImage: "/cover.png",
+  twitterImage: "https://iport.yfi.moe/cover.png",
   twitterCard: "summary_large_image",
 });
 
