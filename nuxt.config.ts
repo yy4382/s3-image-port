@@ -10,10 +10,6 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
   ],
   css: ["~/assets/css/global.css"],
-  routeRules: {
-    "/": { prerender: true },
-    "/**": { ssr: false },
-  },
   i18n: {
     locales: [
       {

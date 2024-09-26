@@ -6,18 +6,20 @@
       mask-image: linear-gradient(transparent, black, transparent);
     "
   ></div>
-  <div class="min-h-screen flex flex-col dark:bg-surface-800 gap-4">
-    <NavMenu />
-    <NuxtPage
-      class="flex-grow"
-      :transition="{
-        name: 'my',
-        mode: 'out-in',
-        onBeforeEnter,
-      }"
-    />
-    <FooterComp />
-  </div>
+  <ClientOnly>
+    <div class="min-h-screen flex flex-col dark:bg-surface-800 gap-4">
+      <NavMenu />
+      <NuxtPage
+        class="flex-grow"
+        :transition="{
+          name: 'my',
+          mode: 'out-in',
+          onBeforeEnter,
+        }"
+      />
+      <FooterComp />
+    </div>
+  </ClientOnly>
   <UNotifications />
 </template>
 
