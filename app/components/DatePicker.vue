@@ -38,10 +38,25 @@ const attrs = {
   <VCalendarDatePicker
     v-if="date && typeof date === 'object'"
     v-model.range="date"
-    :columns="2"
     v-bind="{ ...attrs, ...$attrs }"
+    @dayclick="
+      (_: any, event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        target.blur();
+      }
+    "
   />
-  <VCalendarDatePicker v-else v-model="date" v-bind="{ ...attrs, ...$attrs }" />
+  <VCalendarDatePicker
+    v-else
+    v-model="date"
+    v-bind="{ ...attrs, ...$attrs }"
+    @dayclick="
+      (_: any, event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        target.blur();
+      }
+    "
+  />
 </template>
 
 <style>
