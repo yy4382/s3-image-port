@@ -18,7 +18,7 @@
     </UChip>
     <UButton
       :icon="
-        sortOrderIsDescending
+        galleryState.filterOptions.sort.orderIsDesc
           ? 'i-mingcute-sort-descending-line'
           : 'i-mingcute-sort-ascending-line'
       "
@@ -52,7 +52,7 @@
             "
           />
           <USelectMenu
-            v-model="prefix"
+            v-model="galleryState.filterOptions.prefix"
             searchable
             :options="availablePrefixes4Display"
             :placeholder="
@@ -85,7 +85,7 @@
                   ? $t(
                       "photos.displayOptions.filter.dateFilter.calendar.labels.allTime",
                     )
-                  : getDateRangeString(dateRange)
+                  : getDateRangeString(galleryState.filterOptions.dateRange)
               }}
             </UButton>
 
@@ -108,7 +108,7 @@
                     ]"
                     truncate
                     @click="
-                      dateRange = {
+                      galleryState.filterOptions.dateRange = {
                         start: sub(new Date(), range.duration),
                         end: new Date(),
                       }
@@ -117,7 +117,7 @@
                 </div>
 
                 <DatePicker
-                  v-model="dateRange"
+                  v-model="galleryState.filterOptions.dateRange"
                   :locale="$i18n.locale === 'zh' ? 'zh-CN' : 'en'"
                   @close="close"
                 />
@@ -166,7 +166,7 @@
             </div>
             <div class="flex flex-col justify-center">
               <USelectMenu
-                v-model="sortBy"
+                v-model="galleryState.filterOptions.sort.by"
                 :options="sortByOptions"
                 :disabled="searchTerm.trim() !== ''"
               />
@@ -180,7 +180,7 @@
             <div class="flex flex-col justify-center">
               <!--TODO: optimize design (the current version is ugly)-->
               <UToggle
-                v-model="sortOrderIsDescending"
+                v-model="galleryState.filterOptions.sort.orderIsDesc"
                 on-icon="i-mingcute-sort-descending-line"
                 off-icon="i-mingcute-sort-ascending-line"
                 :disabled="searchTerm.trim() !== ''"
@@ -195,26 +195,12 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  sub,
-  format,
-  isSameDay,
-  type Duration,
-  compareAsc,
-  compareDesc,
-} from "date-fns";
+import { sub, format, isSameDay, type Duration } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
-import type { SortByOpts } from "~/types";
-import { useFuse } from "@vueuse/integrations/useFuse";
 
 const { t, locale } = useI18n();
 
-const settings = useSettingsStore();
-const enableFuzzySearch = computed(() => settings.app.enableFuzzySearch);
-const fuzzySearchThreshold = computed(() => settings.app.fuzzySearchThreshold);
-
 const galleryState = useGalleryStateStore();
-const photos = computed(() => galleryState.imageAll);
 
 const openFilter = ref(false);
 const openSort = ref(false);
@@ -224,13 +210,15 @@ const openSort = ref(false);
 // search
 const searchTerm = ref("");
 const debouncedSearchTerm = refDebounced(searchTerm, 300);
+watch(debouncedSearchTerm, () => {
+  galleryState.filterOptions.searchTerm = debouncedSearchTerm.value;
+});
 
 // prefix
-const prefix: Ref<string> = ref("");
 const availablePrefixes: ComputedRef<string[]> = computed(() => [
   "",
   ...new Set(
-    photos.value.flatMap((photo) => {
+    galleryState.imageAll.flatMap((photo) => {
       const parts = photo.Key.split("/");
       return parts
         .slice(0, -1)
@@ -255,11 +243,6 @@ const availablePrefixes4Display = computed(() =>
  * Range that should be seen as "all time"
  */
 const allTimeRange: Duration = { years: 1000 };
-
-const dateRange: Ref<{ start: Date; end: Date }> = ref({
-  start: sub(new Date(), allTimeRange),
-  end: new Date(),
-});
 
 const selectedAllTime = computed(() => isRangeSelected(allTimeRange));
 
@@ -306,15 +289,13 @@ const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
   return `${formattedDate(dateRange.start)} - ${formattedDate(dateRange.end)}`;
 };
 function isRangeSelected(duration: Duration) {
+  const { dateRange } = galleryState.filterOptions;
   return (
-    isSameDay(dateRange.value.start, sub(new Date(), duration)) &&
-    isSameDay(dateRange.value.end, new Date())
+    isSameDay(dateRange.start, sub(new Date(), duration)) &&
+    isSameDay(dateRange.end, new Date())
   );
 }
 
-// sort
-const sortBy: Ref<SortByOpts> = ref("key");
-const sortOrderIsDescending: Ref<boolean> = ref(true);
 const sortByOptions = ["key", "date"];
 
 /**
@@ -323,71 +304,8 @@ const sortByOptions = ["key", "date"];
  */
 const numberOfFilters = computed(() => {
   let count = 0;
-  if (prefix.value !== "") ++count;
+  if (galleryState.filterOptions.prefix !== "") ++count;
   if (!selectedAllTime.value) ++count;
   return count;
 });
-
-const photosFilteredByPrefixAndDate = computed(() => {
-  const filteredByPrefix = photos.value.filter((photo) =>
-    photo.Key.startsWith(prefix.value),
-  );
-  return filteredByPrefix.filter((photo) => {
-    const date = new Date(photo.LastModified);
-    return date >= dateRange.value.start && date <= dateRange.value.end;
-  });
-});
-
-const photosToDisplay = computed(() => {
-  const preFiltered = photosFilteredByPrefixAndDate.value;
-
-  if (debouncedSearchTerm.value.trim() === "") {
-    // Sort related options are only available when search term is empty
-    if (sortBy.value === "key") {
-      return preFiltered
-        .slice()
-        .sort((a, b) =>
-          !sortOrderIsDescending.value
-            ? a.Key.localeCompare(b.Key)
-            : b.Key.localeCompare(a.Key),
-        );
-    } else {
-      // assert sortBy.value === "date"
-      return preFiltered
-        .slice()
-        .sort((a, b) =>
-          !sortOrderIsDescending.value
-            ? compareAsc(new Date(a.LastModified), new Date(b.LastModified))
-            : compareDesc(new Date(a.LastModified), new Date(b.LastModified)),
-        );
-    }
-  }
-
-  // Fuzzy search
-  if (!enableFuzzySearch.value)
-    // not enabled, use simple search
-    return preFiltered.filter((photo) =>
-      photo.Key.includes(debouncedSearchTerm.value.trim()),
-    );
-
-  const { results } = useFuse(
-    debouncedSearchTerm.value,
-    preFiltered.map((photo) => photo.Key),
-    {
-      fuseOptions: {
-        threshold: fuzzySearchThreshold.value,
-        useExtendedSearch: true,
-      },
-    },
-  );
-  const keys = results.value.map((result) => result.item);
-  const searchResultPhotos = preFiltered.filter((photo) =>
-    keys.includes(photo.Key),
-  );
-  return searchResultPhotos.sort(
-    (a, b) => keys.indexOf(a.Key) - keys.indexOf(b.Key),
-  );
-});
-
-watchEffect(() => (galleryState.imageFiltered = photosToDisplay.value));
 </script>

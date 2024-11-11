@@ -1,5 +1,7 @@
+import { sub } from "date-fns";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import type { Photo } from "~/types";
+import filter from "~/utils/filterImages";
 
 export const useGalleryStateStore = defineStore("galleryState", () => {
   const settings = useSettingsStore();
@@ -43,10 +45,19 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
     }
   };
 
+  const filterOptions = ref<FilterOptions>({
+    searchTerm: "",
+    prefix: "",
+    dateRange: { start: sub(new Date(), { years: 1000 }), end: new Date() },
+    sort: { by: "key", orderIsDesc: true },
+  });
+
   /**
    * Filtered photos, updated by PhotoDisplayOptions
    */
-  const imageFiltered = ref<Photo[]>([]);
+  const imageFiltered = computed(() =>
+    filter(imageAll.value, filterOptions.value, settings.app),
+  );
 
   const imageDisplayed = ref<Photo[]>([]);
 
@@ -76,6 +87,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
   return {
     imageAll,
     listImages,
+    filterOptions,
     imageFiltered,
     imageDisplayed,
     imageSelected,
