@@ -1,5 +1,5 @@
 import { skipHydrate } from "pinia";
-import type { AppSettings, S3Settings } from "~/types";
+import type { AllSettings, AppSettings, S3Settings } from "~/types";
 import { appSettingsSchema, s3SettingsSchema } from "~/types";
 import * as checkOp from "~/utils/testOps";
 
@@ -80,14 +80,22 @@ export const useSettingsStore = defineStore("settings", () => {
     };
   };
 
-  const exportSettings = () => {
-    return {
-      s3: s3.value,
-      app: app.value,
-    };
+  const exportSettings = (name?: string): AllSettings => {
+    if (!name)
+      return {
+        s3: s3.value,
+        app: app.value,
+      };
+
+    const profile = profiles.value.find((p) => p.name === name);
+    if (profile) {
+      return profile.settings;
+    } else {
+      throw new Error(`Profile "${name}" not found`);
+    }
   };
 
-  const importSettings = (settings: { s3: S3Settings; app: AppSettings }) => {
+  const importSettings = (settings: AllSettings) => {
     const { success: appSuccess, data: appData } = appSettingsSchema.safeParse(
       settings.app,
     );
@@ -101,6 +109,38 @@ export const useSettingsStore = defineStore("settings", () => {
     s3.value = s3Data;
   };
 
+  const profiles = useLocalStorage<{ name: string; settings: AllSettings }[]>(
+    "s3pi:settings-profiles",
+    [],
+  );
+
+  const saveProfile = (name: string) => {
+    const index = profiles.value.findIndex((p) => p.name === name);
+    if (index === -1) {
+      profiles.value.push({ name, settings: { s3: s3.value, app: app.value } });
+    } else {
+      profiles.value[index] = {
+        name,
+        settings: { s3: s3.value, app: app.value },
+      };
+    }
+  };
+
+  const loadProfile = (name: string) => {
+    const profile = profiles.value.find((p) => p.name === name);
+    if (profile) {
+      s3.value = profile.settings.s3;
+      app.value = profile.settings.app;
+    }
+  };
+
+  const deleteProfile = (name: string) => {
+    const index = profiles.value.findIndex((p) => p.name === name);
+    if (index !== -1) {
+      profiles.value.splice(index, 1);
+    }
+  };
+
   return {
     s3: skipHydrate(s3),
     app: skipHydrate(app),
@@ -109,6 +149,11 @@ export const useSettingsStore = defineStore("settings", () => {
     test,
     exportSettings,
     importSettings,
+
+    profiles: skipHydrate(profiles),
+    saveProfile,
+    loadProfile,
+    deleteProfile,
   };
 });
 

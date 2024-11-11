@@ -1,3 +1,5 @@
+import type { AppSettings } from "./AppSettings";
+import type { S3Settings } from "./S3Settings";
 export * from "./S3Settings";
 export * from "./AppSettings";
 
@@ -12,4 +14,7 @@ export interface Photo {
   url: string;
 }
 
-export type SortByOpts = "date" | "key";
+export type AllSettings = {
+  s3: S3Settings;
+  app: AppSettings;
+};

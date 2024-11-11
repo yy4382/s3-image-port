@@ -4,9 +4,11 @@ import {
   SettingsAppGallery,
   SettingsAppUpload,
   SettingsAppMisc,
+  SettingsProfiles,
 } from "#components";
 import { z } from "zod";
 const typeComponentMap = {
+  profiles: SettingsProfiles,
   s3: SettingsS3,
   upload: SettingsAppUpload,
   gallery: SettingsAppGallery,
@@ -15,7 +17,9 @@ const typeComponentMap = {
 const route = useRoute();
 const type = computed(() => {
   try {
-    return z.enum(["s3", "upload", "gallery", "misc"]).parse(route.params.type);
+    return z
+      .enum(["profiles", "s3", "upload", "gallery", "misc"])
+      .parse(route.params.type);
   } catch {
     throw createError({
       statusCode: 404,
