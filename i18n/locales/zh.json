@@ -131,7 +131,6 @@
         "dateFilter": {
           "title": "按日期过滤",
           "description": "点击以打开日历以选择日期范围。",
-          "notAvailableOnMobile": "抱歉，Calendar 组件在移动设备上暂不可用。",
           "calendar": {
             "labels": {
               "7d": "最近 7 天",
@@ -140,7 +139,8 @@
               "3m": "最近 3 个月",
               "6m": "最近 6 个月",
               "1y": "最近 1 年",
-              "all": "所有"
+              "all": "所有",
+              "custom": "自定义"
             }
           }
         },
@@ -296,7 +296,6 @@
       }
     },
     "app": {
-      "title": "应用设置",
       "autoRefresh": {
         "title": "启用自动刷新图库功能",
         "description": "切换到图库页面时自动刷新图库。"

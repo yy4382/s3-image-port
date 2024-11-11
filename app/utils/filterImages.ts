@@ -1,5 +1,5 @@
 import type { AppSettings, Photo } from "~/types";
-import { compareAsc, compareDesc, sub } from "date-fns";
+import { compareAsc, compareDesc, sub, intervalToDuration } from "date-fns";
 import Fuse from "fuse.js";
 
 export type FilterOptions = {
@@ -12,6 +12,24 @@ export type FilterOptions = {
     orderIsDesc: boolean;
   };
 };
+
+export const ALL_TIME_RANGE = {
+  start: new Date(0),
+  end: new Date(2100, 0),
+};
+export const ALL_TIME_DURATION = intervalToDuration(ALL_TIME_RANGE);
+
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  searchTerm: "",
+  prefix: "",
+  dateRange: ALL_TIME_RANGE,
+  dateRangeType: "all",
+  sort: {
+    by: "key",
+    orderIsDesc: true,
+  },
+};
+
 const filterByPrefix = (images: Photo[], prefix: string) =>
   images.filter((image) => image.Key.startsWith(prefix));
 
@@ -50,7 +68,7 @@ const sortTrivial = (
 const sortSearch = (
   images: Photo[],
   options: FilterOptions,
-  appSettings: AppSettings,
+  appSettings: Pick<AppSettings, "enableFuzzySearch" | "fuzzySearchThreshold">,
 ) => {
   if (!appSettings.enableFuzzySearch)
     // not enabled, use simple search
@@ -73,7 +91,7 @@ const sortSearch = (
 export default function filterImages(
   images: Photo[],
   options: FilterOptions,
-  appSettings: AppSettings,
+  appSettings: Pick<AppSettings, "enableFuzzySearch" | "fuzzySearchThreshold">,
 ) {
   const filteredImages = filterByDateRange(
     filterByPrefix(images, options.prefix),
@@ -85,7 +103,6 @@ export default function filterImages(
   return sortTrivial(filteredImages, options.sort.by, options.sort.orderIsDesc);
 }
 
-export const ALL_TIME_RANGE: Duration = { years: 1000 };
 export const TIME_RANGES = [
   {
     duration: { days: 7 },
@@ -112,10 +129,12 @@ export const TIME_RANGES = [
     type: "1y",
   },
   {
-    duration: ALL_TIME_RANGE,
+    duration: ALL_TIME_DURATION,
     type: "all",
   },
-] as const;
+] as const satisfies { duration: Duration; type: string }[];
+
+// MARK: Persisting filter options
 
 export const FILTER_LOCALSTORAGE_KEY = "s3pi:filterOptions";
 
@@ -124,19 +143,19 @@ export function loadOptions(
   localstorage: Record<string, string>,
 ): FilterOptions | undefined {
   return (
-    loadOptionsWithType((x) => searchParam.get(x)) ??
-    loadOptionsWithType((x) => localstorage[x] ?? null)
+    loadOptionsWithType((x) => searchParam.get(x) ?? undefined) ??
+    loadOptionsWithType((x) => localstorage[x])
   );
 }
 
 function loadOptionsWithType(
-  getter: (x: string) => string | null,
+  getter: (x: string) => string | undefined,
 ): FilterOptions | undefined {
-  let dateRangeType = getter("dateRangeType") ?? undefined;
+  let dateRangeType = getter("dateRangeType");
   const searchTerm = getter("searchTerm") ?? "";
   const prefix = getter("prefix") ?? "";
-  let sortby = getter("sortby") ?? undefined;
-  let sortOrder = getter("sortOrder") ?? undefined;
+  let sortby = getter("sortby");
+  let sortOrder = getter("sortOrder");
   if (![dateRangeType, searchTerm, prefix, sortby, sortOrder].some(Boolean)) {
     return;
   }
@@ -170,10 +189,7 @@ function loadOptionsWithType(
     };
   } else {
     dateRangeType = "all";
-    dateRange = {
-      start: sub(new Date(), ALL_TIME_RANGE),
-      end: new Date(),
-    };
+    dateRange = ALL_TIME_RANGE;
   }
 
   return {
@@ -195,19 +211,25 @@ export function saveOptions(options: FilterOptions) {
     toBeSaved[x] = y;
   };
 
-  setter("searchTerm", options.searchTerm);
-  setter("prefix", options.prefix);
-  setter(
-    "dateRangeType",
-    options.dateRangeType === "all" ? undefined : options.dateRangeType,
-  );
+  if (options.searchTerm !== DEFAULT_FILTER_OPTIONS.searchTerm)
+    setter("searchTerm", options.searchTerm);
+
+  if (options.prefix !== DEFAULT_FILTER_OPTIONS.prefix)
+    setter("prefix", options.prefix);
+
+  if (options.dateRangeType !== DEFAULT_FILTER_OPTIONS.dateRangeType)
+    setter("dateRangeType", options.dateRangeType);
+
   if (options.dateRangeType === "custom") {
     setter("dateRangeStart", options.dateRange.start.toISOString());
     setter("dateRangeEnd", options.dateRange.end.toISOString());
   }
-  setter("sortby", options.sort.by === "date" ? "date" : undefined);
-  setter("sortOrder", options.sort.orderIsDesc ? undefined : "asc");
+  if (options.sort.by !== DEFAULT_FILTER_OPTIONS.sort.by)
+    setter("sortby", options.sort.by);
 
-  // return and let caller (component) to update the URL
+  if (options.sort.orderIsDesc !== DEFAULT_FILTER_OPTIONS.sort.orderIsDesc)
+    setter("sortOrder", options.sort.orderIsDesc ? "desc" : "asc"); // always save "asc" because "desc" is default
+
+  // return and let caller (component) to update the URL and localstorage
   return toBeSaved;
 }

@@ -78,63 +78,15 @@
             "
             class="hidden md:block"
           />
-          <UPopover :popper="{ placement: 'bottom-start' }">
+          <UPopover :popper="{ placement: 'top-start' }">
             <UButton icon="i-heroicons-calendar-days-20-solid">
-              {{
-                selectedAllTime
-                  ? $t(
-                      "photos.displayOptions.filter.dateFilter.calendar.labels.all",
-                    )
-                  : getDateRangeString(galleryState.filterOptions.dateRange)
-              }}
+              {{ getDateRangeString(galleryState.filterOptions.dateRange) }}
             </UButton>
 
             <template #panel="{ close }">
-              <div
-                class="flex items-center sm:divide-x divide-gray-200 dark:divide-gray-800"
-              >
-                <div class="hidden sm:flex flex-col py-4">
-                  <UButton
-                    v-for="(range, index) in TIME_RANGES"
-                    :key="index"
-                    :label="
-                      t(
-                        'photos.displayOptions.filter.dateFilter.calendar.labels.' +
-                          range.type,
-                      )
-                    "
-                    color="gray"
-                    variant="ghost"
-                    class="rounded-none px-6"
-                    :class="[
-                      galleryState.filterOptions.dateRangeType === range.type
-                        ? 'bg-gray-100 dark:bg-gray-800'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
-                    ]"
-                    truncate
-                    @click="
-                      galleryState.filterOptions.dateRangeType = range.type;
-                      galleryState.filterOptions.dateRange = {
-                        start: sub(new Date(), range.duration),
-                        end: new Date(),
-                      };
-                    "
-                  />
-                </div>
-
-                <DatePicker
-                  v-model="galleryState.filterOptions.dateRange"
-                  :locale="$i18n.locale === 'zh' ? 'zh-CN' : 'en'"
-                  @close="close"
-                />
-              </div>
+              <PhotoDisplayOptionsDate @close="close" />
             </template>
           </UPopover>
-          <div class="md:hidden">
-            {{
-              $t("photos.displayOptions.filter.dateFilter.notAvailableOnMobile")
-            }}
-          </div>
         </div>
       </UCard>
     </UModal>
@@ -201,12 +153,10 @@
 </template>
 
 <script lang="ts" setup>
-import { sub, format, isSameDay, type Duration } from "date-fns";
+import { format } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
 import {
-  ALL_TIME_RANGE,
   FILTER_LOCALSTORAGE_KEY,
-  TIME_RANGES,
   loadOptions,
   saveOptions,
 } from "@/utils/filterImages";
@@ -251,9 +201,14 @@ const availablePrefixes4Display = computed(() =>
 );
 
 // date
-const selectedAllTime = computed(() => isRangeSelected(ALL_TIME_RANGE));
+const selectedAllTime = computed(
+  () => galleryState.filterOptions.dateRangeType === "all",
+);
 
 const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
+  if (galleryState.filterOptions.dateRangeType === "all") {
+    return t("photos.displayOptions.filter.dateFilter.calendar.labels.all");
+  }
   const localeForDateFns = locale.value === "zh" ? zhCN : enUS;
   const formatString =
     localeForDateFns === zhCN ? "yyyy 年 M 月 d 日" : "d MMM, yyyy";
@@ -263,28 +218,6 @@ const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
     });
   return `${formattedDate(dateRange.start)} - ${formattedDate(dateRange.end)}`;
 };
-function isRangeSelected(duration: Duration) {
-  const { dateRange } = galleryState.filterOptions;
-  return (
-    isSameDay(dateRange.start, sub(new Date(), duration)) &&
-    isSameDay(dateRange.end, new Date())
-  );
-}
-watch(
-  () => galleryState.filterOptions.dateRange,
-  () => {
-    const dateRangeType = galleryState.filterOptions.dateRangeType;
-    const expectedDuration = TIME_RANGES.find(
-      (range) => range.type === dateRangeType,
-    )?.duration;
-    if (!expectedDuration) {
-      galleryState.filterOptions.dateRangeType = "custom";
-      return;
-    }
-    if (isRangeSelected(expectedDuration)) return;
-    galleryState.filterOptions.dateRangeType = "custom";
-  },
-);
 
 const sortByOptions = ["key", "date"];
 

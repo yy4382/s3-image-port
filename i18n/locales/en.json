@@ -131,7 +131,6 @@
         "dateFilter": {
           "title": "Filter by Date",
           "description": "Click to open the calendar and select a date range.",
-          "notAvailableOnMobile": "Sorry, Calendar not supported on mobile.",
           "calendar": {
             "labels": {
               "7d": "Last 7 Days",
@@ -140,7 +139,8 @@
               "3m": "Last 3 Months",
               "6m": "Last 6 Months",
               "1y": "Last Year",
-              "all": "All Time"
+              "all": "All Time",
+              "custom": "Custom"
             }
           }
         },
@@ -296,7 +296,6 @@
       }
     },
     "app": {
-      "title": "App Settings",
       "titles": {
         "upload": "Upload Settings",
         "gallery": "Gallery Settings",

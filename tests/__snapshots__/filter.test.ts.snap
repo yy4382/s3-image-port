@@ -1,0 +1,141 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`filter > should filter by date range 1`] = `
+[
+  {
+    "Key": "i/2024/06/06/yy27b-vm.webp",
+    "LastModified": "2024-06-06T08:18:16.921Z",
+    "url": "https://i.yfi.moe/i/2024/06/06/yy27b-vm.webp",
+  },
+  {
+    "Key": "i/2024/04/28/2yo5d-7h.png",
+    "LastModified": "2024-05-11T10:37:49.274Z",
+    "url": "https://i.yfi.moe/i/2024/04/28/2yo5d-7h.png",
+  },
+]
+`;
+
+exports[`filter > should filter by prefix 1`] = `
+[
+  {
+    "Key": "i/2024/01/14/maoa07-2.webp",
+    "LastModified": "2024-04-25T02:30:16.421Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/maoa07-2.webp",
+  },
+  {
+    "Key": "i/2024/01/14/m90nuc-2.webp",
+    "LastModified": "2024-04-24T02:30:16.053Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/m90nuc-2.webp",
+  },
+]
+`;
+
+exports[`filter > should honor sort by option 1`] = `
+[
+  {
+    "Key": "i/2024/04/19/2cm1jl.webp",
+    "LastModified": "2024-04-25T02:30:09.181Z",
+    "url": "https://i.yfi.moe/i/2024/04/19/2cm1jl.webp",
+  },
+  {
+    "Key": "i/2024/01/17/z5a8xq-2.webp",
+    "LastModified": "2024-04-25T02:30:40.970Z",
+    "url": "https://i.yfi.moe/i/2024/01/17/z5a8xq-2.webp",
+  },
+  {
+    "Key": "i/2024/01/14/maoa07-2.webp",
+    "LastModified": "2024-04-25T02:30:16.421Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/maoa07-2.webp",
+  },
+  {
+    "Key": "i/2024/01/14/m90nuc-2.webp",
+    "LastModified": "2024-04-24T02:30:16.053Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/m90nuc-2.webp",
+  },
+  {
+    "Key": "i/2023/05/05/zec5ut-2.webp",
+    "LastModified": "2024-04-25T02:30:42.198Z",
+    "url": "https://i.yfi.moe/i/2023/05/05/zec5ut-2.webp",
+  },
+]
+`;
+
+exports[`filter > should honor sort by option 2`] = `
+[
+  {
+    "Key": "i/2023/05/05/zec5ut-2.webp",
+    "LastModified": "2024-04-25T02:30:42.198Z",
+    "url": "https://i.yfi.moe/i/2023/05/05/zec5ut-2.webp",
+  },
+  {
+    "Key": "i/2024/01/17/z5a8xq-2.webp",
+    "LastModified": "2024-04-25T02:30:40.970Z",
+    "url": "https://i.yfi.moe/i/2024/01/17/z5a8xq-2.webp",
+  },
+  {
+    "Key": "i/2024/01/14/maoa07-2.webp",
+    "LastModified": "2024-04-25T02:30:16.421Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/maoa07-2.webp",
+  },
+  {
+    "Key": "i/2024/04/19/2cm1jl.webp",
+    "LastModified": "2024-04-25T02:30:09.181Z",
+    "url": "https://i.yfi.moe/i/2024/04/19/2cm1jl.webp",
+  },
+  {
+    "Key": "i/2024/01/14/m90nuc-2.webp",
+    "LastModified": "2024-04-24T02:30:16.053Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/m90nuc-2.webp",
+  },
+]
+`;
+
+exports[`filter > should use fuzzy search if enabled 1`] = `
+[
+  {
+    "Key": "i/2024/09/01/188v0o-nl.png",
+    "LastModified": "2024-09-02T03:38:38.274Z",
+    "url": "https://i.yfi.moe/i/2024/09/01/188v0o-nl.png",
+  },
+  {
+    "Key": "i/2024/08/04/un0o0-gr.webp",
+    "LastModified": "2024-08-04T06:18:03.289Z",
+    "url": "https://i.yfi.moe/i/2024/08/04/un0o0-gr.webp",
+  },
+  {
+    "Key": "i/2024/08/04/un8h3-2f.webp",
+    "LastModified": "2024-08-04T06:18:04.087Z",
+    "url": "https://i.yfi.moe/i/2024/08/04/un8h3-2f.webp",
+  },
+  {
+    "Key": "i/2024/08/04/un8qt-rb.webp",
+    "LastModified": "2024-08-04T06:18:03.476Z",
+    "url": "https://i.yfi.moe/i/2024/08/04/un8qt-rb.webp",
+  },
+]
+`;
+
+exports[`filter > should use simple search if fuzzy search is disabled 1`] = `
+[
+  {
+    "Key": "i/2023/05/05/zec5ut-2.webp",
+    "LastModified": "2024-04-25T02:30:42.198Z",
+    "url": "https://i.yfi.moe/i/2023/05/05/zec5ut-2.webp",
+  },
+  {
+    "Key": "i/2024/01/14/m90nuc-2.webp",
+    "LastModified": "2024-04-24T02:30:16.053Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/m90nuc-2.webp",
+  },
+  {
+    "Key": "i/2024/01/14/maoa07-2.webp",
+    "LastModified": "2024-04-25T02:30:16.421Z",
+    "url": "https://i.yfi.moe/i/2024/01/14/maoa07-2.webp",
+  },
+  {
+    "Key": "i/2024/01/17/z5a8xq-2.webp",
+    "LastModified": "2024-04-25T02:30:40.970Z",
+    "url": "https://i.yfi.moe/i/2024/01/17/z5a8xq-2.webp",
+  },
+]
+`;
