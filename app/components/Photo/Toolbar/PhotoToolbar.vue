@@ -3,6 +3,7 @@ const settings = useSettingsStore();
 const galleryState = useGalleryStateStore();
 
 const selectedPhotos = computed(() => galleryState.imageSelected);
+const hasSelectedPhotos = computed(() => selectedPhotos.value.length > 0);
 </script>
 
 <template>
@@ -10,15 +11,22 @@ const selectedPhotos = computed(() => galleryState.imageSelected);
     <PhotoToolbarRefresh />
 
     <UButton
-      v-if="selectedPhotos.length > 0"
       icon="i-mingcute-checkbox-line"
-      :label="selectedPhotos.length + ''"
+      :label="hasSelectedPhotos ? selectedPhotos.length + '' : undefined"
       variant="solid"
       color="gray"
-      @click="galleryState.clearSelectedPhotos"
+      @click="
+        () => {
+          if (hasSelectedPhotos) {
+            galleryState.clearSelectedPhotos();
+          } else {
+            galleryState.selectDisplayedPhotos();
+          }
+        }
+      "
     />
     <BaseSecondConfirm
-      v-if="selectedPhotos.length > 0"
+      v-if="hasSelectedPhotos"
       :action="
         () => {
           galleryState.deletePhoto();

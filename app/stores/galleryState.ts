@@ -66,6 +66,9 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
   const clearSelectedPhotos = () => {
     imageSelected.value = [];
   };
+  const selectDisplayedPhotos = () => {
+    imageSelected.value = imageDisplayed.value.map((photo) => photo.Key);
+  };
 
   async function deletePhoto(inputKeys?: string[]) {
     const keys = inputKeys ?? imageSelected.value;
@@ -92,6 +95,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
     imageDisplayed,
     imageSelected,
     clearSelectedPhotos,
+    selectDisplayedPhotos,
     deletePhoto,
   };
 });
