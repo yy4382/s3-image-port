@@ -83,7 +83,7 @@
               {{
                 selectedAllTime
                   ? $t(
-                      "photos.displayOptions.filter.dateFilter.calendar.labels.allTime",
+                      "photos.displayOptions.filter.dateFilter.calendar.labels.all",
                     )
                   : getDateRangeString(galleryState.filterOptions.dateRange)
               }}
@@ -95,23 +95,29 @@
               >
                 <div class="hidden sm:flex flex-col py-4">
                   <UButton
-                    v-for="(range, index) in timeRanges"
+                    v-for="(range, index) in TIME_RANGES"
                     :key="index"
-                    :label="range.label"
+                    :label="
+                      t(
+                        'photos.displayOptions.filter.dateFilter.calendar.labels.' +
+                          range.type,
+                      )
+                    "
                     color="gray"
                     variant="ghost"
                     class="rounded-none px-6"
                     :class="[
-                      isRangeSelected(range.duration)
+                      galleryState.filterOptions.dateRangeType === range.type
                         ? 'bg-gray-100 dark:bg-gray-800'
                         : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
                     ]"
                     truncate
                     @click="
+                      galleryState.filterOptions.dateRangeType = range.type;
                       galleryState.filterOptions.dateRange = {
                         start: sub(new Date(), range.duration),
                         end: new Date(),
-                      }
+                      };
                     "
                   />
                 </div>
@@ -197,6 +203,13 @@
 <script lang="ts" setup>
 import { sub, format, isSameDay, type Duration } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
+import {
+  ALL_TIME_RANGE,
+  FILTER_LOCALSTORAGE_KEY,
+  TIME_RANGES,
+  loadOptions,
+  saveOptions,
+} from "@/utils/filterImages";
 
 const { t, locale } = useI18n();
 
@@ -238,45 +251,7 @@ const availablePrefixes4Display = computed(() =>
 );
 
 // date
-
-/**
- * Range that should be seen as "all time"
- */
-const allTimeRange: Duration = { years: 1000 };
-
-const selectedAllTime = computed(() => isRangeSelected(allTimeRange));
-
-// prettier-ignore
-const timeRanges = [
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last7Days"),
-    duration: { days: 7 },
-  },
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last14Days"),
-    duration: { days: 14 },
-  },
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last30Days"),
-    duration: { days: 30 },
-  },
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last3Months"),
-    duration: { months: 3 },
-  },
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.last6Months"),
-    duration: { months: 6 },
-  },
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.lastYear"),
-    duration: { years: 1 },
-  },
-  {
-    label: t("photos.displayOptions.filter.dateFilter.calendar.labels.allTime"),
-    duration: allTimeRange,
-  },
-];
+const selectedAllTime = computed(() => isRangeSelected(ALL_TIME_RANGE));
 
 const getDateRangeString = (dateRange: { start: Date; end: Date }) => {
   const localeForDateFns = locale.value === "zh" ? zhCN : enUS;
@@ -295,6 +270,21 @@ function isRangeSelected(duration: Duration) {
     isSameDay(dateRange.end, new Date())
   );
 }
+watch(
+  () => galleryState.filterOptions.dateRange,
+  () => {
+    const dateRangeType = galleryState.filterOptions.dateRangeType;
+    const expectedDuration = TIME_RANGES.find(
+      (range) => range.type === dateRangeType,
+    )?.duration;
+    if (!expectedDuration) {
+      galleryState.filterOptions.dateRangeType = "custom";
+      return;
+    }
+    if (isRangeSelected(expectedDuration)) return;
+    galleryState.filterOptions.dateRangeType = "custom";
+  },
+);
 
 const sortByOptions = ["key", "date"];
 
@@ -307,5 +297,25 @@ const numberOfFilters = computed(() => {
   if (galleryState.filterOptions.prefix !== "") ++count;
   if (!selectedAllTime.value) ++count;
   return count;
+});
+
+// Save and load filter options
+watch(
+  () => galleryState.filterOptions,
+  (val) => {
+    const opt = saveOptions(val);
+    localStorage.setItem(FILTER_LOCALSTORAGE_KEY, JSON.stringify(opt));
+    useRouter().replace({ query: opt });
+  },
+  { deep: true },
+);
+onMounted(() => {
+  const savedOptions = loadOptions(
+    new URLSearchParams(location.search),
+    JSON.parse(localStorage.getItem(FILTER_LOCALSTORAGE_KEY) ?? "{}"),
+  );
+  if (savedOptions) {
+    galleryState.filterOptions = savedOptions;
+  }
 });
 </script>

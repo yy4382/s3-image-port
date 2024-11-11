@@ -49,6 +49,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
     searchTerm: "",
     prefix: "",
     dateRange: { start: sub(new Date(), { years: 1000 }), end: new Date() },
+    dateRangeType: "all",
     sort: { by: "key", orderIsDesc: true },
   });
 

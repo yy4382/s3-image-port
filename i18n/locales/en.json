@@ -134,13 +134,13 @@
           "notAvailableOnMobile": "Sorry, Calendar not supported on mobile.",
           "calendar": {
             "labels": {
-              "last7Days": "Last 7 Days",
-              "last14Days": "Last 14 Days",
-              "last30Days": "Last 30 Days",
-              "last3Months": "Last 3 Months",
-              "last6Months": "Last 6 Months",
-              "lastYear": "Last Year",
-              "allTime": "All Time"
+              "7d": "Last 7 Days",
+              "14d": "Last 14 Days",
+              "30d": "Last 30 Days",
+              "3m": "Last 3 Months",
+              "6m": "Last 6 Months",
+              "1y": "Last Year",
+              "all": "All Time"
             }
           }
         },
