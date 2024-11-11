@@ -12,17 +12,20 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
    */
   const imageAll = useLocalStorage<Photo[]>("s3-photos", []);
   const listImages = async () => {
+    const toastId = Math.random().toString();
     toast.add({
+      id: toastId,
       title: t("photos.message.listPhotos.try.title"),
     });
     try {
       imageAll.value = await new ImageS3Client(settings.s3).list();
-      toast.add({
+      toast.update(toastId, {
         title: t("photos.message.listPhotos.success.title"),
+        timeout: 1200,
       });
     } catch (e) {
       console.error(e);
-      toast.add({
+      toast.update(toastId, {
         title: t("photos.message.listPhotos.fail.title"),
         description: t("photos.message.listPhotos.fail.description"),
         actions: [
@@ -35,6 +38,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
             click: () => navigateTo(localePath("/settings/s3")),
           },
         ],
+        timeout: 7000,
       });
     }
   };
