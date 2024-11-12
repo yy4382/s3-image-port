@@ -98,7 +98,7 @@ const newName = ref("");
       <div
         v-for="profile in settingsStore.profiles"
         :key="profile.name"
-        class="flex justify-between border p-2 rounded-md items-center"
+        class="flex justify-between border dark:border-gray-600 p-2 rounded-md items-center"
       >
         <div>{{ profile.name }}</div>
         <div class="flex gap-2">
