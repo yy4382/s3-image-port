@@ -1,4 +1,4 @@
 <script setup lang="ts">
 const localePath = useLocalePath();
-await navigateTo(localePath("/settings/s3"));
+await navigateTo(localePath("/settings/profiles"));
 </script>
