@@ -5,10 +5,10 @@ RUN corepack enable
 COPY . /app
 WORKDIR /app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run build
+RUN pnpm run generate
 
-FROM node:20-slim
-WORKDIR /app
-COPY --from=build /app/.output /app/.output
+FROM gcr.io/distroless/python3
+WORKDIR /app/public
+COPY --from=build /app/.output /app
 EXPOSE 3000
-CMD [ "node", ".output/server/index.mjs" ]
+CMD ["-m", "http.server", "3000"]
