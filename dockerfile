@@ -7,7 +7,7 @@ WORKDIR /app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run generate
 
-FROM gcr.io/distroless/python3
+FROM gcr.io/distroless/python3:latest
 WORKDIR /app/public
 COPY --from=build /app/.output /app
 EXPOSE 3000
