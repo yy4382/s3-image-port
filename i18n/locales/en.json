@@ -212,6 +212,38 @@
   },
   "settings": {
     "title": "Settings",
+    "profiles": {
+      "title": "Profiles",
+      "what-is-profile": "What is Profile?",
+      "what-is": {
+        "1": "Profile is a snapshot of your current settings.",
+        "2": "You can save your current settings as a profile, or load a profile to restore your settings.",
+        "3": "If you change your current settings, profile will not be affected."
+      },
+      "import": {
+        "desc": "Load from Clipboard into Current Settings",
+        "btn": "Import Settings"
+      },
+      "save": {
+        "desc": "Save Current Settings into Profile",
+        "placeholder": "new profile name",
+        "btn": "Save Profile"
+      },
+      "action": {
+        "title": "Profile Actions",
+        "desc": {
+          "load": "Load: load this profile to current settings.",
+          "save": "Save: save current settings as this profile.",
+          "delete": "Delete: delete this profile. This action cannot be undone.",
+          "copy": "Copy: copy this profile to clipboard."
+        },
+        "load": "Load",
+        "save": "Save",
+        "delete": "Delete",
+        "copy": "Copy"
+      },
+      "no-profiles-saved-yet": "No profiles saved yet."
+    },
     "s3": {
       "title": "S3 Settings",
       "info": {

@@ -54,46 +54,46 @@ const newName = ref("");
 
 <template>
   <div class="flex flex-col gap-4">
-    <UAlert title="What is Profile?">
+    <UAlert :title="$t('settings.profiles.what-is-profile')">
       <template #description>
         <div class="flex flex-col gap-1">
-          <p>Profile is a snapshot of your current settings.</p>
-          <p>
-            You can save your current settings as a profile, or load a profile
-            to restore your settings.
-          </p>
-          <p>
-            If you change your current settings, profile will not be affected.
-          </p>
+          <p>{{ $t("settings.profiles.what-is.1") }}</p>
+          <p>{{ $t("settings.profiles.what-is.2") }}</p>
+          <p>{{ $t("settings.profiles.what-is.3") }}</p>
         </div>
       </template>
     </UAlert>
-    <UFormGroup label="Load from Clipboard into Current Settings">
-      <UButton @click="handleImportSettings">Import Settings</UButton>
+    <UFormGroup :label="$t('settings.profiles.import.desc')">
+      <UButton @click="handleImportSettings">{{
+        $t("settings.profiles.import.btn")
+      }}</UButton>
     </UFormGroup>
-    <UFormGroup label="Save Current Settings into Profile">
+    <UFormGroup :label="$t('settings.profiles.save.desc')">
       <div class="flex gap-2 items-center">
-        <UInput v-model="newName" placeholder="new profile name" />
-        <UButton @click="newName && settingsStore.saveProfile(newName)"
-          >Save Profile</UButton
-        >
+        <UInput
+          v-model="newName"
+          :placeholder="$t('settings.profiles.save.placeholder')"
+        />
+        <UButton @click="newName && settingsStore.saveProfile(newName)">{{
+          $t("settings.profiles.save.btn")
+        }}</UButton>
       </div>
     </UFormGroup>
     <UDivider />
-    <UAlert title="Profile Actions">
+    <UAlert :title="$t('settings.profiles.action.title')">
       <template #description>
         <div class="flex flex-col gap-1">
-          <p>Load: load this profile to current settings.</p>
-          <p>Save: save current settings as this profile.</p>
-          <p>Delete: delete this profile. This action cannot be undone.</p>
-          <p>Copy: copy this profile to clipboard.</p>
+          <p>{{ $t("settings.profiles.action.desc.load") }}</p>
+          <p>{{ $t("settings.profiles.action.desc.save") }}</p>
+          <p>{{ $t("settings.profiles.action.desc.delete") }}</p>
+          <p>{{ $t("settings.profiles.action.desc.copy") }}</p>
         </div>
       </template>
     </UAlert>
     <div class="flex flex-col gap-2">
-      <h2 class="text-2xl">Profiles</h2>
+      <h2 class="text-2xl">{{ $t("settings.profiles.title") }}</h2>
       <div v-if="settingsStore.profiles.length === 0">
-        No profiles saved yet.
+        {{ $t("settings.profiles.no-profiles-saved-yet") }}
       </div>
       <div
         v-for="profile in settingsStore.profiles"
@@ -106,25 +106,25 @@ const newName = ref("");
             variant="outline"
             size="xs"
             @click="settingsStore.loadProfile(profile.name)"
-            >Load</UButton
+            >{{ $t("settings.profiles.action.load") }}</UButton
           >
           <UButton
             variant="outline"
             size="xs"
             @click="settingsStore.saveProfile(profile.name)"
-            >Save</UButton
+            >{{ $t("settings.profiles.action.save") }}</UButton
           >
           <UButton
             variant="outline"
             size="xs"
             @click="settingsStore.deleteProfile(profile.name)"
-            >Delete</UButton
+            >{{ $t("settings.profiles.action.delete") }}</UButton
           >
           <UButton
             variant="outline"
             size="xs"
             @click="() => handleExportSettings(profile.name)"
-            >Copy</UButton
+            >{{ $t("settings.profiles.action.copy") }}</UButton
           >
         </div>
       </div>

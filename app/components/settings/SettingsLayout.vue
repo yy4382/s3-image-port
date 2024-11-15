@@ -4,7 +4,7 @@ const localePath = useLocalePath();
 const links = computed(() => [
   [
     {
-      label: "Profiles",
+      label: t("settings.profiles.title"),
       to: localePath("/settings/profiles"),
     },
     {
