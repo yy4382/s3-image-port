@@ -94,6 +94,13 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
     }
   }
 
+  function clearAll() {
+    imageAll.value = [];
+    imageDisplayed.value = [];
+    imageSelected.value = [];
+    imageFiltered.value = [];
+  }
+
   return {
     imageAll,
     listImages,
@@ -104,6 +111,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
     clearSelectedPhotos,
     selectDisplayedPhotos,
     deletePhoto,
+    clearAll,
   };
 });
 
