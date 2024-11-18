@@ -56,15 +56,9 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
   /**
    * Filtered photos, updated by PhotoDisplayOptions
    */
-  const imageFiltered = ref<Photo[]>([]);
-
-  watchEffect(() => {
-    imageFiltered.value = filter(
-      imageAll.value,
-      filterOptions.value,
-      settings.app,
-    );
-  });
+  const imageFiltered = computed(() =>
+    filter(imageAll.value, filterOptions.value, settings.app),
+  );
 
   const imageDisplayed = ref<Photo[]>([]);
 
@@ -98,7 +92,6 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
     imageAll.value = [];
     imageDisplayed.value = [];
     imageSelected.value = [];
-    imageFiltered.value = [];
   }
 
   return {
