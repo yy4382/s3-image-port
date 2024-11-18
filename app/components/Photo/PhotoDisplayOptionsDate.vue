@@ -26,13 +26,7 @@ function setDateRange(rangeType: FilterOptions["dateRangeType"]) {
   }
   galleryState.$patch((state) => {
     state.filterOptions.dateRangeType = rangeType;
-    state.filterOptions.dateRange = {
-      start: sub(
-        new Date(),
-        TIME_RANGES.find((range) => range.type === rangeType)!.duration,
-      ),
-      end: new Date(),
-    };
+    state.filterOptions.dateRange = ALL_TIME_RANGE;
   });
 }
 

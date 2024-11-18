@@ -1,4 +1,3 @@
-import { sub } from "date-fns";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import type { Photo } from "~/types";
 import filter from "~/utils/filterImages";
@@ -48,7 +47,7 @@ export const useGalleryStateStore = defineStore("galleryState", () => {
   const filterOptions = ref<FilterOptions>({
     searchTerm: "",
     prefix: "",
-    dateRange: { start: sub(new Date(), { years: 1000 }), end: new Date() },
+    dateRange: ALL_TIME_RANGE,
     dateRangeType: "all",
     sort: { by: "key", orderIsDesc: true },
   });
