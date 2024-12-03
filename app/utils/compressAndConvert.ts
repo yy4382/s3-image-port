@@ -6,11 +6,11 @@ export default async function (
   file: File,
   options: ConvertSettings,
 ): Promise<File> {
-  const fileType =
-    options.convertType === "none"
-      ? file.type
-      : mime.getType(options.convertType) || "image/jpeg";
+  if (options.convertType === "none") {
+    return file;
+  }
 
+  const fileType = mime.getType(options.convertType) || "image/jpeg";
   const compressedFile = await imageCompression(file, {
     maxSizeMB: options.compressionMaxSize || undefined,
     maxWidthOrHeight: options.compressionMaxWidthOrHeight || undefined,
