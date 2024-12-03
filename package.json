@@ -32,7 +32,7 @@
     "lint-staged": "^15.2.7",
     "nuxt": "^3.14.159",
     "prettier": "^3.3.2",
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.2",
     "vitepress": "^1.5.0",
     "vitest": "^2.1.4",
     "vitest-localstorage-mock": "^0.1.2",
@@ -41,7 +41,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.688.0",
     "@iconify-json/mingcute": "^1.2.1",
-    "@nuxtjs/i18n": "^9.0.0",
+    "@nuxtjs/i18n": "^9.1.0",
     "@pinia/nuxt": "^0.7.0",
     "@vueuse/components": "^11.2.0",
     "browser-image-compression": "^2.0.2",
