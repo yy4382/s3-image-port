@@ -43,7 +43,7 @@ const fileMap = new WeakMap<File, boolean>();
 const onDrop = (files: File[] | null) => {
   pushFiles(files ?? []);
 };
-const dropZoneRef = ref<HTMLElement | null>(null);
+const dropZoneRef = useTemplateRef("dropZoneRef");
 const { isOverDropZone } = useDropZone(dropZoneRef, onDrop);
 
 const { open, onChange } = useFileDialog({
