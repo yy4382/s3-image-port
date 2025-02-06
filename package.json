@@ -17,7 +17,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^1.6.4",
+    "@nuxt/devtools": "2.0.0-beta.7",
     "@nuxt/eslint": "^0.6.2",
     "@nuxt/test-utils": "^3.15.4",
     "@nuxt/ui": "^2.20.0",
@@ -30,7 +30,7 @@
     "happy-dom": "^15.11.7",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.11",
-    "nuxt": "^3.14.1592",
+    "nuxt": "^3.15.4",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
     "vitepress": "^1.5.0",
@@ -41,7 +41,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.709.0",
     "@iconify-json/mingcute": "^1.2.1",
-    "@nuxtjs/i18n": "^9.1.1",
+    "@nuxtjs/i18n": "^9.1.5",
     "@pinia/nuxt": "^0.7.0",
     "@vueuse/components": "^11.3.0",
     "browser-image-compression": "^2.0.2",
