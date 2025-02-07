@@ -124,9 +124,23 @@ class ImageS3Client {
 
     // If the HTTP status code is not 200, throw an error
     const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300 || !response.Contents) {
+    if (httpStatusCode >= 300) {
       throw new Error(`List operation get http code: ${httpStatusCode}`);
     }
+
+    // if bucket is empty, return empty array
+    if (!response.Contents) {
+      if (response.KeyCount !== 0) {
+        console.warn("Bucket is not empty but no contents returned", response);
+      }
+
+      return {
+        contents: [],
+        IsTruncated: false,
+        NextContinuationToken: undefined,
+      };
+    }
+
     const contents = response.Contents.map((photo) => {
       return {
         Key: photo.Key,
