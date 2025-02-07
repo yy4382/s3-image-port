@@ -53,7 +53,7 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 [
   {
     "AllowedOrigins": ["https://iport.yfi.moe"],
-    "AllowedMethods": ["GET", "PUT", "DELETE"],
+    "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD", "POST"],
     "AllowedHeaders": ["*"]
   }
 ]

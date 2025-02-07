@@ -54,7 +54,7 @@ Below is an example of a CORS policy that makes the [official instance](https://
 [
   {
     "AllowedOrigins": ["https://iport.yfi.moe"],
-    "AllowedMethods": ["GET", "PUT", "DELETE"],
+    "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD", "POST"],
     "AllowedHeaders": ["*"]
   }
 ]
