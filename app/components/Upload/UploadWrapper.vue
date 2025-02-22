@@ -53,6 +53,33 @@ const uploadProgress = ref(0);
 const uploadProgressMax = ref(0);
 const showProgress = ref(false);
 
+const handlePaste = async (event: ClipboardEvent) => {
+  if (!event.clipboardData) return;
+
+  const items = event.clipboardData.items;
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.kind === "file" && item.type.startsWith("image/")) {
+      const file = item.getAsFile();
+      if (file) {
+        fileList.value.push(file);
+        toast.add({
+          title: t("upload.fileUploader.clipboardSuccess"),
+        });
+      }
+    }
+  }
+};
+
+onMounted(() => {
+  window.addEventListener("paste", handlePaste);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("paste", handlePaste);
+});
+
 const upload = async () => {
   uploading.value = true;
   uploadProgressMax.value = fileList.value.length;
