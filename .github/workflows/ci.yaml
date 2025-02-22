@@ -66,6 +66,8 @@ jobs:
         with:
           images: |
             ${{ secrets.DOCKERHUB_USERNAME }}/s3-image-port
+          tags: |
+            type=sha
 
       - name: Build and push
         uses: docker/build-push-action@v5
