@@ -70,6 +70,7 @@
   },
   "upload": {
     "title": "Upload",
+    "clipboardSuccess": "Successfully read image from clipboard",
     "fileUploader": {
       "dropZone": {
         "part1": "Drop files here or ",

@@ -71,6 +71,7 @@
   "upload": {
     "title": "上传",
     "fileUploader": {
+      "clipboardSuccess": "读取剪切板图片成功",
       "dropZone": {
         "part1": "拖放文件到这里，或者",
         "part2": "点击上传"
