@@ -3,11 +3,13 @@ import react from "@vitejs/plugin-react";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import Icons from "unplugin-icons/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     tailwindcss(),
+    Icons({ compiler: "jsx", jsx: "react" }),
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
     react(),
   ],
@@ -15,5 +17,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  server: {
+    port: 3000,
   },
 });

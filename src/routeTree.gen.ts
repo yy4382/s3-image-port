@@ -11,10 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as GalleryImport } from './routes/gallery'
 import { Route as AboutImport } from './routes/about'
+import { Route as SettingsRouteImport } from './routes/settings/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as SettingsS3Import } from './routes/settings/s3'
 
 // Create/Update Routes
+
+const GalleryRoute = GalleryImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AboutRoute = AboutImport.update({
   id: '/about',
@@ -22,10 +31,22 @@ const AboutRoute = AboutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const SettingsRouteRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const SettingsS3Route = SettingsS3Import.update({
+  id: '/s3',
+  path: '/s3',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -39,6 +60,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -46,44 +74,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryImport
+      parentRoute: typeof rootRoute
+    }
+    '/settings/s3': {
+      id: '/settings/s3'
+      path: '/s3'
+      fullPath: '/settings/s3'
+      preLoaderRoute: typeof SettingsS3Import
+      parentRoute: typeof SettingsRouteImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface SettingsRouteRouteChildren {
+  SettingsS3Route: typeof SettingsS3Route
+}
+
+const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
+  SettingsS3Route: SettingsS3Route,
+}
+
+const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
+  SettingsRouteRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/gallery': typeof GalleryRoute
+  '/settings/s3': typeof SettingsS3Route
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/gallery': typeof GalleryRoute
+  '/settings/s3': typeof SettingsS3Route
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/gallery': typeof GalleryRoute
+  '/settings/s3': typeof SettingsS3Route
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths: '/' | '/settings' | '/about' | '/gallery' | '/settings/s3'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to: '/' | '/settings' | '/about' | '/gallery' | '/settings/s3'
+  id: '__root__' | '/' | '/settings' | '/about' | '/gallery' | '/settings/s3'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
+  GalleryRoute: typeof GalleryRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AboutRoute: AboutRoute,
+  GalleryRoute: GalleryRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,14 +164,29 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/settings",
+        "/about",
+        "/gallery"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
+    "/settings": {
+      "filePath": "settings/route.tsx",
+      "children": [
+        "/settings/s3"
+      ]
+    },
     "/about": {
       "filePath": "about.tsx"
+    },
+    "/gallery": {
+      "filePath": "gallery.tsx"
+    },
+    "/settings/s3": {
+      "filePath": "settings/s3.tsx",
+      "parent": "/settings"
     }
   }
 }

@@ -1,0 +1,7 @@
+@utility hover-to-show {
+  @apply pointer-events-none group-hover:pointer-events-auto focus-visible:pointer-events-auto opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-200;
+}
+
+/* * {
+  @apply border-border;
+} */

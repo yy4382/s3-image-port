@@ -8,6 +8,9 @@
       "baseUrl": ".",
       "paths": {
         "@/*": ["./src/*"]
-      }
+      },
+      "types": [
+        "unplugin-icons/types/react",
+      ]
     }
   }
