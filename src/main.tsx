@@ -2,13 +2,13 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./index.css";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
-import {enableMapSet} from "immer"
-enableMapSet()
+import { enableMapSet } from "immer";
+enableMapSet();
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
+
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -27,7 +27,6 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <RouterProvider router={router} />
-      <TanStackRouterDevtools router={router} />
     </StrictMode>,
   );
 }
