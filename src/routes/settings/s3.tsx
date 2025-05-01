@@ -24,6 +24,7 @@ function S3Settings() {
   return (
     <div>
       <div className="grid gap-6">
+        <h2 className="text-2xl font-bold">S3</h2>
         <Endpoint />
         <BucketName />
         <Region />
@@ -309,6 +310,19 @@ export const s3SettingsAtom = atom<S3Settings>((get) => ({
   forcePathStyle: get(usePathStyleAtom),
   pubUrl: get(publicUrlAtom),
 }));
+
+export const setS3SettingsAtom = atom(
+  null,
+  (_get, set, settings: S3Settings) => {
+    set(endpointAtom, settings.endpoint);
+    set(bucketNameAtom, settings.bucket);
+    set(regionAtom, settings.region);
+    set(accessKeyAtom, settings.accKeyId);
+    set(secretKeyAtom, settings.secretAccKey);
+    set(usePathStyleAtom, settings.forcePathStyle);
+    set(publicUrlAtom, settings.pubUrl);
+  },
+);
 
 export function useS3SettingsValue(
   failureCallback?: () => void,
