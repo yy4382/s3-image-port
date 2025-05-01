@@ -31,6 +31,8 @@ import McZoomIn from "~icons/mingcute/zoom-in-line";
 import McCopy from "~icons/mingcute/copy-2-line";
 import McEmptyBox from "~icons/mingcute/empty-box-line";
 import { toast } from "sonner";
+import { useAtomCallback } from "jotai/utils";
+import atomWithDebounce from "@/utils/atomWithDebounce";
 
 const PER_PAGE = 20;
 
@@ -42,28 +44,24 @@ const showingPhotosAtom = atom<Photo[]>((get) => {
   const end = start + PER_PAGE;
   return photos.slice(start, end);
 });
-const photosLengthAtom = atom((get) => get(photosAtom).length);
+
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);
-  const allPhotosLength = useAtomValue(photosLengthAtom);
+  const allPhotosLength = useAtomCallback(
+    useCallback((get) => get(photosAtom).length, []),
+  );
   const [page, setPage] = useAtom(currentPageAtom);
   const photoSize = useAtomValue(photoSizeAtom);
   const setContainerWidth = useSetAtom(containerWidthAtom);
   const containerRef = useRef<HTMLDivElement>(null);
   const listPhotos = useListPhotos();
   useEffect(() => {
-    const handleResize = (width: number) => {
-      setContainerWidth(width);
-    };
-
-    const debouncedSetWidth = debounce(handleResize, 30); // Debounce by 200ms
-
     setContainerWidth(containerRef.current?.clientWidth ?? 600); // Set initial width immediately
 
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target === containerRef.current) {
-          debouncedSetWidth(entry.contentRect.width);
+          setContainerWidth(entry.contentRect.width);
         }
       }
     });
@@ -81,7 +79,7 @@ export function PhotoGrid() {
           </div>
           <PaginationWithLogic
             page={page}
-            totalCount={allPhotosLength}
+            totalCount={allPhotosLength()}
             pageSize={PER_PAGE}
             onPageChange={(p) => {
               setPage(p);
@@ -112,21 +110,6 @@ export function PhotoGrid() {
   );
 }
 
-const debounce = <F extends (...args: number[]) => unknown>(
-  func: F,
-  waitFor: number,
-) => {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-  return (...args: Parameters<F>): void => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    timeoutId = setTimeout(() => func(...args), waitFor);
-  };
-};
-
 const naturalSizesAtom = atom<Map<string, [number, number]>>(new Map());
 const setNaturalSizesAtom = atom(
   null,
@@ -146,7 +129,7 @@ const setNaturalSizesAtom = atom(
   },
 );
 
-const containerWidthAtom = atom(300);
+const { debouncedValueAtom: containerWidthAtom } = atomWithDebounce(600, 100);
 const DEFAULT_IMAGE_SIZE: [number, number] = [384, 208];
 const GAP_PX = 8;
 
