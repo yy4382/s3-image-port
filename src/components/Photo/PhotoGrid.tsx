@@ -2,6 +2,7 @@ import {
   photosAtom,
   selectedPhotosAtom,
   selectModeAtom,
+  useListPhotos,
 } from "@/routes/gallery";
 import type { Photo } from "@/utils/ImageS3Client";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -28,6 +29,7 @@ import McTimeLine from "~icons/mingcute/time-line";
 import McKey2Line from "~icons/mingcute/key-2-line";
 import McZoomIn from "~icons/mingcute/zoom-in-line";
 import McCopy from "~icons/mingcute/copy-2-line";
+import McEmptyBox from "~icons/mingcute/empty-box-line";
 import { toast } from "sonner";
 
 const PER_PAGE = 20;
@@ -48,6 +50,7 @@ export function PhotoGrid() {
   const photoSize = useAtomValue(photoSizeAtom);
   const setContainerWidth = useSetAtom(containerWidthAtom);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listPhotos = useListPhotos();
   useEffect(() => {
     const handleResize = (width: number) => {
       setContainerWidth(width);
@@ -86,7 +89,24 @@ export function PhotoGrid() {
           />
         </div>
       ) : (
-        <p>No photos found</p>
+        <div className="flex flex-col items-center justify-center w-full h-64 p-8 bg-muted/20 rounded-lg border border-dashed border-muted-foreground/30">
+          <div className="flex flex-col items-center gap-2 mb-4">
+            <div className="h-12 w-12 text-muted-foreground/70">
+              {/* Photo icon placeholder */}
+              <McEmptyBox className="w-full h-full" />
+            </div>
+            <p className="text-lg text-muted-foreground text-center">
+              No photos found
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={listPhotos}
+            className="flex items-center gap-2"
+          >
+            Load Photos
+          </Button>
+        </div>
       )}
     </div>
   );
