@@ -28,6 +28,7 @@ import McTimeLine from "~icons/mingcute/time-line";
 import McKey2Line from "~icons/mingcute/key-2-line";
 import McZoomIn from "~icons/mingcute/zoom-in-line";
 import McCopy from "~icons/mingcute/copy-2-line";
+import { toast } from "sonner";
 
 const PER_PAGE = 20;
 
@@ -197,7 +198,6 @@ function PhotoDisplay({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
-  // TODO make sure this is not undefined
   const s3Settings = useS3SettingsValue();
 
   const [loadingState, setLoadingState] = useState<
@@ -340,7 +340,7 @@ function PhotoItemOverlay({
   const toggleSelected = useSetAtom(toggleSelectedAtom);
   function copy(photo: Photo) {
     navigator.clipboard.writeText(photo.url);
-    // TODO use toast
+    toast.success("Copied to clipboard");
   }
   return (
     <>
@@ -361,7 +361,7 @@ function PhotoItemOverlay({
         onCheckedChange={(c) => {
           toggleSelected(photo.Key, !!c);
         }}
-        className={cn("absolute top-4 left-4 hover-to-show", {
+        className={cn("absolute top-2 left-2 hover-to-show", {
           "!opacity-100 !pointer-events-auto": selected,
         })}
       />
@@ -382,7 +382,6 @@ function PhotoItemOverlay({
         {selectMode ? <McZoomIn /> : <McCopy />}
       </Button>
     </>
-    // TODO finish this
   );
 }
 

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import type { Photo } from "@/utils/ImageS3Client";
 import ImageS3Client from "@/utils/ImageS3Client";
 import { createFileRoute } from "@tanstack/react-router";
@@ -7,6 +6,11 @@ import { atom, useAtom, useSetAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { useS3SettingsValue } from "./settings/s3";
 import { PhotoGrid } from "@/components/Photo/PhotoGrid";
+import McCheckbox from "~icons/mingcute/checkbox-line";
+import McDelete from "~icons/mingcute/delete-3-line";
+import McRefresh from "~icons/mingcute/refresh-2-line";
+import { toast } from "sonner";
+import { useCallback } from "react";
 
 export const Route = createFileRoute("/gallery")({
   component: RouteComponent,
@@ -22,13 +26,13 @@ function RouteComponent() {
 
 export const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
 
-function Gallery() {
+const useListPhotos = () => {
   const setPhotos = useSetAtom(photosAtom);
   const s3Settings = useS3SettingsValue();
 
-  async function handleRefresh() {
+  const listPhotos = useCallback(async () => {
     if (!s3Settings) {
-      // TODO use toast
+      toast.error("S3 settings not found");
       console.error("S3 settings not found");
       return;
     }
@@ -36,22 +40,29 @@ function Gallery() {
     try {
       photos = await new ImageS3Client(s3Settings).list();
     } catch (error) {
-      // TODO use toast
+      toast.error("Failed to fetch photos");
       console.error("Failed to fetch photos", error);
       return;
     }
     if (photos) {
-      // TODO use toast
+      toast.message("Fetched photos");
       console.log("Fetched photos", photos.length);
       setPhotos(photos);
     } else {
-      // TODO use toast
+      toast.error("Failed to fetch photos");
       console.error("Failed to fetch photos");
     }
-  }
+  }, [s3Settings, setPhotos]);
+
+  return listPhotos;
+};
+
+function Gallery() {
+  const listPhotos = useListPhotos();
+
   return (
     <div className="flex flex-col gap-6 w-full">
-      <GalleryControl onRefresh={handleRefresh} />
+      <GalleryControl onRefresh={listPhotos} />
       <GalleryContent />
     </div>
   );
@@ -65,21 +76,50 @@ export const selectModeAtom = atom((get) => {
 
 function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
+  const s3Settings = useS3SettingsValue();
+  const listPhotos = useListPhotos();
+  async function handleDelete() {
+    if (!s3Settings) {
+      toast.error("S3 settings not found");
+      return;
+    }
+    try {
+      toast.message("Requested delete...");
+      await Promise.all(
+        Array.from(selectedPhotos).map(async (key) => {
+          await new ImageS3Client(s3Settings).delete(key);
+        }),
+      );
+      toast.success("Deleted photos");
+    } catch (error) {
+      toast.error("Failed to delete photos");
+      console.error("Failed to delete photos", error);
+    } finally {
+      setSelectedPhotos(new Set<string>());
+      await listPhotos();
+    }
+  }
   return (
-    <Card>
-      <CardContent>
-        <Button onClick={onRefresh}>Refresh</Button>
-        {selectedPhotos.size > 0 && (
+    <div className="flex gap-2">
+      <Button onClick={onRefresh} size={"icon"}>
+        <McRefresh />
+      </Button>
+      {selectedPhotos.size > 0 && (
+        <>
           <Button
+            variant="secondary"
             onClick={() => {
               setSelectedPhotos(new Set<string>());
             }}
           >
-            {selectedPhotos.size} Selected
+            <McCheckbox /> {selectedPhotos.size}
           </Button>
-        )}
-      </CardContent>
-    </Card>
+          <Button variant={"destructive"} onClick={handleDelete}>
+            <McDelete /> {selectedPhotos.size}
+          </Button>
+        </>
+      )}
+    </div>
   );
 }
 
