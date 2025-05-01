@@ -70,7 +70,7 @@ export function PhotoGrid() {
   return (
     <div ref={containerRef} className="max-w-full">
       {photos.length > 0 ? (
-        <div className="grid gap-4 w-full">
+        <div className="flex flex-col gap-4 w-full">
           <div className="flex flex-wrap gap-2 w-full">
             {photos.map((photo, i) => (
               <PhotoItem key={photo.Key} photo={photo} size={photoSize[i]} />
