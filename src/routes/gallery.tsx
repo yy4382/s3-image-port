@@ -26,7 +26,7 @@ function RouteComponent() {
 
 export const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
 
-const useListPhotos = () => {
+export const useListPhotos = () => {
   const setPhotos = useSetAtom(photosAtom);
   const s3Settings = useS3SettingsValue();
 
