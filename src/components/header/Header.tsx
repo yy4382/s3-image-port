@@ -57,7 +57,7 @@ const Header: React.FC = () => {
           </div>
           <div className="md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <ThemeSwitcherButton />
               </DropdownMenuTrigger>
               <DropdownMenuContent>

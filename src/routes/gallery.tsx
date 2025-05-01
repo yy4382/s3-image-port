@@ -5,7 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { useS3SettingsValue } from "./settings/s3";
-import { PhotoGrid } from "@/components/Photo/PhotoGrid";
+import { PhotoGrid, resetGridStateAtom } from "@/components/Photo/PhotoGrid";
 import McCheckbox from "~icons/mingcute/checkbox-line";
 import McDelete from "~icons/mingcute/delete-3-line";
 import McRefresh from "~icons/mingcute/refresh-2-line";
@@ -126,3 +126,10 @@ function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
 function GalleryContent() {
   return <PhotoGrid />;
 }
+
+// used when changing profiles
+export const resetGalleryStateAtom = atom(null, (_get, set) => {
+  set(photosAtom, []);
+  set(selectedPhotosAtom, new Set<string>());
+  set(resetGridStateAtom);
+});

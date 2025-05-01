@@ -414,3 +414,8 @@ function PhotoInfo({ photo }: { photo: Photo }) {
     </TooltipProvider>
   );
 }
+
+export const resetGridStateAtom = atom(null, (_get, set) => {
+  set(currentPageAtom, 1);
+  set(naturalSizesAtom, new Map());
+});

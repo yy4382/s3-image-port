@@ -15,7 +15,9 @@ import { Route as GalleryImport } from './routes/gallery'
 import { Route as AboutImport } from './routes/about'
 import { Route as SettingsRouteImport } from './routes/settings/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as SettingsIndexImport } from './routes/settings/index'
 import { Route as SettingsS3Import } from './routes/settings/s3'
+import { Route as SettingsProfileImport } from './routes/settings/profile'
 
 // Create/Update Routes
 
@@ -43,9 +45,21 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const SettingsIndexRoute = SettingsIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+
 const SettingsS3Route = SettingsS3Import.update({
   id: '/s3',
   path: '/s3',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+
+const SettingsProfileRoute = SettingsProfileImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => SettingsRouteRoute,
 } as any)
 
@@ -81,11 +95,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryImport
       parentRoute: typeof rootRoute
     }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileImport
+      parentRoute: typeof SettingsRouteImport
+    }
     '/settings/s3': {
       id: '/settings/s3'
       path: '/s3'
       fullPath: '/settings/s3'
       preLoaderRoute: typeof SettingsS3Import
+      parentRoute: typeof SettingsRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexImport
       parentRoute: typeof SettingsRouteImport
     }
   }
@@ -94,11 +122,15 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface SettingsRouteRouteChildren {
+  SettingsProfileRoute: typeof SettingsProfileRoute
   SettingsS3Route: typeof SettingsS3Route
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
+  SettingsProfileRoute: SettingsProfileRoute,
   SettingsS3Route: SettingsS3Route,
+  SettingsIndexRoute: SettingsIndexRoute,
 }
 
 const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
@@ -110,15 +142,18 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/settings/s3': typeof SettingsS3Route
+  '/settings/': typeof SettingsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/settings/s3': typeof SettingsS3Route
+  '/settings': typeof SettingsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -127,15 +162,38 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/settings/s3': typeof SettingsS3Route
+  '/settings/': typeof SettingsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/settings' | '/about' | '/gallery' | '/settings/s3'
+  fullPaths:
+    | '/'
+    | '/settings'
+    | '/about'
+    | '/gallery'
+    | '/settings/profile'
+    | '/settings/s3'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings' | '/about' | '/gallery' | '/settings/s3'
-  id: '__root__' | '/' | '/settings' | '/about' | '/gallery' | '/settings/s3'
+  to:
+    | '/'
+    | '/about'
+    | '/gallery'
+    | '/settings/profile'
+    | '/settings/s3'
+    | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/settings'
+    | '/about'
+    | '/gallery'
+    | '/settings/profile'
+    | '/settings/s3'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 
@@ -175,7 +233,9 @@ export const routeTree = rootRoute
     "/settings": {
       "filePath": "settings/route.tsx",
       "children": [
-        "/settings/s3"
+        "/settings/profile",
+        "/settings/s3",
+        "/settings/"
       ]
     },
     "/about": {
@@ -184,8 +244,16 @@ export const routeTree = rootRoute
     "/gallery": {
       "filePath": "gallery.tsx"
     },
+    "/settings/profile": {
+      "filePath": "settings/profile.tsx",
+      "parent": "/settings"
+    },
     "/settings/s3": {
       "filePath": "settings/s3.tsx",
+      "parent": "/settings"
+    },
+    "/settings/": {
+      "filePath": "settings/index.tsx",
       "parent": "/settings"
     }
   }
