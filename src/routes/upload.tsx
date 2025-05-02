@@ -1,4 +1,5 @@
 import ImageCompressOptions from "@/components/settings/ImageCompressOptions";
+import { KeyTemplate } from "@/components/settings/KeyTemplate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,12 +21,18 @@ import { splitAtom } from "jotai/utils";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
+import { monotonicFactory } from "ulid";
 import { v4 as uuid } from "uuid";
+import McCheck from "~icons/mingcute/check-line";
 import McTrash from "~icons/mingcute/delete-2-line";
 import McPencil from "~icons/mingcute/edit-2-line";
 import McUpload from "~icons/mingcute/file-upload-line";
+import McLoading from "~icons/mingcute/loading-3-line";
+import McUpload2 from "~icons/mingcute/upload-2-line";
+import McCopy from "~icons/mingcute/copy-2-line";
 import { useS3SettingsValue, type S3Settings } from "./settings/s3";
-import { KeyTemplate } from "@/components/settings/KeyTemplate";
+import { uploadSettingsAtom } from "./settings/upload";
+import key2Url from "@/utils/key2Url";
 
 export const Route = createFileRoute("/upload")({
   component: Upload,
@@ -35,7 +42,7 @@ type UploadObject = {
   file: File;
   processedFile: File | null;
   key: S3Key;
-  processOption: CompressOption | null;
+  compressOption: CompressOption | null;
   status: "pending" | "processing" | "processed" | "uploading" | "uploaded";
   id: string;
   supportProcess: boolean;
@@ -44,101 +51,103 @@ type UploadObject = {
 const fileListAtom = atom<UploadObject[]>([]);
 
 const appendFileAtom = atom(null, (get, set, newFiles: File[]) => {
+  const uploadSettings = get(uploadSettingsAtom);
+  const ulid = monotonicFactory();
   const uploadObjects = newFiles.map(
     (file) =>
       ({
         file,
         processedFile: null,
-        // TODO: use setting's template
-        key: new S3Key(file, defaultKeyTemplate),
-        // TODO: Add a default process option
-        processOption: null,
+        key: new S3Key(
+          file,
+          uploadSettings?.keyTemplate ?? defaultKeyTemplate,
+          ulid,
+        ),
+        compressOption: uploadSettings?.compressionOption ?? null,
         id: uuid(),
         status: "pending",
         supportProcess: isSupportedFileType(file),
-      }) as UploadObject,
+      }) satisfies UploadObject,
   );
   set(fileListAtom, [...get(fileListAtom), ...uploadObjects]);
 });
 
 const fileAtomAtoms = splitAtom(fileListAtom, (file) => file.id);
 
-const process = async (
-  file: UploadObject,
-  setFile: (arg: (prev: UploadObject) => UploadObject) => void,
-) => {
-  if (!file.processOption || !isSupportedFileType(file.file)) {
-    return file.file;
-  }
-  setFile((prev) => ({
-    ...prev,
-    status: "processing",
-  }));
-  let processed: File;
-  try {
-    processed = await processFile(file.file, file.processOption, () => {});
-  } catch (error) {
-    toast.error(`Processing failed for ${file.file.name}`);
-    console.error("Processing failed", error);
-    setFile((prev) => ({
+const processAtom = atom(
+  null,
+  async (get, set, atom: PrimitiveAtom<UploadObject>) => {
+    const initFile = get(atom);
+    if (!initFile.compressOption || !isSupportedFileType(initFile.file)) {
+      return;
+    }
+    set(atom, (prev) => ({
       ...prev,
-      status: "pending",
+      status: "processing",
     }));
-    throw error;
-  }
-  setFile((prev) => ({
-    ...prev,
-    key: prev.key.updateFile(processed),
-    processedFile: processed,
-    status: "processed",
-  }));
-  return processed;
-};
-const upload = async (
-  file: UploadObject,
-  setFile: (arg: (prev: UploadObject) => UploadObject) => void,
-  s3Settings: S3Settings,
-) => {
-  const processedFile = file.processedFile ?? (await process(file, setFile));
-  setFile((prev) => ({
-    ...prev,
-    status: "uploading",
-  }));
-  try {
-    await new ImageS3Client(s3Settings).upload(
-      processedFile,
-      file.key.toString(),
-    );
-    setFile((prev) => ({
+    try {
+      const file = get(atom);
+      const processed = await processFile(
+        file.file,
+        file.compressOption!,
+        () => {},
+      );
+      set(atom, (prev) => ({
+        ...prev,
+        processedFile: processed,
+        key: prev.key.updateFile(processed),
+        status: "processed",
+      }));
+    } catch (error) {
+      toast.error(`Processing failed for ${get(atom).file.name}`);
+      console.error("Processing failed", error);
+      set(atom, (prev) => ({
+        ...prev,
+        status: "pending",
+      }));
+      throw error;
+    }
+  },
+);
+
+const uploadAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    atom: PrimitiveAtom<UploadObject>,
+    s3Settings: S3Settings,
+  ) => {
+    await set(processAtom, atom);
+    const file = get(atom);
+    const processedFile = file.processedFile ?? file.file;
+    set(atom, (prev) => ({
       ...prev,
-      status: "uploaded",
+      status: "uploading",
     }));
-  } catch (error) {
-    console.error("Upload failed", error);
-    setFile((prev) => ({
-      ...prev,
-      status: "pending",
-    }));
-  }
-};
+    try {
+      await new ImageS3Client(s3Settings).upload(
+        processedFile,
+        file.key.toString(),
+      );
+      set(atom, (prev) => ({
+        ...prev,
+        status: "uploaded",
+      }));
+    } catch (error) {
+      console.error("Upload failed", error);
+      set(atom, (prev) => ({
+        ...prev,
+        status: "pending",
+      }));
+    }
+  },
+);
 
 const uploadAll = atom(null, async (get, set, s3Settings: S3Settings) => {
-  const files = get(fileListAtom);
   await Promise.all(
-    files.map((file) => {
-      return upload(
-        file,
-        (arg) => {
-          set(fileListAtom, (prev) => {
-            const singlePrev = prev.findIndex((f) => f.id === file.id);
-            if (singlePrev < 0) return prev;
-            const newFiles = prev.slice();
-            newFiles[singlePrev] = arg(file);
-            return newFiles;
-          });
-        },
-        s3Settings,
-      );
+    get(fileAtomAtoms).map(async (atom) => {
+      await set(uploadAtom, atom, s3Settings);
     }),
   );
 });
@@ -146,21 +155,13 @@ const uploadAll = atom(null, async (get, set, s3Settings: S3Settings) => {
 function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
   const [file, setFile] = useAtom(atom);
 
-  const _process = useCallback(async () => {
-    return process(file, setFile);
-  }, [file, setFile]);
-
-  const _upload = useCallback(
-    async (s3Settings: S3Settings) => {
-      upload(file, setFile, s3Settings);
-    },
-    [file, setFile],
-  );
   const updateProcessOption = useCallback(
     (option: CompressOption | null) => {
       setFile((prev) => ({
         ...prev,
-        processOption: option,
+        status: "pending",
+        processedFile: null,
+        compressOption: option,
       }));
     },
     [setFile],
@@ -176,8 +177,6 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
   );
   return {
     file,
-    process: _process,
-    upload: _upload,
     updateProcessOption,
     updateTemplate,
   };
@@ -268,52 +267,16 @@ function FilePreview({
   fileAtom: PrimitiveAtom<UploadObject>;
   remove: () => void;
 }) {
-  const { file, process, upload, updateProcessOption, updateTemplate } =
+  const upload = useSetAtom(uploadAtom);
+  const process = useSetAtom(processAtom);
+  const { file, updateProcessOption, updateTemplate } =
     useFileAtomOperations(fileAtom);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const s3Settings = useS3SettingsValue();
-
-  // Generate and properly manage thumbnail preview for images
-  useEffect(() => {
-    let url: string | null = null;
-
-    if (file.file.type.startsWith("image/")) {
-      url = URL.createObjectURL(file.file);
-      setFileUrl(url);
-    }
-
-    // Cleanup function to revoke the object URL
-    return () => {
-      if (url) {
-        URL.revokeObjectURL(url);
-      }
-    };
-  }, [file.file]);
-
-  useEffect(() => {
-    if (file.status === "uploaded") {
-      setTimeout(() => {
-        remove();
-      }, 500);
-    }
-  }, [file.status, remove]);
 
   return (
     <Card className="overflow-hidden py-1">
       <div className="flex items-center px-3 py-1">
-        <div className="h-8 w-8 mr-2 bg-secondary rounded flex-shrink-0 overflow-hidden">
-          {fileUrl ? (
-            <img
-              src={fileUrl}
-              alt={file.file.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full w-full">
-              <span className="text-xs text-muted-foreground">File</span>
-            </div>
-          )}
-        </div>
+        <FilePreviewThumbnail file={file.file} />
 
         <div className="flex-grow min-w-0 flex items-center">
           <div className="font-medium truncate text-sm" title={file.file.name}>
@@ -322,48 +285,73 @@ function FilePreview({
           <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">
             {(file.file.size / 1024).toFixed(1)} KB
           </Badge>
-          {file.supportProcess && file.processOption !== null && (
-            <FilePreviewProcess file={file} process={process} />
+          {file.supportProcess && file.compressOption !== null && (
+            <FilePreviewProcess file={file} process={() => process(fileAtom)} />
           )}
         </div>
 
         <div className="flex items-center space-x-1 ml-2">
+          {file.status === "uploaded" && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                try {
+                  navigator.clipboard.writeText(
+                    key2Url(file.key.toString(), s3Settings!),
+                  );
+                  toast.success("Key copied to clipboard");
+                } catch {
+                  toast.error("Failed to copy key");
+                }
+              }}
+            >
+              <span className="sr-only">Copy Link</span>
+              <McCopy />
+            </Button>
+          )}
           {file.status === "uploading" ? (
-            <Button variant="outline" size="sm" disabled>
-              Uploading...
+            <Button variant="outline" size="icon" disabled>
+              <McLoading className="animate-spin" />
             </Button>
           ) : file.status === "uploaded" ? (
-            <Button variant="outline" size="sm" disabled>
-              Uploaded
+            <Button variant="outline" size="icon" disabled>
+              <McCheck className="text-green-500" />
             </Button>
           ) : (
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => upload(s3Settings!)} // TODO: Handle s3Settings
+              size="icon"
+              onClick={() => upload(fileAtom, s3Settings!)}
+              disabled={!s3Settings}
             >
-              Upload
+              <McUpload2 />
             </Button>
           )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+              <Button variant="ghost" size="icon" className="">
                 <span className="sr-only">Edit</span>
-                <McPencil className="h-4 w-4" />
+                <McPencil />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="p-4">
               <div className="space-y-6">
-                <KeyTemplate
-                  v={file.key.template}
-                  set={(k) => {
-                    updateTemplate(k);
-                  }}
-                />
+                <div>
+                  <KeyTemplate
+                    v={file.key.template}
+                    set={(k) => {
+                      updateTemplate(k);
+                    }}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Key will be: {file.key.toString()}
+                  </p>
+                </div>
                 {file.supportProcess && (
                   <ImageCompressOptions
-                    value={file.processOption}
+                    value={file.compressOption}
                     onChange={updateProcessOption}
                   ></ImageCompressOptions>
                 )}
@@ -373,9 +361,9 @@ function FilePreview({
 
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={remove}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <span className="sr-only">Remove</span>
             <McTrash className="h-4 w-4" />
@@ -386,12 +374,48 @@ function FilePreview({
   );
 }
 
+function FilePreviewThumbnail({ file }: { file: File }) {
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  // Generate and properly manage thumbnail preview for images
+  useEffect(() => {
+    let url: string | null = null;
+
+    if (file.type.startsWith("image/")) {
+      url = URL.createObjectURL(file);
+      setFileUrl(url);
+    }
+
+    // Cleanup function to revoke the object URL
+    return () => {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [file]);
+  return (
+    <div className="h-8 w-8 mr-2 bg-secondary rounded flex-shrink-0 overflow-hidden">
+      {fileUrl ? (
+        <img
+          src={fileUrl}
+          alt={file.name}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full w-full">
+          <span className="text-xs text-muted-foreground">File</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FilePreviewProcess({
   file,
   process,
 }: {
   file: UploadObject;
-  process: () => Promise<File>;
+  process: () => void;
 }) {
   return (
     <>

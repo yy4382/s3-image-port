@@ -20,6 +20,11 @@ export function KeyTemplate({
     set(value);
     const result = keyTemplateSchema.safeParse(value);
     if (result.success) {
+      if (!value.trim().endsWith(".{{ext}}")) {
+        setError('End with ".{{ext}}" is generally recommended.');
+        return;
+      }
+      // TODO: add other checks (deprecated placeholders, "ulid-dayslice" should use with y/m/d etc.)
       setError(undefined);
     } else {
       setError(z.prettifyError(result.error));

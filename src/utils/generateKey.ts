@@ -16,13 +16,13 @@ const _availablePlaceholders = [
    */
   "ulid-dayslice",
   /**
-   * @deprecated renamed to `ulid-day`
+   * @deprecated renamed to `ulid-dayslice`
    */
   "random",
 ] as const;
 
 export const defaultKeyTemplate =
-  "i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}";
+  "i/{{year}}/{{month}}/{{day}}/{{ulid-dayslice}}.{{ext}}";
 
 export class S3Key {
   template: string;
