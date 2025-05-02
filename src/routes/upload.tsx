@@ -72,6 +72,18 @@ const appendFileAtom = atom(null, (get, set, newFiles: File[]) => {
   set(fileListAtom, [...get(fileListAtom), ...uploadObjects]);
 });
 
+const removeUploadedFileAtom = atom(
+  (get) => {
+    return get(fileListAtom).some((file) => file.status === "uploaded");
+  },
+  (get, set) => {
+    const filtered = get(fileListAtom).filter(
+      (file) => file.status !== "uploaded",
+    );
+    set(fileListAtom, filtered);
+  },
+);
+
 const fileAtomAtoms = splitAtom(fileListAtom, (file) => file.id);
 
 const processAtom = atom(
@@ -185,6 +197,7 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
 function Upload() {
   const [fileAtoms, dispatch] = useAtom(fileAtomAtoms);
   const triggerUpload = useSetAtom(uploadAll);
+  const [hasUploaded, removeUploaded] = useAtom(removeUploadedFileAtom);
   const s3Settings = useS3SettingsValue();
 
   return (
@@ -200,19 +213,30 @@ function Upload() {
           <h2 className="text-xl font-semibold">
             Files to upload ({fileAtoms.length})
           </h2>
-          <Button
-            onClick={() => {
-              if (!s3Settings) {
-                toast.error("S3 settings are not configured");
-                return;
-              }
-              triggerUpload(s3Settings);
-            }}
-            size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Upload All Files
-          </Button>
+          <div className="flex items-center space-x-2">
+            {hasUploaded && (
+              <Button
+                variant="outline"
+                onClick={removeUploaded}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                Clear Uploaded Entry
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                if (!s3Settings) {
+                  toast.error("S3 settings are not configured");
+                  return;
+                }
+                triggerUpload(s3Settings);
+              }}
+              size="lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Upload All
+            </Button>
+          </div>
         </div>
       )}
 
@@ -293,7 +317,7 @@ function FilePreview({
         <div className="flex items-center space-x-1 ml-2">
           {file.status === "uploaded" && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={() => {
                 try {
