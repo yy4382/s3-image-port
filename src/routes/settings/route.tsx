@@ -42,6 +42,15 @@ function SettingPageSwitcher() {
       >
         S3
       </Link>
+      <Link
+        to="/settings/upload"
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",
+        )}
+      >
+        Upload{" "}
+      </Link>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import McAlertDiamond from "~icons/mingcute/alert-diamond-line";
 import McCheckCircle from "~icons/mingcute/check-circle-line";
 import McPencil from "~icons/mingcute/pencil-2-line";
 import McCopy from "~icons/mingcute/copy-2-line";
+import { uploadSettingsAtom, uploadSettingsSchema } from "./upload";
 
 export const Route = createFileRoute("/settings/profile")({
   component: RouteComponent,
@@ -27,14 +28,21 @@ function RouteComponent() {
 }
 
 const profileSchema = z.object({
+  // TODO maybe add a version field to the profile
   s3: s3SettingsSchema,
+  upload: uploadSettingsSchema,
 });
 
 type Profile = z.infer<typeof profileSchema>;
 
-const profileAtom = atom<Profile>((get) => ({
-  s3: get(s3SettingsAtom),
-}));
+const profileAtom = atom<Profile>((get) => {
+  const s3Settings = get(s3SettingsAtom);
+  const uploadSettings = get(uploadSettingsAtom);
+  return {
+    s3: s3Settings,
+    upload: uploadSettings,
+  } as Profile;
+});
 const setProfileAtom = atom(null, (get, set, profile: Profile) => {
   const s3Settings = get(s3SettingsAtom);
   const newS3Settings = { ...s3Settings, ...profile.s3 };
