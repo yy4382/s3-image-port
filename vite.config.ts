@@ -18,6 +18,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: [
+      "@jsquash/png",
+      "@jsquash/jpeg",
+      "@jsquash/webp",
+      "@jsquash/avif",
+    ],
+  },
   server: {
     port: 3000,
   },

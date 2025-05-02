@@ -31,6 +31,8 @@ class ImageS3Client {
         secretAccessKey: s3Settings.secretAccKey,
       },
       endpoint: s3Settings.endpoint,
+      // TODO: Remove workaround once https://github.com/aws/aws-sdk-js-v3/issues/6834 is fixed.
+      requestChecksumCalculation: "WHEN_REQUIRED",
     });
     this.bucket = s3Settings.bucket;
   }

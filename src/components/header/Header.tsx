@@ -37,7 +37,7 @@ const Header: React.FC = () => {
         </Link>
 
         <div className="flex space-x-4 font-semibold flex-1 justify-center">
-          <Link to="/gallery" className={getNavLinkClass}>
+          <Link to="/upload" className={getNavLinkClass}>
             <McPhotoAlbum className="text-2xl md:text-base" />
             <span className="hidden md:block">Upload</span>
           </Link>

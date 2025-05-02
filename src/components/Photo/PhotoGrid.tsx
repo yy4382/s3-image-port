@@ -392,7 +392,7 @@ function PhotoInfo({ photo }: { photo: Photo }) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <Button variant={"secondary"} size="icon">
             <MingcuteInformationLine />
           </Button>

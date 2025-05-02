@@ -11,15 +11,23 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as UploadImport } from './routes/upload'
 import { Route as GalleryImport } from './routes/gallery'
 import { Route as AboutImport } from './routes/about'
 import { Route as SettingsRouteImport } from './routes/settings/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as SettingsIndexImport } from './routes/settings/index'
+import { Route as SettingsUploadImport } from './routes/settings/upload'
 import { Route as SettingsS3Import } from './routes/settings/s3'
 import { Route as SettingsProfileImport } from './routes/settings/profile'
 
 // Create/Update Routes
+
+const UploadRoute = UploadImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const GalleryRoute = GalleryImport.update({
   id: '/gallery',
@@ -48,6 +56,12 @@ const IndexRoute = IndexImport.update({
 const SettingsIndexRoute = SettingsIndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+
+const SettingsUploadRoute = SettingsUploadImport.update({
+  id: '/upload',
+  path: '/upload',
   getParentRoute: () => SettingsRouteRoute,
 } as any)
 
@@ -95,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryImport
       parentRoute: typeof rootRoute
     }
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadImport
+      parentRoute: typeof rootRoute
+    }
     '/settings/profile': {
       id: '/settings/profile'
       path: '/profile'
@@ -107,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/s3'
       fullPath: '/settings/s3'
       preLoaderRoute: typeof SettingsS3Import
+      parentRoute: typeof SettingsRouteImport
+    }
+    '/settings/upload': {
+      id: '/settings/upload'
+      path: '/upload'
+      fullPath: '/settings/upload'
+      preLoaderRoute: typeof SettingsUploadImport
       parentRoute: typeof SettingsRouteImport
     }
     '/settings/': {
@@ -124,12 +152,14 @@ declare module '@tanstack/react-router' {
 interface SettingsRouteRouteChildren {
   SettingsProfileRoute: typeof SettingsProfileRoute
   SettingsS3Route: typeof SettingsS3Route
+  SettingsUploadRoute: typeof SettingsUploadRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
   SettingsProfileRoute: SettingsProfileRoute,
   SettingsS3Route: SettingsS3Route,
+  SettingsUploadRoute: SettingsUploadRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }
 
@@ -142,8 +172,10 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
+  '/upload': typeof UploadRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/s3': typeof SettingsS3Route
+  '/settings/upload': typeof SettingsUploadRoute
   '/settings/': typeof SettingsIndexRoute
 }
 
@@ -151,8 +183,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
+  '/upload': typeof UploadRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/s3': typeof SettingsS3Route
+  '/settings/upload': typeof SettingsUploadRoute
   '/settings': typeof SettingsIndexRoute
 }
 
@@ -162,8 +196,10 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
+  '/upload': typeof UploadRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/s3': typeof SettingsS3Route
+  '/settings/upload': typeof SettingsUploadRoute
   '/settings/': typeof SettingsIndexRoute
 }
 
@@ -174,16 +210,20 @@ export interface FileRouteTypes {
     | '/settings'
     | '/about'
     | '/gallery'
+    | '/upload'
     | '/settings/profile'
     | '/settings/s3'
+    | '/settings/upload'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/gallery'
+    | '/upload'
     | '/settings/profile'
     | '/settings/s3'
+    | '/settings/upload'
     | '/settings'
   id:
     | '__root__'
@@ -191,8 +231,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/about'
     | '/gallery'
+    | '/upload'
     | '/settings/profile'
     | '/settings/s3'
+    | '/settings/upload'
     | '/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -202,6 +244,7 @@ export interface RootRouteChildren {
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   GalleryRoute: typeof GalleryRoute
+  UploadRoute: typeof UploadRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -209,6 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   GalleryRoute: GalleryRoute,
+  UploadRoute: UploadRoute,
 }
 
 export const routeTree = rootRoute
@@ -224,7 +268,8 @@ export const routeTree = rootRoute
         "/",
         "/settings",
         "/about",
-        "/gallery"
+        "/gallery",
+        "/upload"
       ]
     },
     "/": {
@@ -235,6 +280,7 @@ export const routeTree = rootRoute
       "children": [
         "/settings/profile",
         "/settings/s3",
+        "/settings/upload",
         "/settings/"
       ]
     },
@@ -244,12 +290,19 @@ export const routeTree = rootRoute
     "/gallery": {
       "filePath": "gallery.tsx"
     },
+    "/upload": {
+      "filePath": "upload.tsx"
+    },
     "/settings/profile": {
       "filePath": "settings/profile.tsx",
       "parent": "/settings"
     },
     "/settings/s3": {
       "filePath": "settings/s3.tsx",
+      "parent": "/settings"
+    },
+    "/settings/upload": {
+      "filePath": "settings/upload.tsx",
       "parent": "/settings"
     },
     "/settings/": {
