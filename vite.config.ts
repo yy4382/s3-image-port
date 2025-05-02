@@ -4,6 +4,7 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import Icons from "unplugin-icons/vite";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
     Icons({ compiler: "jsx", jsx: "react" }),
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
     react(),
+    visualizer({ gzipSize: true }),
   ],
   resolve: {
     alias: {
@@ -25,6 +27,19 @@ export default defineConfig({
       "@jsquash/webp",
       "@jsquash/avif",
     ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          awsSdkS3: ["@aws-sdk/client-s3"],
+          shared: ["zod", "date-fns", "mime"],
+        }
+      }
+    }
+  },
+  worker: {
+    format: "es",
   },
   server: {
     port: 3000,
