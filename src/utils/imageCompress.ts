@@ -31,12 +31,6 @@ const SUPPORTED_INPUT_MIME = {
   "image/png": "png",
 } as const;
 
-import * as avif from "@jsquash/avif";
-import * as jpeg from "@jsquash/jpeg";
-// import * as jxl from '@jsquash/jxl';
-import * as png from "@jsquash/png";
-import * as webp from "@jsquash/webp";
-
 const wasmInitialized = new Map<OutputTypes, boolean>();
 async function ensureWasmLoaded(format: OutputTypes): Promise<void> {
   if (wasmInitialized.get(format)) return;
@@ -67,21 +61,30 @@ export async function decode(
   sourceMime: keyof typeof SUPPORTED_INPUT_MIME,
   fileBuffer: ArrayBuffer,
 ): Promise<ImageData> {
+  const sourceType = SUPPORTED_INPUT_MIME[sourceMime];
   // Ensure WASM is loaded for the source type
-  await ensureWasmLoaded(SUPPORTED_INPUT_MIME[sourceMime]);
+  await ensureWasmLoaded(sourceType);
 
   try {
-    switch (SUPPORTED_INPUT_MIME[sourceMime]) {
-      case "avif":
-        return await avif.decode(fileBuffer);
-      case "jpeg":
-        return await jpeg.decode(fileBuffer);
+    switch (sourceType) {
+      case "avif": {
+        const { decode } = await import("@jsquash/avif");
+        return await decode(fileBuffer);
+      }
+      case "jpeg": {
+        const { decode } = await import("@jsquash/jpeg");
+        return await decode(fileBuffer);
+      }
       // case "jxl":
       // return await jxl.decode(fileBuffer);
-      case "png":
-        return await png.decode(fileBuffer);
-      case "webp":
-        return await webp.decode(fileBuffer);
+      case "png": {
+        const { decode } = await import("@jsquash/png");
+        return await decode(fileBuffer);
+      }
+      case "webp": {
+        const { decode } = await import("@jsquash/webp");
+        return await decode(fileBuffer);
+      }
       default:
         throw new Error(`Unsupported source type: ${sourceMime}`);
     }
@@ -101,15 +104,20 @@ export async function encode(
   try {
     switch (option.type) {
       case "avif": {
-        return await avif.encode(imageData, option);
+        const { encode } = await import("@jsquash/avif");
+        return await encode(imageData, option);
       }
       case "jpeg": {
-        return await jpeg.encode(imageData, option);
+        const { encode } = await import("@jsquash/jpeg");
+        return await encode(imageData, option);
       }
-      case "png":
-        return await png.encode(imageData);
+      case "png": {
+        const { encode } = await import("@jsquash/png");
+        return await encode(imageData);
+      }
       case "webp": {
-        return await webp.encode(imageData, option);
+        const { encode } = await import("@jsquash/webp");
+        return await encode(imageData, option);
       }
     }
   } catch (error) {
