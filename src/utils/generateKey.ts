@@ -37,8 +37,8 @@ export class S3Key {
       day: format(new Date(), "dd"),
       filename: file.name.split(".").shift() || "",
       ext: mime.getExtension(file.type) ?? file.name.split(".").pop() ?? "",
-      "ulid-dayslice": `${this.ulid.slice(4, 10).toLowerCase()}-${this.ulid.slice(-5, -1).toLowerCase()}`,
-      random: `${this.ulid.slice(4, 10).toLowerCase()}-${this.ulid.slice(-5, -1).toLowerCase()}`,
+      "ulid-dayslice": `${this.ulid.slice(4, 10).toLowerCase()}-${this.ulid.slice(-4).toLowerCase()}`,
+      random: `${this.ulid.slice(4, 10).toLowerCase()}-${this.ulid.slice(-4).toLowerCase()}`,
       timestamp: new Date().getTime().toString(),
       ulid: ulidGenerator ? ulidGenerator() : ulid(),
     };

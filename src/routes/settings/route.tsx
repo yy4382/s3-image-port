@@ -9,7 +9,7 @@ export const Route = createFileRoute("/settings")({
 
 function RouteComponent() {
   return (
-    <Card className="max-w-4xl w-full mx-auto">
+    <Card className="max-w-4xl w-full mx-auto h-fit">
       <CardContent className="grid grid-cols-[auto_1fr] gap-4">
         <div className="flex flex-col gap-4 min-w-48">
           <h1 className="text-2xl font-bold ml-2">Settings</h1>

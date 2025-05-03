@@ -17,11 +17,7 @@ export const Route = createFileRoute("/gallery")({
 });
 
 function RouteComponent() {
-  return (
-    <div>
-      <Gallery />
-    </div>
-  );
+  return <Gallery />;
 }
 
 export const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
