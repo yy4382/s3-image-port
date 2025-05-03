@@ -4,9 +4,15 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/header/theme-provider";
 import Header from "@/components/header/Header";
 import { DevTools } from "jotai-devtools";
-if (import.meta.env.DEV) {
-  await import("jotai-devtools/styles.css");
-}
+import css from "jotai-devtools/styles.css?inline";
+
+const JotaiDevTools = () =>
+  process.env.NODE_ENV !== "production" ? (
+    <>
+      <style>{css}</style>
+      <DevTools />
+    </>
+  ) : null;
 
 export const Route = createRootRoute({
   component: () => (
@@ -22,7 +28,7 @@ export const Route = createRootRoute({
         </div>
         <Toaster />
         <TanStackRouterDevtools />
-        <DevTools />
+        <JotaiDevTools />
       </div>
     </ThemeProvider>
   ),

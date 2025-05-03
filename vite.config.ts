@@ -15,6 +15,7 @@ export default defineConfig({
     react({
       babel: {
         presets: ["jotai/babel/preset"],
+        plugins: [["babel-plugin-react-compiler", {}]],
       },
     }),
     visualizer({ gzipSize: true }),
@@ -36,8 +37,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          awsSdkS3: ["@aws-sdk/client-s3"],
-          shared: ["zod", "date-fns", "mime"],
+          // awsSdkS3: ["@aws-sdk/client-s3"],
+          // shared: ["zod", "date-fns", "mime"],
         },
       },
     },

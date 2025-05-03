@@ -214,7 +214,7 @@ function SecretKey() {
 }
 
 // MARK: usePathStyle
-const usePathStyleAtom = atomWithStorage(
+const forcePathStyleAtom = atomWithStorage(
   "s3ip:s3:usePathStyle",
   false,
   withStorageValidator((value): value is boolean => {
@@ -223,7 +223,7 @@ const usePathStyleAtom = atomWithStorage(
   { getOnInit: true },
 );
 function UsePathStyle() {
-  const [usePathStyle, setUsePathStyle] = useAtom(usePathStyleAtom);
+  const [usePathStyle, setUsePathStyle] = useAtom(forcePathStyleAtom);
   const id = useId();
   return (
     <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -354,7 +354,7 @@ export const s3SettingsAtom = atom<S3Settings>((get) => ({
   region: get(regionAtom),
   accKeyId: get(accessKeyAtom),
   secretAccKey: get(secretKeyAtom),
-  forcePathStyle: get(usePathStyleAtom),
+  forcePathStyle: get(forcePathStyleAtom),
   pubUrl: get(publicUrlAtom),
 }));
 
@@ -366,7 +366,7 @@ export const setS3SettingsAtom = atom(
     set(regionAtom, settings.region);
     set(accessKeyAtom, settings.accKeyId);
     set(secretKeyAtom, settings.secretAccKey);
-    set(usePathStyleAtom, settings.forcePathStyle);
+    set(forcePathStyleAtom, settings.forcePathStyle);
     set(publicUrlAtom, settings.pubUrl);
   },
 );
