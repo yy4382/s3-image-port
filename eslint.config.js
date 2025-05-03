@@ -27,6 +27,7 @@ export default tseslint.config(
           varsIgnorePattern: "^_",
         },
       ],
+      "react-hooks/react-compiler": "error",
     },
   },
 );
