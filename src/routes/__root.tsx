@@ -3,6 +3,10 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/header/theme-provider";
 import Header from "@/components/header/Header";
+import { DevTools } from "jotai-devtools";
+if (import.meta.env.DEV) {
+  await import("jotai-devtools/styles.css");
+}
 
 export const Route = createRootRoute({
   component: () => (
@@ -18,6 +22,7 @@ export const Route = createRootRoute({
         </div>
         <Toaster />
         <TanStackRouterDevtools />
+        <DevTools />
       </div>
     </ThemeProvider>
   ),
