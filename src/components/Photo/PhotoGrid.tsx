@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { useAtomCallback } from "jotai/utils";
 import atomWithDebounce from "@/utils/atomWithDebounce";
 
-const PER_PAGE = 20;
+const PER_PAGE = 12;
 
 const currentPageAtom = atom(1);
 

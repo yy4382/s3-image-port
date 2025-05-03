@@ -41,7 +41,7 @@ function ImageCheckbox({
       )}
       {...props}
     >
-      <div className="inset-[5px] absolute group-data-[state=checked]:bg-white z-10"></div>
+      <div className="inset-[5px] absolute group-data-[state=checked]:bg-white dark:group-data-[state=checked]:bg-black z-10"></div>
       <CheckboxPrimitive.Indicator
         forceMount={true}
         data-slot="checkbox-indicator"

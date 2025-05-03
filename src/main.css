@@ -5,3 +5,11 @@
 /* * {
   @apply border-border;
 } */
+@utility bg-grid-image {
+  background-image: url("/background.svg");
+  mask-image: linear-gradient(transparent, black, transparent);
+  @variant dark {
+    background-image: unset;
+    mask-image: unset;
+  }
+}

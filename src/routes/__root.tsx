@@ -7,12 +7,13 @@ import Header from "@/components/header/Header";
 export const Route = createRootRoute({
   component: () => (
     <ThemeProvider defaultTheme="system" storageKey="s3ip:root:theme">
-      <div className="bg-background text-foreground min-h-screen max-w-screen flex flex-col gap-6">
+      <div className="fixed top-0 bottom-0 left-0 right-0 -z-10 bg-grid-image dark:hidden"></div>
+      <div className="dark:bg-background text-foreground min-h-screen w-screen flex flex-col gap-6">
         <div className="p-2 flex gap-2 max-w-7xl mx-auto px-4 w-full">
           <Header />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 w-full">
+        <div className="max-w-7xl mx-auto px-4 w-full flex-1 flex">
           <Outlet />
         </div>
         <Toaster />

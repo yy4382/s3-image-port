@@ -15,7 +15,7 @@ import {
   type CompressOption,
 } from "@/utils/imageCompress";
 import ImageS3Client from "@/utils/ImageS3Client";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { atom, useAtom, useSetAtom, type PrimitiveAtom } from "jotai";
 import { splitAtom } from "jotai/utils";
 import { useCallback, useEffect, useState } from "react";
@@ -33,6 +33,7 @@ import McCopy from "~icons/mingcute/copy-2-line";
 import { useS3SettingsValue, type S3Settings } from "./settings/s3";
 import { uploadSettingsAtom } from "./settings/upload";
 import key2Url from "@/utils/key2Url";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const Route = createFileRoute("/upload")({
   component: Upload,
@@ -207,6 +208,21 @@ function Upload() {
           <DropZone />
         </CardContent>
       </Card>
+
+      {!s3Settings && (
+        <Alert className="mb-4" variant="destructive">
+          <AlertTitle>S3 incorrectly configured</AlertTitle>
+          <AlertDescription>
+            <p>
+              Your S3 settings are not valid. Please configure them in the{" "}
+              <Link to="/settings/s3" className="underline">
+                settings page
+              </Link>
+              .
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {fileAtoms.length > 0 && (
         <div className="mb-4 flex justify-between items-center">
@@ -446,7 +462,7 @@ function FilePreviewProcess({
       {file.processedFile && (
         <>
           <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">
-            Processed {(file.processedFile.size / 1024).toFixed(1)} KB
+            Compressed {(file.processedFile.size / 1024).toFixed(1)} KB
           </Badge>
         </>
       )}
@@ -458,13 +474,13 @@ function FilePreviewProcess({
           asChild
         >
           <button onClick={process}>
-            {file.status === "pending" ? "Process" : "Reprocess"}
+            {file.status === "pending" ? "Compress" : "Recompress"}
           </button>
         </Badge>
       )}
       {file.status === "processing" && (
         <Badge variant="default" className="ml-2 text-xs whitespace-nowrap">
-          Processing...
+          Compressing...
         </Badge>
       )}
     </>
