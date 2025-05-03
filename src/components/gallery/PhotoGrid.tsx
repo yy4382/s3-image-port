@@ -3,13 +3,13 @@ import {
   selectedPhotosAtom,
   selectModeAtom,
   useListPhotos,
-} from "@/routes/gallery";
+} from "./gallery";
 import type { Photo } from "@/utils/ImageS3Client";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import * as z from "zod";
-import { useS3SettingsValue } from "@/routes/settings/s3";
+import { validS3SettingsAtom } from "../settings/s3";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import key2Url from "@/utils/key2Url";
@@ -201,7 +201,7 @@ function PhotoDisplay({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
-  const s3Settings = useS3SettingsValue();
+  const s3Settings = useAtomValue(validS3SettingsAtom);
 
   const [loadingState, setLoadingState] = useState<
     "loading" | "loaded" | "error"
@@ -273,7 +273,7 @@ function PhotoDisplay({
 
 function PhotoDisplayError({ s3Key }: { s3Key: string }) {
   const [mime, setMime] = useState<string | undefined>(undefined);
-  const s3Settings = useS3SettingsValue();
+  const s3Settings = useAtomValue(validS3SettingsAtom);
 
   const handleRefresh = useCallback(() => {
     if (!s3Settings) return;

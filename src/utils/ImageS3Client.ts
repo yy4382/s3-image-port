@@ -5,8 +5,9 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  GetBucketCorsCommand,
 } from "@aws-sdk/client-s3";
-import type { S3Settings } from "@/routes/settings/s3";
+import type { S3Settings } from "@/components/settings/s3";
 import mime from "mime";
 import key2Url from "./key2Url";
 
@@ -179,7 +180,20 @@ class ImageS3Client {
     return response;
   }
 
-  static calculateMIME(file: File | Blob | string, key: string) {
+  async getCors() {
+    const command = new GetBucketCorsCommand({
+      Bucket: this.bucket,
+    });
+    const response = await this.client.send(command);
+    // If the HTTP status code is not 200, throw an error
+    const httpStatusCode = response.$metadata.httpStatusCode!;
+    if (httpStatusCode >= 300) {
+      throw new Error(`GetCors operation get http code: ${httpStatusCode}`);
+    }
+    return response;
+  }
+
+  private static calculateMIME(file: File | Blob | string, key: string) {
     const defaultMIME = "application/octet-stream";
     const keyExt = key.split(".").pop();
 

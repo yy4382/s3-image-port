@@ -12,7 +12,11 @@ export default defineConfig({
     tailwindcss(),
     Icons({ compiler: "jsx", jsx: "react" }),
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
-    react(),
+    react({
+      babel: {
+        presets: ["jotai/babel/preset"],
+      },
+    }),
     visualizer({ gzipSize: true }),
   ],
   resolve: {
@@ -34,9 +38,9 @@ export default defineConfig({
         manualChunks: {
           awsSdkS3: ["@aws-sdk/client-s3"],
           shared: ["zod", "date-fns", "mime"],
-        }
-      }
-    }
+        },
+      },
+    },
   },
   worker: {
     format: "es",
