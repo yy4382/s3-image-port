@@ -29,3 +29,5 @@ docs/.vitepress/dist
 docs/.vitepress/cache
 
 stats.html
+
+coverage/

@@ -2,13 +2,14 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
-import path from "path";
 import Icons from "unplugin-icons/vite";
 import { visualizer } from "rollup-plugin-visualizer";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tsconfigPaths(),
     tailwindcss(),
     Icons({ compiler: "jsx", jsx: "react" }),
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
@@ -20,11 +21,6 @@ export default defineConfig({
     }),
     visualizer({ gzipSize: true }),
   ],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
   optimizeDeps: {
     exclude: [
       "@jsquash/png",
