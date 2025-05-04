@@ -16,7 +16,11 @@ import McAlertDiamond from "~icons/mingcute/alert-diamond-line";
 import McCheckCircle from "~icons/mingcute/check-circle-line";
 import McPencil from "~icons/mingcute/pencil-2-line";
 import McCopy from "~icons/mingcute/copy-2-line";
-import { uploadSettingsAtom, uploadSettingsSchema } from "./upload";
+import {
+  setUploadSettingsAtom,
+  uploadSettingsAtom,
+  uploadSettingsSchema,
+} from "./upload";
 
 const _profileSchema = z.object({
   // TODO maybe add a version field to the profile
@@ -35,10 +39,12 @@ const profileAtom = atom<Profile>((get) => {
   } as Profile;
 });
 const setProfileAtom = atom(null, (get, set, profile: Profile) => {
-  // FIXME update upload settings
   const s3Settings = get(s3SettingsAtom);
   const newS3Settings = { ...s3Settings, ...profile.s3 };
   set(setS3SettingsAtom, newS3Settings);
+  const uploadSettings = get(uploadSettingsAtom);
+  const newUploadSettings = { ...uploadSettings, ...profile.upload };
+  set(setUploadSettingsAtom, newUploadSettings);
 });
 
 const currentProfileNameAtom = atomWithStorage<string>(

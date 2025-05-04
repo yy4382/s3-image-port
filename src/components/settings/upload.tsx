@@ -59,10 +59,20 @@ export const uploadSettingsSchema = z.object({
   compressionOption: compressOptionSchema.nullable(),
 });
 
+type UploadOptions = z.infer<typeof uploadSettingsSchema>;
+
 export const uploadSettingsAtom = atom((get) => ({
   keyTemplate: get(keyTemplateAtom),
   compressionOption: get(CompressOptionAtom),
 }));
+
+export const setUploadSettingsAtom = atom(
+  null,
+  (_, set, uploadSettings: UploadOptions) => {
+    set(keyTemplateAtom, uploadSettings.keyTemplate);
+    set(CompressOptionAtom, uploadSettings.compressionOption);
+  },
+);
 
 export function useUploadSettings() {
   const uploadSettings = useAtomValue(uploadSettingsAtom);
