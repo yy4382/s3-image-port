@@ -7,7 +7,7 @@ import {
   HeadObjectCommand,
   GetBucketCorsCommand,
 } from "@aws-sdk/client-s3";
-import type { S3Settings } from "@/components/settings/s3";
+import type { S3Options } from "@/components/settings/s3";
 import mime from "mime";
 import key2Url from "./key2Url";
 
@@ -20,9 +20,9 @@ export type Photo = {
 class ImageS3Client {
   client: S3Client;
   bucket: string;
-  config: S3Settings;
+  config: S3Options;
 
-  constructor(s3Settings: S3Settings) {
+  constructor(s3Settings: S3Options) {
     this.config = s3Settings;
     this.client = new S3Client({
       region: s3Settings.region,

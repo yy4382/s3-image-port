@@ -1,8 +1,8 @@
-import type { S3Settings } from "@/components/settings/s3";
+import type { S3Options } from "@/components/settings/s3";
 import ImageS3Client from "./ImageS3Client";
 
 export async function getAndParseCors(
-  settings: S3Settings,
+  settings: S3Options,
   currentOrigin: string,
 ) {
   let corsResp;
@@ -17,7 +17,8 @@ export async function getAndParseCors(
   }
   const allowedMethods = cors.reduce((acc, rule) => {
     if (
-      rule.AllowedOrigins?.includes(currentOrigin) &&
+      (rule.AllowedOrigins?.includes(currentOrigin) ||
+        rule.AllowedOrigins?.includes("*")) &&
       rule.AllowedHeaders?.includes("*")
     ) {
       acc.push(...(rule.AllowedMethods ?? []));
