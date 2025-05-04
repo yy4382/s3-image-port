@@ -42,7 +42,7 @@ class ImageS3Client {
    * @param key The key to use in S3
    * @returns The response from the S3 upload operation
    */
-  async upload(file: File | string, key: string) {
+  async upload(_file: File | string, _key: string) {
     // const mimeType = ImageS3Client.calculateMIME(file, key);
     // const command = new PutObjectCommand({
     //   Bucket: this.bucket,
