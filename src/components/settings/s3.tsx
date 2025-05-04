@@ -1,30 +1,73 @@
 import { FormEntry } from "@/components/ui/formEntry";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { getAndParseCors } from "@/utils/testS3Settings";
-import { useAtom, atom, useAtomValue } from "jotai";
 import {
-  atomWithStorage,
-  unstable_withStorageValidator as withStorageValidator,
-  createJSONStorage,
-} from "jotai/utils";
-import { useId, useState } from "react";
+  useAtom,
+  atom,
+  useAtomValue,
+  type WritableAtom,
+  type SetStateAction,
+} from "jotai";
+import { atomWithStorage } from "jotai/utils";
+import { useId, useState, type JSX } from "react";
 import * as z from "zod";
 import { Button } from "../ui/button";
 
-export function S3Settings() {
+function S3Settings() {
   return (
     <div>
       <div className="grid gap-6">
         <h2 className="text-2xl font-bold">S3</h2>
-        <Endpoint />
-        <BucketName />
-        <Region />
-        <AccessKey />
-        <SecretKey />
-        <UsePathStyle />
-        <PublicUrl />
+        <SettingsInputEntry
+          title="Endpoint"
+          description="S3 endpoint"
+          atom={endpointAtom}
+          schema={endpointSchema}
+        />
+        <SettingsInputEntry
+          title="Bucket Name"
+          description="S3 bucket name"
+          atom={bucketNameAtom}
+          schema={bucketNameSchema}
+        />
+        <SettingsInputEntry
+          title="Region"
+          description="S3 region"
+          atom={regionAtom}
+          schema={regionSchema}
+        />
+        <SettingsInputEntry
+          title="Access Key"
+          description="S3 access key"
+          atom={accessKeyAtom}
+          schema={accessKeySchema}
+        />
+        <SettingsInputEntry
+          title="Secret Key"
+          description="S3 secret key"
+          atom={secretKeyAtom}
+          schema={secretKeySchema}
+        />
+        <SettingsInputEntry
+          title="Use Path Style API"
+          description="Force using path style API"
+          atom={forcePathStyleAtom}
+          schema={z.boolean()}
+          input={(v, s, id) => (
+            <Switch
+              id={id}
+              checked={v}
+              onCheckedChange={(checked) => s(checked)}
+            />
+          )}
+        />
+        <SettingsInputEntry
+          title="Public URL"
+          description="S3 public URL"
+          schema={publicUrlSchema}
+          atom={publicUrlAtom}
+        />
         <S3Validation />
       </div>
     </div>
@@ -33,250 +76,30 @@ export function S3Settings() {
 
 // MARK: Endpoint
 const endpointSchema = z.url();
-const endpointAtom = atomWithStorage(
-  "s3ip:s3:endpoint",
-  "",
-  withStorageValidator((value): value is string => {
-    return endpointSchema.safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-
-function Endpoint() {
-  const [endpoint, setEndpoint] = useAtom(endpointAtom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEndpoint(value);
-    const result = endpointSchema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title="Endpoint"
-      description="The URL of the S3 endpoint. Bucket name is not included."
-      error={error}
-    >
-      <Input id={id} value={endpoint} onChange={handleChange} />
-    </FormEntry>
-  );
-}
+const endpointAtom = atomWithStorage("s3ip:s3:endpoint", "");
 
 // MARK: Bucket Name
 const bucketNameSchema = z.string().min(1);
-const bucketNameAtom = atomWithStorage(
-  "s3ip:s3:bucketName",
-  "",
-  withStorageValidator((value): value is string => {
-    return bucketNameSchema.safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-function BucketName() {
-  const [bucketName, setBucketName] = useAtom(bucketNameAtom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setBucketName(value);
-    const result = bucketNameSchema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title="Bucket Name"
-      description="The name of the S3 bucket."
-      error={error}
-    >
-      <Input id={id} value={bucketName} onChange={handleChange} />
-    </FormEntry>
-  );
-}
+const bucketNameAtom = atomWithStorage("s3ip:s3:bucketName", "");
 
 // MARK: Region
 const regionSchema = z.string().min(1);
-const regionAtom = atomWithStorage(
-  "s3ip:s3:region",
-  "",
-  withStorageValidator((value): value is string => {
-    return regionSchema.safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-
-function Region() {
-  const [region, setRegion] = useAtom(regionAtom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRegion(value);
-    const result = regionSchema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title="Region"
-      description="The region of the S3 bucket."
-      error={error}
-    >
-      <Input id={id} value={region} onChange={handleChange} />
-    </FormEntry>
-  );
-}
+const regionAtom = atomWithStorage("s3ip:s3:region", "");
 
 // MARK: Access Key
 const accessKeySchema = z.string().min(1);
-const accessKeyAtom = atomWithStorage(
-  "s3ip:s3:accessKey",
-  "",
-  withStorageValidator((value): value is string => {
-    return accessKeySchema.safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-function AccessKey() {
-  const [accessKey, setAccessKey] = useAtom(accessKeyAtom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setAccessKey(value);
-    const result = accessKeySchema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title="Access Key"
-      description="The access key for the S3 bucket."
-      error={error}
-    >
-      <Input id={id} value={accessKey} onChange={handleChange} />
-    </FormEntry>
-  );
-}
+const accessKeyAtom = atomWithStorage("s3ip:s3:accessKey", "");
 
 // MARK: Secret Key
 const secretKeySchema = z.string().min(1);
-const secretKeyAtom = atomWithStorage(
-  "s3ip:s3:secretKey",
-  "",
-  withStorageValidator((value): value is string => {
-    return secretKeySchema.safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-function SecretKey() {
-  const [secretKey, setSecretKey] = useAtom(secretKeyAtom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSecretKey(value);
-    const result = secretKeySchema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title="Secret Key"
-      description="The secret key for the S3 bucket."
-      error={error}
-    >
-      <Input id={id} value={secretKey} onChange={handleChange} />
-    </FormEntry>
-  );
-}
+const secretKeyAtom = atomWithStorage("s3ip:s3:secretKey", "");
 
 // MARK: usePathStyle
-const forcePathStyleAtom = atomWithStorage(
-  "s3ip:s3:usePathStyle",
-  false,
-  withStorageValidator((value): value is boolean => {
-    return z.boolean().safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-function UsePathStyle() {
-  const [usePathStyle, setUsePathStyle] = useAtom(forcePathStyleAtom);
-  const id = useId();
-  return (
-    <div className="grid grid-cols-[1fr_auto] gap-2">
-      <div className="grid gap-2">
-        <Label htmlFor={id}>Use Path Style API</Label>
-        <p className="text-muted-foreground text-sm">
-          使用 end.point/bucket/key 而不是 bucket.end.point/key
-        </p>
-      </div>
-      <Switch
-        id={id}
-        checked={usePathStyle}
-        onCheckedChange={setUsePathStyle}
-      />
-    </div>
-  );
-}
+const forcePathStyleAtom = atomWithStorage("s3ip:s3:usePathStyle", false);
 
 // MARK: Public url
 const publicUrlSchema = z.url();
-const publicUrlAtom = atomWithStorage(
-  "s3ip:s3:publicUrl",
-  "",
-  withStorageValidator((value): value is string => {
-    return publicUrlSchema.safeParse(value).success;
-  })(createJSONStorage()),
-  { getOnInit: true },
-);
-function PublicUrl() {
-  const [publicUrl, setPublicUrl] = useAtom(publicUrlAtom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPublicUrl(value);
-    const result = publicUrlSchema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title="Public URL"
-      description="The public URL of the S3 bucket."
-      error={error}
-    >
-      <Input id={id} value={publicUrl} onChange={handleChange} />
-    </FormEntry>
-  );
-}
+const publicUrlAtom = atomWithStorage("s3ip:s3:publicUrl", "");
 
 type S3ValidationResult = { valid: true } | { valid: false; error: string };
 
@@ -316,9 +139,7 @@ function S3Validation() {
               <p
                 className={`text-sm font-medium ${error.valid ? "text-green-600" : "text-red-600"}`}
               >
-                {error.valid
-                  ? "✓ S3 settings are valid"
-                  : `⚠ ${error.error || "S3 settings are not valid"}`}
+                {error.valid ? "✓ S3 settings are valid" : `⚠ ${error.error}`}
               </p>
             </div>
           )}
@@ -331,7 +152,7 @@ function S3Validation() {
   );
 }
 
-export const s3SettingsSchema = z.object({
+const s3SettingsSchema = z.object({
   endpoint: endpointSchema,
   bucket: bucketNameSchema,
   region: regionSchema,
@@ -341,14 +162,14 @@ export const s3SettingsSchema = z.object({
   pubUrl: publicUrlSchema,
 });
 
-export type S3Settings = z.infer<typeof s3SettingsSchema>;
+type S3Options = z.infer<typeof s3SettingsSchema>;
 
 /**
  * This atom is used to store the S3 settings.
  *
  * Does not guarantee the settings are valid. To get the valid settings, use `useS3SettingsValue`.
  */
-export const s3SettingsAtom = atom<S3Settings>((get) => ({
+const s3SettingsAtom = atom<S3Options>((get) => ({
   endpoint: get(endpointAtom),
   bucket: get(bucketNameAtom),
   region: get(regionAtom),
@@ -358,20 +179,17 @@ export const s3SettingsAtom = atom<S3Settings>((get) => ({
   pubUrl: get(publicUrlAtom),
 }));
 
-export const setS3SettingsAtom = atom(
-  null,
-  (_get, set, settings: S3Settings) => {
-    set(endpointAtom, settings.endpoint);
-    set(bucketNameAtom, settings.bucket);
-    set(regionAtom, settings.region);
-    set(accessKeyAtom, settings.accKeyId);
-    set(secretKeyAtom, settings.secretAccKey);
-    set(forcePathStyleAtom, settings.forcePathStyle);
-    set(publicUrlAtom, settings.pubUrl);
-  },
-);
+const setS3SettingsAtom = atom(null, (_get, set, settings: S3Options) => {
+  set(endpointAtom, settings.endpoint);
+  set(bucketNameAtom, settings.bucket);
+  set(regionAtom, settings.region);
+  set(accessKeyAtom, settings.accKeyId);
+  set(secretKeyAtom, settings.secretAccKey);
+  set(forcePathStyleAtom, settings.forcePathStyle);
+  set(publicUrlAtom, settings.pubUrl);
+});
 
-export const validS3SettingsAtom = atom((get) => {
+const validS3SettingsAtom = atom((get) => {
   const settings = get(s3SettingsAtom);
   const result = s3SettingsSchema.safeParse(settings);
   if (result.success) {
@@ -379,3 +197,54 @@ export const validS3SettingsAtom = atom((get) => {
   }
   return undefined;
 });
+
+function SettingsInputEntry<K>({
+  title,
+  description,
+  atom,
+  schema,
+  input,
+}: {
+  title: string;
+  description: string;
+  atom: WritableAtom<K, [SetStateAction<K>], void>;
+  schema: z.ZodType<K>;
+  input?: (v: K, set: (v: K) => void, id: string) => JSX.Element;
+}) {
+  if (!input) {
+    input = (v, s, id) => (
+      <Input
+        id={id}
+        value={v as string}
+        onChange={(e) => s(e.target.value as K)}
+        placeholder="https://example.com"
+      />
+    );
+  }
+  const [value, setValue] = useAtom(atom);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const handleChange = (value: K) => {
+    setValue(value);
+    const result = schema.safeParse(value);
+    if (result.success) {
+      setError(undefined);
+    } else {
+      setError(z.prettifyError(result.error));
+    }
+  };
+  const id = useId();
+  return (
+    <FormEntry id={id} title={title} description={description} error={error}>
+      {input(value, handleChange, id)}
+    </FormEntry>
+  );
+}
+
+export {
+  S3Settings,
+  s3SettingsSchema,
+  s3SettingsAtom,
+  setS3SettingsAtom,
+  validS3SettingsAtom,
+  type S3Options,
+};

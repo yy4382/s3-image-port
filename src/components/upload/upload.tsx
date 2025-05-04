@@ -36,7 +36,7 @@ import McUpload from "~icons/mingcute/file-upload-line";
 import McLoading from "~icons/mingcute/loading-3-line";
 import McUpload2 from "~icons/mingcute/upload-2-line";
 import McCopy from "~icons/mingcute/copy-2-line";
-import { validS3SettingsAtom, type S3Settings } from "../settings/s3";
+import { validS3SettingsAtom, type S3Options } from "../settings/s3";
 import { uploadSettingsAtom } from "../settings/upload";
 import key2Url from "@/utils/key2Url";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -131,7 +131,7 @@ const uploadAtom = atom(
     get,
     set,
     atom: PrimitiveAtom<UploadObject>,
-    s3Settings: S3Settings,
+    s3Settings: S3Options,
   ) => {
     await set(processAtom, atom);
     const file = get(atom);
@@ -159,7 +159,7 @@ const uploadAtom = atom(
   },
 );
 
-const uploadAll = atom(null, async (get, set, s3Settings: S3Settings) => {
+const uploadAll = atom(null, async (get, set, s3Settings: S3Options) => {
   await Promise.all(
     get(fileAtomAtoms).map(async (atom) => {
       await set(uploadAtom, atom, s3Settings);
