@@ -15,7 +15,7 @@ import {
   type CompressOption,
 } from "@/utils/imageCompress";
 import ImageS3Client from "@/utils/ImageS3Client";
-import { Link } from "@tanstack/react-router";
+import { ClientOnly, Link } from "@tanstack/react-router";
 import {
   atom,
   useAtom,
@@ -211,20 +211,22 @@ export function Upload() {
         </CardContent>
       </Card>
 
-      {!s3Settings && (
-        <Alert className="mb-4" variant="destructive">
-          <AlertTitle>S3 incorrectly configured</AlertTitle>
-          <AlertDescription>
-            <p>
-              Your S3 settings are not valid. Please configure them in the{" "}
-              <Link to="/settings/s3" className="underline">
-                settings page
-              </Link>
-              .
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
+      <ClientOnly>
+        {!s3Settings && (
+          <Alert className="mb-4" variant="destructive">
+            <AlertTitle>S3 incorrectly configured</AlertTitle>
+            <AlertDescription>
+              <p>
+                Your S3 settings are not valid. Please configure them in the{" "}
+                <Link to="/settings/s3" className="underline">
+                  settings page
+                </Link>
+                .
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
+      </ClientOnly>
 
       {fileAtoms.length > 0 && (
         <div className="mb-4 flex justify-between items-center">

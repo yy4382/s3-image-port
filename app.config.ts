@@ -33,12 +33,9 @@ export default defineConfig({
     },
   },
   tsr: {
-    appDirectory: "src"
+    appDirectory: "src",
   },
   server: {
-    prerender: {
-      routes: ["/"],
-      crawlLinks: true,
-    }
-  }
+    static: true,
+  },
 });
