@@ -50,15 +50,11 @@ const setProfileAtom = atom(null, (get, set, profile: Profile) => {
 const currentProfileNameAtom = atomWithStorage<string>(
   "s3ip:profile:currentName",
   "Default",
-  undefined,
-  { getOnInit: true },
 );
 
 const profilesAtom = atomWithStorage<Record<string, Profile>>(
   "s3ip:profile:profiles",
   {},
-  undefined,
-  { getOnInit: true },
 );
 
 // need to check if the profile name already exists
@@ -106,6 +102,12 @@ const duplicateProfileAtom = atom(
     }
   },
 );
+const hasChangeAtom = atom((get) => {
+  return !deepEqual(
+    get(profilesAtom)[get(currentProfileNameAtom)],
+    get(profileAtom),
+  );
+});
 
 function Profiles() {
   const profile = useAtomValue(profileAtom);
@@ -114,14 +116,7 @@ function Profiles() {
   const loadProfile = useSetAtom(loadProfileAtom);
   const renameProfile = useSetAtom(renameProfileAtom);
   const duplicateProfile = useSetAtom(duplicateProfileAtom);
-
-  // useEffect(() => {
-  //   // Sync the current profile with the profiles atom
-  //   const newProfiles = { ...profiles, [currentProfileName]: profile };
-  //   setProfiles(newProfiles);
-  // }, [profile, currentProfileName, profiles, setProfiles]);
-
-  const hasChanges = !deepEqual(profiles[currentProfileName], profile);
+  const hasChanges = useAtomValue(hasChangeAtom);
 
   return (
     <div className="space-y-6">

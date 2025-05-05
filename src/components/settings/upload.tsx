@@ -34,7 +34,6 @@ const keyTemplateAtom = atomWithStorage(
   withStorageValidator((value): value is string => {
     return keyTemplateSchema.safeParse(value).success;
   })(createJSONStorage()),
-  { getOnInit: true },
 );
 
 function KeyTemplateWrapper() {

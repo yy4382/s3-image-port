@@ -31,3 +31,5 @@ docs/.vitepress/cache
 stats.html
 
 coverage/
+
+.vinxi
