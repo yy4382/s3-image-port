@@ -14,7 +14,7 @@ function Index() {
 
 import { buttonVariants } from "@/components/ui/button";
 
-export default async function HomePage() {
+export default function HomePage() {
   return (
     <div className="max-w-4xl lg:max-w-[60rem] w-full flex flex-grow flex-col justify-center mx-auto h-full">
       <div className="w-full flex flex-col md:flex-row gap-12 lg:gap-16 items-center px-8 md:px-0">
