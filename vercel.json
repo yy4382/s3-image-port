@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "redirects": [{ "source": "/(.*)", "destination": "/", "statusCode": 200 }]
+  "redirects": [{ "source": "/(.*)", "destination": "/index.html", "statusCode": 200 }]
 }
