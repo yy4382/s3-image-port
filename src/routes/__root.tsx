@@ -13,7 +13,10 @@ import setThemeJs from "@/utils/headSetTheme?raw";
 
 export const Route = createRootRoute({
   head: () => ({
-    links: [{ rel: "stylesheet", href: indexCss }],
+    links: [
+      { rel: "stylesheet", href: indexCss },
+      { rel: "icon", href: "favicon.svg" },
+    ],
     scripts: [
       {
         children: setThemeJs,
@@ -32,6 +35,12 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  notFoundComponent: () => (
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h1 className="text-4xl font-bold">404</h1>
+      <p className="text-lg">Page not found</p>
+    </div>
+  ),
   component: () => (
     <html suppressHydrationWarning>
       <head>
