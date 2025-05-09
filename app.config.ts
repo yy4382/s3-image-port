@@ -51,14 +51,27 @@ export default defineConfig({
           );
         }
       },
-      "prerender:done": (route) => {
-        console.log(route.prerenderedRoutes);
-        const staticDir = path.resolve(process.cwd(), ".vercel/output/static");
+      close: () => {
+        const vercelConfig = path.resolve(
+          process.cwd(),
+          ".vercel/output/config.json",
+        );
         try {
-          const files = fs.readdirSync(staticDir, { recursive: true });
-          console.log("Files in .vercel/output/static:", files);
+          const config = fs.readFileSync(vercelConfig, "utf-8");
+          const parsedConfig = JSON.parse(config);
+          const overrides = parsedConfig["overrides"];
+          const modifiedOverrides = Object.entries(overrides).filter((item) => {
+            if (item[0] === "404.html") {
+              return false;
+            }
+            return true;
+          });
+          const newOverrides = Object.fromEntries(modifiedOverrides);
+          parsedConfig["overrides"] = newOverrides;
+          fs.writeFileSync(vercelConfig, JSON.stringify(parsedConfig, null, 2));
+          console.log("Vercel config updated successfully.");
         } catch (err) {
-          console.error("Error reading .vercel/output/static:", err);
+          console.error("Error reading Vercel config:", err);
         }
       },
     },
