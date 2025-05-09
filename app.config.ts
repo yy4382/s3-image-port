@@ -43,7 +43,8 @@ export default defineConfig({
     },
     static: true,
     hooks: {
-      "prerender:generate": (route) => {
+      "prerender:generate": (route, nitro) => {
+        if (!nitro.options.prerender.autoSubfolderIndex) return;
         if (route.route === "/404") {
           route.fileName = route.fileName?.replace(
             "404/index.html",
@@ -52,10 +53,18 @@ export default defineConfig({
         }
       },
       close: () => {
+        // Remove the 404.html override from the Vercel config
+        // This is a workaround for the Vercel issue where the 404.html override
+        // is not removed when the prerendering is done
+        // and the app is deployed to Vercel.
         const vercelConfig = path.resolve(
           process.cwd(),
           ".vercel/output/config.json",
         );
+        // check if the file exists
+        if (!fs.existsSync(vercelConfig)) {
+          return;
+        }
         try {
           const config = fs.readFileSync(vercelConfig, "utf-8");
           const parsedConfig = JSON.parse(config);
