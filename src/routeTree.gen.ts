@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as UploadImport } from './routes/upload'
 import { Route as GalleryImport } from './routes/gallery'
 import { Route as AboutImport } from './routes/about'
+import { Route as R404Import } from './routes/404'
 import { Route as SettingsRouteImport } from './routes/settings/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as SettingsIndexImport } from './routes/settings/index'
@@ -38,6 +39,12 @@ const GalleryRoute = GalleryImport.update({
 const AboutRoute = AboutImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const R404Route = R404Import.update({
+  id: '/404',
+  path: '/404',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -93,6 +100,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404Import
       parentRoute: typeof rootRoute
     }
     '/about': {
@@ -170,6 +184,7 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/settings': typeof SettingsRouteRouteWithChildren
+  '/404': typeof R404Route
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
   '/upload': typeof UploadRoute
@@ -181,6 +196,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
   '/upload': typeof UploadRoute
@@ -194,6 +210,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/settings': typeof SettingsRouteRouteWithChildren
+  '/404': typeof R404Route
   '/about': typeof AboutRoute
   '/gallery': typeof GalleryRoute
   '/upload': typeof UploadRoute
@@ -208,6 +225,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/settings'
+    | '/404'
     | '/about'
     | '/gallery'
     | '/upload'
@@ -218,6 +236,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/404'
     | '/about'
     | '/gallery'
     | '/upload'
@@ -229,6 +248,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/settings'
+    | '/404'
     | '/about'
     | '/gallery'
     | '/upload'
@@ -242,6 +262,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
+  R404Route: typeof R404Route
   AboutRoute: typeof AboutRoute
   GalleryRoute: typeof GalleryRoute
   UploadRoute: typeof UploadRoute
@@ -250,6 +271,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
+  R404Route: R404Route,
   AboutRoute: AboutRoute,
   GalleryRoute: GalleryRoute,
   UploadRoute: UploadRoute,
@@ -267,6 +289,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/settings",
+        "/404",
         "/about",
         "/gallery",
         "/upload"
@@ -283,6 +306,9 @@ export const routeTree = rootRoute
         "/settings/upload",
         "/settings/"
       ]
+    },
+    "/404": {
+      "filePath": "404.tsx"
     },
     "/about": {
       "filePath": "about.tsx"
