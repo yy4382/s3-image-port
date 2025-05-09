@@ -3,6 +3,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import Icons from "unplugin-icons/vite";
 import { visualizer } from "rollup-plugin-visualizer";
+import path from "path";
+import fs from "fs";
 
 export default defineConfig({
   react: {
@@ -51,6 +53,13 @@ export default defineConfig({
       },
       "prerender:done": (route) => {
         console.log(route.prerenderedRoutes);
+        const staticDir = path.resolve(process.cwd(), ".vercel/output/static");
+        try {
+          const files = fs.readdirSync(staticDir, { recursive: true });
+          console.log("Files in .vercel/output/static:", files);
+        } catch (err) {
+          console.error("Error reading .vercel/output/static:", err);
+        }
       },
     },
   },
