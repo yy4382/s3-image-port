@@ -36,6 +36,9 @@ export default defineConfig({
     appDirectory: "src",
   },
   server: {
+    prerender: {
+      routes: ["/", "/404"],
+    },
     static: true,
   },
 });
