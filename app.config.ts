@@ -43,12 +43,14 @@ export default defineConfig({
     hooks: {
       "prerender:generate": (route) => {
         if (route.route === "/404") {
-          console.log(route);
           route.fileName = route.fileName?.replace(
             "404/index.html",
             "404.html",
           );
         }
+      },
+      "prerender:done": (route) => {
+        console.log(route.prerenderedRoutes);
       },
     },
   },
