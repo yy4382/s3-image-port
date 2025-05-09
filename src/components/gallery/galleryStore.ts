@@ -1,0 +1,281 @@
+import type { Photo } from "@/utils/ImageS3Client";
+import { atomWithStorage } from "jotai/utils";
+import z from "zod";
+import {
+  compareAsc,
+  compareDesc,
+  isAfter,
+  isBefore,
+  sub,
+  type Duration,
+} from "date-fns";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { validS3SettingsAtom } from "../settings/s3";
+import { useCallback } from "react";
+import { toast } from "sonner";
+import ImageS3Client from "@/utils/ImageS3Client";
+import atomWithDebounce from "@/utils/atomWithDebounce";
+
+export const TIME_RANGES = [
+  {
+    duration: { days: 7 },
+    type: "7d",
+  },
+  {
+    duration: { days: 14 },
+    type: "14d",
+  },
+  {
+    duration: { days: 30 },
+    type: "30d",
+  },
+  {
+    duration: { months: 3 },
+    type: "3m",
+  },
+  {
+    duration: { months: 6 },
+    type: "6m",
+  },
+  {
+    duration: { years: 1 },
+    type: "1y",
+  },
+] as const satisfies { duration: Duration; type: string }[];
+
+const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
+
+export const photoListDisplayOptionsSchema = z.object({
+  searchTerm: z.string().default("").catch(""),
+  prefix: z.string().optional().catch(undefined),
+  dateRangeType: z
+    .enum([...TIME_RANGES.map((t) => t.type)])
+    .or(z.tuple([z.coerce.date().nullable(), z.coerce.date().nullable()]))
+    .default([null, null])
+    .catch([null, null]),
+  sortBy: z.enum(["key", "date"]).catch("key").default("key"),
+  sortOrder: z.enum(["asc", "desc"]).catch("desc").default("desc"),
+});
+
+export type PhotoListDisplayOptions = z.infer<
+  typeof photoListDisplayOptionsSchema
+>;
+
+export const photoListDisplayOptionsAtom = atom<PhotoListDisplayOptions>(
+  photoListDisplayOptionsSchema.parse({}),
+);
+
+export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());
+
+export function getTimeRange(
+  type: PhotoListDisplayOptions["dateRangeType"],
+): [Date | null, Date | null] {
+  if (Array.isArray(type)) {
+    return type;
+  } else {
+    const selectedRange = TIME_RANGES.find((r) => r.type === type);
+    if (selectedRange) {
+      const to = new Date();
+      const from = sub(to, selectedRange.duration);
+      return [from, to];
+    }
+  }
+  return [null, null];
+}
+
+export const availablePrefixesAtom = atom<
+  { name: string; hierarchy: number }[]
+>((get) => {
+  const photos = get(photosAtom);
+  const prefixes = new Set(
+    photos.flatMap((photo) => {
+      const parts = photo.Key.split("/");
+      return parts
+        .slice(0, -1)
+        .map((_, index) => parts.slice(0, index + 1).join("/"));
+    }),
+  );
+  return [...Array.from(prefixes), ""]
+    .map((prefix) => {
+      const hierarchy = prefix.split("/").length - 1;
+      return { name: prefix, hierarchy };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
+
+export const filteredPhotosAtom = atom<Photo[]>((get) => {
+  const photos = get(photosAtom);
+  const displayOptions = get(photoListDisplayOptionsAtom);
+  const displayedPhotos = photos
+    .filter((photo) => {
+      if (
+        displayOptions.searchTerm &&
+        !photo.Key.includes(displayOptions.searchTerm)
+      ) {
+        return false;
+      }
+      if (
+        displayOptions.prefix !== undefined &&
+        !photo.Key.startsWith(displayOptions.prefix)
+      ) {
+        return false;
+      }
+      if (displayOptions.prefix === "" && photo.Key.includes("/")) {
+        return false;
+      }
+      const [from, to] = getTimeRange(displayOptions.dateRangeType);
+      if (from && isBefore(photo.LastModified, from)) {
+        return false;
+      }
+      if (to && isAfter(photo.LastModified, to)) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (displayOptions.sortBy === "key") {
+        return displayOptions.sortOrder === "asc"
+          ? a.Key.localeCompare(b.Key)
+          : b.Key.localeCompare(a.Key);
+      } else {
+        return displayOptions.sortOrder === "asc"
+          ? compareAsc(a.LastModified, b.LastModified)
+          : compareDesc(a.LastModified, b.LastModified);
+      }
+    });
+  return displayedPhotos;
+});
+
+export const filteredPhotosCountAtom = atom((get) => {
+  return get(filteredPhotosAtom).length;
+});
+
+export const PER_PAGE = 12;
+export const currentPageAtom = atom(1);
+
+export const showingPhotosAtom = atom<Photo[]>((get) => {
+  const start = (get(currentPageAtom) - 1) * PER_PAGE;
+  const end = start + PER_PAGE;
+  return get(filteredPhotosAtom).slice(start, end);
+});
+
+export const { debouncedValueAtom: containerWidthAtom } = atomWithDebounce(
+  600,
+  100,
+);
+const DEFAULT_IMAGE_SIZE: [number, number] = [384, 208];
+const GAP_PX = 8;
+
+const naturalSizesAtom = atom<Map<string, [number, number]>>(new Map());
+
+export const setNaturalSizesAtom = atom(
+  null,
+  (get, set, inputAction: [string, [number, number]]) => {
+    const validated = z
+      .tuple([z.string(), z.tuple([z.number(), z.number()])])
+      .safeParse(inputAction);
+    if (!validated.success) {
+      return;
+    }
+    const action = validated.data;
+    const map = get(naturalSizesAtom);
+    if (action) {
+      map.set(action[0], action[1]);
+      set(naturalSizesAtom, new Map(map));
+    }
+  },
+);
+
+const scaleCurGroup = (
+  curGroup: [number, number][],
+  wrapperWidth: number,
+  gap: number,
+) => {
+  const widthWithoutGap = wrapperWidth - gap * (curGroup.length - 1);
+  const scale =
+    widthWithoutGap / curGroup.reduce((acc, [width]) => acc + width, 0);
+  curGroup.forEach(([width, height], index) => {
+    curGroup[index] = [width * scale, height * scale];
+  });
+};
+
+export const photoSizeAtom = atom((get) => {
+  const originalSizes = get(showingPhotosAtom).map((photo) => {
+    const size = get(naturalSizesAtom).get(photo.Key);
+    if (size) {
+      const ratio = size[0] / size[1];
+      return [DEFAULT_IMAGE_SIZE[1] * ratio, DEFAULT_IMAGE_SIZE[1]] as [
+        number,
+        number,
+      ];
+    }
+    return DEFAULT_IMAGE_SIZE;
+  });
+
+  const grouped: [number, number][][] = [];
+  let curWidth = 0;
+  let curGroup: [number, number][] = [];
+  originalSizes.forEach((size) => {
+    if (curWidth + size[0] + GAP_PX > get(containerWidthAtom)) {
+      // this element will be put in the next line
+      // scale & push the current line
+      scaleCurGroup(curGroup, get(containerWidthAtom), GAP_PX);
+      grouped.push(curGroup);
+      // start a new line (reset cur* variables)
+      curWidth = 0;
+      curGroup = [];
+    }
+    curWidth += size[0] + GAP_PX;
+    curGroup.push(size);
+  });
+  if (curGroup.length > 1)
+    // if there is only one element in the last line, no need to scale
+    scaleCurGroup(curGroup, get(containerWidthAtom), GAP_PX);
+  grouped.push(curGroup);
+  return grouped.flat();
+});
+
+export const selectModeAtom = atom((get) => {
+  const selected = get(selectedPhotosAtom);
+  return selected.size > 0;
+});
+
+export const useFetchPhotoList = () => {
+  const setPhotos = useSetAtom(photosAtom);
+  const s3Settings = useAtomValue(validS3SettingsAtom);
+
+  const fetchPhotoList = useCallback(async () => {
+    if (!s3Settings) {
+      toast.error("S3 settings not found");
+      console.error("S3 settings not found");
+      return;
+    }
+    let photos: Photo[];
+    try {
+      photos = await new ImageS3Client(s3Settings).list();
+    } catch (error) {
+      toast.error("Failed to fetch photos");
+      console.error("Failed to fetch photos", error);
+      return;
+    }
+    if (photos) {
+      toast.message("Fetched photos");
+      console.log("Fetched photos", photos.length);
+      setPhotos(photos);
+    } else {
+      toast.error("Failed to fetch photos");
+      console.error("Failed to fetch photos");
+    }
+  }, [s3Settings, setPhotos]);
+
+  return fetchPhotoList;
+};
+
+// used when changing profiles
+export const resetGalleryStateAtom = atom(null, (_get, set) => {
+  set(photosAtom, []);
+  set(selectedPhotosAtom, new Set<string>());
+  set(photoListDisplayOptionsAtom, photoListDisplayOptionsSchema.parse({})); // Reset display options
+  set(currentPageAtom, 1);
+  set(naturalSizesAtom, new Map());
+});

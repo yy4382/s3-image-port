@@ -3,7 +3,7 @@ import { s3SettingsAtom, s3SettingsSchema, setS3SettingsAtom } from "./s3";
 import { atomWithStorage } from "jotai/utils";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button } from "@/components/ui/button";
-import { resetGalleryStateAtom } from "../gallery/gallery";
+import { resetGalleryStateAtom } from "../gallery/galleryStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
