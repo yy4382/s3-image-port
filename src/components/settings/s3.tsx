@@ -24,30 +24,35 @@ function S3Settings() {
           description="S3 endpoint"
           atom={endpointAtom}
           schema={endpointSchema}
+          placeholder="https://example.com"
         />
         <SettingsInputEntry
           title="Bucket Name"
           description="S3 bucket name"
           atom={bucketNameAtom}
           schema={bucketNameSchema}
+          placeholder="my-bucket"
         />
         <SettingsInputEntry
           title="Region"
           description="S3 region"
           atom={regionAtom}
           schema={regionSchema}
+          placeholder="us-east-1"
         />
         <SettingsInputEntry
           title="Access Key"
           description="S3 access key"
           atom={accessKeyAtom}
           schema={accessKeySchema}
+          placeholder="XXXXXXXX"
         />
         <SettingsInputEntry
           title="Secret Key"
           description="S3 secret key"
           atom={secretKeyAtom}
           schema={secretKeySchema}
+          placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         />
         <SettingsInputEntry
           title="Use Path Style API"
@@ -67,6 +72,7 @@ function S3Settings() {
           description="S3 public URL"
           schema={publicUrlSchema}
           atom={publicUrlAtom}
+          placeholder="https://example1.com"
         />
         <S3Validation />
       </div>
@@ -203,12 +209,14 @@ function SettingsInputEntry<K>({
   description,
   atom,
   schema,
+  placeholder,
   input,
 }: {
   title: string;
   description: string;
   atom: WritableAtom<K, [SetStateAction<K>], void>;
   schema: z.ZodType<K>;
+  placeholder?: string;
   input?: (v: K, set: (v: K) => void, id: string) => JSX.Element;
 }) {
   if (!input) {
@@ -217,7 +225,7 @@ function SettingsInputEntry<K>({
         id={id}
         value={v as string}
         onChange={(e) => s(e.target.value as K)}
-        placeholder="https://example.com"
+        placeholder={placeholder}
       />
     );
   }
