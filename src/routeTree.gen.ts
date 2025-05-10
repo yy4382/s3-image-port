@@ -10,164 +10,164 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as UploadImport } from './routes/upload'
-import { Route as GalleryImport } from './routes/gallery'
-import { Route as AboutImport } from './routes/about'
-import { Route as R404Import } from './routes/404'
-import { Route as SettingsRouteImport } from './routes/settings/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as SettingsIndexImport } from './routes/settings/index'
-import { Route as SettingsUploadImport } from './routes/settings/upload'
-import { Route as SettingsS3Import } from './routes/settings/s3'
-import { Route as SettingsProfileImport } from './routes/settings/profile'
+import { Route as rootRoute } from "./routes/__root";
+import { Route as UploadImport } from "./routes/upload";
+import { Route as GalleryImport } from "./routes/gallery";
+import { Route as AboutImport } from "./routes/about";
+import { Route as R404Import } from "./routes/404";
+import { Route as SettingsRouteImport } from "./routes/settings/route";
+import { Route as IndexImport } from "./routes/index";
+import { Route as SettingsIndexImport } from "./routes/settings/index";
+import { Route as SettingsUploadImport } from "./routes/settings/upload";
+import { Route as SettingsS3Import } from "./routes/settings/s3";
+import { Route as SettingsProfileImport } from "./routes/settings/profile";
 
 // Create/Update Routes
 
 const UploadRoute = UploadImport.update({
-  id: '/upload',
-  path: '/upload',
+  id: "/upload",
+  path: "/upload",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const GalleryRoute = GalleryImport.update({
-  id: '/gallery',
-  path: '/gallery',
+  id: "/gallery",
+  path: "/gallery",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
+  id: "/about",
+  path: "/about",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const R404Route = R404Import.update({
-  id: '/404',
-  path: '/404',
+  id: "/404",
+  path: "/404",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const SettingsRouteRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+  id: "/settings",
+  path: "/settings",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const SettingsIndexRoute = SettingsIndexImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => SettingsRouteRoute,
-} as any)
+} as any);
 
 const SettingsUploadRoute = SettingsUploadImport.update({
-  id: '/upload',
-  path: '/upload',
+  id: "/upload",
+  path: "/upload",
   getParentRoute: () => SettingsRouteRoute,
-} as any)
+} as any);
 
 const SettingsS3Route = SettingsS3Import.update({
-  id: '/s3',
-  path: '/s3',
+  id: "/s3",
+  path: "/s3",
   getParentRoute: () => SettingsRouteRoute,
-} as any)
+} as any);
 
 const SettingsProfileRoute = SettingsProfileImport.update({
-  id: '/profile',
-  path: '/profile',
+  id: "/profile",
+  path: "/profile",
   getParentRoute: () => SettingsRouteRoute,
-} as any)
+} as any);
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/404': {
-      id: '/404'
-      path: '/404'
-      fullPath: '/404'
-      preLoaderRoute: typeof R404Import
-      parentRoute: typeof rootRoute
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
-      parentRoute: typeof rootRoute
-    }
-    '/gallery': {
-      id: '/gallery'
-      path: '/gallery'
-      fullPath: '/gallery'
-      preLoaderRoute: typeof GalleryImport
-      parentRoute: typeof rootRoute
-    }
-    '/upload': {
-      id: '/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof UploadImport
-      parentRoute: typeof rootRoute
-    }
-    '/settings/profile': {
-      id: '/settings/profile'
-      path: '/profile'
-      fullPath: '/settings/profile'
-      preLoaderRoute: typeof SettingsProfileImport
-      parentRoute: typeof SettingsRouteImport
-    }
-    '/settings/s3': {
-      id: '/settings/s3'
-      path: '/s3'
-      fullPath: '/settings/s3'
-      preLoaderRoute: typeof SettingsS3Import
-      parentRoute: typeof SettingsRouteImport
-    }
-    '/settings/upload': {
-      id: '/settings/upload'
-      path: '/upload'
-      fullPath: '/settings/upload'
-      preLoaderRoute: typeof SettingsUploadImport
-      parentRoute: typeof SettingsRouteImport
-    }
-    '/settings/': {
-      id: '/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof SettingsIndexImport
-      parentRoute: typeof SettingsRouteImport
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/settings": {
+      id: "/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof SettingsRouteImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/404": {
+      id: "/404";
+      path: "/404";
+      fullPath: "/404";
+      preLoaderRoute: typeof R404Import;
+      parentRoute: typeof rootRoute;
+    };
+    "/about": {
+      id: "/about";
+      path: "/about";
+      fullPath: "/about";
+      preLoaderRoute: typeof AboutImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/gallery": {
+      id: "/gallery";
+      path: "/gallery";
+      fullPath: "/gallery";
+      preLoaderRoute: typeof GalleryImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/upload": {
+      id: "/upload";
+      path: "/upload";
+      fullPath: "/upload";
+      preLoaderRoute: typeof UploadImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/settings/profile": {
+      id: "/settings/profile";
+      path: "/profile";
+      fullPath: "/settings/profile";
+      preLoaderRoute: typeof SettingsProfileImport;
+      parentRoute: typeof SettingsRouteImport;
+    };
+    "/settings/s3": {
+      id: "/settings/s3";
+      path: "/s3";
+      fullPath: "/settings/s3";
+      preLoaderRoute: typeof SettingsS3Import;
+      parentRoute: typeof SettingsRouteImport;
+    };
+    "/settings/upload": {
+      id: "/settings/upload";
+      path: "/upload";
+      fullPath: "/settings/upload";
+      preLoaderRoute: typeof SettingsUploadImport;
+      parentRoute: typeof SettingsRouteImport;
+    };
+    "/settings/": {
+      id: "/settings/";
+      path: "/";
+      fullPath: "/settings/";
+      preLoaderRoute: typeof SettingsIndexImport;
+      parentRoute: typeof SettingsRouteImport;
+    };
   }
 }
 
 // Create and export the route tree
 
 interface SettingsRouteRouteChildren {
-  SettingsProfileRoute: typeof SettingsProfileRoute
-  SettingsS3Route: typeof SettingsS3Route
-  SettingsUploadRoute: typeof SettingsUploadRoute
-  SettingsIndexRoute: typeof SettingsIndexRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute;
+  SettingsS3Route: typeof SettingsS3Route;
+  SettingsUploadRoute: typeof SettingsUploadRoute;
+  SettingsIndexRoute: typeof SettingsIndexRoute;
 }
 
 const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
@@ -175,97 +175,97 @@ const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
   SettingsS3Route: SettingsS3Route,
   SettingsUploadRoute: SettingsUploadRoute,
   SettingsIndexRoute: SettingsIndexRoute,
-}
+};
 
 const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
   SettingsRouteRouteChildren,
-)
+);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRouteRouteWithChildren
-  '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/gallery': typeof GalleryRoute
-  '/upload': typeof UploadRoute
-  '/settings/profile': typeof SettingsProfileRoute
-  '/settings/s3': typeof SettingsS3Route
-  '/settings/upload': typeof SettingsUploadRoute
-  '/settings/': typeof SettingsIndexRoute
+  "/": typeof IndexRoute;
+  "/settings": typeof SettingsRouteRouteWithChildren;
+  "/404": typeof R404Route;
+  "/about": typeof AboutRoute;
+  "/gallery": typeof GalleryRoute;
+  "/upload": typeof UploadRoute;
+  "/settings/profile": typeof SettingsProfileRoute;
+  "/settings/s3": typeof SettingsS3Route;
+  "/settings/upload": typeof SettingsUploadRoute;
+  "/settings/": typeof SettingsIndexRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/gallery': typeof GalleryRoute
-  '/upload': typeof UploadRoute
-  '/settings/profile': typeof SettingsProfileRoute
-  '/settings/s3': typeof SettingsS3Route
-  '/settings/upload': typeof SettingsUploadRoute
-  '/settings': typeof SettingsIndexRoute
+  "/": typeof IndexRoute;
+  "/404": typeof R404Route;
+  "/about": typeof AboutRoute;
+  "/gallery": typeof GalleryRoute;
+  "/upload": typeof UploadRoute;
+  "/settings/profile": typeof SettingsProfileRoute;
+  "/settings/s3": typeof SettingsS3Route;
+  "/settings/upload": typeof SettingsUploadRoute;
+  "/settings": typeof SettingsIndexRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRouteRouteWithChildren
-  '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/gallery': typeof GalleryRoute
-  '/upload': typeof UploadRoute
-  '/settings/profile': typeof SettingsProfileRoute
-  '/settings/s3': typeof SettingsS3Route
-  '/settings/upload': typeof SettingsUploadRoute
-  '/settings/': typeof SettingsIndexRoute
+  __root__: typeof rootRoute;
+  "/": typeof IndexRoute;
+  "/settings": typeof SettingsRouteRouteWithChildren;
+  "/404": typeof R404Route;
+  "/about": typeof AboutRoute;
+  "/gallery": typeof GalleryRoute;
+  "/upload": typeof UploadRoute;
+  "/settings/profile": typeof SettingsProfileRoute;
+  "/settings/s3": typeof SettingsS3Route;
+  "/settings/upload": typeof SettingsUploadRoute;
+  "/settings/": typeof SettingsIndexRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/settings'
-    | '/404'
-    | '/about'
-    | '/gallery'
-    | '/upload'
-    | '/settings/profile'
-    | '/settings/s3'
-    | '/settings/upload'
-    | '/settings/'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/settings"
+    | "/404"
+    | "/about"
+    | "/gallery"
+    | "/upload"
+    | "/settings/profile"
+    | "/settings/s3"
+    | "/settings/upload"
+    | "/settings/";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/404'
-    | '/about'
-    | '/gallery'
-    | '/upload'
-    | '/settings/profile'
-    | '/settings/s3'
-    | '/settings/upload'
-    | '/settings'
+    | "/"
+    | "/404"
+    | "/about"
+    | "/gallery"
+    | "/upload"
+    | "/settings/profile"
+    | "/settings/s3"
+    | "/settings/upload"
+    | "/settings";
   id:
-    | '__root__'
-    | '/'
-    | '/settings'
-    | '/404'
-    | '/about'
-    | '/gallery'
-    | '/upload'
-    | '/settings/profile'
-    | '/settings/s3'
-    | '/settings/upload'
-    | '/settings/'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/settings"
+    | "/404"
+    | "/about"
+    | "/gallery"
+    | "/upload"
+    | "/settings/profile"
+    | "/settings/s3"
+    | "/settings/upload"
+    | "/settings/";
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
-  R404Route: typeof R404Route
-  AboutRoute: typeof AboutRoute
-  GalleryRoute: typeof GalleryRoute
-  UploadRoute: typeof UploadRoute
+  IndexRoute: typeof IndexRoute;
+  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren;
+  R404Route: typeof R404Route;
+  AboutRoute: typeof AboutRoute;
+  GalleryRoute: typeof GalleryRoute;
+  UploadRoute: typeof UploadRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -275,11 +275,11 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   GalleryRoute: GalleryRoute,
   UploadRoute: UploadRoute,
-}
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {
