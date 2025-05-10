@@ -13,9 +13,7 @@ import type { PhotoListDisplayOptions } from "../galleryStore";
 
 interface SortPopoverContentProps {
   currentDisplayOptions: PhotoListDisplayOptions;
-  handleUpdate: (
-    update: Partial<PhotoListDisplayOptions>,
-  ) => void;
+  handleUpdate: (update: Partial<PhotoListDisplayOptions>) => void;
   isSearchActive: boolean;
   setSortPopoverOpen: (open: boolean) => void;
 }
