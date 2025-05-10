@@ -8,6 +8,7 @@
     "build": "vinxi build",
     "generate": "vinxi build",
     "lint": "eslint .",
+    "test": "vitest --run",
     "preview": "vinxi serve --dir .output/public",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
