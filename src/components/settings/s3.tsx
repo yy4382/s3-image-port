@@ -4,15 +4,26 @@ import { Switch } from "@/components/ui/switch";
 import { getAndParseCors } from "@/utils/testS3Settings";
 import {
   useAtom,
-  atom,
   useAtomValue,
   type WritableAtom,
   type SetStateAction,
 } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 import { useId, useState, type JSX } from "react";
 import * as z from "zod";
 import { Button } from "../ui/button";
+import { focusAtom } from "jotai-optics";
+import {
+  s3SettingsAtom,
+  s3SettingsSchema,
+  type S3Options,
+} from "./settingsStore";
+
+function getS3Part(opt: keyof S3Options) {
+  return {
+    schema: s3SettingsSchema.shape[opt],
+    atom: focusAtom(s3SettingsAtom, (optic) => optic.prop(opt)),
+  };
+}
 
 function S3Settings() {
   return (
@@ -20,58 +31,51 @@ function S3Settings() {
       <div className="grid gap-6">
         <h2 className="text-2xl font-bold">S3</h2>
         <SettingsInputEntry
+          {...getS3Part("endpoint")}
           title="Endpoint"
           description="S3 endpoint"
-          atom={endpointAtom}
-          schema={endpointSchema}
           placeholder="https://example.com"
         />
         <SettingsInputEntry
+          {...getS3Part("bucket")}
           title="Bucket Name"
           description="S3 bucket name"
-          atom={bucketNameAtom}
-          schema={bucketNameSchema}
           placeholder="my-bucket"
         />
         <SettingsInputEntry
+          {...getS3Part("region")}
           title="Region"
           description="S3 region"
-          atom={regionAtom}
-          schema={regionSchema}
           placeholder="us-east-1"
         />
         <SettingsInputEntry
+          {...getS3Part("accKeyId")}
           title="Access Key"
           description="S3 access key"
-          atom={accessKeyAtom}
-          schema={accessKeySchema}
           placeholder="XXXXXXXX"
         />
         <SettingsInputEntry
+          {...getS3Part("secretAccKey")}
           title="Secret Key"
           description="S3 secret key"
-          atom={secretKeyAtom}
-          schema={secretKeySchema}
           placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         />
         <SettingsInputEntry
+          {...getS3Part("forcePathStyle")}
           title="Use Path Style API"
           description="Force using path style API"
-          atom={forcePathStyleAtom}
-          schema={z.boolean()}
           input={(v, s, id) => (
             <Switch
               id={id}
-              checked={v}
+              checked={v as boolean}
               onCheckedChange={(checked) => s(checked)}
             />
           )}
         />
         <SettingsInputEntry
+          {...getS3Part("pubUrl")}
           title="Public URL"
           description="S3 public URL"
-          schema={publicUrlSchema}
-          atom={publicUrlAtom}
           placeholder="https://example1.com"
         />
         <S3Validation />
@@ -79,33 +83,6 @@ function S3Settings() {
     </div>
   );
 }
-
-// MARK: Endpoint
-const endpointSchema = z.url();
-const endpointAtom = atomWithStorage("s3ip:s3:endpoint", "");
-
-// MARK: Bucket Name
-const bucketNameSchema = z.string().min(1);
-const bucketNameAtom = atomWithStorage("s3ip:s3:bucketName", "");
-
-// MARK: Region
-const regionSchema = z.string().min(1);
-const regionAtom = atomWithStorage("s3ip:s3:region", "");
-
-// MARK: Access Key
-const accessKeySchema = z.string().min(1);
-const accessKeyAtom = atomWithStorage("s3ip:s3:accessKey", "");
-
-// MARK: Secret Key
-const secretKeySchema = z.string().min(1);
-const secretKeyAtom = atomWithStorage("s3ip:s3:secretKey", "");
-
-// MARK: usePathStyle
-const forcePathStyleAtom = atomWithStorage("s3ip:s3:usePathStyle", false);
-
-// MARK: Public url
-const publicUrlSchema = z.url();
-const publicUrlAtom = atomWithStorage("s3ip:s3:publicUrl", "");
 
 type S3ValidationResult = { valid: true } | { valid: false; error: string };
 
@@ -158,52 +135,6 @@ function S3Validation() {
   );
 }
 
-const s3SettingsSchema = z.object({
-  endpoint: endpointSchema,
-  bucket: bucketNameSchema,
-  region: regionSchema,
-  accKeyId: accessKeySchema,
-  secretAccKey: secretKeySchema,
-  forcePathStyle: z.boolean(),
-  pubUrl: publicUrlSchema,
-});
-
-type S3Options = z.infer<typeof s3SettingsSchema>;
-
-/**
- * This atom is used to store the S3 settings.
- *
- * Does not guarantee the settings are valid. To get the valid settings, use `useS3SettingsValue`.
- */
-const s3SettingsAtom = atom<S3Options>((get) => ({
-  endpoint: get(endpointAtom),
-  bucket: get(bucketNameAtom),
-  region: get(regionAtom),
-  accKeyId: get(accessKeyAtom),
-  secretAccKey: get(secretKeyAtom),
-  forcePathStyle: get(forcePathStyleAtom),
-  pubUrl: get(publicUrlAtom),
-}));
-
-const setS3SettingsAtom = atom(null, (_get, set, settings: S3Options) => {
-  set(endpointAtom, settings.endpoint);
-  set(bucketNameAtom, settings.bucket);
-  set(regionAtom, settings.region);
-  set(accessKeyAtom, settings.accKeyId);
-  set(secretKeyAtom, settings.secretAccKey);
-  set(forcePathStyleAtom, settings.forcePathStyle);
-  set(publicUrlAtom, settings.pubUrl);
-});
-
-const validS3SettingsAtom = atom((get) => {
-  const settings = get(s3SettingsAtom);
-  const result = s3SettingsSchema.safeParse(settings);
-  if (result.success) {
-    return result.data;
-  }
-  return undefined;
-});
-
 function SettingsInputEntry<K>({
   title,
   description,
@@ -248,11 +179,4 @@ function SettingsInputEntry<K>({
   );
 }
 
-export {
-  S3Settings,
-  s3SettingsSchema,
-  s3SettingsAtom,
-  setS3SettingsAtom,
-  validS3SettingsAtom,
-  type S3Options,
-};
+export { S3Settings };

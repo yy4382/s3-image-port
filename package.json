@@ -9,7 +9,6 @@
     "generate": "vinxi build",
     "lint": "eslint .",
     "preview": "vinxi serve --dir .output/public",
-    
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -45,6 +44,7 @@
     "immer": "^10.1.1",
     "jotai": "^2.12.3",
     "jotai-devtools": "^0.12.0",
+    "jotai-optics": "^0.4.0",
     "lucide-react": "^0.503.0",
     "mime": "^4.0.7",
     "next-themes": "^0.4.6",

@@ -1,4 +1,4 @@
-import type { S3Options } from "@/components/settings/s3";
+import type { S3Options } from "@/components/settings/settingsStore";
 function addTrailingSlash(url: string) {
   if (url.endsWith("/")) {
     return url;
