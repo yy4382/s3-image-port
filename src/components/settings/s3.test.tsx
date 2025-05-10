@@ -1,12 +1,16 @@
+/**
+ * TODO this test is severely outdated, it should be rewritten
+ */
+
 import { render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { S3Settings } from "./s3";
 import {
-  S3Settings,
   s3SettingsAtom,
   validS3SettingsAtom,
   // originalLocalStorage,
-} from "./s3";
+} from "./settingsStore";
 import { createStore, Provider, useAtomValue } from "jotai";
 import type { PropsWithChildren } from "react";
 

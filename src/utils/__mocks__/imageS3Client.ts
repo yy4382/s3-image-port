@@ -6,7 +6,7 @@ import {
   HeadObjectCommand,
   type GetBucketCorsCommandOutput,
 } from "@aws-sdk/client-s3";
-import type { S3Options } from "@/components/settings/s3";
+import type { S3Options } from "@/components/settings/settingsStore";
 import key2Url from "../key2Url";
 
 export type Photo = {

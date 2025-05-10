@@ -36,8 +36,11 @@ import McUpload from "~icons/mingcute/file-upload-line";
 import McLoading from "~icons/mingcute/loading-3-line";
 import McUpload2 from "~icons/mingcute/upload-2-line";
 import McCopy from "~icons/mingcute/copy-2-line";
-import { validS3SettingsAtom, type S3Options } from "../settings/s3";
-import { uploadSettingsAtom } from "../settings/upload";
+import {
+  validS3SettingsAtom,
+  type S3Options,
+  uploadSettingsAtom,
+} from "../settings/settingsStore";
 import key2Url from "@/utils/key2Url";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 

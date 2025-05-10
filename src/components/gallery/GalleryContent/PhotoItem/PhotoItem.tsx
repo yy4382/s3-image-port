@@ -21,7 +21,7 @@ import MingcuteInformationLine from "~icons/mingcute/information-line";
 import McKey2Line from "~icons/mingcute/key-2-line";
 import McTimeLine from "~icons/mingcute/time-line";
 import McZoomIn from "~icons/mingcute/zoom-in-line";
-import { validS3SettingsAtom } from "@/components/settings/s3";
+import { validS3SettingsAtom } from "@/components/settings/settingsStore";
 import { selectModeAtom, selectedPhotosAtom } from "../../galleryStore";
 import { setNaturalSizesAtom } from "../../galleryStore";
 

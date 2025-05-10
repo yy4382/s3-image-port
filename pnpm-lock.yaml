@@ -98,6 +98,9 @@ importers:
       jotai-devtools:
         specifier: ^0.12.0
         version: 0.12.0(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(redux@5.0.1)(storybook@8.6.12(prettier@3.5.3))
+      jotai-optics:
+        specifier: ^0.4.0
+        version: 0.4.0(jotai@2.12.3(@types/react@19.1.2)(react@19.1.0))(optics-ts@2.4.1)
       lucide-react:
         specifier: ^0.503.0
         version: 0.503.0(react@19.1.0)
@@ -5277,6 +5280,12 @@ packages:
     peerDependencies:
       react: '>=17.0.0'
 
+  jotai-optics@0.4.0:
+    resolution: {integrity: sha512-osbEt9AgS55hC4YTZDew2urXKZkaiLmLqkTS/wfW5/l0ib8bmmQ7kBXSFaosV6jDDWSp00IipITcJARFHdp42g==}
+    peerDependencies:
+      jotai: '>=2.0.0'
+      optics-ts: '>=2.0.0'
+
   jotai@2.12.3:
     resolution: {integrity: sha512-DpoddSkmPGXMFtdfnoIHfueFeGP643nqYUWC6REjUcME+PG2UkAtYnLbffRDw3OURI9ZUTcRWkRGLsOvxuWMCg==}
     engines: {node: '>=12.20.0'}
@@ -5861,6 +5870,9 @@ packages:
   open@8.4.2:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
+
+  optics-ts@2.4.1:
+    resolution: {integrity: sha512-HaYzMHvC80r7U/LqAd4hQyopDezC60PO2qF5GuIwALut2cl5rK1VWHsqTp0oqoJJWjiv6uXKqsO+Q2OO0C3MmQ==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -13493,6 +13505,11 @@ snapshots:
       - redux
       - storybook
 
+  jotai-optics@0.4.0(jotai@2.12.3(@types/react@19.1.2)(react@19.1.0))(optics-ts@2.4.1):
+    dependencies:
+      jotai: 2.12.3(@types/react@19.1.2)(react@19.1.0)
+      optics-ts: 2.4.1
+
   jotai@2.12.3(@types/react@19.1.2)(react@19.1.0):
     optionalDependencies:
       '@types/react': 19.1.2
@@ -14138,6 +14155,8 @@ snapshots:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
+
+  optics-ts@2.4.1: {}
 
   optionator@0.9.4:
     dependencies:

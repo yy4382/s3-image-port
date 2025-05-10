@@ -1,7 +1,5 @@
-import * as z from "zod";
-import { s3SettingsAtom, s3SettingsSchema, setS3SettingsAtom } from "./s3";
 import { atomWithStorage } from "jotai/utils";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { resetGalleryStateAtom } from "../gallery/galleryStore";
 import {
@@ -10,167 +8,171 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import deepEqual from "deep-equal";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import McAlertDiamond from "~icons/mingcute/alert-diamond-line";
-import McCheckCircle from "~icons/mingcute/check-circle-line";
 import McPencil from "~icons/mingcute/pencil-2-line";
 import McCopy from "~icons/mingcute/copy-2-line";
-import {
-  setUploadSettingsAtom,
-  uploadSettingsAtom,
-  uploadSettingsSchema,
-} from "./upload";
 import { ClientOnly } from "@tanstack/react-router";
+import type { Options as Profile } from "./settingsStore";
+import { optionsAtom } from "./settingsStore";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
-const _profileSchema = z.object({
-  // TODO maybe add a version field to the profile
-  s3: s3SettingsSchema,
-  upload: uploadSettingsSchema,
-});
+const CURRENT_PROFILE = "CURRENT";
 
-type Profile = z.infer<typeof _profileSchema>;
-
-const profileAtom = atom<Profile>((get) => {
-  const s3Settings = get(s3SettingsAtom);
-  const uploadSettings = get(uploadSettingsAtom);
-  return {
-    s3: s3Settings,
-    upload: uploadSettings,
-  } as Profile;
-});
-const setProfileAtom = atom(null, (get, set, profile: Profile) => {
-  const s3Settings = get(s3SettingsAtom);
-  const newS3Settings = { ...s3Settings, ...profile.s3 };
-  set(setS3SettingsAtom, newS3Settings);
-  const uploadSettings = get(uploadSettingsAtom);
-  const newUploadSettings = { ...uploadSettings, ...profile.upload };
-  set(setUploadSettingsAtom, newUploadSettings);
-});
-
-const currentProfileNameAtom = atomWithStorage<string>(
-  "s3ip:profile:currentName",
-  "Default",
-);
-
-const profilesAtom = atomWithStorage<Record<string, Profile>>(
-  "s3ip:profile:profiles",
-  {},
-);
+// The current profile is not stored in here!
+const profileListAtom = atomWithStorage<
+  [string, Profile | typeof CURRENT_PROFILE][]
+>("s3ip:profile:profiles", [["Default", CURRENT_PROFILE]]);
 
 // need to check if the profile name already exists
 const renameProfileAtom = atom(
   null,
   (get, set, { oldName, newName }: { oldName: string; newName: string }) => {
     if (oldName === newName) {
+      toast.error("New name is the same as the old name");
       return;
     }
-    if (get(profilesAtom)[newName]) {
+    // check if the new name already exists
+    if (get(profileListAtom).find((p) => p[0] === newName)) {
+      toast.error("Profile name already exists");
       return;
     }
-    set(currentProfileNameAtom, newName);
-    const newProfiles: Record<string, Profile> = {
-      ...get(profilesAtom),
-      [newName]: get(profilesAtom)[oldName],
-    };
-    delete newProfiles[oldName];
-    set(profilesAtom, newProfiles);
+    const newProfiles = get(profileListAtom).map((p) => {
+      if (p[0] === oldName) {
+        return [newName, p[1]] as [string, Profile | typeof CURRENT_PROFILE];
+      }
+      return p;
+    });
+    set(profileListAtom, newProfiles);
   },
 );
 
 const loadProfileAtom = atom(null, (get, set, name: string) => {
-  const profiles = get(profilesAtom);
-  const profile = profiles[name];
-  if (profile) {
-    set(currentProfileNameAtom, name);
-    set(setProfileAtom, profile);
+  const profiles = get(profileListAtom);
+  let profileToBeLoad: Profile | typeof CURRENT_PROFILE | undefined;
+  let currentProfileName: string | undefined;
+  let currentProfileIndex = -1;
+  let targetProfileIndex = -1;
 
-    // also, reset gallery state
+  // Single pass to find all required information
+  for (let i = 0; i < profiles.length; i++) {
+    const [profileName, profile] = profiles[i];
+    if (profileName === name) {
+      profileToBeLoad = profile;
+      targetProfileIndex = i;
+    }
+    if (profile === CURRENT_PROFILE) {
+      currentProfileName = profileName;
+      currentProfileIndex = i;
+    }
+  }
+
+  if (!profileToBeLoad || !currentProfileName || currentProfileIndex === -1) {
+    toast.error("Failed to load profile. Please try again.");
+    return;
+  }
+
+  if (profileToBeLoad !== CURRENT_PROFILE) {
+    const currentProfile = get(optionsAtom);
+
+    // Create new profiles array with updated values
+    const newProfiles = [...profiles];
+    newProfiles[currentProfileIndex] = [currentProfileName, currentProfile];
+    newProfiles[targetProfileIndex] = [name, CURRENT_PROFILE];
+
+    set(optionsAtom, profileToBeLoad);
+    set(profileListAtom, newProfiles);
     set(resetGalleryStateAtom);
+
+    toast.success(`Profile "${name}" loaded successfully.`);
   }
 });
 
 const duplicateProfileAtom = atom(
   null,
-  (get, set, { name, newName }: { name: string; newName: string }) => {
-    const profiles = get(profilesAtom);
-    const profile = profiles[name];
-    if (profile) {
-      set(profilesAtom, {
-        ...profiles,
-        [newName]: profile,
-      });
+  (
+    get,
+    set,
+    {
+      name,
+      newName: initialNewNameSuggestion,
+    }: { name: string; newName: string },
+  ) => {
+    const profiles = get(profileListAtom);
+
+    // Find a unique name
+    let newName = initialNewNameSuggestion;
+    let counter = 1;
+    while (profiles.find((p) => p[0] === newName)) {
+      counter++;
+      newName = `${name} (copy ${counter})`;
+    }
+
+    // Get the profile to duplicate
+    const profileToDuplicate =
+      profiles.find((p) => p[0] === name)?.[1] === CURRENT_PROFILE
+        ? get(optionsAtom)
+        : profiles.find((p) => p[0] === name)?.[1];
+
+    if (profileToDuplicate) {
+      set(profileListAtom, [...profiles, [newName, profileToDuplicate]]);
+      toast.success(`Profile "${name}" duplicated as "${newName}".`);
+    } else {
+      toast.error("Failed to duplicate profile.");
     }
   },
 );
-const hasChangeAtom = atom((get) => {
-  return !deepEqual(
-    get(profilesAtom)[get(currentProfileNameAtom)],
-    get(profileAtom),
-  );
+
+const deleteProfileAtom = atom(null, (get, set, nameToDelete: string) => {
+  const currentProfiles = get(profileListAtom);
+  const profileToDelete = currentProfiles.find((p) => p[0] === nameToDelete);
+
+  if (!profileToDelete) {
+    toast.error("Profile not found for deletion.");
+    return;
+  }
+
+  if (profileToDelete[1] === CURRENT_PROFILE) {
+    toast.error("Cannot delete the currently active profile.");
+    return;
+  }
+
+  const newProfiles = currentProfiles.filter((p) => p[0] !== nameToDelete);
+  set(profileListAtom, newProfiles);
+  toast.success(`Profile "${nameToDelete}" deleted.`);
 });
 
 function Profiles() {
-  const profile = useAtomValue(profileAtom);
-  const currentProfileName = useAtomValue(currentProfileNameAtom);
-  const [profiles, setProfiles] = useAtom(profilesAtom);
+  const [profiles, setProfiles] = useAtom(profileListAtom);
   const loadProfile = useSetAtom(loadProfileAtom);
   const renameProfile = useSetAtom(renameProfileAtom);
   const duplicateProfile = useSetAtom(duplicateProfileAtom);
-  const hasChanges = useAtomValue(hasChangeAtom);
+  const deleteProfile = useSetAtom(deleteProfileAtom);
+
+  useEffect(() => {
+    if (profiles.length === 0) {
+      setProfiles([["Default", CURRENT_PROFILE]]);
+    }
+  }, [profiles.length, setProfiles]);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Profiles</h2>
-        <ClientOnly>
-          {hasChanges && (
-            <Button
-              onClick={() => {
-                setProfiles({
-                  ...profiles,
-                  [currentProfileName]: profile,
-                });
-              }}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Save Changes
-            </Button>
-          )}
-        </ClientOnly>
       </div>
 
       <ClientOnly>
-        {hasChanges ? (
-          <Alert variant="destructive">
-            <McAlertDiamond className="h-5 w-5 text-amber-400" />
-            <AlertTitle>Some setting changes not saved to profiles</AlertTitle>
-            <AlertDescription>
-              <p>
-                You have unsaved changes to the{" "}
-                <strong>{currentProfileName}</strong> profile
-              </p>
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <Alert>
-            <McCheckCircle className="h-5 w-5" />
-            <AlertDescription>
-              Your profile is up to date with the current settings
-            </AlertDescription>
-          </Alert>
-        )}
-
         <div className="grid gap-4 md:grid-cols-2">
-          {Object.keys(profiles).map((name) => (
+          {profiles.map(([name, profile]) => (
             <div
               key={name}
-              className={`border border-border rounded-lg p-4 ${name === currentProfileName ? "ring-2 ring-primary" : ""}`}
+              className={`border border-border rounded-lg p-4 ${
+                profile === CURRENT_PROFILE ? "ring-2 ring-primary" : ""
+              }`}
             >
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-medium text-lg">
                   {name}
-                  {name === currentProfileName && (
+                  {profile === CURRENT_PROFILE && (
                     <span className="ml-2 bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-1 rounded">
                       Current
                     </span>
@@ -221,7 +223,7 @@ function Profiles() {
                   Duplicate
                 </Button>
 
-                {name !== currentProfileName && (
+                {profile !== CURRENT_PROFILE && (
                   <>
                     <Button
                       onClick={() => loadProfile(name)}
@@ -233,9 +235,7 @@ function Profiles() {
                       variant="destructive"
                       className="flex-1"
                       onClick={() => {
-                        const newProfiles = { ...profiles };
-                        delete newProfiles[name];
-                        setProfiles(newProfiles);
+                        deleteProfile(name);
                       }}
                     >
                       Delete
