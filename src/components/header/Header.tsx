@@ -7,12 +7,13 @@ import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
 import McUpload from "~icons/mingcute/upload-3-fill";
 import McPhotoAlbum from "~icons/mingcute/photo-album-2-fill";
 import McSettings from "~icons/mingcute/settings-3-fill";
+import { LinkWithActive } from "../misc/link-with-active";
 
 // Placeholder hooks and components - replace with actual implementations
 // You'll need libraries for color mode, breakpoints, and UI components (like Popover, Button, Icon)
 
 const Header: React.FC = () => {
-  const getNavLinkClass = `flex flex-row items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 [&.active]:text-primary`;
+  const getNavLinkClass = `flex flex-row items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 data-[status=active]:text-primary`;
 
   return (
     <div className="w-full">
@@ -39,18 +40,18 @@ const Header: React.FC = () => {
         </Link>
 
         <div className="flex space-x-4 font-semibold flex-1 justify-center">
-          <Link href="/upload" className={getNavLinkClass}>
+          <LinkWithActive href="/upload" className={getNavLinkClass}>
             <McPhotoAlbum className="text-2xl md:text-base" />
             <span className="hidden md:block">Upload</span>
-          </Link>
-          <Link href="/gallery" className={getNavLinkClass}>
+          </LinkWithActive>
+          <LinkWithActive href="/gallery" className={getNavLinkClass}>
             <McUpload className="text-2xl md:text-base" />
             <span className="hidden md:block">Photos</span>
-          </Link>
-          <Link href="/settings" className={getNavLinkClass}>
+          </LinkWithActive>
+          <LinkWithActive href="/settings" className={getNavLinkClass}>
             <McSettings className="text-2xl md:text-base" />
             <span className="hidden md:block">Settings</span>{" "}
-          </Link>
+          </LinkWithActive>
         </div>
 
         <div className="flex-1 flex justify-end items-center gap-1">
