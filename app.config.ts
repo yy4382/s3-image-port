@@ -5,6 +5,7 @@ import Icons from "unplugin-icons/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 import path from "path";
 import fs from "fs";
+import { paraglideVitePlugin as paraglide } from "@inlang/paraglide-js";
 
 export default defineConfig({
   react: {
@@ -20,6 +21,20 @@ export default defineConfig({
       }),
       tailwindcss(),
       Icons({ compiler: "jsx", jsx: "react" }),
+      paraglide({
+        project: "./project.inlang",
+        outdir: "./src/paraglide",
+        strategy: ["url", "baseLocale"],
+        urlPatterns: [
+          {
+            pattern: "/:path(.*)?",
+            localized: [
+              ["zh", "/zh/:path(.*)?"],
+              ["en", "/:path(.*)?"],
+            ],
+          },
+        ],
+      }),
       visualizer({ gzipSize: true }),
     ],
     optimizeDeps: {
@@ -39,7 +54,7 @@ export default defineConfig({
   },
   server: {
     prerender: {
-      routes: ["/", "/404"],
+      routes: ["/", "/zh", "/404"],
     },
     static: true,
     hooks: {

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
-    "build": "vinxi build",
+    "build": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && vinxi build",
     "generate": "vinxi build",
     "lint": "eslint .",
     "test": "vitest --run",
@@ -58,12 +58,14 @@
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^4.1.5",
     "ulid": "^3.0.0",
+    "urlpattern-polyfill": "^10.1.0",
     "uuid": "^11.1.0",
     "zod": "4.0.0-beta.20250505T195954"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@iconify-json/mingcute": "^1.2.3",
+    "@inlang/paraglide-js": "2.0.12",
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "@tanstack/react-start": "^1.119.2",

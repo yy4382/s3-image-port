@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/header/theme-provider";
 import Header from "@/components/header/Header";
 import indexCss from "@/index.css?url";
 import setThemeJs from "@/utils/headSetTheme?raw";
+import { getLocale } from "@/paraglide/runtime";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -37,7 +38,7 @@ export const Route = createRootRoute({
   }),
 
   component: () => (
-    <html suppressHydrationWarning>
+    <html suppressHydrationWarning lang={getLocale()}>
       <head>
         <HeadContent />
       </head>

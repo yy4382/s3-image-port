@@ -3,12 +3,21 @@ import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { enableMapSet } from "immer";
 enableMapSet();
 
+// TODO remove this once vercel supports node 24
+import { URLPattern } from "urlpattern-polyfill";
+// @ts-expect-error URLPattern is not supported in current node version
+if (!globalThis.URLPattern) {
+  // @ts-expect-error URLPattern is not supported in current node version
+  globalThis.URLPattern = URLPattern;
+}
+
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
+import { getRouterBasepath } from "./utils/routeBasePath";
 
 // Create a new router instance
 // const router = createRouter({ routeTree });
-export function createRouter() {
+export function createRouter(pathname?: string) {
   const router = createTanStackRouter({
     // TODO make this look nicer
     defaultNotFoundComponent: () => (
@@ -19,6 +28,7 @@ export function createRouter() {
     ),
     routeTree,
     scrollRestoration: true,
+    basepath: getRouterBasepath(pathname),
   });
 
   return router;

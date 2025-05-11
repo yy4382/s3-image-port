@@ -7,6 +7,7 @@ import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
 import McUpload from "~icons/mingcute/upload-3-fill";
 import McPhotoAlbum from "~icons/mingcute/photo-album-2-fill";
 import McSettings from "~icons/mingcute/settings-3-fill";
+import { m } from "@/paraglide/messages";
 
 // Placeholder hooks and components - replace with actual implementations
 // You'll need libraries for color mode, breakpoints, and UI components (like Popover, Button, Icon)
@@ -39,15 +40,15 @@ const Header: React.FC = () => {
         <div className="flex space-x-4 font-semibold flex-1 justify-center">
           <Link to="/upload" className={getNavLinkClass}>
             <McPhotoAlbum className="text-2xl md:text-base" />
-            <span className="hidden md:block">Upload</span>
+            <span className="hidden md:block">{m.navbar_upload()}</span>
           </Link>
           <Link to="/gallery" className={getNavLinkClass}>
             <McUpload className="text-2xl md:text-base" />
-            <span className="hidden md:block">Photos</span>
+            <span className="hidden md:block">{m.navbar_photos()}</span>
           </Link>
           <Link to="/settings" className={getNavLinkClass}>
             <McSettings className="text-2xl md:text-base" />
-            <span className="hidden md:block">Settings</span>{" "}
+            <span className="hidden md:block">{m.navbar_settings()}</span>{" "}
           </Link>
         </div>
 

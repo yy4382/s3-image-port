@@ -26,7 +26,8 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["unplugin-icons/types/react"]
+    "types": ["unplugin-icons/types/react"],
+    "allowJs": true,
   },
   "include": ["src"]
 }
