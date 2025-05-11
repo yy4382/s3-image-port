@@ -1,8 +1,8 @@
+import { LinkWithActive } from "@/components/misc/link-with-active";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
   return (
@@ -21,7 +21,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 function SettingPageSwitcher() {
   return (
     <div className="flex flex-col gap-2">
-      <Link
+      <LinkWithActive
         href="/settings/profile"
         className={cn(
           buttonVariants({ variant: "ghost" }),
@@ -29,8 +29,8 @@ function SettingPageSwitcher() {
         )}
       >
         Profiles
-      </Link>
-      <Link
+      </LinkWithActive>
+      <LinkWithActive
         href="/settings/s3"
         className={cn(
           buttonVariants({ variant: "ghost" }),
@@ -38,16 +38,16 @@ function SettingPageSwitcher() {
         )}
       >
         S3
-      </Link>
-      <Link
+      </LinkWithActive>
+      <LinkWithActive
         href="/settings/upload"
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",
         )}
       >
-        Upload{" "}
-      </Link>
+        Upload
+      </LinkWithActive>
     </div>
   );
 }
