@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { XIcon } from "lucide-react";
-import type { PhotoListDisplayOptions } from "../galleryStore";
+import type { DisplayOptions } from "./displayControlStore";
 
 interface SortPopoverContentProps {
-  currentDisplayOptions: PhotoListDisplayOptions;
-  handleUpdate: (update: Partial<PhotoListDisplayOptions>) => void;
+  currentDisplayOptions: DisplayOptions;
+  handleUpdate: (update: Partial<DisplayOptions>) => void;
   isSearchActive: boolean;
   setSortPopoverOpen: (open: boolean) => void;
 }

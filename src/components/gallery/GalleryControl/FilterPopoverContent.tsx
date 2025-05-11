@@ -2,10 +2,8 @@ import { Button } from "@/components/ui/button";
 import { useAtomsDebugValue } from "jotai-devtools";
 import { Label } from "@/components/ui/label";
 import { Check, ChevronsUpDown, XIcon } from "lucide-react";
-import {
-  availablePrefixesAtom,
-  type PhotoListDisplayOptions,
-} from "../galleryStore";
+import { availablePrefixesAtom } from "../galleryStore";
+import { type DisplayOptions } from "./displayControlStore";
 import { DateRangePickerPopover } from "./DateRangePickerPopover";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
@@ -25,8 +23,8 @@ import {
 import { cn } from "@/lib/utils";
 
 interface FilterPopoverContentProps {
-  currentDisplayOptions: PhotoListDisplayOptions;
-  handleUpdate: (update: Partial<PhotoListDisplayOptions>) => void;
+  currentDisplayOptions: DisplayOptions;
+  handleUpdate: (update: Partial<DisplayOptions>) => void;
   setFilterPopoverOpen: (open: boolean) => void;
 }
 

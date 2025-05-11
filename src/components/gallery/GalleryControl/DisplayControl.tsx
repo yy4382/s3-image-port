@@ -1,11 +1,15 @@
 "use client";
 
-import { useAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useAtom, useSetAtom } from "jotai";
+import { useEffect, useMemo, useState } from "react";
 import {
-  photoListDisplayOptionsAtom,
-  type PhotoListDisplayOptions,
-} from "../galleryStore";
+  displayOptionsToSearchParams,
+  displayOptionsAtom,
+  displayOptionsSchema,
+  searchParamsToDisplayOptions,
+  type DisplayOptions,
+} from "./displayControlStore";
+import { currentPageAtom } from "../galleryStore";
 import { Input } from "../../ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -18,40 +22,42 @@ import { FilterIcon, ArrowUpDownIcon } from "lucide-react";
 import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function useSearchDisplayOptions() {
-  // const search = useSearchParams();
-  // const navigate = useRouter();
-  // const setCurrentPage = useSetAtom(currentPageAtom);
-  // const handleUpdate = (
-  //   update:
-  //     | Partial<PhotoListDisplayOptions>
-  //     | ((prev: PhotoListDisplayOptions) => Partial<PhotoListDisplayOptions>),
-  // ) => {
-  //   let newSearchOptions: Partial<PhotoListDisplayOptions>;
-  //   if (typeof update === "function") {
-  //     newSearchOptions = update(photoListDisplayOptionsSchema.parse(search));
-  //   } else {
-  //     newSearchOptions = update;
-  //   }
-  //   setCurrentPage(1);
-  //   navigate({
-  //     search: (prev) => ({ ...prev, ...newSearchOptions }),
-  //   });
-  // };
-  // const setOgDisplayOptions = useSetAtom(photoListDisplayOptionsAtom);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // useEffect(() => {
-  //   setOgDisplayOptions(photoListDisplayOptionsSchema.parse(search));
-  // }, [search, setOgDisplayOptions]);
+  const setCurrentPage = useSetAtom(currentPageAtom);
+  const [search, setSearch] = useAtom(displayOptionsAtom);
 
-  const [search, setSearch] = useAtom(photoListDisplayOptionsAtom);
+  const handleUpdate = (
+    update:
+      | Partial<DisplayOptions>
+      | ((prev: DisplayOptions) => Partial<DisplayOptions>),
+  ) => {
+    let newSearchOptions: Partial<DisplayOptions>;
+    if (typeof update === "function") {
+      newSearchOptions = update(displayOptionsSchema.parse(search));
+    } else {
+      newSearchOptions = update;
+    }
+    setCurrentPage(1);
+    const newSearchParams = displayOptionsToSearchParams({
+      ...search,
+      ...newSearchOptions,
+    });
+    router.replace(`?${newSearchParams.toString()}`);
+  };
+
+  useEffect(() => {
+    const parsedSearchParams = searchParamsToDisplayOptions(searchParams);
+    setSearch(parsedSearchParams);
+  }, [setSearch, searchParams]);
 
   return {
     search,
-    handleUpdate: (update: Partial<PhotoListDisplayOptions>) => {
-      setSearch((prev) => ({ ...prev, ...update }));
-    },
+    handleUpdate,
   };
 }
 

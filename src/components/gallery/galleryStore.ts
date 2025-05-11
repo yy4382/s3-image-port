@@ -6,7 +6,6 @@ import {
   compareDesc,
   isAfter,
   isBefore,
-  sub,
   type Duration,
 } from "date-fns";
 import { atom, useAtomValue, useSetAtom } from "jotai";
@@ -15,73 +14,42 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import ImageS3Client from "@/utils/ImageS3Client";
 import atomWithDebounce from "@/utils/atomWithDebounce";
+import {
+  displayOptionsDefault,
+  getTimeRange,
+} from "./GalleryControl/displayControlStore";
+import { displayOptionsAtom } from "./GalleryControl/displayControlStore";
 
-export const TIME_RANGES = [
-  {
-    duration: { days: 7 },
-    type: "7d",
-  },
-  {
-    duration: { days: 14 },
-    type: "14d",
-  },
-  {
-    duration: { days: 30 },
-    type: "30d",
-  },
-  {
-    duration: { months: 3 },
-    type: "3m",
-  },
-  {
-    duration: { months: 6 },
-    type: "6m",
-  },
-  {
-    duration: { years: 1 },
-    type: "1y",
-  },
-] as const satisfies { duration: Duration; type: string }[];
+export function timeRangesGetter(): { duration: Duration; type: string }[] {
+  return [
+    {
+      duration: { days: 7 },
+      type: "7d",
+    },
+    {
+      duration: { days: 14 },
+      type: "14d",
+    },
+    {
+      duration: { days: 30 },
+      type: "30d",
+    },
+    {
+      duration: { months: 3 },
+      type: "3m",
+    },
+    {
+      duration: { months: 6 },
+      type: "6m",
+    },
+    {
+      duration: { years: 1 },
+      type: "1y",
+    },
+  ];
+}
 
 const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
-
-export const photoListDisplayOptionsSchema = z.object({
-  searchTerm: z.string().default("").catch(""),
-  prefix: z.string().optional().catch(undefined),
-  dateRangeType: z
-    .enum([...TIME_RANGES.map((t) => t.type)])
-    .or(z.tuple([z.coerce.date().nullable(), z.coerce.date().nullable()]))
-    .default([null, null])
-    .catch([null, null]),
-  sortBy: z.enum(["key", "date"]).catch("key").default("key"),
-  sortOrder: z.enum(["asc", "desc"]).catch("desc").default("desc"),
-});
-
-export type PhotoListDisplayOptions = z.infer<
-  typeof photoListDisplayOptionsSchema
->;
-
-export const photoListDisplayOptionsAtom = atom<PhotoListDisplayOptions>(
-  photoListDisplayOptionsSchema.parse({}),
-);
-
-export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());
-
-export function getTimeRange(
-  type: PhotoListDisplayOptions["dateRangeType"],
-): [Date | null, Date | null] {
-  if (Array.isArray(type)) {
-    return type;
-  } else {
-    const selectedRange = TIME_RANGES.find((r) => r.type === type);
-    if (selectedRange) {
-      const to = new Date();
-      const from = sub(to, selectedRange.duration);
-      return [from, to];
-    }
-  }
-  return [null, null];
-}
 
 export const availablePrefixesAtom = atom<
   { name: string; hierarchy: number }[]
@@ -105,7 +73,7 @@ export const availablePrefixesAtom = atom<
 
 export const filteredPhotosAtom = atom<Photo[]>((get) => {
   const photos = get(photosAtom);
-  const displayOptions = get(photoListDisplayOptionsAtom);
+  const displayOptions = get(displayOptionsAtom);
   const displayedPhotos = photos
     .filter((photo) => {
       if (
@@ -235,6 +203,7 @@ export const photoSizeAtom = atom((get) => {
   return grouped.flat();
 });
 
+export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());
 export const selectModeAtom = atom((get) => {
   const selected = get(selectedPhotosAtom);
   return selected.size > 0;
@@ -275,7 +244,7 @@ export const useFetchPhotoList = () => {
 export const resetGalleryStateAtom = atom(null, (_get, set) => {
   set(photosAtom, []);
   set(selectedPhotosAtom, new Set<string>());
-  set(photoListDisplayOptionsAtom, photoListDisplayOptionsSchema.parse({})); // Reset display options
+  set(displayOptionsAtom, displayOptionsDefault); // Reset display options
   set(currentPageAtom, 1);
   set(naturalSizesAtom, new Map());
 });
