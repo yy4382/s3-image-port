@@ -1,14 +1,14 @@
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { useSetAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useAtom } from "jotai";
+import { useMemo, useState } from "react";
 import {
   photoListDisplayOptionsAtom,
   type PhotoListDisplayOptions,
-  photoListDisplayOptionsSchema,
 } from "../galleryStore";
 import { Input } from "../../ui/input";
-import { currentPageAtom } from "../galleryStore";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -19,37 +19,39 @@ import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
 
-const route = getRouteApi("/gallery");
-
 function useSearchDisplayOptions() {
-  const search = route.useSearch();
-  const navigate = useNavigate({ from: "/gallery" });
-  const setCurrentPage = useSetAtom(currentPageAtom);
-  const handleUpdate = (
-    update:
-      | Partial<PhotoListDisplayOptions>
-      | ((prev: PhotoListDisplayOptions) => Partial<PhotoListDisplayOptions>),
-  ) => {
-    let newSearchOptions: Partial<PhotoListDisplayOptions>;
-    if (typeof update === "function") {
-      newSearchOptions = update(photoListDisplayOptionsSchema.parse(search));
-    } else {
-      newSearchOptions = update;
-    }
-    setCurrentPage(1);
-    navigate({
-      search: (prev) => ({ ...prev, ...newSearchOptions }),
-    });
-  };
-  const setOgDisplayOptions = useSetAtom(photoListDisplayOptionsAtom);
+  // const search = useSearchParams();
+  // const navigate = useRouter();
+  // const setCurrentPage = useSetAtom(currentPageAtom);
+  // const handleUpdate = (
+  //   update:
+  //     | Partial<PhotoListDisplayOptions>
+  //     | ((prev: PhotoListDisplayOptions) => Partial<PhotoListDisplayOptions>),
+  // ) => {
+  //   let newSearchOptions: Partial<PhotoListDisplayOptions>;
+  //   if (typeof update === "function") {
+  //     newSearchOptions = update(photoListDisplayOptionsSchema.parse(search));
+  //   } else {
+  //     newSearchOptions = update;
+  //   }
+  //   setCurrentPage(1);
+  //   navigate({
+  //     search: (prev) => ({ ...prev, ...newSearchOptions }),
+  //   });
+  // };
+  // const setOgDisplayOptions = useSetAtom(photoListDisplayOptionsAtom);
 
-  useEffect(() => {
-    setOgDisplayOptions(photoListDisplayOptionsSchema.parse(search));
-  }, [search, setOgDisplayOptions]);
+  // useEffect(() => {
+  //   setOgDisplayOptions(photoListDisplayOptionsSchema.parse(search));
+  // }, [search, setOgDisplayOptions]);
+
+  const [search, setSearch] = useAtom(photoListDisplayOptionsAtom);
 
   return {
     search,
-    handleUpdate,
+    handleUpdate: (update: Partial<PhotoListDisplayOptions>) => {
+      setSearch((prev) => ({ ...prev, ...update }));
+    },
   };
 }
 

@@ -1,8 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef } from "react";
-import McEmptyBox from "~icons/mingcute/empty-box-line";
+import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
 import { useFetchPhotoList } from "../galleryStore";
 import {
   containerWidthAtom,

@@ -5,7 +5,7 @@ function addTrailingSlash(url: string) {
   }
   return url + "/";
 }
-export default function (key: string, config: S3Options) {
+export default function key2Url(key: string, config: S3Options) {
   if (!config.pubUrl) {
     return addTrailingSlash(config.endpoint) + config.bucket + "/" + key;
   } else {

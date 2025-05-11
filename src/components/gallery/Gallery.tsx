@@ -1,3 +1,5 @@
+"use client";
+
 import { useFetchPhotoList } from "./galleryStore";
 import { PhotoGrid } from "@/components/gallery/GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";

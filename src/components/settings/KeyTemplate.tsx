@@ -1,3 +1,5 @@
+"use client";
+
 import { useId, useState } from "react";
 import * as z from "zod";
 import { FormEntry } from "../ui/formEntry";

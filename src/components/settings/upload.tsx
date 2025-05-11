@@ -1,3 +1,5 @@
+"use client";
+
 import ImageCompressOptions from "@/components/settings/ImageCompressOptions";
 import { KeyTemplate } from "@/components/settings/KeyTemplate";
 import { useAtom } from "jotai";

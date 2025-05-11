@@ -3,9 +3,9 @@ import ImageS3Client from "@/utils/ImageS3Client";
 import { useAtom, useAtomValue } from "jotai";
 import { selectedPhotosAtom, useFetchPhotoList } from "../galleryStore";
 import { validS3SettingsAtom } from "@/components/settings/settingsStore";
-import McCheckbox from "~icons/mingcute/checkbox-line";
-import McDelete from "~icons/mingcute/delete-3-line";
-import McRefresh from "~icons/mingcute/refresh-2-line";
+import McCheckbox from "~icons/mingcute/checkbox-line.jsx";
+import McDelete from "~icons/mingcute/delete-3-line.jsx";
+import McRefresh from "~icons/mingcute/refresh-2-line.jsx";
 import { toast } from "sonner";
 import { DisplayControl } from "./DisplayControl";
 
