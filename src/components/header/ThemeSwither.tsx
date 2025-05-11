@@ -1,11 +1,24 @@
-import { useTheme } from "./theme-provider";
-import McSun from "~icons/mingcute/sun-line";
-import McMoon from "~icons/mingcute/moon-line";
-import McSystem from "~icons/mingcute/computer-line";
+"use client";
+
+import { useTheme } from "next-themes";
+import McSun from "~icons/mingcute/sun-line.jsx";
+import McMoon from "~icons/mingcute/moon-line.jsx";
+import McSystem from "~icons/mingcute/computer-line.jsx";
 import { Button } from "../ui/button";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false);
   const theme = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]">
@@ -34,7 +47,17 @@ export function ThemeSwitcher() {
   );
 }
 export function ThemeSwitcherButton() {
+  const [mounted, setMounted] = useState(false);
   const theme = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   let icon;
   switch (theme.theme) {
     case "light":

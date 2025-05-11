@@ -1,3 +1,5 @@
+"use client";
+
 import ImageCompressOptions from "@/components/settings/ImageCompressOptions";
 import { KeyTemplate } from "@/components/settings/KeyTemplate";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +17,8 @@ import {
   type CompressOption,
 } from "@/utils/imageCompress";
 import ImageS3Client from "@/utils/ImageS3Client";
-import { ClientOnly, Link } from "@tanstack/react-router";
+import { ClientOnly } from "../misc/client-only";
+import Link from "next/link";
 import {
   atom,
   useAtom,
@@ -221,7 +224,7 @@ export function Upload() {
             <AlertDescription>
               <p>
                 Your S3 settings are not valid. Please configure them in the{" "}
-                <Link to="/settings/s3" className="underline">
+                <Link href="/settings/s3" className="underline">
                   settings page
                 </Link>
                 .

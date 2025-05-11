@@ -1,3 +1,5 @@
+"use client";
+
 import { atomWithStorage } from "jotai/utils";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { Button } from "@/components/ui/button";
@@ -8,13 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import McPencil from "~icons/mingcute/pencil-2-line";
-import McCopy from "~icons/mingcute/copy-2-line";
-import { ClientOnly } from "@tanstack/react-router";
+import McPencil from "~icons/mingcute/pencil-2-line.jsx";
+import McCopy from "~icons/mingcute/copy-2-line.jsx";
 import type { Options as Profile } from "./settingsStore";
 import { optionsAtom } from "./settingsStore";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { ClientOnly } from "../misc/client-only";
 
 const CURRENT_PROFILE = "CURRENT";
 

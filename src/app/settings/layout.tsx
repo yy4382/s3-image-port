@@ -1,13 +1,10 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import Link from "next/link";
+import { PropsWithChildren } from "react";
 
-export const Route = createFileRoute("/settings")({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
+export default function SettingsLayout({ children }: PropsWithChildren) {
   return (
     <Card className="max-w-4xl w-full mx-auto h-fit">
       <CardContent className="grid grid-cols-[auto_1fr] gap-4">
@@ -15,7 +12,7 @@ function RouteComponent() {
           <h1 className="text-2xl font-bold ml-2">Settings</h1>
           <SettingPageSwitcher />
         </div>
-        <Outlet />
+        {children}
       </CardContent>
     </Card>
   );
@@ -25,7 +22,7 @@ function SettingPageSwitcher() {
   return (
     <div className="flex flex-col gap-2">
       <Link
-        to="/settings/profile"
+        href="/settings/profile"
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",
@@ -34,7 +31,7 @@ function SettingPageSwitcher() {
         Profiles
       </Link>
       <Link
-        to="/settings/s3"
+        href="/settings/s3"
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",
@@ -43,7 +40,7 @@ function SettingPageSwitcher() {
         S3
       </Link>
       <Link
-        to="/settings/upload"
+        href="/settings/upload"
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",

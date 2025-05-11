@@ -16,11 +16,11 @@ import { produce } from "immer";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import McCopy from "~icons/mingcute/copy-2-line";
-import MingcuteInformationLine from "~icons/mingcute/information-line";
-import McKey2Line from "~icons/mingcute/key-2-line";
-import McTimeLine from "~icons/mingcute/time-line";
-import McZoomIn from "~icons/mingcute/zoom-in-line";
+import McCopy from "~icons/mingcute/copy-2-line.jsx";
+import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
+import McKey2Line from "~icons/mingcute/key-2-line.jsx";
+import McTimeLine from "~icons/mingcute/time-line.jsx";
+import McZoomIn from "~icons/mingcute/zoom-in-line.jsx";
 import { validS3SettingsAtom } from "@/components/settings/settingsStore";
 import { selectModeAtom, selectedPhotosAtom } from "../../galleryStore";
 import { setNaturalSizesAtom } from "../../galleryStore";
@@ -105,6 +105,7 @@ function PhotoDisplay({
       )}
       {s3Settings && (
         <img
+          alt={s3Key}
           ref={imgRef}
           className={cn("transition-[scale]", {
             invisible: loadingState !== "loaded",

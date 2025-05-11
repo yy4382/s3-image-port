@@ -1,3 +1,5 @@
+"use client";
+
 import { FormEntry } from "@/components/ui/formEntry";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";

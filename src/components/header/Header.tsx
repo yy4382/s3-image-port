@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { buttonVariants } from "../ui/button";
 import McGithub from "~icons/mingcute/github-line";
 import { ThemeSwitcher, ThemeSwitcherButton } from "./ThemeSwither";
@@ -22,14 +22,16 @@ const Header: React.FC = () => {
       >
         <Link
           className="flex-1 justify-start flex items-center gap-2 select-none"
-          to="/"
+          href="/"
           aria-label="Logo" // Removed i18n
         >
           <img
             src="/favicon.svg" // Assuming favicon is in public root
-            className="h-6 pointer-events-none"
+            className="pointer-events-none"
             alt="favicon"
             aria-hidden="true"
+            width={24}
+            height={24}
           />
           <span className="text-xl font-bold hidden md:block">
             S3 Image Port
@@ -37,15 +39,15 @@ const Header: React.FC = () => {
         </Link>
 
         <div className="flex space-x-4 font-semibold flex-1 justify-center">
-          <Link to="/upload" className={getNavLinkClass}>
+          <Link href="/upload" className={getNavLinkClass}>
             <McPhotoAlbum className="text-2xl md:text-base" />
             <span className="hidden md:block">Upload</span>
           </Link>
-          <Link to="/gallery" className={getNavLinkClass}>
+          <Link href="/gallery" className={getNavLinkClass}>
             <McUpload className="text-2xl md:text-base" />
             <span className="hidden md:block">Photos</span>
           </Link>
-          <Link to="/settings" className={getNavLinkClass}>
+          <Link href="/settings" className={getNavLinkClass}>
             <McSettings className="text-2xl md:text-base" />
             <span className="hidden md:block">Settings</span>{" "}
           </Link>
