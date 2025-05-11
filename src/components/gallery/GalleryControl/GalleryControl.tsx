@@ -8,6 +8,7 @@ import McDelete from "~icons/mingcute/delete-3-line.jsx";
 import McRefresh from "~icons/mingcute/refresh-2-line.jsx";
 import { toast } from "sonner";
 import { DisplayControl } from "./DisplayControl";
+import { Suspense } from "react";
 
 export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
@@ -56,7 +57,9 @@ export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
           </>
         )}
       </div>
-      <DisplayControl />
+      <Suspense>
+        <DisplayControl />
+      </Suspense>
     </div>
   );
 }

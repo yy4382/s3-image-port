@@ -9,15 +9,14 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format, startOfDay, endOfDay, subMonths } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import {
-  getTimeRange,
-  TIME_RANGES,
-  type PhotoListDisplayOptions,
-} from "../galleryStore";
+import { timeRangesGetter } from "../galleryStore";
+import { getTimeRange, type DisplayOptions } from "./displayControlStore";
+
+const TIME_RANGES = timeRangesGetter();
 
 interface DateRangePickerPopoverProps {
-  currentDisplayOptions: PhotoListDisplayOptions;
-  handleUpdate: (update: Partial<PhotoListDisplayOptions>) => void;
+  currentDisplayOptions: DisplayOptions;
+  handleUpdate: (update: Partial<DisplayOptions>) => void;
 }
 
 export function DateRangePickerPopover({
@@ -27,7 +26,6 @@ export function DateRangePickerPopover({
   const [datePickerPopoverOpen, setDatePickerPopoverOpen] = useState(false);
 
   const handleDateRangeSelect = (range: DateRange | undefined) => {
-    console.log("handleDateRangeSelect", range);
     if (range?.from && range?.to && range.from < range.to) {
       handleUpdate({
         dateRangeType: [startOfDay(range.from), endOfDay(range.to)],
