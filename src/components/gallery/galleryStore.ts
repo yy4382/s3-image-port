@@ -19,6 +19,7 @@ import {
   getTimeRange,
 } from "./GalleryControl/displayControlStore";
 import { displayOptionsAtom } from "./GalleryControl/displayControlStore";
+import { useTranslations } from "use-intl";
 
 export function timeRangesGetter(): { duration: Duration; type: string }[] {
   return [
@@ -212,10 +213,11 @@ export const selectModeAtom = atom((get) => {
 export const useFetchPhotoList = () => {
   const setPhotos = useSetAtom(photosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
+  const t = useTranslations("gallery.store");
 
   const fetchPhotoList = useCallback(async () => {
     if (!s3Settings) {
-      toast.error("S3 settings not found");
+      toast.error(t("s3SettingsNotFound"));
       console.error("S3 settings not found");
       return;
     }
@@ -223,19 +225,19 @@ export const useFetchPhotoList = () => {
     try {
       photos = await new ImageS3Client(s3Settings).list();
     } catch (error) {
-      toast.error("Failed to fetch photos");
+      toast.error(t("failedToFetchPhotos"));
       console.error("Failed to fetch photos", error);
       return;
     }
     if (photos) {
-      toast.message("Fetched photos");
+      toast.message(t("fetchedPhotos"));
       console.log("Fetched photos", photos.length);
       setPhotos(photos);
     } else {
-      toast.error("Failed to fetch photos");
+      toast.error(t("failedToFetchPhotos"));
       console.error("Failed to fetch photos");
     }
-  }, [s3Settings, setPhotos]);
+  }, [s3Settings, setPhotos, t]);
 
   return fetchPhotoList;
 };

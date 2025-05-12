@@ -10,6 +10,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { XIcon } from "lucide-react";
 import type { DisplayOptions } from "./displayControlStore";
+import { useTranslations } from "next-intl";
 
 interface SortPopoverContentProps {
   currentDisplayOptions: DisplayOptions;
@@ -24,11 +25,13 @@ export function SortPopoverContent({
   isSearchActive,
   setSortPopoverOpen,
 }: SortPopoverContentProps) {
+  const t = useTranslations("gallery.sort");
+  
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium leading-none">排序选项</h4>
+          <h4 className="font-medium leading-none">{t("sortOptions")}</h4>
           <Button
             variant="ghost"
             size="sm"
@@ -39,13 +42,13 @@ export function SortPopoverContent({
         </div>
         <p className="text-sm text-muted-foreground">
           {isSearchActive
-            ? "搜索已激活，排序选项已禁用。图片将按搜索匹配度排序。"
-            : "选择图片的排序方式。"}
+            ? t("sortActiveMessage")
+            : t("sortInactiveMessage")}
         </p>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="sort-by">按 ... 排序</Label>
-        <p className="text-xs text-muted-foreground">排序所依据的属性。</p>
+        <Label htmlFor="sort-by">{t("sortBy")}</Label>
+        <p className="text-xs text-muted-foreground">{t("sortProperty")}</p>
         <Select
           value={currentDisplayOptions.sortBy}
           onValueChange={(value: "key" | "date") =>
@@ -54,20 +57,20 @@ export function SortPopoverContent({
           disabled={isSearchActive}
         >
           <SelectTrigger id="sort-by" disabled={isSearchActive}>
-            <SelectValue placeholder="选择属性" />
+            <SelectValue placeholder={t("selectProperty")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date">日期</SelectItem>
-            <SelectItem value="key">名称 (路径)</SelectItem>
+            <SelectItem value="date">{t("date")}</SelectItem>
+            <SelectItem value="key">{t("name")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="grid gap-2">
         <div className="flex items-center justify-between">
           <div>
-            <Label htmlFor="sort-order">升降序</Label>
+            <Label htmlFor="sort-order">{t("sortOrder")}</Label>
             <p className="text-xs text-muted-foreground">
-              以升序或降序显示结果。
+              {t("sortOrderDesc")}
             </p>
           </div>
           <Switch
@@ -77,7 +80,7 @@ export function SortPopoverContent({
               handleUpdate({ sortOrder: checked ? "desc" : "asc" })
             }
             disabled={isSearchActive}
-            aria-label="排序顺序切换"
+            aria-label={t("sortOrderToggle")}
           />
         </div>
       </div>

@@ -19,6 +19,7 @@ import {
   s3SettingsSchema,
   type S3Options,
 } from "./settingsStore";
+import { useTranslations } from "next-intl";
 
 function getS3Part(opt: keyof S3Options) {
   return {
@@ -28,44 +29,46 @@ function getS3Part(opt: keyof S3Options) {
 }
 
 function S3Settings() {
+  const t = useTranslations("settings.s3Settings");
+  
   return (
     <div>
       <div className="grid gap-6">
-        <h2 className="text-2xl font-bold">S3</h2>
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
         <SettingsInputEntry
           {...getS3Part("endpoint")}
-          title="Endpoint"
-          description="S3 endpoint"
+          title={t("endpoint")}
+          description={t("endpointDesc")}
           placeholder="https://example.com"
         />
         <SettingsInputEntry
           {...getS3Part("bucket")}
-          title="Bucket Name"
-          description="S3 bucket name"
+          title={t("bucket")}
+          description={t("bucketDesc")}
           placeholder="my-bucket"
         />
         <SettingsInputEntry
           {...getS3Part("region")}
-          title="Region"
-          description="S3 region"
+          title={t("region")}
+          description={t("regionDesc")}
           placeholder="us-east-1"
         />
         <SettingsInputEntry
           {...getS3Part("accKeyId")}
-          title="Access Key"
-          description="S3 access key"
+          title={t("accessKey")}
+          description={t("accessKeyDesc")}
           placeholder="XXXXXXXX"
         />
         <SettingsInputEntry
           {...getS3Part("secretAccKey")}
-          title="Secret Key"
-          description="S3 secret key"
+          title={t("secretKey")}
+          description={t("secretKeyDesc")}
           placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         />
         <SettingsInputEntry
           {...getS3Part("forcePathStyle")}
-          title="Use Path Style API"
-          description="Force using path style API"
+          title={t("pathStyle")}
+          description={t("pathStyleDesc")}
           input={(v, s, id) => (
             <Switch
               id={id}
@@ -76,8 +79,8 @@ function S3Settings() {
         />
         <SettingsInputEntry
           {...getS3Part("pubUrl")}
-          title="Public URL"
-          description="S3 public URL"
+          title={t("publicUrl")}
+          description={t("publicUrlDesc")}
           placeholder="https://example1.com"
         />
         <S3Validation />
@@ -91,6 +94,7 @@ type S3ValidationResult = { valid: true } | { valid: false; error: string };
 function S3Validation() {
   const s3Settings = useAtomValue(s3SettingsAtom);
   const [error, setError] = useState<S3ValidationResult | undefined>(undefined);
+  const t = useTranslations("settings.s3Settings");
 
   async function validate() {
     if (!s3SettingsSchema.safeParse(s3Settings).success) {
@@ -124,13 +128,15 @@ function S3Validation() {
               <p
                 className={`text-sm font-medium ${error.valid ? "text-green-600" : "text-red-600"}`}
               >
-                {error.valid ? "✓ S3 settings are valid" : `⚠ ${error.error}`}
+                {error.valid 
+                  ? t("validSuccess") 
+                  : t("validError", { error: error.error })}
               </p>
             </div>
           )}
         </div>
         <Button onClick={validate} className="w-fit" variant="outline">
-          Validate S3 Settings
+          {t("validateBtn")}
         </Button>
       </div>
     </div>

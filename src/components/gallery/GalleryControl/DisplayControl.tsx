@@ -24,6 +24,7 @@ import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 function useSearchDisplayOptions() {
   const router = useRouter();
@@ -64,6 +65,7 @@ function useSearchDisplayOptions() {
 
 export function DisplayControl() {
   const { search, handleUpdate } = useSearchDisplayOptions();
+  const t = useTranslations("gallery.display");
 
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
   const [sortPopoverOpen, setSortPopoverOpen] = useState(false);
@@ -81,7 +83,7 @@ export function DisplayControl() {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder="搜索..."
+        placeholder={t("search")}
         className="flex-grow max-w-72"
         onChange={(e) => {
           handleUpdate({ searchTerm: e.target.value });

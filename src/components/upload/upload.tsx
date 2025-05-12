@@ -46,6 +46,7 @@ import {
 } from "../settings/settingsStore";
 import key2Url from "@/utils/key2Url";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
 
 type UploadObject = {
   file: File;
@@ -208,6 +209,7 @@ export function Upload() {
   const triggerUpload = useSetAtom(uploadAll);
   const [hasUploaded, removeUploaded] = useAtom(removeUploadedFileAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
+  const t = useTranslations("upload");
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -220,12 +222,12 @@ export function Upload() {
       <ClientOnly>
         {!s3Settings && (
           <Alert className="mb-4" variant="destructive">
-            <AlertTitle>S3 incorrectly configured</AlertTitle>
+            <AlertTitle>{t("alerts.s3ConfigTitle")}</AlertTitle>
             <AlertDescription>
               <p>
-                Your S3 settings are not valid. Please configure them in the{" "}
+                {t("alerts.s3ConfigDesc")}{" "}
                 <Link href="/settings/s3" className="underline">
-                  settings page
+                  {t("alerts.settingsPage")}
                 </Link>
                 .
               </p>
@@ -237,7 +239,7 @@ export function Upload() {
       {fileAtoms.length > 0 && (
         <div className="mb-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold">
-            Files to upload ({fileAtoms.length})
+            {t("fileList.title")} ({fileAtoms.length})
           </h2>
           <div className="flex items-center space-x-2">
             {hasUploaded && (
@@ -246,13 +248,13 @@ export function Upload() {
                 onClick={removeUploaded}
                 className="text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                Clear Uploaded Entry
+                {t("fileList.clearUploaded")}
               </Button>
             )}
             <Button
               onClick={() => {
                 if (!s3Settings) {
-                  toast.error("S3 settings are not configured");
+                  toast.error(t("alerts.s3NotConfigured"));
                   return;
                 }
                 triggerUpload(s3Settings);
@@ -260,7 +262,7 @@ export function Upload() {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Upload All
+              {t("fileList.uploadAll")}
             </Button>
           </div>
         </div>
@@ -281,6 +283,7 @@ export function Upload() {
 
 function DropZone() {
   const appendFiles = useSetAtom(appendFileAtom);
+  const t = useTranslations("upload.dropzone");
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
       appendFiles(acceptedFiles);
@@ -302,7 +305,7 @@ function DropZone() {
         </div>
         <div>
           <p className="text-lg font-medium">
-            Drag files here or click to browse
+            {t("title")}
           </p>
         </div>
       </div>
@@ -322,6 +325,7 @@ function FilePreview({
   const { file, updateProcessOption, updateTemplate } =
     useFileAtomOperations(fileAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
+  const t = useTranslations("upload.fileList");
 
   return (
     <Card className="overflow-hidden py-1">
@@ -350,13 +354,13 @@ function FilePreview({
                   navigator.clipboard.writeText(
                     key2Url(file.key.toString(), s3Settings!),
                   );
-                  toast.success("Key copied to clipboard");
+                  toast.success(t("urlCopied"));
                 } catch {
-                  toast.error("Failed to copy key");
+                  toast.error(t("copyFailed"));
                 }
               }}
             >
-              <span className="sr-only">Copy Link</span>
+              <span className="sr-only">{t("copy")}</span>
               <McCopy />
             </Button>
           )}
@@ -382,7 +386,7 @@ function FilePreview({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="">
-                <span className="sr-only">Edit</span>
+                <span className="sr-only">{t("edit")}</span>
                 <McPencil />
               </Button>
             </DropdownMenuTrigger>
@@ -396,7 +400,7 @@ function FilePreview({
                     }}
                   />
                   <p className="text-sm text-muted-foreground mt-2">
-                    Key will be: {file.key.toString()}
+                    {t("keyWillBe")} {file.key.toString()}
                   </p>
                 </div>
                 {file.supportProcess && (
@@ -415,7 +419,7 @@ function FilePreview({
             onClick={remove}
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            <span className="sr-only">Remove</span>
+            <span className="sr-only">{t("remove")}</span>
             <McTrash className="h-4 w-4" />
           </Button>
         </div>
@@ -467,12 +471,13 @@ function FilePreviewProcess({
   file: UploadObject;
   process: () => void;
 }) {
+  const t = useTranslations("upload.fileList");
   return (
     <>
       {file.processedFile && (
         <>
           <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">
-            Compressed {(file.processedFile.size / 1024).toFixed(1)} KB
+            {t("compressed")} {(file.processedFile.size / 1024).toFixed(1)} KB
           </Badge>
         </>
       )}
@@ -484,13 +489,13 @@ function FilePreviewProcess({
           asChild
         >
           <button onClick={process}>
-            {file.status === "pending" ? "Compress" : "Recompress"}
+            {file.status === "pending" ? t("process") : t("recompress")}
           </button>
         </Badge>
       )}
       {file.status === "processing" && (
         <Badge variant="default" className="ml-2 text-xs whitespace-nowrap">
-          Compressing...
+          {t("compressing")}
         </Badge>
       )}
     </>

@@ -12,6 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 
 function ThemeSwitcherContent() {
   const theme = useTheme();
@@ -63,6 +64,7 @@ function ThemeSwitcherButton() {
 
 export function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false);
+  const t = useTranslations("theme");
 
   useEffect(() => {
     setMounted(true);
@@ -81,7 +83,7 @@ export function ThemeSwitcher() {
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost">
               <ThemeSwitcherButton />
-              <span className="sr-only">Toggle theme</span>
+              <span className="sr-only">{t("toggleTheme")}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-fit bg-transparent  min-w-fit p-0">

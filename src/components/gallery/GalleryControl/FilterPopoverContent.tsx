@@ -21,6 +21,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface FilterPopoverContentProps {
   currentDisplayOptions: DisplayOptions;
@@ -33,11 +34,13 @@ export function FilterPopoverContent({
   handleUpdate,
   setFilterPopoverOpen,
 }: FilterPopoverContentProps) {
+  const t = useTranslations("gallery.filter");
+  
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium leading-none">过滤选项</h4>
+          <h4 className="font-medium leading-none">{t("filterOptions")}</h4>
           <Button
             variant="ghost"
             size="sm"
@@ -46,12 +49,12 @@ export function FilterPopoverContent({
             <XIcon className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">根据属性筛选图片。</p>
+        <p className="text-sm text-muted-foreground">{t("filterByProperty")}</p>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="prefix-filter">按前缀过滤</Label>
+        <Label htmlFor="prefix-filter">{t("filterByPrefix")}</Label>
         <p className="text-xs text-muted-foreground">
-          像在目录树中一样查找图像。
+          {t("directoryTree")}
         </p>
         {/* <Input
           id="prefix-filter"
@@ -65,9 +68,9 @@ export function FilterPopoverContent({
         />
       </div>
       <div className="grid gap-2">
-        <Label>按日期过滤</Label>
+        <Label>{t("filterByDate")}</Label>
         <p className="text-xs text-muted-foreground">
-          点击以打开日历选择日期范围。
+          {t("clickToOpenCalendar")}
         </p>
         <DateRangePickerPopover
           currentDisplayOptions={currentDisplayOptions}
@@ -93,13 +96,14 @@ function PrefixSelector({
     handleUpdate({ prefix: value });
   };
   useAtomsDebugValue();
+  const t = useTranslations("gallery.filter");
 
   const currentPrefix = currentDisplayOptions.prefix;
   const currentDisplayPrefix =
     currentPrefix === ""
-      ? "(no prefix)"
+      ? t("noPrefix")
       : currentPrefix === undefined
-        ? "Select prefix..."
+        ? t("selectPrefix")
         : currentPrefix;
 
   return (
@@ -117,9 +121,9 @@ function PrefixSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search prefix..." className="h-9" />
+          <CommandInput placeholder={t("searchPrefix")} className="h-9" />
           <CommandList>
-            <CommandEmpty>No prefix found.</CommandEmpty>
+            <CommandEmpty>{t("noPrefixFound")}</CommandEmpty>
             <CommandGroup>
               {availablePrefixes.map((prefixItem) => (
                 <CommandItem
@@ -133,7 +137,7 @@ function PrefixSelector({
                   }}
                   style={{ paddingLeft: prefixItem.hierarchy + 0.5 + "rem" }}
                 >
-                  {prefixItem.name || "(no prefix)"}
+                  {prefixItem.name || t("noPrefix")}
                   <Check
                     className={cn(
                       "ml-auto",

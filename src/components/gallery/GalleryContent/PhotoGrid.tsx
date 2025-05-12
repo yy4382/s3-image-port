@@ -15,6 +15,7 @@ import {
   showingPhotosAtom,
 } from "../galleryStore";
 import { PhotoItem } from "./PhotoItem/PhotoItem";
+import { useTranslations } from "next-intl";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);
@@ -24,6 +25,8 @@ export function PhotoGrid() {
   const containerRef = useRef<HTMLDivElement>(null);
   const listPhotos = useFetchPhotoList();
   const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
+  const t = useTranslations("gallery.grid");
+  
   useEffect(() => {
     setContainerWidth(containerRef.current?.clientWidth ?? 600); // Set initial width immediately
 
@@ -63,7 +66,7 @@ export function PhotoGrid() {
               <McEmptyBox className="w-full h-full" />
             </div>
             <p className="text-lg text-muted-foreground text-center">
-              No photos found
+              {t("noPhotosFound")}
             </p>
           </div>
           <Button
@@ -71,7 +74,7 @@ export function PhotoGrid() {
             onClick={listPhotos}
             className="flex items-center gap-2"
           >
-            Load Photos
+            {t("loadPhotos")}
           </Button>
         </div>
       )}

@@ -5,12 +5,15 @@ import { KeyTemplate } from "@/components/settings/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "./settingsStore";
 import { focusAtom } from "jotai-optics";
+import { useTranslations } from "next-intl";
 
 function UploadSettings() {
+  const t = useTranslations("settings");
+  
   return (
     <div>
       <div className="grid gap-6">
-        <h2 className="text-2xl font-bold">Upload</h2>
+        <h2 className="text-2xl font-bold">{t("upload")}</h2>
         <KeyTemplateWrapper />
         <CompressOptionWrapper />
       </div>
