@@ -139,8 +139,7 @@
     },
     "alerts": {
       "s3ConfigTitle": "S3 incorrectly configured",
-      "s3ConfigDesc": "Your S3 settings are not valid. Please configure them in the",
-      "settingsPage": "settings page",
+      "s3ConfigDesc": "Your S3 settings are not valid. Please configure them in the <settings>settings page</settings>.",
       "s3NotConfigured": "S3 settings are not configured"
     }
   }
