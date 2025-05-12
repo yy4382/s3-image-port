@@ -7,21 +7,16 @@ import McSystem from "~icons/mingcute/computer-line.jsx";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
-export function ThemeSwitcher() {
-  const [mounted, setMounted] = useState(false);
+function ThemeSwitcherContent() {
   const theme = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div className="bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]">
+    <div className="bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-md p-[3px]">
       <button
         className="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent p-1 size-7 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
         data-state={theme.theme === "light" ? "active" : ""}
@@ -46,18 +41,8 @@ export function ThemeSwitcher() {
     </div>
   );
 }
-export function ThemeSwitcherButton() {
-  const [mounted, setMounted] = useState(false);
+function ThemeSwitcherButton() {
   const theme = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   let icon;
   switch (theme.theme) {
     case "light":
@@ -73,10 +58,37 @@ export function ThemeSwitcherButton() {
       icon = <McSystem className="size-4" />;
       break;
   }
+  return icon;
+}
+
+export function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
   return (
-    <Button size="icon" variant={"ghost"}>
-      {icon}
-      <span className="sr-only">Toggle theme</span>
-    </Button>
+    <div>
+      <div className="hidden md:block">
+        <ThemeSwitcherContent />
+      </div>
+      <div className="md:hidden">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="icon" variant="ghost">
+              <ThemeSwitcherButton />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-fit bg-transparent  min-w-fit p-0">
+            <ThemeSwitcherContent />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }

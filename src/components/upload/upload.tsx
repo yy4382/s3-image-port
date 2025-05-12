@@ -18,7 +18,7 @@ import {
 } from "@/utils/imageCompress";
 import ImageS3Client from "@/utils/ImageS3Client";
 import { ClientOnly } from "../misc/client-only";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   atom,
   useAtom,
