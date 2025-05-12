@@ -13,13 +13,15 @@ import { validS3SettingsAtom } from "../settings/settingsStore";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import ImageS3Client from "@/utils/ImageS3Client";
-import atomWithDebounce from "@/utils/atomWithDebounce";
 import {
   displayOptionsDefault,
   getTimeRange,
 } from "./GalleryControl/displayControlStore";
 import { displayOptionsAtom } from "./GalleryControl/displayControlStore";
-import { useTranslations } from "use-intl";
+import { useTranslations } from "next-intl";
+import { enableMapSet } from "immer";
+
+enableMapSet();
 
 export function timeRangesGetter(): { duration: Duration; type: string }[] {
   return [
@@ -128,14 +130,41 @@ export const showingPhotosAtom = atom<Photo[]>((get) => {
   return get(filteredPhotosAtom).slice(start, end);
 });
 
-export const { debouncedValueAtom: containerWidthAtom } = atomWithDebounce(
-  600,
-  100,
-);
-const DEFAULT_IMAGE_SIZE: [number, number] = [384, 208];
+export const containerWidthAtom = atom(600);
+export const DEFAULT_IMAGE_SIZE: [number, number] = [384, 208];
 const GAP_PX = 8;
 
-const naturalSizesAtom = atom<Map<string, [number, number]>>(new Map());
+type SampleMapItem = [number, number];
+const serializeMap = (map: Map<string, SampleMapItem>) =>
+  JSON.stringify(Array.from(map.entries()));
+function deserializeMap(str: string) {
+  try {
+    return new Map(JSON.parse(str)) as Map<string, SampleMapItem>;
+  } catch (error) {
+    console.error("Failed to deserialize map", error);
+    return new Map<string, SampleMapItem>();
+  }
+}
+
+type SampleMap = Map<string, SampleMapItem>;
+const localStorageWithMap = {
+  getItem: (key: string, initialValue: SampleMap) => {
+    const item = localStorage.getItem(key);
+    return item ? deserializeMap(item) : initialValue;
+  },
+  setItem: (key: string, newValue: SampleMap) => {
+    localStorage.setItem(key, serializeMap(newValue));
+  },
+  removeItem: (key: string) => {
+    localStorage.removeItem(key);
+  },
+};
+
+const naturalSizesAtom = atomWithStorage<Map<string, [number, number]>>(
+  "s3ip:gallery:naturalSizeCache",
+  new Map(),
+  localStorageWithMap,
+);
 
 export const setNaturalSizesAtom = atom(
   null,
@@ -148,10 +177,12 @@ export const setNaturalSizesAtom = atom(
     }
     const action = validated.data;
     const map = get(naturalSizesAtom);
-    if (action) {
-      map.set(action[0], action[1]);
-      set(naturalSizesAtom, new Map(map));
+    const old = map.get(action[0]);
+    if (old && old[0] === action[1][0] && old[1] === action[1][1]) {
+      return;
     }
+    map.set(action[0], action[1]);
+    set(naturalSizesAtom, new Map(map));
   },
 );
 
@@ -169,6 +200,8 @@ const scaleCurGroup = (
 };
 
 export const photoSizeAtom = atom((get) => {
+  console.log("photoSizeAtom", get(naturalSizesAtom));
+  // debugger;
   const originalSizes = get(showingPhotosAtom).map((photo) => {
     const size = get(naturalSizesAtom).get(photo.Key);
     if (size) {
