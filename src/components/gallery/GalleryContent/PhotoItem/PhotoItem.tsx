@@ -22,7 +22,11 @@ import McKey2Line from "~icons/mingcute/key-2-line.jsx";
 import McTimeLine from "~icons/mingcute/time-line.jsx";
 import McZoomIn from "~icons/mingcute/zoom-in-line.jsx";
 import { validS3SettingsAtom } from "@/components/settings/settingsStore";
-import { selectModeAtom, selectedPhotosAtom } from "../../galleryStore";
+import {
+  DEFAULT_IMAGE_SIZE,
+  selectModeAtom,
+  selectedPhotosAtom,
+} from "../../galleryStore";
 import { setNaturalSizesAtom } from "../../galleryStore";
 
 export function PhotoItem({
@@ -64,15 +68,16 @@ function PhotoDisplay({
     }
 
     setNaturalSizes([s3Key, [naturalWidth, naturalHeight]]);
+    setLoadingState("loaded");
+    // setTimeout(() => {
     // setLoadingState("loaded");
-    setTimeout(() => {
-      setLoadingState("loaded");
-    }, 50);
+    // }, 50);
   }, [s3Key, setNaturalSizes]);
 
   const handleError = useCallback(() => {
+    setNaturalSizes([s3Key, DEFAULT_IMAGE_SIZE]);
     setLoadingState("error");
-  }, []);
+  }, [s3Key, setNaturalSizes]);
 
   useEffect(() => {
     if (imgRef.current?.complete) {
@@ -88,7 +93,7 @@ function PhotoDisplay({
   return (
     <div
       ref={wrapperRef}
-      className="overflow-hidden transition-all group"
+      className="overflow-hidden transition-all duration-75 group"
       style={{ width: size[0], height: size[1] }}
     >
       {loadingState === "loading" && <Skeleton className="w-full h-full" />}
@@ -107,10 +112,12 @@ function PhotoDisplay({
         <img
           alt={s3Key}
           ref={imgRef}
-          className={cn("transition-[scale]", {
+          className={cn("transition-[scale] duration-75", {
             invisible: loadingState !== "loaded",
             "scale-90 rounded-lg": selected,
           })}
+          width={size[0]}
+          height={size[1]}
           src={key2Url(s3Key, s3Settings)}
           onLoad={handleLoad}
           onError={handleError}

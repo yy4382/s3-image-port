@@ -3,6 +3,7 @@
 import { useFetchPhotoList } from "./galleryStore";
 import { PhotoGrid } from "@/components/gallery/GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
+import { ClientOnly } from "../misc/client-only";
 
 export function Gallery() {
   const listPhotos = useFetchPhotoList();
@@ -10,7 +11,9 @@ export function Gallery() {
   return (
     <div className="flex flex-col gap-6 w-full">
       <GalleryControl onRefresh={listPhotos} />
-      <PhotoGrid />
+      <ClientOnly>
+        <PhotoGrid />
+      </ClientOnly>
     </div>
   );
 }
