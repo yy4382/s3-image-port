@@ -17,6 +17,7 @@ import { optionsAtom } from "./settingsStore";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { ClientOnly } from "../misc/client-only";
+import { useTranslations } from "next-intl";
 
 const CURRENT_PROFILE = "CURRENT";
 
@@ -149,6 +150,7 @@ function Profiles() {
   const renameProfile = useSetAtom(renameProfileAtom);
   const duplicateProfile = useSetAtom(duplicateProfileAtom);
   const deleteProfile = useSetAtom(deleteProfileAtom);
+  const t = useTranslations("settings.profiles");
 
   useEffect(() => {
     if (profiles.length === 0) {
@@ -159,7 +161,7 @@ function Profiles() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Profiles</h2>
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
       </div>
 
       <ClientOnly>
@@ -176,7 +178,7 @@ function Profiles() {
                   {name}
                   {profile === CURRENT_PROFILE && (
                     <span className="ml-2 bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-1 rounded">
-                      Current
+                      {t("current")}
                     </span>
                   )}
                 </h3>
@@ -187,7 +189,7 @@ function Profiles() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex-1">
                       <McPencil className="h-5 w-5 mr-1" />
-                      Rename
+                      {t("rename")}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -208,7 +210,7 @@ function Profiles() {
                         className="w-40"
                       />
                       <Button type="submit" size="sm">
-                        Update
+                        {t("update")}
                       </Button>
                     </form>
                   </DropdownMenuContent>
@@ -222,7 +224,7 @@ function Profiles() {
                   }}
                 >
                   <McCopy className="h-5 w-5 mr-1" />
-                  Duplicate
+                  {t("duplicate")}
                 </Button>
 
                 {profile !== CURRENT_PROFILE && (
@@ -231,7 +233,7 @@ function Profiles() {
                       onClick={() => loadProfile(name)}
                       className="flex-1"
                     >
-                      Load
+                      {t("load")}
                     </Button>
                     <Button
                       variant="destructive"
@@ -240,7 +242,7 @@ function Profiles() {
                         deleteProfile(name);
                       }}
                     >
-                      Delete
+                      {t("delete")}
                     </Button>
                   </>
                 )}

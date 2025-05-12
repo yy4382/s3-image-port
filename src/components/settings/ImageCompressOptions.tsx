@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"; // Import Switch
 import type { CompressOption } from "@/utils/imageCompress"; // Adjust the import path as needed
+import { useTranslations } from "next-intl";
 
 const PROCESS_OPTION_DEFAULTS = {
   jpeg: { quality: 75 },
@@ -30,6 +31,7 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
   value,
   onChange,
 }) => {
+  const t = useTranslations("settings.imageCompress");
   const isProcessingEnabled = value !== null;
 
   const handleEnabledChange = (enabled: boolean) => {
@@ -68,7 +70,7 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
       {/* Enable/Disable Switch */}
       <div className="flex items-center space-x-2">
         <Label htmlFor="enable-processing">
-          Enable Image Convert & Compression
+          {t("enable")}
         </Label>
         <Switch
           id="enable-processing"
@@ -83,7 +85,7 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
           htmlFor="image-type-select"
           className={!isProcessingEnabled ? "text-muted-foreground" : ""}
         >
-          Target Format
+          {t("targetFormat")}
         </Label>
         <Select
           value={currentType}
@@ -97,7 +99,7 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
             disabled={!isProcessingEnabled}
             className="mt-2"
           >
-            <SelectValue placeholder="Select format" />
+            <SelectValue placeholder={t("selectFormat")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="avif">AVIF</SelectItem>
@@ -113,7 +115,7 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
         quality !== undefined &&
         currentType !== "png" && (
           <div>
-            <Label htmlFor="quality-slider">Quality: {quality}</Label>
+            <Label htmlFor="quality-slider">{t("quality", { quality })}</Label>
             <Slider
               id="quality-slider"
               min={0}

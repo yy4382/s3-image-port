@@ -4,18 +4,14 @@ import { useId, useState } from "react";
 import * as z from "zod";
 import { FormEntry } from "../ui/formEntry";
 import { Input } from "../ui/input";
+import { useTranslations } from "next-intl";
 
 export const keyTemplateSchema = z
   .string()
   .min(1, "Key template cannot be empty");
 
-export function KeyTemplate({
-  v,
-  set,
-}: {
-  v: string;
-  set: (a: string) => void;
-}) {
+export function KeyTemplate({ v, set }: { v: string; set(a: string): void }) {
+  const t = useTranslations("settings.keyTemplate");
   const [error, setError] = useState<string | undefined>(undefined);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -23,7 +19,7 @@ export function KeyTemplate({
     const result = keyTemplateSchema.safeParse(value);
     if (result.success) {
       if (!value.trim().endsWith(".{{ext}}")) {
-        setError('End with ".{{ext}}" is generally recommended.');
+        setError(t("endWithExtWarning"));
         return;
       }
       // TODO: add other checks (deprecated placeholders, "ulid-dayslice" should use with y/m/d etc.)
@@ -36,8 +32,8 @@ export function KeyTemplate({
   return (
     <FormEntry
       id={id}
-      title="Key Template"
-      description="Template for the S3 key. Use {{filename}} to insert the original filename."
+      title={t("title")}
+      description={t("description")}
       error={error}
     >
       <Input id={id} value={v} onChange={handleChange} />

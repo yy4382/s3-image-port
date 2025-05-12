@@ -9,26 +9,29 @@ import McRefresh from "~icons/mingcute/refresh-2-line.jsx";
 import { toast } from "sonner";
 import { DisplayControl } from "./DisplayControl";
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 
 export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const listPhotos = useFetchPhotoList();
+  const t = useTranslations("gallery.control");
+  
   async function handleDelete() {
     if (!s3Settings) {
-      toast.error("S3 settings not found");
+      toast.error(t("s3SettingsNotFound"));
       return;
     }
     try {
-      toast.message("Requested delete...");
+      toast.message(t("requestingDelete"));
       await Promise.all(
         Array.from(selectedPhotos).map(async (key) => {
           await new ImageS3Client(s3Settings).delete(key);
         }),
       );
-      toast.success("Deleted photos");
+      toast.success(t("deleteSuccess"));
     } catch (error) {
-      toast.error("Failed to delete photos");
+      toast.error(t("deleteFailed"));
       console.error("Failed to delete photos", error);
     } finally {
       setSelectedPhotos(new Set<string>());

@@ -11,6 +11,7 @@ import { format, startOfDay, endOfDay, subMonths } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { timeRangesGetter } from "../galleryStore";
 import { getTimeRange, type DisplayOptions } from "./displayControlStore";
+import { useTranslations } from "next-intl";
 
 const TIME_RANGES = timeRangesGetter();
 
@@ -24,6 +25,7 @@ export function DateRangePickerPopover({
   handleUpdate,
 }: DateRangePickerPopoverProps) {
   const [datePickerPopoverOpen, setDatePickerPopoverOpen] = useState(false);
+  const t = useTranslations("gallery.date");
 
   const handleDateRangeSelect = (range: DateRange | undefined) => {
     if (range?.from && range?.to && range.from < range.to) {
@@ -58,7 +60,7 @@ export function DateRangePickerPopover({
     if (Array.isArray(currentDisplayOptions.dateRangeType)) {
       const [from, to] = currentDisplayOptions.dateRangeType;
       if (from === null && to === null) {
-        return "所有";
+        return t("all");
       }
       return `${from ? format(from, "yyyy-MM-dd") : ""} - ${to ? format(to, "yyyy-MM-dd") : ""}`;
     }
@@ -66,11 +68,11 @@ export function DateRangePickerPopover({
       (r) => r.type === currentDisplayOptions.dateRangeType,
     );
     return range
-      ? `最近 ${range.type
-          .replace(/d$/, "天")
-          .replace(/m$/, "个月")
-          .replace(/y$/, "年")}`
-      : "选择日期";
+      ? `${t("recent")} ${range.type
+          .replace(/d$/, t("days"))
+          .replace(/m$/, t("months"))
+          .replace(/y$/, t("years"))}`
+      : t("selectDate");
   };
 
   const selected = useMemo(() => {
@@ -115,7 +117,7 @@ export function DateRangePickerPopover({
               className="justify-start"
               onClick={() => handlePredefinedDateRange("all")}
             >
-              全部（重置）
+              {t("reset")}
             </Button>
             {TIME_RANGES.map((range) => (
               <Button
@@ -125,11 +127,11 @@ export function DateRangePickerPopover({
                 className="justify-start"
                 onClick={() => handlePredefinedDateRange(range.type)}
               >
-                最近{" "}
+                {t("recent")}{" "}
                 {range.type
-                  .replace(/d$/, "天")
-                  .replace(/m$/, "个月")
-                  .replace(/y$/, "年")}
+                  .replace(/d$/, t("days"))
+                  .replace(/m$/, t("months"))
+                  .replace(/y$/, t("years"))}
               </Button>
             ))}
           </div>
