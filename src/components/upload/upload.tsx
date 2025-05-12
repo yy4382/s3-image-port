@@ -48,6 +48,7 @@ import key2Url from "@/utils/key2Url";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslations } from "next-intl";
 
+
 type UploadObject = {
   file: File;
   processedFile: File | null;
@@ -225,11 +226,13 @@ export function Upload() {
             <AlertTitle>{t("alerts.s3ConfigTitle")}</AlertTitle>
             <AlertDescription>
               <p>
-                {t("alerts.s3ConfigDesc")}{" "}
-                <Link href="/settings/s3" className="underline">
-                  {t("alerts.settingsPage")}
-                </Link>
-                .
+                {t.rich("alerts.s3ConfigDesc", {
+                  settings: (chunks) => (
+                    <Link href="/settings/s3" className="underline">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </p>
             </AlertDescription>
           </Alert>
@@ -304,9 +307,7 @@ function DropZone() {
           <McUpload className="h-16 w-16" />
         </div>
         <div>
-          <p className="text-lg font-medium">
-            {t("title")}
-          </p>
+          <p className="text-lg font-medium">{t("title")}</p>
         </div>
       </div>
     </div>

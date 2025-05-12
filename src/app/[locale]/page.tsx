@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 export default function Home() {
   const t = useTranslations("index");
-  
+
   return (
     <div className="p-2 flex items-center justify-center flex-1">
       <div className="max-w-4xl lg:max-w-[60rem] w-full flex flex-grow flex-col justify-center mx-auto h-full">
@@ -47,9 +47,9 @@ export default function Home() {
               </a>
             </div>
             {/* TODO: Replace this div with your Checkbox component when available */}
-            <div className="pt-2 transition-opacity opacity-40 hover:opacity-80">
+            {/* <div className="pt-2 transition-opacity opacity-40 hover:opacity-80">
               {t("noLongerShow")}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
