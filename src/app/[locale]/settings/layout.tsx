@@ -10,8 +10,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
   
   return (
     <Card className="max-w-4xl w-full mx-auto h-fit">
-      <CardContent className="grid grid-cols-[auto_1fr] gap-4">
-        <div className="flex flex-col gap-4 min-w-48">
+      <CardContent className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-4">
+        <div className="flex flex-col gap-4 md:min-w-48">
           <h1 className="text-2xl font-bold ml-2">{t("title")}</h1>
           <SettingPageSwitcher />
         </div>
@@ -25,7 +25,7 @@ function SettingPageSwitcher() {
   const t = useTranslations("settings");
   
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 mb-4 md:mb-0">
       <LinkWithActive
         href="/settings/profile"
         className={cn(
