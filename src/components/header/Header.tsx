@@ -1,13 +1,12 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "../ui/button";
 import McGithub from "~icons/mingcute/github-line";
-import { ThemeSwitcher, ThemeSwitcherButton } from "./ThemeSwither";
-import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
+import { ThemeSwitcher } from "./ThemeSwither";
 import McUpload from "~icons/mingcute/upload-3-fill";
 import McPhotoAlbum from "~icons/mingcute/photo-album-2-fill";
 import McSettings from "~icons/mingcute/settings-3-fill";
 import { LinkWithActive } from "../misc/link-with-active";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 
 // Placeholder hooks and components - replace with actual implementations
 // You'll need libraries for color mode, breakpoints, and UI components (like Popover, Button, Icon)
@@ -24,7 +23,7 @@ const Header: React.FC = () => {
         <Link
           className="flex-1 justify-start flex items-center gap-2 select-none"
           href="/"
-          aria-label="Logo" // Removed i18n
+          aria-label="Logo"
         >
           <img
             src="/favicon.svg" // Assuming favicon is in public root
@@ -54,22 +53,9 @@ const Header: React.FC = () => {
           </LinkWithActive>
         </div>
 
-        <div className="flex-1 flex justify-end items-center gap-1">
-          <div className="hidden md:block">
-            <ThemeSwitcher />
-          </div>
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <ThemeSwitcherButton />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <ThemeSwitcher />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Removed Language Switcher Popover */}
+        <div className="flex-1 flex justify-end items-center md:gap-2 gap-0">
+          <LocaleSwitcher />
+          <ThemeSwitcher />
 
           <a
             target="_blank"

@@ -10,7 +10,7 @@ import {
   type DisplayOptions,
 } from "./displayControlStore";
 import { currentPageAtom } from "../galleryStore";
-import { Input } from "../../ui/input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -22,7 +22,8 @@ import { FilterIcon, ArrowUpDownIcon } from "lucide-react";
 import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 
 function useSearchDisplayOptions() {
   const router = useRouter();
