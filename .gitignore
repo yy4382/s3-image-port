@@ -27,3 +27,10 @@ logs
 # vitepress
 docs/.vitepress/dist
 docs/.vitepress/cache
+
+stats.html
+
+coverage/
+
+.vinxi
+.vercel

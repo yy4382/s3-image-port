@@ -1,9 +1,10 @@
-import { defineVitestConfig } from "@nuxt/test-utils/config";
+import { defineConfig } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineVitestConfig({
-  // any custom Vitest config you require
+export default defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
-    setupFiles: ["vitest-localstorage-mock"],
-    mockReset: false,
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.ts", "vitest-localstorage-mock"],
   },
 });

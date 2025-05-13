@@ -1,0 +1,15 @@
+@utility hover-to-show {
+  @apply pointer-events-none group-hover:pointer-events-auto focus-visible:pointer-events-auto opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-200;
+}
+
+/* * {
+  @apply border-border;
+} */
+@utility bg-grid-image {
+  background-image: url("/background.svg");
+  mask-image: linear-gradient(transparent, black, transparent);
+  @variant dark {
+    background-image: unset;
+    mask-image: unset;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "navbar_upload": "Upload",
+  "navbar_photos": "Photos",
+  "navbar_settings": "Settings"
+}
