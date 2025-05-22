@@ -248,29 +248,40 @@ export const useFetchPhotoList = () => {
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("gallery.store");
 
-  const fetchPhotoList = useCallback(async () => {
-    if (!s3Settings) {
-      toast.error(t("s3SettingsNotFound"));
-      console.error("S3 settings not found");
-      return;
-    }
-    let photos: Photo[];
-    try {
-      photos = await new ImageS3Client(s3Settings).list();
-    } catch (error) {
-      toast.error(t("failedToFetchPhotos"));
-      console.error("Failed to fetch photos", error);
-      return;
-    }
-    if (photos) {
-      toast.message(t("fetchedPhotos"));
-      console.log("Fetched photos", photos.length);
-      setPhotos(photos);
-    } else {
-      toast.error(t("failedToFetchPhotos"));
-      console.error("Failed to fetch photos");
-    }
-  }, [s3Settings, setPhotos, t]);
+  const fetchPhotoList = useCallback(
+    async (showToast = true) => {
+      if (!s3Settings) {
+        if (showToast) {
+          toast.error(t("s3SettingsNotFound"));
+        }
+        console.error("S3 settings not found");
+        return;
+      }
+      let photos: Photo[];
+      try {
+        photos = await new ImageS3Client(s3Settings).list();
+      } catch (error) {
+        if (showToast) {
+          toast.error(t("failedToFetchPhotos"));
+        }
+        console.error("Failed to fetch photos", error);
+        return;
+      }
+      if (photos) {
+        if (showToast) {
+          toast.message(t("fetchedPhotos"));
+        }
+        console.log("Fetched photos", photos.length);
+        setPhotos(photos);
+      } else {
+        if (showToast) {
+          toast.error(t("failedToFetchPhotos"));
+        }
+        console.error("Failed to fetch photos");
+      }
+    },
+    [s3Settings, setPhotos, t],
+  );
 
   return fetchPhotoList;
 };

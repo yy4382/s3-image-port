@@ -62,6 +62,11 @@
       "s3ConfigTitle": "S3 配置不正确",
       "s3ConfigDesc": "S3 配置不正确或未配置，请在设置页面中检查。",
       "editLink": "编辑设置"
+    },
+    "gallery": {
+      "title": "画廊",
+      "autoRefresh": "自动刷新",
+      "autoRefreshDesc": "当有新照片上传时自动刷新画廊。"
     }
   },
   "gallery": {
