@@ -48,7 +48,6 @@ import key2Url from "@/utils/key2Url";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslations } from "next-intl";
 
-
 type UploadObject = {
   file: File;
   processedFile: File | null;
@@ -239,21 +238,21 @@ export function Upload() {
         )}
       </ClientOnly>
 
-      {fileAtoms.length > 0 && (
-        <div className="mb-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            {t("fileList.title")} ({fileAtoms.length})
-          </h2>
-          <div className="flex items-center space-x-2">
-            {hasUploaded && (
-              <Button
-                variant="outline"
-                onClick={removeUploaded}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                {t("fileList.clearUploaded")}
-              </Button>
-            )}
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-semibold">
+          {t("fileList.title")} ({fileAtoms.length})
+        </h2>
+        <div className="flex items-center space-x-2">
+          {hasUploaded && (
+            <Button
+              variant="outline"
+              onClick={removeUploaded}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              {t("fileList.clearUploaded")}
+            </Button>
+          )}
+          {fileAtoms.length > 0 && (
             <Button
               onClick={() => {
                 if (!s3Settings) {
@@ -263,13 +262,14 @@ export function Upload() {
                 triggerUpload(s3Settings);
               }}
               size="lg"
+              disabled={!s3Settings}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {t("fileList.uploadAll")}
             </Button>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="grid gap-1">
         {fileAtoms.map((fileAtom) => (
