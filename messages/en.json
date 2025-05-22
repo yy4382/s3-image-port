@@ -57,6 +57,11 @@
       "load": "Load",
       "delete": "Delete",
       "update": "Update"
+    },
+    "s3Invalid": {
+      "s3ConfigTitle": "S3 incorrectly configured",
+      "s3ConfigDesc": "S3 settings are not valid or not configured, please check in the settings page.",
+      "editLink": "Edit Settings"
     }
   },
   "gallery": {
@@ -138,8 +143,6 @@
       "keyWillBe": "Key will be:"
     },
     "alerts": {
-      "s3ConfigTitle": "S3 incorrectly configured",
-      "s3ConfigDesc": "Your S3 settings are not valid. Please configure them in the <settings>settings page</settings>.",
       "s3NotConfigured": "S3 settings are not configured"
     }
   }
