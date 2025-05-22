@@ -2,9 +2,22 @@ import { atomWithStorageMigration } from "@/utils/atomWithStorageMigration";
 import { defaultKeyTemplate } from "@/utils/generateKey";
 import { focusAtom } from "jotai-optics";
 import { keyTemplateSchema } from "./KeyTemplate";
-import z from "zod";
+import z from "zod/v4";
 import { compressOptionSchema } from "@/utils/imageCompress";
 import { atom } from "jotai";
+
+
+export const s3SettingsSchema = z.object({
+  endpoint: z.url(),
+  bucket: z.string().min(1),
+  region: z.string().min(1),
+  accKeyId: z.string().min(1),
+  secretAccKey: z.string().min(1),
+  forcePathStyle: z.boolean(),
+  pubUrl: z.url(),
+});
+
+export type S3Options = z.infer<typeof s3SettingsSchema>;
 
 export const uploadSettingsSchema = z.object({
   keyTemplate: keyTemplateSchema,
@@ -19,11 +32,14 @@ export const gallerySettingsSchema = z.object({
 
 export type GalleryOptions = z.infer<typeof gallerySettingsSchema>;
 
-export type Options = {
-  s3: S3Options;
-  upload: UploadOptions;
-  gallery: GalleryOptions;
-};
+export const optionsSchema = z.object({
+  s3: s3SettingsSchema,
+  upload: uploadSettingsSchema,
+  gallery: gallerySettingsSchema,
+});
+
+export type Options = z.infer<typeof optionsSchema>;
+
 
 export const optionsAtom = atomWithStorageMigration<Options>(
   "s3ip:options",
@@ -66,17 +82,7 @@ export const gallerySettingsAtom = focusAtom(optionsAtom, (optic) =>
   optic.prop("gallery"),
 );
 
-export const s3SettingsSchema = z.object({
-  endpoint: z.url(),
-  bucket: z.string().min(1),
-  region: z.string().min(1),
-  accKeyId: z.string().min(1),
-  secretAccKey: z.string().min(1),
-  forcePathStyle: z.boolean(),
-  pubUrl: z.url(),
-});
 
-export type S3Options = z.infer<typeof s3SettingsSchema>;
 
 export const validS3SettingsAtom = atom((get) => {
   const settings = get(s3SettingsAtom);

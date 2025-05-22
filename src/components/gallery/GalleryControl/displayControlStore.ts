@@ -1,6 +1,6 @@
 import { endOfDay, format, parse, startOfDay, sub } from "date-fns";
 import { atom } from "jotai";
-import z from "zod";
+import z from "zod/v4";
 import { timeRangesGetter } from "../galleryStore";
 import deepEqual from "deep-equal";
 
