@@ -11,7 +11,7 @@ import {
   type SetStateAction,
 } from "jotai";
 import { useId, useState, type JSX } from "react";
-import * as z from "zod";
+import * as z from "zod/v4";
 import { Button } from "../ui/button";
 import { focusAtom } from "jotai-optics";
 import {

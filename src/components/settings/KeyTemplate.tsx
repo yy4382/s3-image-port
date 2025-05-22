@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import * as z from "zod";
+import * as z from "zod/v4";
 import { FormEntry } from "../ui/formEntry";
 import { Input } from "../ui/input";
 import { useTranslations } from "next-intl";
