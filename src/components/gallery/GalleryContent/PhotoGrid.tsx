@@ -71,7 +71,7 @@ export function PhotoGrid() {
           </div>
           <Button
             variant="outline"
-            onClick={listPhotos}
+            onClick={() => listPhotos()}
             className="flex items-center gap-2"
           >
             {t("loadPhotos")}
