@@ -13,7 +13,7 @@ import { getTranslations } from "next-intl/server";
 // You'll need libraries for color mode, breakpoints, and UI components (like Popover, Button, Icon)
 
 const Header: React.FC = async () => {
-  const getNavLinkClass = `flex flex-row items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 data-[status=active]:text-primary`;
+  const getNavLinkClass = `flex flex-row items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 data-[status=active]:text-primary dark:data-[status=active]:text-primary`;
   const t = await getTranslations("navbar");
   return (
     <div className="w-full">
