@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { DisplayControl } from "./DisplayControl";
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { InvalidS3Dialog } from "@/components/settings/InvalidS3Dialog";
 
 export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
@@ -40,6 +41,11 @@ export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
   }
   return (
     <div className="flex gap-2 justify-between">
+      {
+        s3Settings === undefined && (
+          <InvalidS3Dialog />
+        )
+      }
       <div className="flex gap-2">
         <Button onClick={onRefresh} size={"icon"}>
           <McRefresh />

@@ -18,7 +18,6 @@ import {
 } from "@/utils/imageCompress";
 import ImageS3Client from "@/utils/ImageS3Client";
 import { ClientOnly } from "../misc/client-only";
-import { Link } from "@/i18n/navigation";
 import {
   atom,
   useAtom,
@@ -45,8 +44,8 @@ import {
   uploadSettingsAtom,
 } from "../settings/settingsStore";
 import key2Url from "@/utils/key2Url";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslations } from "next-intl";
+import { InvalidS3Dialog } from "../settings/InvalidS3Dialog";
 
 type UploadObject = {
   file: File;
@@ -219,24 +218,7 @@ export function Upload() {
         </CardContent>
       </Card>
 
-      <ClientOnly>
-        {!s3Settings && (
-          <Alert className="mb-4" variant="destructive">
-            <AlertTitle>{t("alerts.s3ConfigTitle")}</AlertTitle>
-            <AlertDescription>
-              <p>
-                {t.rich("alerts.s3ConfigDesc", {
-                  settings: (chunks) => (
-                    <Link href="/settings/s3" className="underline">
-                      {chunks}
-                    </Link>
-                  ),
-                })}
-              </p>
-            </AlertDescription>
-          </Alert>
-        )}
-      </ClientOnly>
+      <ClientOnly>{!s3Settings &&  <InvalidS3Dialog />}</ClientOnly>
 
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">

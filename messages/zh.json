@@ -57,6 +57,11 @@
       "load": "加载",
       "delete": "删除",
       "update": "更新"
+    },
+    "s3Invalid": {
+      "s3ConfigTitle": "S3 配置不正确",
+      "s3ConfigDesc": "S3 配置不正确或未配置，请在设置页面中检查。",
+      "editLink": "编辑设置"
     }
   },
   "gallery": {
@@ -138,8 +143,6 @@
       "keyWillBe": "名称将会是："
     },
     "alerts": {
-      "s3ConfigTitle": "S3 配置不正确",
-      "s3ConfigDesc": "您有一个无效的 S3 配置。请在<settings>设置页面</settings>中检查。",
       "s3NotConfigured": "S3 设置未配置"
     }
   }
