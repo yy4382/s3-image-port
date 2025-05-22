@@ -56,7 +56,31 @@
       "duplicate": "Duplicate",
       "load": "Load",
       "delete": "Delete",
-      "update": "Update"
+      "update": "Update",
+      "export": "Export",
+      "importProfile": "Import Profile",
+      "importOptions": "Import Options",
+      "importFromClipboard": "Import from Clipboard",
+      "importFromFile": "Import from File",
+      "clipboardEmpty": "Clipboard is empty.",
+      "failedToReadClipboard": "Failed to read from clipboard.",
+      "failedToReadFile": "Failed to read file.",
+      "errors": {
+        "sameNameError": "New name is the same as the old name",
+        "nameExists": "Profile name already exists",
+        "loadFailed": "Failed to load profile. Please try again.",
+        "loadSuccess": "Profile \"{name}\" loaded successfully.",
+        "duplicateSuccess": "Profile \"{name}\" duplicated as \"{newName}\".",
+        "duplicateFailed": "Failed to duplicate profile.",
+        "profileNotFound": "Profile not found for deletion.",
+        "cannotDeleteCurrent": "Cannot delete the currently active profile.",
+        "deleteSuccess": "Profile \"{nameToDelete}\" deleted.",
+        "invalidFormat": "Invalid profile format. Missing name or data.",
+        "nameExistsImport": "Profile with name \"{name}\" already exists.",
+        "importSuccess": "Profile \"{name}\" imported successfully.",
+        "parseFailed": "Failed to parse profile JSON. Please check the format.",
+        "validationFailed": "Data validation failed: {error}"
+      }
     },
     "s3Invalid": {
       "s3ConfigTitle": "S3 incorrectly configured",

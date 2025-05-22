@@ -56,7 +56,31 @@
       "duplicate": "复制",
       "load": "加载",
       "delete": "删除",
-      "update": "更新"
+      "update": "更新",
+      "export": "导出",
+      "importProfile": "导入配置",
+      "importOptions": "导入选项",
+      "importFromClipboard": "从剪贴板导入",
+      "importFromFile": "从文件导入",
+      "clipboardEmpty": "剪贴板为空。",
+      "failedToReadClipboard": "无法从剪贴板读取。",
+      "failedToReadFile": "无法读取文件。",
+      "errors": {
+        "sameNameError": "新名称与旧名称相同",
+        "nameExists": "配置名称已存在",
+        "loadFailed": "加载配置失败，请重试。",
+        "loadSuccess": "配置 \"{name}\" 已成功加载。",
+        "duplicateSuccess": "配置 \"{name}\" 已复制为 \"{newName}\"。",
+        "duplicateFailed": "复制配置失败。",
+        "profileNotFound": "未找到要删除的配置。",
+        "cannotDeleteCurrent": "无法删除当前活动的配置。",
+        "deleteSuccess": "配置 \"{nameToDelete}\" 已删除。",
+        "invalidFormat": "配置格式无效。缺少名称或数据。",
+        "nameExistsImport": "名为 \"{name}\" 的配置已存在。",
+        "importSuccess": "配置 \"{name}\" 已成功导入。",
+        "parseFailed": "解析配置 JSON 失败。请检查格式。",
+        "validationFailed": "数据验证失败：{error}"
+      }
     },
     "s3Invalid": {
       "s3ConfigTitle": "S3 配置不正确",
