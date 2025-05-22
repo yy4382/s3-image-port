@@ -53,6 +53,15 @@ function SettingPageSwitcher() {
       >
         {t("upload")}
       </LinkWithActive>
+      <LinkWithActive
+        href="/settings/gallery"
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",
+        )}
+      >
+        {t("gallery.title")}
+      </LinkWithActive>
     </div>
   );
 }

@@ -143,7 +143,7 @@ function S3Validation() {
   );
 }
 
-function SettingsInputEntry<K>({
+export function SettingsInputEntry<K>({
   title,
   description,
   atom,

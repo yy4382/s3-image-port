@@ -13,12 +13,19 @@ export const uploadSettingsSchema = z.object({
 
 export type UploadOptions = z.infer<typeof uploadSettingsSchema>;
 
+export const gallerySettingsSchema = z.object({
+  autoRefresh: z.boolean(),
+});
+
+export type GalleryOptions = z.infer<typeof gallerySettingsSchema>;
+
 export type Options = {
   s3: S3Options;
   upload: UploadOptions;
+  gallery: GalleryOptions;
 };
 
-export const [optionsAtom] = atomWithStorageMigration<Options>(
+export const optionsAtom = atomWithStorageMigration<Options>(
   "s3ip:options",
   {
     s3: {
@@ -34,6 +41,9 @@ export const [optionsAtom] = atomWithStorageMigration<Options>(
       keyTemplate: defaultKeyTemplate,
       compressionOption: null,
     },
+    gallery: {
+      autoRefresh: true,
+    }
   },
   undefined,
   {
@@ -50,6 +60,10 @@ export const s3SettingsAtom = focusAtom(optionsAtom, (optic) =>
 
 export const uploadSettingsAtom = focusAtom(optionsAtom, (optic) =>
   optic.prop("upload"),
+);
+
+export const gallerySettingsAtom = focusAtom(optionsAtom, (optic) =>
+  optic.prop("gallery"),
 );
 
 export const s3SettingsSchema = z.object({

@@ -62,6 +62,11 @@
       "s3ConfigTitle": "S3 incorrectly configured",
       "s3ConfigDesc": "S3 settings are not valid or not configured, please check in the settings page.",
       "editLink": "Edit Settings"
+    },
+    "gallery": {
+      "title": "Gallery",
+      "autoRefresh": "Auto Refresh",
+      "autoRefreshDesc": "Auto refresh the gallery when a new photo is uploaded."
     }
   },
   "gallery": {

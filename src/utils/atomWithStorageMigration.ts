@@ -1,4 +1,3 @@
-import deepEqual from "deep-equal";
 import { atom, type SetStateAction } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import z from "zod";
@@ -55,23 +54,5 @@ export function atomWithStorageMigration<T>(
       set(baseAtom, { version, data: nextValue });
     },
   );
-  const withVersionAtom = atom(
-    (get) => {
-      return { version, data: get(anAtom) };
-    },
-    (_, set, update: WithVersion<unknown>) => {
-      const migrated = getValue(update);
-      set(baseAtom, { version, data: migrated });
-    },
-  );
-  const deepEqualWith = atom(null, (get, _, other: WithVersion<unknown>) => {
-    const stored = get(anAtom);
-    const parsedOther = withVersionSchema.safeParse(other);
-    if (!parsedOther.success) {
-      return false;
-    }
-    const migratedOther = getValue(parsedOther.data);
-    return deepEqual(stored, migratedOther);
-  });
-  return [anAtom, withVersionAtom, deepEqualWith] as const;
+  return anAtom;
 }
