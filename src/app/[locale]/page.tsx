@@ -35,6 +35,7 @@ export default function Home() {
               </Link>
               <a
                 className={buttonVariants({ variant: "secondary" })}
+                target="_blank"
                 href="https://docs.iport.yfi.moe"
               >
                 {t("readDocs")}
@@ -42,6 +43,7 @@ export default function Home() {
               <a
                 className={buttonVariants({ variant: "ghost" })}
                 href="https://github.com/yy4382/s3-image-port"
+                target="_blank"
               >
                 {t("viewSource")}
               </a>
