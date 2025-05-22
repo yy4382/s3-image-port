@@ -43,7 +43,7 @@ export const optionsAtom = atomWithStorageMigration<Options>(
     },
     gallery: {
       autoRefresh: true,
-    }
+    },
   },
   undefined,
   {
@@ -86,3 +86,53 @@ export const validS3SettingsAtom = atom((get) => {
   }
   return undefined;
 });
+
+/**
+ * Try to migrate from v1 (nuxt version) to current version
+ */
+export function tryMigrateFromV1(): Options {
+  const oldS3SettingsStr = localStorage.getItem("s3-settings");
+  const oldAppSettingsStr = localStorage.getItem("app-settings");
+
+  if (!oldS3SettingsStr || !oldAppSettingsStr) {
+    throw new Error("No old settings found");
+  }
+
+  if (oldAppSettingsStr) {
+    localStorage.removeItem("app-settings");
+  }
+  if (oldS3SettingsStr) {
+    localStorage.removeItem("s3-settings");
+  }
+
+  let oldS3Settings: Record<string, unknown>;
+  let oldAppSettings: Record<string, unknown>;
+
+  try {
+    oldS3Settings = JSON.parse(oldS3SettingsStr);
+    oldAppSettings = JSON.parse(oldAppSettingsStr);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to parse old settings");
+  }
+
+  const newOptions: Options = {
+    s3: {
+      endpoint: String(oldS3Settings?.endpoint ?? ""),
+      bucket: String(oldS3Settings?.bucket ?? ""),
+      region: String(oldS3Settings?.region ?? ""),
+      accKeyId: String(oldS3Settings?.accKeyId ?? ""),
+      secretAccKey: String(oldS3Settings?.secretAccKey ?? ""),
+      forcePathStyle: Boolean(oldS3Settings?.forcePathStyle ?? false),
+      pubUrl: String(oldS3Settings?.pubUrl ?? ""),
+    },
+    upload: {
+      keyTemplate: String(oldAppSettings?.keyTemplate ?? ""),
+      compressionOption: null,
+    },
+    gallery: {
+      autoRefresh: Boolean(oldAppSettings?.enableAutoRefresh ?? true),
+    },
+  };
+  return newOptions;
+}

@@ -1,4 +1,5 @@
 import { LinkWithActive } from "@/components/misc/link-with-active";
+import { MigrationIndicator } from "@/components/settings/MigrationIndicator";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -7,23 +8,26 @@ import type { PropsWithChildren } from "react";
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
   const t = useTranslations("settings");
-  
+
   return (
-    <Card className="max-w-4xl w-full mx-auto h-fit">
-      <CardContent className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-4">
-        <div className="flex flex-col gap-4 md:min-w-48">
-          <h1 className="text-2xl font-bold ml-2">{t("title")}</h1>
-          <SettingPageSwitcher />
-        </div>
-        {children}
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
+      <MigrationIndicator />
+      <Card className="h-fit">
+        <CardContent className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-4">
+          <div className="flex flex-col gap-4 md:min-w-48">
+            <h1 className="text-2xl font-bold ml-2">{t("title")}</h1>
+            <SettingPageSwitcher />
+          </div>
+          {children}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
 function SettingPageSwitcher() {
   const t = useTranslations("settings");
-  
+
   return (
     <div className="flex flex-col gap-2 mb-4 md:mb-0">
       <LinkWithActive
