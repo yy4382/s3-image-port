@@ -1,4 +1,4 @@
-import ImageModal from "@/components/image/ImageModal";
+import PhotoModal from "@/components/photo/PhotoModal";
 import { setRequestLocale } from "next-intl/server";
 
 export default async function ImagePage({
@@ -8,5 +8,5 @@ export default async function ImagePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <ImageModal />;
+  return <PhotoModal />;
 }
