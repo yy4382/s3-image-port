@@ -218,7 +218,7 @@ export function Upload() {
         </CardContent>
       </Card>
 
-      <ClientOnly>{!s3Settings &&  <InvalidS3Dialog />}</ClientOnly>
+      <ClientOnly>{!s3Settings && <InvalidS3Dialog />}</ClientOnly>
 
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">

@@ -26,7 +26,7 @@ export function PhotoGrid() {
   const listPhotos = useFetchPhotoList();
   const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
   const t = useTranslations("gallery.grid");
-  
+
   useEffect(() => {
     setContainerWidth(containerRef.current?.clientWidth ?? 600); // Set initial width immediately
 
