@@ -16,11 +16,13 @@ import { produce } from "immer";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import McCopy from "~icons/mingcute/copy-2-line.jsx";
-import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
-import McKey2Line from "~icons/mingcute/key-2-line.jsx";
-import McTimeLine from "~icons/mingcute/time-line.jsx";
-import McZoomIn from "~icons/mingcute/zoom-in-line.jsx";
+import {
+  CopyIcon,
+  InfoIcon,
+  KeyRoundIcon,
+  Clock4Icon,
+  ZoomInIcon,
+} from "lucide-react";
 import { validS3SettingsAtom } from "@/components/settings/settingsStore";
 import {
   DEFAULT_IMAGE_SIZE,
@@ -277,7 +279,7 @@ function PhotoItemOverlay({
         }}
       >
         {" "}
-        {selectMode ? <McZoomIn /> : <McCopy />}
+        {selectMode ? <ZoomInIcon /> : <CopyIcon />}
       </Button>
     </>
   );
@@ -289,19 +291,19 @@ function PhotoInfo({ photo }: { photo: Photo }) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant={"secondary"} size="icon">
-            <MingcuteInformationLine />
+            <InfoIcon />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
           <div className="flex flex-col space-y-1 flex-shrink basis-0 flex-grow min-w-0 p-2">
             <div className="text-sm items-center inline-flex">
-              <McTimeLine className="shrink-0 mr-2" />
+              <Clock4Icon className="shrink-0 mr-2" />
               <span className="truncate block">
                 {format(new Date(photo.LastModified), "yyyy-MM-dd HH:mm:ss")}
               </span>
             </div>
             <div className="text-sm items-center inline-flex">
-              <McKey2Line className="shrink-0 mr-2" />
+              <KeyRoundIcon className="shrink-0 mr-2" />
               <span title={photo.Key} className="truncate block">
                 {photo.Key}
               </span>

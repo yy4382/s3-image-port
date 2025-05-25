@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { validS3SettingsAtom } from "../settings/settingsStore";
 import { PhotoImg } from "../gallery/GalleryContent/PhotoItem/PhotoItem";
 import { Button } from "../ui/button";
-import McArrowLeft from "~icons/mingcute/arrow-left-line";
+import { ArrowLeftIcon } from "lucide-react";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
 import { photosAtomReadOnly } from "../gallery/galleryStore";
 import { toast } from "sonner";
@@ -146,7 +146,7 @@ function PhotoModalToolbar({ path }: { path: string }) {
     <div className="flex justify-between items-center text-white p-2 relative z-20">
       <div className="">
         <Button size="icon" variant="ghost" onClick={handleBack}>
-          <McArrowLeft />
+          <ArrowLeftIcon />
         </Button>
       </div>
       <div className="flex gap-2 items-center">
