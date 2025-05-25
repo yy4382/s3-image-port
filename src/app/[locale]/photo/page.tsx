@@ -1,5 +1,6 @@
 import PhotoModal from "@/components/photo/PhotoModal";
 import { setRequestLocale } from "next-intl/server";
+import { Suspense } from "react";
 
 export default async function ImagePage({
   params,
@@ -8,5 +9,11 @@ export default async function ImagePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PhotoModal />;
+  return (
+    <Suspense
+      fallback={<div className="h-screen w-screen bg-background dark" />}
+    >
+      <PhotoModal />
+    </Suspense>
+  );
 }
