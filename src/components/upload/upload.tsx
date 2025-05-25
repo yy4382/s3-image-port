@@ -31,13 +31,15 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { monotonicFactory } from "ulid";
 import { v4 as uuid } from "uuid";
-import McCheck from "~icons/mingcute/check-line";
-import McTrash from "~icons/mingcute/delete-2-line";
-import McPencil from "~icons/mingcute/edit-2-line";
-import McUpload from "~icons/mingcute/file-upload-line";
-import McLoading from "~icons/mingcute/loading-3-line";
-import McUpload2 from "~icons/mingcute/upload-2-line";
-import McCopy from "~icons/mingcute/copy-2-line";
+import {
+  CheckIcon,
+  Trash2Icon,
+  PencilIcon,
+  FileUpIcon,
+  LoaderCircleIcon,
+  UploadIcon,
+  CopyIcon,
+} from "lucide-react";
 import {
   validS3SettingsAtom,
   type S3Options,
@@ -286,7 +288,7 @@ function DropZone() {
       <input {...getInputProps()} />
       <div className="flex flex-col items-center justify-center space-y-4">
         <div className="h-16 w-16 text-muted-foreground">
-          <McUpload className="h-16 w-16" />
+          <UploadIcon className="h-16 w-16" />
         </div>
         <div>
           <p className="text-lg font-medium">{t("title")}</p>
@@ -344,16 +346,16 @@ function FilePreview({
               }}
             >
               <span className="sr-only">{t("copy")}</span>
-              <McCopy />
+              <CopyIcon />
             </Button>
           )}
           {file.status === "uploading" ? (
             <Button variant="outline" size="icon" disabled>
-              <McLoading className="animate-spin" />
+              <LoaderCircleIcon className="animate-spin" />
             </Button>
           ) : file.status === "uploaded" ? (
             <Button variant="outline" size="icon" disabled>
-              <McCheck className="text-green-500" />
+              <CheckIcon className="text-green-500" />
             </Button>
           ) : (
             <Button
@@ -362,7 +364,7 @@ function FilePreview({
               onClick={() => upload(fileAtom, s3Settings!)}
               disabled={!s3Settings}
             >
-              <McUpload2 />
+              <FileUpIcon />
             </Button>
           )}
 
@@ -370,7 +372,7 @@ function FilePreview({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="">
                 <span className="sr-only">{t("edit")}</span>
-                <McPencil />
+                <PencilIcon />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="p-4">
@@ -403,7 +405,7 @@ function FilePreview({
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <span className="sr-only">{t("remove")}</span>
-            <McTrash className="h-4 w-4" />
+            <Trash2Icon className="h-4 w-4" />
           </Button>
         </div>
       </div>

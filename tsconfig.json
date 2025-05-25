@@ -21,7 +21,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["unplugin-icons/types/react"],
     "plugins": [
       {
         "name": "next"

@@ -3,9 +3,7 @@ import ImageS3Client from "@/utils/ImageS3Client";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { selectedPhotosAtom, useFetchPhotoList } from "../galleryStore";
 import { validS3SettingsAtom } from "@/components/settings/settingsStore";
-import McCheckbox from "~icons/mingcute/checkbox-line.jsx";
-import McDelete from "~icons/mingcute/delete-3-line.jsx";
-import McRefresh from "~icons/mingcute/refresh-2-line.jsx";
+import { SquareCheckIcon, Trash2Icon, RefreshCcwIcon } from "lucide-react";
 import { toast } from "sonner";
 import { DisplayControl } from "./DisplayControl";
 import { Suspense, useCallback } from "react";
@@ -60,7 +58,7 @@ export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
       {s3Settings === undefined && <InvalidS3Dialog />}
       <div className="flex gap-2">
         <Button onClick={onRefresh} size={"icon"}>
-          <McRefresh />
+          <RefreshCcwIcon />
         </Button>
         {selectedPhotos.size > 0 && (
           <>
@@ -70,13 +68,13 @@ export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
                 setSelectedPhotos(new Set<string>());
               }}
             >
-              <McCheckbox /> {selectedPhotos.size}
+              <SquareCheckIcon /> {selectedPhotos.size}
             </Button>
             <Button
               variant={"destructive"}
               onClick={() => handleDelete(Array.from(selectedPhotos))}
             >
-              <McDelete /> {selectedPhotos.size}
+              <Trash2Icon /> {selectedPhotos.size}
             </Button>
           </>
         )}

@@ -1,7 +1,6 @@
 import * as React from "react";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { CheckIcon } from "lucide-react";
-import McCheckFill from "~icons/mingcute/checkbox-fill";
+import { CheckIcon, CheckSquare2Icon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -47,7 +46,7 @@ function ImageCheckbox({
         data-slot="checkbox-indicator"
         className="flex items-center justify-center text-current transition-none"
       >
-        <McCheckFill className="size-8 z-20" />
+        <CheckSquare2Icon className="size-8 z-20" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );
