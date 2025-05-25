@@ -1,5 +1,11 @@
 import Header from "@/components/header/Header";
 import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "S3 Image Port",
+  description: "Manage and view your S3 images with S3 Image Port.",
+};
 
 export default async function RootLayout({
   children,

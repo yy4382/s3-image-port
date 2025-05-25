@@ -1,5 +1,11 @@
 import { GallerySettings } from "@/components/settings/gallery";
 import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Gallery Settings - S3 Image Port",
+  description: "Configure your gallery settings for S3 Image Port.",
+};
 
 export default async function GallerySettingsPage({
   params,
