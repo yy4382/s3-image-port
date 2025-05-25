@@ -9,6 +9,24 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
+  openGraph: {
+    title: "S3 Image Port",
+    description: "Manage your images in S3",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "S3 Image Port Site Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "S3 Image Port",
+    description: "Manage your images in S3",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({

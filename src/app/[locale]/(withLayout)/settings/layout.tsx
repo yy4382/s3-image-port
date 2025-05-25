@@ -6,6 +6,12 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Settings - S3 Image Port",
+  description: "Configure your S3 Image Port settings.",
+};
 
 export default async function SettingsLayout({
   children,
