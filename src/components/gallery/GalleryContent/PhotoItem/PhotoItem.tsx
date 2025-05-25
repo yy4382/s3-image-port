@@ -28,6 +28,8 @@ import {
   selectedPhotosAtom,
 } from "../../galleryStore";
 import { setNaturalSizesAtom } from "../../galleryStore";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 
 export function PhotoItem({
   photo,
@@ -52,13 +54,69 @@ function PhotoDisplay({
 }) {
   const s3Key = photo.Key;
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-  const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
 
   const [loadingState, setLoadingState] = useState<
     "loading" | "loaded" | "error"
   >("loading");
+
+  const allSelected = useAtomValue(selectedPhotosAtom);
+  const selected = useMemo(() => {
+    return allSelected.has(photo.Key);
+  }, [allSelected, photo.Key]);
+
+  const handleOpenModal = useOpenModal(photo.Key);
+
+  return (
+    <div
+      ref={wrapperRef}
+      className="overflow-hidden transition-all duration-75 group"
+      style={{ width: size[0], height: size[1] }}
+    >
+      {loadingState === "loading" && <Skeleton className="w-full h-full" />}
+      {loadingState === "error" && <PhotoDisplayError s3Key={s3Key} />}
+      {s3Settings && (
+        <PhotoImg
+          className={cn("transition-[scale] duration-75", {
+            invisible: loadingState !== "loaded",
+            "scale-90 rounded-lg": selected,
+          })}
+          s3Key={s3Key}
+          url={key2Url(s3Key, s3Settings)}
+          setLoadingState={setLoadingState}
+          width={size[0]}
+          height={size[1]}
+          draggable="false"
+        />
+      )}
+      {loadingState === "loaded" && (
+        <div className="absolute inset-0 z-20">
+          <PhotoItemOverlay
+            photo={photo}
+            selected={selected}
+            onOpenModal={handleOpenModal}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Display the photo image, handle the loading state, and cache the natural size.
+ */
+export function PhotoImg({
+  s3Key,
+  url,
+  setLoadingState,
+  ...props
+}: {
+  s3Key: string;
+  url: string;
+  setLoadingState: (state: "loading" | "loaded" | "error") => void;
+} & React.ComponentProps<"img">) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
 
   const handleLoad = useCallback(() => {
     if (!imgRef.current) return;
@@ -72,12 +130,12 @@ function PhotoDisplay({
     // setTimeout(() => {
     // setLoadingState("loaded");
     // }, 50);
-  }, [s3Key, setNaturalSizes]);
+  }, [s3Key, setNaturalSizes, setLoadingState]);
 
   const handleError = useCallback(() => {
     setNaturalSizes([s3Key, DEFAULT_IMAGE_SIZE]);
     setLoadingState("error");
-  }, [s3Key, setNaturalSizes]);
+  }, [s3Key, setNaturalSizes, setLoadingState]);
 
   useEffect(() => {
     if (imgRef.current?.complete) {
@@ -85,47 +143,29 @@ function PhotoDisplay({
     }
   }, [handleLoad]);
 
-  const allSelected = useAtomValue(selectedPhotosAtom);
-  const selected = useMemo(() => {
-    return allSelected.has(photo.Key);
-  }, [allSelected, photo.Key]);
-
   return (
-    <div
-      ref={wrapperRef}
-      className="overflow-hidden transition-all duration-75 group"
-      style={{ width: size[0], height: size[1] }}
-    >
-      {loadingState === "loading" && <Skeleton className="w-full h-full" />}
-      {loadingState === "error" && <PhotoDisplayError s3Key={s3Key} />}
-      {loadingState === "loaded" && (
-        <div className="absolute inset-0 z-20">
-          {/* TODO: add modal */}
-          <PhotoItemOverlay
-            photo={photo}
-            selected={selected}
-            onOpenModal={() => {}}
-          />
-        </div>
-      )}
-      {s3Settings && (
-        <img
-          alt={s3Key}
-          ref={imgRef}
-          className={cn("transition-[scale] duration-75", {
-            invisible: loadingState !== "loaded",
-            "scale-90 rounded-lg": selected,
-          })}
-          width={size[0]}
-          height={size[1]}
-          src={key2Url(s3Key, s3Settings)}
-          onLoad={handleLoad}
-          onError={handleError}
-          draggable="false"
-        ></img>
-      )}
-    </div>
+    <img
+      {...props}
+      ref={imgRef}
+      src={url}
+      alt={s3Key}
+      onLoad={handleLoad}
+      onError={handleError}
+    />
   );
+}
+
+function useOpenModal(s3Key: string) {
+  const search = useSearchParams();
+  const router = useRouter();
+
+  return useCallback(() => {
+    if (!s3Key) return;
+    const newSearch = new URLSearchParams(search);
+    newSearch.set("imagePath", s3Key);
+
+    router.push(`/photo?${newSearch.toString()}`);
+  }, [search, s3Key, router]);
 }
 
 function PhotoDisplayError({ s3Key }: { s3Key: string }) {
@@ -206,16 +246,13 @@ function PhotoItemOverlay({
     <>
       <div
         className="absolute top-0 bottom-0 left-0 right-0 hover-to-show"
-        style={{
-          backgroundImage:
-            "linear-gradient(to bottom,rgba(0, 0, 0, 0.5),transparent 50px,transparent)",
-          backgroundSize: "100% 100%",
-        }}
         onClick={() => {
           if (selectMode) toggleSelected(photo.Key);
           else onOpenModal();
         }}
-      />
+      >
+        <div className="absolute top-0 h-14 left-0 right-0 bg-gradient-to-bottom" />
+      </div>
       <ImageCheckbox
         checked={selected}
         onCheckedChange={(c) => {
@@ -233,7 +270,8 @@ function PhotoItemOverlay({
         className="absolute bottom-4 right-4 hover-to-show"
         size={"icon"}
         variant="secondary"
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           if (selectMode) onOpenModal();
           else copy(photo);
         }}

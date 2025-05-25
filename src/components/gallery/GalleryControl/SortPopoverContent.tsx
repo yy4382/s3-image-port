@@ -26,7 +26,7 @@ export function SortPopoverContent({
   setSortPopoverOpen,
 }: SortPopoverContentProps) {
   const t = useTranslations("gallery.sort");
-  
+
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
@@ -41,9 +41,7 @@ export function SortPopoverContent({
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isSearchActive
-            ? t("sortActiveMessage")
-            : t("sortInactiveMessage")}
+          {isSearchActive ? t("sortActiveMessage") : t("sortInactiveMessage")}
         </p>
       </div>
       <div className="grid gap-2">

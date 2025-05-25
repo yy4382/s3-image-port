@@ -6,7 +6,6 @@ import z from "zod/v4";
 import { compressOptionSchema } from "@/utils/imageCompress";
 import { atom } from "jotai";
 
-
 export const s3SettingsSchema = z.object({
   endpoint: z.url(),
   bucket: z.string().min(1),
@@ -39,7 +38,6 @@ export const optionsSchema = z.object({
 });
 
 export type Options = z.infer<typeof optionsSchema>;
-
 
 export const optionsAtom = atomWithStorageMigration<Options>(
   "s3ip:options",
@@ -81,8 +79,6 @@ export const uploadSettingsAtom = focusAtom(optionsAtom, (optic) =>
 export const gallerySettingsAtom = focusAtom(optionsAtom, (optic) =>
   optic.prop("gallery"),
 );
-
-
 
 export const validS3SettingsAtom = atom((get) => {
   const settings = get(s3SettingsAtom);

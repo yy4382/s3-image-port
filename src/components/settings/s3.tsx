@@ -30,7 +30,7 @@ function getS3Part(opt: keyof S3Options) {
 
 function S3Settings() {
   const t = useTranslations("settings.s3Settings");
-  
+
   return (
     <div>
       <div className="grid gap-6">
@@ -128,8 +128,8 @@ function S3Validation() {
               <p
                 className={`text-sm font-medium ${error.valid ? "text-green-600" : "text-red-600"}`}
               >
-                {error.valid 
-                  ? t("validSuccess") 
+                {error.valid
+                  ? t("validSuccess")
                   : t("validError", { error: error.error })}
               </p>
             </div>

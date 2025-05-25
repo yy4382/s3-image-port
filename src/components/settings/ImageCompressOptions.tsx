@@ -69,9 +69,7 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
     <div className="space-y-4">
       {/* Enable/Disable Switch */}
       <div className="flex items-center space-x-2">
-        <Label htmlFor="enable-processing">
-          {t("enable")}
-        </Label>
+        <Label htmlFor="enable-processing">{t("enable")}</Label>
         <Switch
           id="enable-processing"
           checked={isProcessingEnabled}

@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 
 function UploadSettings() {
   const t = useTranslations("settings");
-  
+
   return (
     <div>
       <div className="grid gap-6">

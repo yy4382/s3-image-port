@@ -35,7 +35,7 @@ export function FilterPopoverContent({
   setFilterPopoverOpen,
 }: FilterPopoverContentProps) {
   const t = useTranslations("gallery.filter");
-  
+
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
@@ -53,9 +53,7 @@ export function FilterPopoverContent({
       </div>
       <div className="grid gap-2">
         <Label htmlFor="prefix-filter">{t("filterByPrefix")}</Label>
-        <p className="text-xs text-muted-foreground">
-          {t("directoryTree")}
-        </p>
+        <p className="text-xs text-muted-foreground">{t("directoryTree")}</p>
         {/* <Input
           id="prefix-filter"
           placeholder="例如: i/2024/05/"
