@@ -38,9 +38,13 @@ const profileListAtom = atomWithStorage<
 // need to check if the profile name already exists
 const renameProfileAtom = atom(
   null,
-  async (get, set, { oldName, newName }: { oldName: string; newName: string }) => {
+  async (
+    get,
+    set,
+    { oldName, newName }: { oldName: string; newName: string },
+  ) => {
     const t = await getTranslations("settings.profiles.errors");
-    
+
     if (oldName === newName) {
       toast.error(t("sameNameError"));
       return;
@@ -62,7 +66,7 @@ const renameProfileAtom = atom(
 
 const loadProfileAtom = atom(null, async (get, set, name: string) => {
   const t = await getTranslations("settings.profiles.errors");
-  
+
   const profiles = get(profileListAtom);
   let profileToBeLoad: Profile | typeof CURRENT_PROFILE | undefined;
   let currentProfileName: string | undefined;
@@ -114,7 +118,7 @@ const duplicateProfileAtom = atom(
     }: { name: string; newName: string },
   ) => {
     const t = await getTranslations("settings.profiles.errors");
-    
+
     const profiles = get(profileListAtom);
 
     // Find a unique name
@@ -142,7 +146,7 @@ const duplicateProfileAtom = atom(
 
 const deleteProfileAtom = atom(null, async (get, set, nameToDelete: string) => {
   const t = await getTranslations("settings.profiles.errors");
-  
+
   const currentProfiles = get(profileListAtom);
   const profileToDelete = currentProfiles.find((p) => p[0] === nameToDelete);
 
@@ -163,7 +167,7 @@ const deleteProfileAtom = atom(null, async (get, set, nameToDelete: string) => {
 
 const importProfileAtom = atom(null, async (get, set, profileJson: string) => {
   const t = await getTranslations("settings.profiles.errors");
-  
+
   try {
     const parsedProfile = JSON.parse(profileJson) as {
       name: string;

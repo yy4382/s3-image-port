@@ -4,10 +4,20 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import type { PropsWithChildren } from "react";
+import { getTranslations } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
-export default function SettingsLayout({ children }: PropsWithChildren) {
-  const t = useTranslations("settings");
+export default async function SettingsLayout({
+  children,
+  params,
+}: Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}>) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("settings");
 
   return (
     <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">

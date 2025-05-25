@@ -54,6 +54,8 @@ export function timeRangesGetter(): { duration: Duration; type: string }[] {
 
 const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
 
+export const photosAtomReadOnly = atom((get) => get(photosAtom));
+
 export const availablePrefixesAtom = atom<
   { name: string; hierarchy: number }[]
 >((get) => {
@@ -200,7 +202,6 @@ const scaleCurGroup = (
 };
 
 export const photoSizeAtom = atom((get) => {
-  console.log("photoSizeAtom", get(naturalSizesAtom));
   // debugger;
   const originalSizes = get(showingPhotosAtom).map((photo) => {
     const size = get(naturalSizesAtom).get(photo.Key);

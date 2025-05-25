@@ -5,6 +5,7 @@ import withBundleAnalyzerI from "@next/bundle-analyzer";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
+  output: "export",
   reactStrictMode: true,
   webpack(config) {
     config.plugins.push(
