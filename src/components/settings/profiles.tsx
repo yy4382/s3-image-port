@@ -13,14 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  PencilIcon,
-  CopyIcon,
-  DownloadIcon,
-  UploadIcon,
-  ClipboardIcon,
-  FileUpIcon,
-} from "lucide-react";
+import McPencil from "~icons/mingcute/pencil-2-line.jsx";
+import McCopy from "~icons/mingcute/copy-2-line.jsx";
+import McDownload from "~icons/mingcute/download-2-line.jsx";
+import McUpload from "~icons/mingcute/upload-2-line.jsx";
+import McClipboard from "~icons/mingcute/clipboard-line.jsx";
+import McFile from "~icons/mingcute/file-upload-line.jsx";
 import type { Options as Profile } from "./settingsStore";
 import { optionsAtom, optionsSchema } from "./settingsStore";
 import { toast } from "sonner";
@@ -260,7 +258,7 @@ function ProfileItem({
               variant="outline"
               className="flex-1 min-w-[calc(50%-0.25rem)]"
             >
-              <PencilIcon className="h-5 w-5 mr-1" />
+              <McPencil className="h-5 w-5 mr-1" />
               {t("rename")}
             </Button>
           </DropdownMenuTrigger>
@@ -291,7 +289,7 @@ function ProfileItem({
             onDuplicate(name, `${name} (copy)`);
           }}
         >
-          <CopyIcon className="h-5 w-5 mr-1" />
+          <McCopy className="h-5 w-5 mr-1" />
           {t("duplicate")}
         </Button>
 
@@ -300,7 +298,7 @@ function ProfileItem({
           className="flex-1 min-w-[calc(50%-0.25rem)]"
           onClick={handleExport}
         >
-          <UploadIcon className="h-5 w-5 mr-1" />
+          <McUpload className="h-5 w-5 mr-1" />
           {t("export")}
         </Button>
 
@@ -391,7 +389,7 @@ function Profiles() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button>
-              <DownloadIcon className="h-5 w-5 mr-1" />
+              <McDownload className="h-5 w-5 mr-1" />
               <span className="select-none">{t("importProfile")}</span>
             </Button>
           </DropdownMenuTrigger>
@@ -399,11 +397,11 @@ function Profiles() {
             <DropdownMenuLabel>{t("importOptions")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleClipboardImport}>
-              <ClipboardIcon className="h-5 w-5 mr-2" />
+              <McClipboard className="h-5 w-5 mr-2" />
               {t("importFromClipboard")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-              <FileUpIcon className="h-5 w-5 mr-2" />
+              <McFile className="h-5 w-5 mr-2" />
               {t("importFromFile")}
             </DropdownMenuItem>
           </DropdownMenuContent>

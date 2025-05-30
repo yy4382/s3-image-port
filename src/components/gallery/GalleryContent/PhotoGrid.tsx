@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef } from "react";
-import { PackageOpenIcon } from "lucide-react";
+import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
 import { useFetchPhotoList } from "../galleryStore";
 import {
   containerWidthAtom,
@@ -63,7 +63,7 @@ export function PhotoGrid() {
           <div className="flex flex-col items-center gap-2 mb-4">
             <div className="h-12 w-12 text-muted-foreground/70">
               {/* Photo icon placeholder */}
-              <PackageOpenIcon className="w-full h-full" />
+              <McEmptyBox className="w-full h-full" />
             </div>
             <p className="text-lg text-muted-foreground text-center">
               {t("noPhotosFound")}
