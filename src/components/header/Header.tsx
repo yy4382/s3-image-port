@@ -1,12 +1,10 @@
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "../ui/button";
+import McGithub from "~icons/mingcute/github-line";
 import { ThemeSwitcher } from "./ThemeSwither";
-import {
-  GithubIcon,
-  CloudUploadIcon,
-  ImagesIcon,
-  SettingsIcon,
-} from "lucide-react";
+import McUpload from "~icons/mingcute/upload-3-fill";
+import McPhotoAlbum from "~icons/mingcute/photo-album-2-fill";
+import McSettings from "~icons/mingcute/settings-3-fill";
 import { LinkWithActive } from "../misc/link-with-active";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { getTranslations } from "next-intl/server";
@@ -43,15 +41,15 @@ const Header: React.FC = async () => {
 
         <div className="flex space-x-4 font-semibold flex-1 justify-center">
           <LinkWithActive href="/upload" className={getNavLinkClass}>
-            <CloudUploadIcon className="size-6 md:size-5" />
+            <McPhotoAlbum className="text-2xl md:text-base" />
             <span className="hidden md:block">{t("upload")}</span>
           </LinkWithActive>
           <LinkWithActive href="/gallery" className={getNavLinkClass}>
-            <ImagesIcon className="size-6 md:size-5" />
+            <McUpload className="text-2xl md:text-base" />
             <span className="hidden md:block">{t("gallery")}</span>
           </LinkWithActive>
           <LinkWithActive href="/settings" className={getNavLinkClass}>
-            <SettingsIcon className="size-6 md:size-5" />
+            <McSettings className="text-2xl md:text-base" />
             <span className="hidden md:block">{t("settings")}</span>
           </LinkWithActive>
         </div>
@@ -66,7 +64,7 @@ const Header: React.FC = async () => {
             className={buttonVariants({ size: "icon", variant: "ghost" })}
             aria-label="GitHub Repository"
           >
-            <GithubIcon />
+            <McGithub />
           </a>
         </div>
       </nav>
