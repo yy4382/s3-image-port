@@ -42,7 +42,7 @@ export default async function Home({
             <div className="flex flex-wrap gap-2 sm:gap-4 md:pt-6 justify-center items-center">
               <Link
                 className={buttonVariants({ variant: "default" })}
-                href="/upload"
+                href="/onboard"
               >
                 {t("getStarted")}
               </Link>

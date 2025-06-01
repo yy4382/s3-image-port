@@ -7,3 +7,11 @@ export const routing = defineRouting({
   // Used when no locale matches
   defaultLocale: "en",
 });
+
+export const localeLocalNames: Record<
+  (typeof routing.locales)[number],
+  string
+> = {
+  en: "English",
+  zh: "中文",
+} as const;

@@ -28,13 +28,13 @@ function getS3Part(opt: keyof S3Options) {
   };
 }
 
-function S3Settings() {
+function S3Settings({ showTitle = true }: { showTitle?: boolean }) {
   const t = useTranslations("settings.s3Settings");
 
   return (
     <div>
       <div className="grid gap-6">
-        <h2 className="text-2xl font-bold">{t("title")}</h2>
+        {showTitle && <h2 className="text-2xl font-bold">{t("title")}</h2>}
         <SettingsInputEntry
           {...getS3Part("endpoint")}
           title={t("endpoint")}

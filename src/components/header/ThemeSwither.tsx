@@ -13,32 +13,38 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useTranslations } from "next-intl";
+import { MotionHighlight } from "../animate-ui/effects/motion-highlight";
 
 function ThemeSwitcherContent() {
   const theme = useTheme();
+  const TABS = [
+    { value: "light", title: "Light", icon: <McSun className="size-4" /> },
+    { value: "dark", title: "Dark", icon: <McMoon className="size-4" /> },
+    { value: "system", title: "System", icon: <McSystem className="size-4" /> },
+  ];
   return (
-    <div className="bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-md p-[3px]">
-      <button
-        className="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent p-1 size-7 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        data-state={theme.theme === "light" ? "active" : ""}
-        onClick={() => theme.setTheme("light")}
+    <div className="flex border rounded-lg p-0.5 w-fit">
+      <MotionHighlight
+        defaultValue={theme.theme}
+        onValueChange={(value) => {
+          if (value) {
+            theme.setTheme(value);
+          }
+        }}
+        className="rounded-md"
       >
-        <McSun className="size-4" />
-      </button>
-      <button
-        className="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent p-1 size-7 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        data-state={theme.theme === "dark" ? "active" : ""}
-        onClick={() => theme.setTheme("dark")}
-      >
-        <McMoon className="size-4" />
-      </button>
-      <button
-        className="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent p-1 size-7 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-        data-state={theme.theme === "system" ? "active" : ""}
-        onClick={() => theme.setTheme("system")}
-      >
-        <McSystem className="size-4" />
-      </button>
+        {TABS.map((tab) => (
+          <div
+            key={tab.value}
+            data-value={tab.value}
+            data-active={tab.value === theme.theme}
+            className="size-8 grid place-items-center"
+            aria-label={tab.title}
+          >
+            {tab.icon}
+          </div>
+        ))}
+      </MotionHighlight>
     </div>
   );
 }

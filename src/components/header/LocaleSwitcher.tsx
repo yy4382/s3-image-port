@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { CheckIcon, Globe } from "lucide-react";
+import { localeLocalNames } from "@/i18n/routing";
 
 export function LocaleSwitcher() {
   const [mounted, setMounted] = useState(false);
@@ -32,8 +33,8 @@ export function LocaleSwitcher() {
 
   // 构建语言选项列表
   const localeOptions = [
-    { value: "en", label: "English" },
-    { value: "zh", label: "中文" },
+    { value: "en", label: localeLocalNames.en },
+    { value: "zh", label: localeLocalNames.zh },
   ];
 
   return (
