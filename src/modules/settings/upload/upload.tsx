@@ -1,9 +1,9 @@
 "use client";
 
-import ImageCompressOptions from "@/modules/settings/ImageCompressOptions";
-import { KeyTemplate } from "@/modules/settings/KeyTemplate";
+import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
+import { KeyTemplate } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
-import { uploadSettingsAtom } from "./settingsStore";
+import { uploadSettingsAtom } from "../settingsStore";
 import { focusAtom } from "jotai-optics";
 import { useTranslations } from "next-intl";
 

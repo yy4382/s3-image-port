@@ -1,12 +1,12 @@
-import { SetStateAction, useAtom, WritableAtom } from "jotai";
+import { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import z from "zod/v4";
 
-export function useValidateInputAtom<T>(
-  atom: WritableAtom<T, [SetStateAction<T>], void>,
+export function useValidateInput<T>(
+  value: T,
+  setValue: Dispatch<SetStateAction<T>>,
   schema: z.ZodType<T>,
 ) {
-  const [value, setValue] = useAtom(atom);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleChange = (value: T) => {
@@ -19,5 +19,5 @@ export function useValidateInputAtom<T>(
     }
   };
 
-  return [value, error, handleChange] as const;
+  return [error, handleChange] as const;
 }

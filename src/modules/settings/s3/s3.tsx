@@ -1,43 +1,36 @@
 "use client";
 
-import { FormEntry } from "@/components/ui/formEntry";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { getAndParseCors } from "@/lib/utils/testS3Settings";
-import {
-  useAtomValue,
-  type WritableAtom,
-  type SetStateAction,
-  useAtom,
-} from "jotai";
-import { useId, useState, type JSX } from "react";
-import * as z from "zod/v4";
+import { useAtomValue } from "jotai";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { focusAtom } from "jotai-optics";
 import {
   s3SettingsAtom,
   s3SettingsSchema,
   type S3Options,
-} from "./settingsStore";
+} from "../settingsStore";
 import { useTranslations } from "next-intl";
-import { useValidateInputAtom } from "@/lib/hooks/validate-input";
-import { Label } from "@/components/ui/label";
+import {
+  FormEntrySwitchAtom,
+  FormEntryTextAtom,
+} from "@/components/ui/form-entry-validate";
 
-function getS3Part(opt: keyof S3Options) {
+function getS3Part(opt: keyof Omit<S3Options, "forcePathStyle">) {
   return {
     schema: s3SettingsSchema.shape[opt],
     atom: focusAtom(s3SettingsAtom, (optic) => optic.prop(opt)),
   };
 }
 
-function S3Settings({ showTitle = true }: { showTitle?: boolean }) {
+function S3Settings() {
   const t = useTranslations("settings.s3Settings");
 
   return (
     <div>
       <div className="grid gap-6">
-        {showTitle && <h2 className="text-2xl font-bold">{t("title")}</h2>}
-        <SettingsInputEntry
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
+        <FormEntryTextAtom
           {...getS3Part("endpoint")}
           title={t("endpoint")}
           description={t("endpointDesc")}
@@ -45,14 +38,14 @@ function S3Settings({ showTitle = true }: { showTitle?: boolean }) {
           tooltipStyleDescription
         />
         <div className="grid gap-2 grid-cols-2 items-start">
-          <SettingsInputEntry
+          <FormEntryTextAtom
             {...getS3Part("bucket")}
             title={t("bucket")}
             description={t("bucketDesc")}
             placeholder="my-bucket"
             tooltipStyleDescription
           />
-          <SettingsInputEntry
+          <FormEntryTextAtom
             {...getS3Part("region")}
             title={t("region")}
             description={t("regionDesc")}
@@ -60,21 +53,21 @@ function S3Settings({ showTitle = true }: { showTitle?: boolean }) {
             tooltipStyleDescription
           />
         </div>
-        <SettingsInputEntry
+        <FormEntryTextAtom
           {...getS3Part("accKeyId")}
           title={t("accessKey")}
           description={t("accessKeyDesc")}
           placeholder="XXXXXXXX"
           tooltipStyleDescription
         />
-        <SettingsInputEntry
+        <FormEntryTextAtom
           {...getS3Part("secretAccKey")}
           title={t("secretKey")}
           description={t("secretKeyDesc")}
           placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
           tooltipStyleDescription
         />
-        <SettingsSwitchEntry
+        <FormEntrySwitchAtom
           atom={focusAtom(s3SettingsAtom, (optic) =>
             optic.prop("forcePathStyle"),
           )}
@@ -91,7 +84,7 @@ function S3Settings({ showTitle = true }: { showTitle?: boolean }) {
             ),
           })}
         />
-        <SettingsInputEntry
+        <FormEntryTextAtom
           {...getS3Part("pubUrl")}
           title={t("publicUrl")}
           description={t.rich("publicUrlDesc", {
@@ -164,78 +157,6 @@ function S3Validation() {
           {t("validateBtn")}
         </Button>
       </div>
-    </div>
-  );
-}
-
-export function SettingsInputEntry<K>({
-  title,
-  description,
-  atom,
-  schema,
-  placeholder,
-  input,
-  tooltipStyleDescription,
-}: {
-  title: string;
-  description?: string | React.ReactNode;
-  atom: WritableAtom<K, [SetStateAction<K>], void>;
-  schema: z.ZodType<K>;
-  placeholder?: string;
-  input?: (v: K, set: (v: K) => void, id: string) => JSX.Element;
-  tooltipStyleDescription?: boolean;
-}) {
-  if (!input) {
-    input = (v, s, id) => (
-      <Input
-        id={id}
-        value={v as string}
-        onChange={(e) => s(e.target.value as K)}
-        placeholder={placeholder}
-      />
-    );
-  }
-  const [value, error, handleChange] = useValidateInputAtom(atom, schema);
-  const id = useId();
-  return (
-    <FormEntry
-      id={id}
-      title={title}
-      description={description}
-      error={error}
-      tooltipStyleDescription={tooltipStyleDescription}
-    >
-      {input(value, handleChange, id)}
-    </FormEntry>
-  );
-}
-
-function SettingsSwitchEntry({
-  title,
-  description,
-  atom,
-}: {
-  title: string;
-  description?: string | React.ReactNode;
-  atom: WritableAtom<boolean, [SetStateAction<boolean>], void>;
-}) {
-  const [value, setValue] = useAtom(atom);
-  const id = useId();
-  return (
-    <div className="flex gap-2 items-center w-full justify-between">
-      <div className="flex flex-col gap-1 flex-1">
-        <Label htmlFor={id} className="w-fit">
-          {title}
-        </Label>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
-      </div>
-      <Switch
-        id={id}
-        checked={value}
-        onCheckedChange={(checked) => setValue(checked)}
-      />
     </div>
   );
 }

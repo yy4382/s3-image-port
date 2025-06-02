@@ -21,7 +21,8 @@
     "keyTemplate": {
       "title": "键（名称）模板",
       "description": "上传到 S3 时的命名模板。使用 '{{filename'}} 插入原始文件名。",
-      "endWithExtWarning": "建议以 \".'{{ext'}}\" 结尾。"
+      "endWithExtWarning": "建议以 \".'{{ext'}}\" 结尾。",
+      "deprecatedPlaceholderWarning": "占位符{placeholder}已被弃用，请使用{instead}替代"
     },
     "imageCompress": {
       "enable": "启用图像转换和压缩",

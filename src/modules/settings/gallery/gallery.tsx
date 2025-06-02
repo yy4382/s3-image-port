@@ -1,10 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { SettingsInputEntry } from "./s3";
-import { gallerySettingsAtom, gallerySettingsSchema } from "./settingsStore";
+import { FormEntrySwitchAtom } from "@/components/ui/form-entry-validate";
+import { gallerySettingsAtom } from "../settingsStore";
 import { focusAtom } from "jotai-optics";
-import { Switch } from "@/components/ui/switch";
 
 export function GallerySettings() {
   const t = useTranslations("settings.gallery");
@@ -12,19 +11,11 @@ export function GallerySettings() {
     <div>
       <div className="grid gap-6">
         <h2 className="text-2xl font-bold">{t("title")}</h2>
-        <SettingsInputEntry
+        <FormEntrySwitchAtom
           title={t("autoRefresh")}
           description={t("autoRefreshDesc")}
           atom={focusAtom(gallerySettingsAtom, (optic) =>
             optic.prop("autoRefresh"),
-          )}
-          schema={gallerySettingsSchema.shape.autoRefresh}
-          input={(v, s, id) => (
-            <Switch
-              id={id}
-              checked={v as boolean}
-              onCheckedChange={(checked) => s(checked)}
-            />
           )}
         />
       </div>

@@ -21,7 +21,8 @@
     "keyTemplate": {
       "title": "Key Template",
       "description": "Template for the S3 key. Use '{{filename'}} to insert the original filename.",
-      "endWithExtWarning": "End with \".'{{ext'}}\" is generally recommended."
+      "endWithExtWarning": "End with \".'{{ext'}}\" is generally recommended.",
+      "deprecatedPlaceholderWarning": "placeholder {placeholder} has been deprecated, use {instead} instead"
     },
     "imageCompress": {
       "enable": "Enable Image Convert & Compression",

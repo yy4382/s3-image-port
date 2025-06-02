@@ -1,4 +1,4 @@
-import { UploadSettings } from "@/modules/settings/upload";
+import { UploadSettings } from "@/modules/settings/upload/upload";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 

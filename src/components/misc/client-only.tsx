@@ -5,7 +5,9 @@ export function ClientOnly({
   children,
   fallback,
   ...delegated
-}: PropsWithChildren<HTMLAttributes<HTMLDivElement> & { fallback?: React.ReactNode }>) {
+}: PropsWithChildren<
+  HTMLAttributes<HTMLDivElement> & { fallback?: React.ReactNode }
+>) {
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
