@@ -2,6 +2,13 @@
 
 [English](README.md) · [简体中文](/apps/docs/README-zh.md)
 
+> [!NOTE]
+> V2 will be released soon. The main branch is the v2 developing branch, which is not stable.
+>
+> Please refer to the [v1 branch](https://github.com/yy4382/s3-image-port/tree/v1) for the currently deployed version.
+>
+> The following README is for v1.
+
 A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
 
 ![poster](/docs/images/poster.png)
