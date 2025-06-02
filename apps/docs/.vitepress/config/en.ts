@@ -5,7 +5,7 @@ export const en = defineConfig({
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/what-is-sip", activeMatch: "/guide/" },
-      { text: "Official Instance", link: "https://iport.yfi.moe" },
+      { text: "Start using", link: "https://iport.yfi.moe" },
     ],
     sidebar: {
       "/guide/": { base: "/guide/", items: sidebarGuide() },
@@ -21,7 +21,6 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "What is S3 Image Port?", link: "what-is-sip" },
         { text: "Getting Started", link: "getting-started" },
-        { text: "Self-Deployment Guide", link: "self-deployment" },
       ],
     },
     {

@@ -34,7 +34,8 @@ export default defineConfig({
       { icon: "github", link: "https://github.com/yy4382/s3-image-port" },
     ],
     editLink: {
-      pattern: "https://github.com/yy4382/s3-image-port/edit/main/docs/:path",
+      pattern:
+        "https://github.com/yy4382/s3-image-port/edit/main/apps/docs/:path",
     },
   },
 });
