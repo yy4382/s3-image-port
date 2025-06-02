@@ -15,7 +15,7 @@ export function S3Onboard() {
         <br /> You need to fill in the following information to use S3 as your
         image storage.
       </p>
-      <div className="max-h-[60vh] overflow-y-auto mt-6">
+      <div className="max-h-[60vh] overflow-y-auto mt-6 p-2 pl-1">
         <S3SettingsForm />
       </div>
     </div>
