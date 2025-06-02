@@ -1,10 +1,10 @@
 "use client";
 
 import { Suspense, useContext, useMemo } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { LanguageTheme } from "./language-theme";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
-import { ClientOnly } from "../misc/client-only";
+import { ClientOnly } from "@/components/misc/client-only";
 import { cn } from "@/lib/utils";
 import useMeasure from "react-use-measure";
 import { S3Onboard } from "./s3";
@@ -127,9 +127,7 @@ function OnboardWelcome() {
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">
-          Welcome to S3 Image Port!
-        </h2>
+        <h2 className="text-xl font-semibold">Welcome to S3 Image Port!</h2>
         <p className="text-muted-foreground">
           We&apos;ll help you set up your S3 bucket and configure your image
           port.

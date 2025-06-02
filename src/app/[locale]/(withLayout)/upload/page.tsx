@@ -1,4 +1,4 @@
-import { Upload } from "@/components/upload/upload";
+import { Upload } from "@/modules/upload/upload";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

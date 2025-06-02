@@ -1,4 +1,4 @@
-import type { Photo } from "@/utils/ImageS3Client";
+import type { Photo } from "@/lib/utils/ImageS3Client";
 import { atomWithStorage } from "jotai/utils";
 import z from "zod/v4";
 import {
@@ -12,7 +12,7 @@ import { atom, useAtomValue, useSetAtom } from "jotai";
 import { validS3SettingsAtom } from "../settings/settingsStore";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import ImageS3Client from "@/utils/ImageS3Client";
+import ImageS3Client from "@/lib/utils/ImageS3Client";
 import {
   displayOptionsDefault,
   getTimeRange,

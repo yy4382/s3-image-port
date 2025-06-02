@@ -1,5 +1,5 @@
 import { LinkWithActive } from "@/components/misc/link-with-active";
-import { MigrationIndicator } from "@/components/settings/MigrationIndicator";
+import { MigrationIndicator } from "@/modules/settings/MigrationIndicator";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";

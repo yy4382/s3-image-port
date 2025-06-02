@@ -4,8 +4,8 @@ import { tryMigrateFromV1 } from "./settingsStore";
 import { useEffect, useState } from "react";
 import { optionsAtom } from "./settingsStore";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function MigrationIndicator() {
   const [hasOldConfig, setHasOldConfig] = useState(false);

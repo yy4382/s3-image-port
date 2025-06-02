@@ -8,9 +8,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/utils/ImageS3Client";
-import ImageS3Client from "@/utils/ImageS3Client";
-import key2Url from "@/utils/key2Url";
+import type { Photo } from "@/lib/utils/ImageS3Client";
+import ImageS3Client from "@/lib/utils/ImageS3Client";
+import key2Url from "@/lib/utils/key2Url";
 import { format } from "date-fns";
 import { produce } from "immer";
 import { atom, useAtomValue, useSetAtom } from "jotai";
@@ -21,7 +21,7 @@ import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
 import McKey2Line from "~icons/mingcute/key-2-line.jsx";
 import McTimeLine from "~icons/mingcute/time-line.jsx";
 import McZoomIn from "~icons/mingcute/zoom-in-line.jsx";
-import { validS3SettingsAtom } from "@/components/settings/settingsStore";
+import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
 import {
   DEFAULT_IMAGE_SIZE,
   selectModeAtom,

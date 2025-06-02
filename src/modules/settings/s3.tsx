@@ -3,7 +3,7 @@
 import { FormEntry } from "@/components/ui/formEntry";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { getAndParseCors } from "@/utils/testS3Settings";
+import { getAndParseCors } from "@/lib/utils/testS3Settings";
 import {
   useAtomValue,
   type WritableAtom,
@@ -12,7 +12,7 @@ import {
 } from "jotai";
 import { useId, useState, type JSX } from "react";
 import * as z from "zod/v4";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { focusAtom } from "jotai-optics";
 import {
   s3SettingsAtom,
@@ -21,7 +21,7 @@ import {
 } from "./settingsStore";
 import { useTranslations } from "next-intl";
 import { useValidateInputAtom } from "@/lib/hooks/validate-input";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 
 function getS3Part(opt: keyof S3Options) {
   return {

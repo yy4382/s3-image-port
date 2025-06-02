@@ -1,4 +1,4 @@
-import { Onboard } from "@/components/onboard/onboard";
+import { Onboard } from "@/modules/onboard/onboard";
 import { setRequestLocale } from "next-intl/server";
 
 export default async function OnboardPage({

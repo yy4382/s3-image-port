@@ -1,4 +1,4 @@
-import PhotoModal from "@/components/photo/PhotoModal";
+import PhotoModal from "@/modules/photo/PhotoModal";
 import { setRequestLocale } from "next-intl/server";
 import { Suspense } from "react";
 import type { Metadata } from "next";

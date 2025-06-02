@@ -2,8 +2,8 @@
 
 import { useId, useState } from "react";
 import * as z from "zod/v4";
-import { FormEntry } from "../ui/formEntry";
-import { Input } from "../ui/input";
+import { FormEntry } from "@/components/ui/formEntry";
+import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 
 export const keyTemplateSchema = z
