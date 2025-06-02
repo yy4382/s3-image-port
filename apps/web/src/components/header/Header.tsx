@@ -41,11 +41,11 @@ const Header: React.FC = async () => {
 
         <div className="flex space-x-4 font-semibold flex-1 justify-center">
           <LinkWithActive href="/upload" className={getNavLinkClass}>
-            <McPhotoAlbum className="text-2xl md:text-base" />
+            <McUpload className="text-2xl md:text-base" />
             <span className="hidden md:block">{t("upload")}</span>
           </LinkWithActive>
           <LinkWithActive href="/gallery" className={getNavLinkClass}>
-            <McUpload className="text-2xl md:text-base" />
+            <McPhotoAlbum className="text-2xl md:text-base" />
             <span className="hidden md:block">{t("gallery")}</span>
           </LinkWithActive>
           <LinkWithActive href="/settings" className={getNavLinkClass}>
