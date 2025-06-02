@@ -1,4 +1,4 @@
-import { GallerySettings } from "@/modules/settings/gallery";
+import { GallerySettings } from "@/modules/settings/gallery/gallery";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 

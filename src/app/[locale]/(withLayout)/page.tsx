@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Home - S3 Image Port",
-  description: "Welcome to S3 Image Port. Upload, manage, and view your S3 images with ease.",
+  description:
+    "Welcome to S3 Image Port. Upload, manage, and view your S3 images with ease.",
 };
 
 export default async function Home({

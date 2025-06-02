@@ -1,7 +1,7 @@
 "use client";
 
-import ImageCompressOptions from "@/modules/settings/ImageCompressOptions";
-import { KeyTemplate } from "@/modules/settings/KeyTemplate";
+import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
+import { KeyTemplate } from "@/modules/settings/upload/KeyTemplate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ import {
   type PrimitiveAtom,
 } from "jotai";
 import { splitAtom } from "jotai/utils";
-import { useCallback, useEffect, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { monotonicFactory } from "ulid";
@@ -188,13 +188,17 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
     [setFile],
   );
   const updateTemplate = useCallback(
-    (template: string) => {
+    (templateAction: SetStateAction<string>) => {
+      const template =
+        typeof templateAction === "function"
+          ? templateAction(file.key.template)
+          : templateAction;
       setFile((prev) => ({
         ...prev,
         key: prev.key.updateTemplate(template),
       }));
     },
-    [setFile],
+    [setFile, file.key.template],
   );
   return {
     file,
