@@ -181,7 +181,8 @@ function PhotoModalToolbar({ path }: { path: string }) {
             <DropdownMenuItem
               onClick={() => {
                 toast.error("not implemented yet");
-                throw new Error("not implemented");
+                console.error("Modify key is not implemented yet");
+                return;
               }}
             >
               Modify Key
