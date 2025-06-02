@@ -10,13 +10,17 @@ export const useStep = (totalSteps: number, searchParamKey: string) => {
   const router = useRouter();
 
   useEffect(() => {
-    const step = parseInt(searchParams.get(searchParamKey) ?? "1");
-    setStepRaw(step - 1);
+    const stepParam = searchParams.get(searchParamKey) ?? "1";
+    const step = parseInt(stepParam);
+    // Handle NaN case by defaulting to step 1 (index 0)
+    const validStep = isNaN(step) ? 1 : step;
+    setStepRaw(validStep - 1);
   }, [searchParamKey, searchParams]);
 
   const setStep = useCallback(
     (step: number) => {
-      if (step < 0 || step >= totalSteps) {
+      // Handle NaN values by returning early
+      if (isNaN(step) || step < 0 || step >= totalSteps) {
         return;
       }
       setStepRaw(step);
