@@ -8,10 +8,10 @@ import { atom } from "jotai";
 
 export const s3SettingsSchema = z.object({
   endpoint: z.url(),
-  bucket: z.string().min(1),
-  region: z.string().min(1),
-  accKeyId: z.string().min(1),
-  secretAccKey: z.string().min(1),
+  bucket: z.string().min(1, "Cannot be empty"),
+  region: z.string().min(1, "Cannot be empty"),
+  accKeyId: z.string().min(1, "Cannot be empty"),
+  secretAccKey: z.string().min(1, "Cannot be empty"),
   forcePathStyle: z.boolean(),
   pubUrl: z.url(),
 });

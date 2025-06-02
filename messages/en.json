@@ -42,9 +42,9 @@
       "secretKey": "Secret Key",
       "secretKeyDesc": "S3 secret key",
       "pathStyle": "Use Path Style API",
-      "pathStyleDesc": "Force using path style API",
+      "pathStyleDesc": "Force using the deprecated <more>path style API</more>.",
       "publicUrl": "Public URL",
-      "publicUrlDesc": "S3 public URL",
+      "publicUrlDesc": "The access url for the public bucket. <mono>public-url/object-path</mono> should be able to access the object in bucket. Learn more at <more>docs</more>.",
       "validateBtn": "Validate S3 Settings",
       "validSuccess": "✓ S3 settings are valid",
       "validError": "⚠ {error}"

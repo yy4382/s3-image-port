@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { getAndParseCors } from "@/utils/testS3Settings";
 import {
-  useAtom,
   useAtomValue,
   type WritableAtom,
   type SetStateAction,
+  useAtom,
 } from "jotai";
 import { useId, useState, type JSX } from "react";
 import * as z from "zod/v4";
@@ -20,6 +20,8 @@ import {
   type S3Options,
 } from "./settingsStore";
 import { useTranslations } from "next-intl";
+import { useValidateInputAtom } from "@/lib/hooks/validate-input";
+import { Label } from "../ui/label";
 
 function getS3Part(opt: keyof S3Options) {
   return {
@@ -40,47 +42,70 @@ function S3Settings({ showTitle = true }: { showTitle?: boolean }) {
           title={t("endpoint")}
           description={t("endpointDesc")}
           placeholder="https://example.com"
+          tooltipStyleDescription
         />
-        <SettingsInputEntry
-          {...getS3Part("bucket")}
-          title={t("bucket")}
-          description={t("bucketDesc")}
-          placeholder="my-bucket"
-        />
-        <SettingsInputEntry
-          {...getS3Part("region")}
-          title={t("region")}
-          description={t("regionDesc")}
-          placeholder="us-east-1"
-        />
+        <div className="grid gap-2 grid-cols-2 items-start">
+          <SettingsInputEntry
+            {...getS3Part("bucket")}
+            title={t("bucket")}
+            description={t("bucketDesc")}
+            placeholder="my-bucket"
+            tooltipStyleDescription
+          />
+          <SettingsInputEntry
+            {...getS3Part("region")}
+            title={t("region")}
+            description={t("regionDesc")}
+            placeholder="us-east-1"
+            tooltipStyleDescription
+          />
+        </div>
         <SettingsInputEntry
           {...getS3Part("accKeyId")}
           title={t("accessKey")}
           description={t("accessKeyDesc")}
           placeholder="XXXXXXXX"
+          tooltipStyleDescription
         />
         <SettingsInputEntry
           {...getS3Part("secretAccKey")}
           title={t("secretKey")}
           description={t("secretKeyDesc")}
           placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+          tooltipStyleDescription
         />
-        <SettingsInputEntry
-          {...getS3Part("forcePathStyle")}
-          title={t("pathStyle")}
-          description={t("pathStyleDesc")}
-          input={(v, s, id) => (
-            <Switch
-              id={id}
-              checked={v as boolean}
-              onCheckedChange={(checked) => s(checked)}
-            />
+        <SettingsSwitchEntry
+          atom={focusAtom(s3SettingsAtom, (optic) =>
+            optic.prop("forcePathStyle"),
           )}
+          title={t("pathStyle")}
+          description={t.rich("pathStyleDesc", {
+            more: (chunks) => (
+              <a
+                href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html"
+                target="_blank"
+                className="hover:text-primary underline-offset-2 underline"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         />
         <SettingsInputEntry
           {...getS3Part("pubUrl")}
           title={t("publicUrl")}
-          description={t("publicUrlDesc")}
+          description={t.rich("publicUrlDesc", {
+            mono: (chunks) => <span className="font-mono">{chunks}</span>,
+            more: (chunks) => (
+              <a
+                href="https://docs.iport.yfi.moe/guide/getting-started#public-url"
+                target="_blank"
+                className="hover:text-primary underline-offset-2 underline"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
           placeholder="https://example1.com"
         />
         <S3Validation />
@@ -150,13 +175,15 @@ export function SettingsInputEntry<K>({
   schema,
   placeholder,
   input,
+  tooltipStyleDescription,
 }: {
   title: string;
-  description: string;
+  description?: string | React.ReactNode;
   atom: WritableAtom<K, [SetStateAction<K>], void>;
   schema: z.ZodType<K>;
   placeholder?: string;
   input?: (v: K, set: (v: K) => void, id: string) => JSX.Element;
+  tooltipStyleDescription?: boolean;
 }) {
   if (!input) {
     input = (v, s, id) => (
@@ -168,22 +195,48 @@ export function SettingsInputEntry<K>({
       />
     );
   }
-  const [value, setValue] = useAtom(atom);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const handleChange = (value: K) => {
-    setValue(value);
-    const result = schema.safeParse(value);
-    if (result.success) {
-      setError(undefined);
-    } else {
-      setError(z.prettifyError(result.error));
-    }
-  };
+  const [value, error, handleChange] = useValidateInputAtom(atom, schema);
   const id = useId();
   return (
-    <FormEntry id={id} title={title} description={description} error={error}>
+    <FormEntry
+      id={id}
+      title={title}
+      description={description}
+      error={error}
+      tooltipStyleDescription={tooltipStyleDescription}
+    >
       {input(value, handleChange, id)}
     </FormEntry>
+  );
+}
+
+function SettingsSwitchEntry({
+  title,
+  description,
+  atom,
+}: {
+  title: string;
+  description?: string | React.ReactNode;
+  atom: WritableAtom<boolean, [SetStateAction<boolean>], void>;
+}) {
+  const [value, setValue] = useAtom(atom);
+  const id = useId();
+  return (
+    <div className="flex gap-2 items-center w-full justify-between">
+      <div className="flex flex-col gap-1 flex-1">
+        <Label htmlFor={id} className="w-fit">
+          {title}
+        </Label>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
+      <Switch
+        id={id}
+        checked={value}
+        onCheckedChange={(checked) => setValue(checked)}
+      />
+    </div>
   );
 }
 
