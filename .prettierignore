@@ -1,2 +1,3 @@
 pnpm-lock.yaml
 .husky/pre-commit
+apps/docs/.vitepress/cache
