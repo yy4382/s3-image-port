@@ -9,7 +9,7 @@ export const zh = defineConfig({
         link: "/zh/guide/what-is-sip",
         activeMatch: "/zh/guide/",
       },
-      { text: "官方实例", link: "https://iport.yfi.moe" },
+      { text: "开始使用", link: "https://iport.yfi.moe" },
     ],
     sidebar: {
       "/zh/guide/": { base: "/zh/guide/", items: sidebarGuide() },
@@ -25,7 +25,6 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "什么是 S3 Image Port？", link: "what-is-sip" },
         { text: "开始使用", link: "getting-started" },
-        { text: "自部署指南", link: "self-deployment" },
       ],
     },
     {
