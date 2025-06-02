@@ -29,6 +29,3 @@ S3 Image Port 是一个控制面板，用于管理 AWS S3 存储桶或 S3 兼容
 只要打开链接，输入您的 S3 存储桶的信息，即可开始使用。
 
 更多信息请参考 [开始使用](/zh/guide/getting-started)。
-
-如果您想要自行部署，可以参考 [部署指南](/zh/guide/self-deployment)。
-目前，自部署和使用公共实例的功能是完全一致的。
