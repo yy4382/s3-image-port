@@ -1,9 +1,9 @@
 "use client";
 
 import { useFetchPhotoList } from "./galleryStore";
-import { PhotoGrid } from "@/components/gallery/GalleryContent/PhotoGrid";
+import { PhotoGrid } from "./GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
-import { ClientOnly } from "../misc/client-only";
+import { ClientOnly } from "@/components/misc/client-only";
 import { useEffect } from "react";
 import {
   gallerySettingsAtom,

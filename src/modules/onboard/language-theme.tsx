@@ -2,15 +2,18 @@
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { localeLocalNames } from "@/i18n/routing";
-import { RadioGroup, RadioGroupItem } from "../animate-ui/radix/radio-group";
-import { Label } from "../ui/label";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/animate-ui/radix/radio-group";
+import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import McSun from "~icons/mingcute/sun-line.jsx";
 import McMoon from "~icons/mingcute/moon-line.jsx";
 import McSystem from "~icons/mingcute/computer-line.jsx";
-import { MotionHighlight } from "../animate-ui/effects/motion-highlight";
-import { ClientOnly } from "../misc/client-only";
-import { Skeleton } from "../ui/skeleton";
+import { MotionHighlight } from "@/components/animate-ui/effects/motion-highlight";
+import { ClientOnly } from "@/components/misc/client-only";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function LanguageTheme() {
   return (

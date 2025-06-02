@@ -1,7 +1,7 @@
 "use client";
 
-import ImageCompressOptions from "@/components/settings/ImageCompressOptions";
-import { KeyTemplate } from "@/components/settings/KeyTemplate";
+import ImageCompressOptions from "@/modules/settings/ImageCompressOptions";
+import { KeyTemplate } from "@/modules/settings/KeyTemplate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,14 +10,14 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { defaultKeyTemplate, S3Key } from "@/utils/generateKey";
+import { defaultKeyTemplate, S3Key } from "@/lib/utils/generateKey";
 import {
   isSupportedFileType,
   processFile,
   type CompressOption,
-} from "@/utils/imageCompress";
-import ImageS3Client from "@/utils/ImageS3Client";
-import { ClientOnly } from "../misc/client-only";
+} from "@/lib/utils/imageCompress";
+import ImageS3Client from "@/lib/utils/ImageS3Client";
+import { ClientOnly } from "@/components/misc/client-only";
 import {
   atom,
   useAtom,
@@ -43,9 +43,9 @@ import {
   type S3Options,
   uploadSettingsAtom,
 } from "../settings/settingsStore";
-import key2Url from "@/utils/key2Url";
+import key2Url from "@/lib/utils/key2Url";
 import { useTranslations } from "next-intl";
-import { InvalidS3Dialog } from "../settings/InvalidS3Dialog";
+import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 
 type UploadObject = {
   file: File;

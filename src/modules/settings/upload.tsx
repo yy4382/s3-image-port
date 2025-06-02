@@ -1,7 +1,7 @@
 "use client";
 
-import ImageCompressOptions from "@/components/settings/ImageCompressOptions";
-import { KeyTemplate } from "@/components/settings/KeyTemplate";
+import ImageCompressOptions from "@/modules/settings/ImageCompressOptions";
+import { KeyTemplate } from "@/modules/settings/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "./settingsStore";
 import { focusAtom } from "jotai-optics";

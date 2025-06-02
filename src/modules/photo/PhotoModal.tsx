@@ -1,13 +1,13 @@
 "use client";
 import { redirect, useRouter } from "@/i18n/navigation";
-import key2Url from "@/utils/key2Url";
+import key2Url from "@/lib/utils/key2Url";
 import { useAtomValue } from "jotai";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { validS3SettingsAtom } from "../settings/settingsStore";
-import { PhotoImg } from "../gallery/GalleryContent/PhotoItem/PhotoItem";
-import { Button } from "../ui/button";
+import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
+import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
+import { Button } from "@/components/ui/button";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
 import { photosAtomReadOnly } from "../gallery/galleryStore";
@@ -20,9 +20,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "../ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import { format } from "date-fns";
-import ImageS3Client from "@/utils/ImageS3Client";
+import ImageS3Client from "@/lib/utils/ImageS3Client";
 
 export default function PhotoModal() {
   const locale = useLocale();

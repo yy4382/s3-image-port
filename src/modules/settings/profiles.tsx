@@ -23,7 +23,7 @@ import type { Options as Profile } from "./settingsStore";
 import { optionsAtom, optionsSchema } from "./settingsStore";
 import { toast } from "sonner";
 import { useEffect, useRef } from "react";
-import { ClientOnly } from "../misc/client-only";
+import { ClientOnly } from "@/components/misc/client-only";
 import { useTranslations } from "next-intl";
 import z from "zod/v4";
 import { getTranslations } from "next-intl/server";

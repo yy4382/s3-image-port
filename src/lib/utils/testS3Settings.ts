@@ -1,4 +1,4 @@
-import type { S3Options } from "@/components/settings/settingsStore";
+import type { S3Options } from "@/modules/settings/settingsStore";
 import ImageS3Client from "./ImageS3Client";
 
 export async function getAndParseCors(

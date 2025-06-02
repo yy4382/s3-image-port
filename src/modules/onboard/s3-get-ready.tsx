@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { StepContext } from "./onboard-util";
 import { atom, useAtom } from "jotai";
 import { AnimatePresence, motion } from "motion/react";

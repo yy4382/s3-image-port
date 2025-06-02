@@ -1,4 +1,4 @@
-import { S3Settings } from "@/components/settings/s3";
+import { S3Settings } from "@/modules/settings/s3";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 
