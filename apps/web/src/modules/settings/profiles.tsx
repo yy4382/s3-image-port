@@ -1,7 +1,7 @@
 "use client";
 
 import { atomWithStorage } from "jotai/utils";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { resetGalleryStateAtom } from "../gallery/galleryStore";
 import {
@@ -22,11 +22,11 @@ import McFile from "~icons/mingcute/file-upload-line.jsx";
 import type { Options as Profile } from "./settingsStore";
 import { optionsAtom, optionsSchema } from "./settingsStore";
 import { toast } from "sonner";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ClientOnly } from "@/components/misc/client-only";
 import { useTranslations } from "next-intl";
 import z from "zod/v4";
-import { getTranslations } from "next-intl/server";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CURRENT_PROFILE = "CURRENT";
 
@@ -35,169 +35,190 @@ const profileListAtom = atomWithStorage<
   [string, Profile | typeof CURRENT_PROFILE][]
 >("s3ip:profile:profiles", [["Default", CURRENT_PROFILE]]);
 
-// need to check if the profile name already exists
-const renameProfileAtom = atom(
-  null,
-  async (
-    get,
-    set,
-    { oldName, newName }: { oldName: string; newName: string },
-  ) => {
-    const t = await getTranslations("settings.profiles.errors");
-
-    if (oldName === newName) {
-      toast.error(t("sameNameError"));
-      return;
-    }
-    // check if the new name already exists
-    if (get(profileListAtom).find((p) => p[0] === newName)) {
-      toast.error(t("nameExists"));
-      return;
-    }
-    const newProfiles = get(profileListAtom).map((p) => {
-      if (p[0] === oldName) {
-        return [newName, p[1]] as [string, Profile | typeof CURRENT_PROFILE];
+function useRenameProfile() {
+  const t = useTranslations("settings.profiles.errors");
+  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const rename = useCallback(
+    ({ oldName, newName }: { oldName: string; newName: string }) => {
+      if (oldName === newName) {
+        toast.error(t("sameNameError"));
+        return;
       }
-      return p;
-    });
-    set(profileListAtom, newProfiles);
-  },
-);
+      if (profileList.find((p) => p[0] === newName)) {
+        toast.error(t("nameExists"));
+        return;
+      }
+      const newProfiles = profileList.map((p) => {
+        if (p[0] === oldName) {
+          return [newName, p[1]] as [string, Profile | typeof CURRENT_PROFILE];
+        }
+        return p;
+      });
+      setProfileList(newProfiles);
+    },
+    [profileList, setProfileList, t],
+  );
 
-const loadProfileAtom = atom(null, async (get, set, name: string) => {
-  const t = await getTranslations("settings.profiles.errors");
+  return rename;
+}
 
-  const profiles = get(profileListAtom);
-  let profileToBeLoad: Profile | typeof CURRENT_PROFILE | undefined;
-  let currentProfileName: string | undefined;
-  let currentProfileIndex = -1;
-  let targetProfileIndex = -1;
+function useLoadProfile() {
+  const t = useTranslations("settings.profiles.errors");
+  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const [options, setOptions] = useAtom(optionsAtom);
+  const resetGalleryState = useSetAtom(resetGalleryStateAtom);
 
-  // Single pass to find all required information
-  for (let i = 0; i < profiles.length; i++) {
-    const [profileName, profile] = profiles[i];
-    if (profileName === name) {
-      profileToBeLoad = profile;
-      targetProfileIndex = i;
-    }
-    if (profile === CURRENT_PROFILE) {
-      currentProfileName = profileName;
-      currentProfileIndex = i;
-    }
-  }
+  const load = useCallback(
+    (name: string) => {
+      let profileToBeLoad: Profile | typeof CURRENT_PROFILE | undefined;
+      let currentProfileName: string | undefined;
+      let currentProfileIndex = -1;
+      let targetProfileIndex = -1;
 
-  if (!profileToBeLoad || !currentProfileName || currentProfileIndex === -1) {
-    toast.error(t("loadFailed"));
-    return;
-  }
+      // Single pass to find all required information
+      for (let i = 0; i < profileList.length; i++) {
+        const [profileName, profile] = profileList[i];
+        if (profileName === name) {
+          profileToBeLoad = profile;
+          targetProfileIndex = i;
+        }
+        if (profile === CURRENT_PROFILE) {
+          currentProfileName = profileName;
+          currentProfileIndex = i;
+        }
+      }
 
-  if (profileToBeLoad !== CURRENT_PROFILE) {
-    const currentProfile = get(optionsAtom);
+      if (
+        !profileToBeLoad ||
+        !currentProfileName ||
+        currentProfileIndex === -1
+      ) {
+        toast.error(t("loadFailed"));
+        return;
+      }
 
-    // Create new profiles array with updated values
-    const newProfiles = [...profiles];
-    newProfiles[currentProfileIndex] = [currentProfileName, currentProfile];
-    newProfiles[targetProfileIndex] = [name, CURRENT_PROFILE];
+      if (profileToBeLoad !== CURRENT_PROFILE) {
+        const currentProfile = options;
 
-    set(optionsAtom, profileToBeLoad);
-    set(profileListAtom, newProfiles);
-    set(resetGalleryStateAtom);
+        // Create new profiles array with updated values
+        const newProfiles = [...profileList];
+        newProfiles[currentProfileIndex] = [currentProfileName, currentProfile];
+        newProfiles[targetProfileIndex] = [name, CURRENT_PROFILE];
 
-    toast.success(t("loadSuccess", { name }));
-  }
-});
+        setOptions(profileToBeLoad);
+        setProfileList(newProfiles);
+        resetGalleryState();
 
-const duplicateProfileAtom = atom(
-  null,
-  async (
-    get,
-    set,
-    {
+        toast.success(t("loadSuccess", { name }));
+      }
+    },
+    [options, profileList, resetGalleryState, setOptions, setProfileList, t],
+  );
+  return load;
+}
+
+const useDuplicateProfile = () => {
+  const t = useTranslations("settings.profiles.errors");
+  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const options = useAtomValue(optionsAtom);
+  const duplicate = useCallback(
+    ({
       name,
       newName: initialNewNameSuggestion,
-    }: { name: string; newName: string },
-  ) => {
-    const t = await getTranslations("settings.profiles.errors");
-
-    const profiles = get(profileListAtom);
-
-    // Find a unique name
-    let newName = initialNewNameSuggestion;
-    let counter = 1;
-    while (profiles.find((p) => p[0] === newName)) {
-      counter++;
-      newName = `${name} (copy ${counter})`;
-    }
-
-    // Get the profile to duplicate
-    const profileToDuplicate =
-      profiles.find((p) => p[0] === name)?.[1] === CURRENT_PROFILE
-        ? get(optionsAtom)
-        : profiles.find((p) => p[0] === name)?.[1];
-
-    if (profileToDuplicate) {
-      set(profileListAtom, [...profiles, [newName, profileToDuplicate]]);
-      toast.success(t("duplicateSuccess", { name, newName }));
-    } else {
-      toast.error(t("duplicateFailed"));
-    }
-  },
-);
-
-const deleteProfileAtom = atom(null, async (get, set, nameToDelete: string) => {
-  const t = await getTranslations("settings.profiles.errors");
-
-  const currentProfiles = get(profileListAtom);
-  const profileToDelete = currentProfiles.find((p) => p[0] === nameToDelete);
-
-  if (!profileToDelete) {
-    toast.error(t("profileNotFound"));
-    return;
-  }
-
-  if (profileToDelete[1] === CURRENT_PROFILE) {
-    toast.error(t("cannotDeleteCurrent"));
-    return;
-  }
-
-  const newProfiles = currentProfiles.filter((p) => p[0] !== nameToDelete);
-  set(profileListAtom, newProfiles);
-  toast.success(t("deleteSuccess", { nameToDelete }));
-});
-
-const importProfileAtom = atom(null, async (get, set, profileJson: string) => {
-  const t = await getTranslations("settings.profiles.errors");
-
-  try {
-    const parsedProfile = JSON.parse(profileJson) as {
+    }: {
       name: string;
-      data: Profile;
-    };
-    if (!parsedProfile.name || !parsedProfile.data) {
-      toast.error(t("invalidFormat"));
-      return;
-    }
+      newName: string;
+    }) => {
+      // Find a unique name
+      let newName = initialNewNameSuggestion;
+      let counter = 1;
+      while (profileList.find((p) => p[0] === newName)) {
+        counter++;
+        newName = `${name} (copy ${counter})`;
+      }
 
-    const data = optionsSchema.parse(parsedProfile.data);
-    const name = parsedProfile.name;
+      // Get the profile to duplicate
+      const profileToDuplicate =
+        profileList.find((p) => p[0] === name)?.[1] === CURRENT_PROFILE
+          ? options
+          : profileList.find((p) => p[0] === name)?.[1];
 
-    const profiles = get(profileListAtom);
-    if (profiles.find((p) => p[0] === name)) {
-      toast.error(t("nameExistsImport", { name }));
-      return;
-    }
+      if (profileToDuplicate) {
+        setProfileList([...profileList, [newName, profileToDuplicate]]);
+        toast.success(t("duplicateSuccess", { name, newName }));
+      } else {
+        toast.error(t("duplicateFailed"));
+      }
+    },
+    [profileList, setProfileList, options, t],
+  );
+  return duplicate;
+};
 
-    set(profileListAtom, [...profiles, [name, data]]);
-    toast.success(t("importSuccess", { name }));
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      toast.error(t("validationFailed", { error: z.prettifyError(error) }));
-    } else {
-      toast.error(t("parseFailed"));
-    }
-    console.error("Import profile error:", error);
-  }
-});
+const useDeleteProfile = () => {
+  const t = useTranslations("settings.profiles.errors");
+  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const deleteProfile = useCallback(
+    (nameToDelete: string) => {
+      const profileToDelete = profileList.find((p) => p[0] === nameToDelete);
+
+      if (!profileToDelete) {
+        toast.error(t("profileNotFound"));
+        return;
+      }
+
+      if (profileToDelete[1] === CURRENT_PROFILE) {
+        toast.error(t("cannotDeleteCurrent"));
+        return;
+      }
+
+      const newProfiles = profileList.filter((p) => p[0] !== nameToDelete);
+      setProfileList(newProfiles);
+      toast.success(t("deleteSuccess", { nameToDelete }));
+    },
+    [profileList, setProfileList, t],
+  );
+  return deleteProfile;
+};
+
+function useImportProfile() {
+  const t = useTranslations("settings.profiles.errors");
+  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const importProfile = useCallback(
+    (profileJson: string) => {
+      try {
+        const parsedProfile = JSON.parse(profileJson) as {
+          name: string;
+          data: Profile;
+        };
+        if (!parsedProfile.name || !parsedProfile.data) {
+          toast.error(t("invalidFormat"));
+          return;
+        }
+
+        const data = optionsSchema.parse(parsedProfile.data);
+        const name = parsedProfile.name;
+
+        if (profileList.find((p) => p[0] === name)) {
+          toast.error(t("nameExistsImport", { name }));
+          return;
+        }
+
+        setProfileList([...profileList, [name, data]]);
+        toast.success(t("importSuccess", { name }));
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast.error(t("validationFailed", { error: z.prettifyError(error) }));
+        } else {
+          toast.error(t("parseFailed"));
+        }
+        console.error("Import profile error:", error);
+      }
+    },
+    [profileList, setProfileList, t],
+  );
+  return importProfile;
+}
 
 type ProfileItemProps = {
   name: string;
@@ -328,11 +349,11 @@ function ProfileItem({
 
 function Profiles() {
   const [profiles, setProfiles] = useAtom(profileListAtom);
-  const loadProfile = useSetAtom(loadProfileAtom);
-  const renameProfile = useSetAtom(renameProfileAtom);
-  const duplicateProfile = useSetAtom(duplicateProfileAtom);
-  const deleteProfile = useSetAtom(deleteProfileAtom);
-  const importProfile = useSetAtom(importProfileAtom);
+  const loadProfile = useLoadProfile();
+  const renameProfile = useRenameProfile();
+  const duplicateProfile = useDuplicateProfile();
+  const deleteProfile = useDeleteProfile();
+  const importProfile = useImportProfile();
   const t = useTranslations("settings.profiles");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -415,8 +436,15 @@ function Profiles() {
         />
       </div>
 
-      <ClientOnly>
-        <div className="grid gap-4 md:grid-cols-2 mt-6">
+      <div className="grid gap-4 md:grid-cols-2 mt-6">
+        <ClientOnly
+          fallback={
+            <>
+              <Skeleton className="w-full h-40" />
+              <Skeleton className="w-full h-40" />
+            </>
+          }
+        >
           {profiles.map(([name, profile]) => (
             <ProfileItem
               key={name}
@@ -433,8 +461,8 @@ function Profiles() {
               onDelete={deleteProfile}
             />
           ))}
-        </div>
-      </ClientOnly>
+        </ClientOnly>
+      </div>
     </div>
   );
 }

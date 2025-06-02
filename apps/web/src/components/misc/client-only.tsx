@@ -1,13 +1,10 @@
 "use client";
-import { HTMLAttributes, PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 
 export function ClientOnly({
   children,
   fallback,
-  ...delegated
-}: PropsWithChildren<
-  HTMLAttributes<HTMLDivElement> & { fallback?: React.ReactNode }
->) {
+}: PropsWithChildren<{ fallback?: React.ReactNode }>) {
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
@@ -15,5 +12,5 @@ export function ClientOnly({
   if (!hasMounted) {
     return fallback ?? null;
   }
-  return <div {...delegated}>{children}</div>;
+  return children;
 }
