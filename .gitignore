@@ -34,7 +34,7 @@ coverage/
 
 .vinxi
 .vercel
-/.next/
-/out/
+.next/
+out/
 *.tsbuildinfo
 next-env.d.ts
