@@ -4,6 +4,7 @@ import { s3SettingsAtom } from "../settings/settingsStore";
 import { s3SettingsSchema } from "../settings/settingsStore";
 import { S3Options } from "../settings/settingsStore";
 import { focusAtom } from "jotai-optics";
+import { S3Validation } from "../settings/s3/s3-validation";
 
 export function S3Onboard() {
   return (
@@ -69,6 +70,7 @@ function S3SettingsForm() {
         placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         tooltipStyleDescription
       />
+      <S3Validation />
     </div>
   );
 }
