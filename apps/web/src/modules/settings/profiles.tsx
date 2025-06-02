@@ -19,8 +19,8 @@ import McDownload from "~icons/mingcute/download-2-line.jsx";
 import McUpload from "~icons/mingcute/upload-2-line.jsx";
 import McClipboard from "~icons/mingcute/clipboard-line.jsx";
 import McFile from "~icons/mingcute/file-upload-line.jsx";
-import type { Options as Profile } from "./settingsStore";
-import { optionsAtom, optionsSchema } from "./settingsStore";
+import type { Options, Options as Profile } from "./settingsStore";
+import { migrateFromV1, optionsAtom, optionsSchema } from "./settingsStore";
 import { toast } from "sonner";
 import { useCallback, useEffect, useRef } from "react";
 import { ClientOnly } from "@/components/misc/client-only";
@@ -181,23 +181,38 @@ const useDeleteProfile = () => {
   return deleteProfile;
 };
 
+function parseProfile(
+  profileJson: string,
+): { name: string; data: Options } | Error {
+  let jsonParsed: Record<string, unknown>;
+  try {
+    jsonParsed = JSON.parse(profileJson);
+  } catch (error) {
+    return new Error("Failed to parse profile", { cause: error });
+  }
+
+  const parsed = z
+    .object({
+      name: z.string(),
+      data: optionsSchema,
+    })
+    .safeParse(jsonParsed);
+
+  if (!parsed.success) {
+    return new Error("Failed to parse profile", { cause: parsed.error });
+  }
+
+  return parsed.data;
+}
+
 function useImportProfile() {
   const t = useTranslations("settings.profiles.errors");
   const [profileList, setProfileList] = useAtom(profileListAtom);
   const importProfile = useCallback(
-    (profileJson: string) => {
+    (newProfile: { name: string; data: Options }) => {
       try {
-        const parsedProfile = JSON.parse(profileJson) as {
-          name: string;
-          data: Profile;
-        };
-        if (!parsedProfile.name || !parsedProfile.data) {
-          toast.error(t("invalidFormat"));
-          return;
-        }
-
-        const data = optionsSchema.parse(parsedProfile.data);
-        const name = parsedProfile.name;
+        const data = newProfile.data;
+        const name = newProfile.name;
 
         if (profileList.find((p) => p[0] === name)) {
           toast.error(t("nameExistsImport", { name }));
@@ -347,21 +362,10 @@ function ProfileItem({
   );
 }
 
-function Profiles() {
-  const [profiles, setProfiles] = useAtom(profileListAtom);
-  const loadProfile = useLoadProfile();
-  const renameProfile = useRenameProfile();
-  const duplicateProfile = useDuplicateProfile();
-  const deleteProfile = useDeleteProfile();
-  const importProfile = useImportProfile();
+function ProfileImporter() {
   const t = useTranslations("settings.profiles");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (profiles.length === 0) {
-      setProfiles([["Default", CURRENT_PROFILE]]);
-    }
-  }, [profiles.length, setProfiles]);
+  const importProfile = useImportProfile();
 
   const handleClipboardImport = async () => {
     try {
@@ -370,7 +374,13 @@ function Profiles() {
         toast.error(t("clipboardEmpty"));
         return;
       }
-      importProfile(text.trim());
+      const parsed = parseProfile(text.trim());
+      if (parsed instanceof Error) {
+        toast.error(t("errors.invalidFormat"));
+        console.error("Failed to parse profile", parsed);
+        return;
+      }
+      importProfile(parsed);
     } catch (error) {
       toast.error(t("failedToReadClipboard"));
       console.error("Clipboard read error:", error);
@@ -386,7 +396,13 @@ function Profiles() {
       try {
         const content = event.target?.result as string;
         if (content) {
-          importProfile(content);
+          const parsed = parseProfile(content);
+          if (parsed instanceof Error) {
+            toast.error(t("errors.invalidFormat"));
+            console.error("Failed to parse profile", parsed);
+            return;
+          }
+          importProfile(parsed);
         }
       } catch (error) {
         toast.error(t("failedToReadFile"));
@@ -403,37 +419,82 @@ function Profiles() {
     reader.readAsText(file);
   };
 
+  const handleV1ClipboardImport = async () => {
+    let text;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch (error) {
+      toast.error(t("failedToReadClipboard"));
+      console.error("Clipboard read error:", error);
+    }
+    const result = migrateFromV1(text);
+    if (result instanceof Error) {
+      toast.error(t("errors.invalidFormat"));
+      console.error("Failed to parse profile", result);
+      return;
+    }
+    importProfile({
+      name: `Migrated ${new Date().toISOString()}`,
+      data: result,
+    });
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button>
+            <McDownload className="h-5 w-5 mr-1" />
+            <span className="select-none">{t("importProfile")}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>{t("importOptions")}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleClipboardImport}>
+            <McClipboard className="h-5 w-5 mr-2" />
+            {t("importFromClipboard")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+            <McFile className="h-5 w-5 mr-2" />
+            {t("importFromFile")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleV1ClipboardImport}>
+            <McClipboard className="h-5 w-5 mr-2" />
+            {t("importFromV1Clipboard")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        accept=".json"
+        onChange={handleFileImport}
+      />
+    </>
+  );
+}
+
+function Profiles() {
+  const [profiles, setProfiles] = useAtom(profileListAtom);
+  const loadProfile = useLoadProfile();
+  const renameProfile = useRenameProfile();
+  const duplicateProfile = useDuplicateProfile();
+  const deleteProfile = useDeleteProfile();
+  const t = useTranslations("settings.profiles");
+
+  useEffect(() => {
+    if (profiles.length === 0) {
+      setProfiles([["Default", CURRENT_PROFILE]]);
+    }
+  }, [profiles.length, setProfiles]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{t("title")}</h2>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <McDownload className="h-5 w-5 mr-1" />
-              <span className="select-none">{t("importProfile")}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{t("importOptions")}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleClipboardImport}>
-              <McClipboard className="h-5 w-5 mr-2" />
-              {t("importFromClipboard")}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-              <McFile className="h-5 w-5 mr-2" />
-              {t("importFromFile")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          accept=".json"
-          onChange={handleFileImport}
-        />
+        <ProfileImporter />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 mt-6">

@@ -81,7 +81,8 @@
         "importSuccess": "配置 \"{name}\" 已成功导入。",
         "parseFailed": "解析配置 JSON 失败。请检查格式。",
         "validationFailed": "数据验证失败：{error}"
-      }
+      },
+      "importFromV1Clipboard": "从剪贴板导入V1配置文件"
     },
     "s3Invalid": {
       "s3ConfigTitle": "S3 配置不正确",

@@ -81,7 +81,8 @@
         "importSuccess": "Profile \"{name}\" imported successfully.",
         "parseFailed": "Failed to parse profile JSON. Please check the format.",
         "validationFailed": "Data validation failed: {error}"
-      }
+      },
+      "importFromV1Clipboard": "Import V1 Profile from Clipboard"
     },
     "s3Invalid": {
       "s3ConfigTitle": "S3 incorrectly configured",

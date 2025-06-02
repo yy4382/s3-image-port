@@ -118,6 +118,47 @@ export function tryMigrateFromV1(): Options {
     throw new Error("Failed to parse old settings");
   }
 
+  const newOptions = migrateFromV1({
+    s3: oldS3Settings,
+    app: oldAppSettings,
+  });
+  if (newOptions instanceof Error) {
+    throw newOptions;
+  }
+  return newOptions;
+}
+
+export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {
+  let v1ProfileRawObject: object;
+  if (typeof v1ProfileRaw === "string") {
+    try {
+      v1ProfileRawObject = JSON.parse(v1ProfileRaw);
+    } catch {
+      try {
+        v1ProfileRawObject = JSON.parse(decodeURIComponent(v1ProfileRaw));
+      } catch (error) {
+        return new Error("Failed to parse v1 profile", { cause: error });
+      }
+    }
+  } else if (typeof v1ProfileRaw === "object" && v1ProfileRaw !== null) {
+    v1ProfileRawObject = v1ProfileRaw;
+  } else {
+    return new Error("Invalid v1 profile");
+  }
+  const v1ProfileParsed = z
+    .object({
+      s3: z.record(z.string(), z.unknown()),
+      app: z.record(z.string(), z.unknown()),
+    })
+    .safeParse(v1ProfileRawObject);
+  if (!v1ProfileParsed.success) {
+    return new Error("Failed to parse v1 profile", {
+      cause: v1ProfileParsed.error,
+    });
+  }
+  const oldS3Settings = v1ProfileParsed.data.s3;
+  const oldAppSettings = v1ProfileParsed.data.app;
+
   const newOptions: Options = {
     s3: {
       endpoint: String(oldS3Settings?.endpoint ?? ""),
