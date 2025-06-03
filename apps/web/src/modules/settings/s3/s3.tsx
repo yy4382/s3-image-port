@@ -56,6 +56,7 @@ function S3Settings() {
           description={t("accessKeyDesc")}
           placeholder="XXXXXXXX"
           tooltipStyleDescription
+          password
         />
         <FormEntryTextAtom
           {...getS3Part("secretAccKey")}
@@ -63,6 +64,7 @@ function S3Settings() {
           description={t("secretKeyDesc")}
           placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
           tooltipStyleDescription
+          password
         />
         <FormEntrySwitchAtom
           atom={focusAtom(s3SettingsAtom, (optic) =>

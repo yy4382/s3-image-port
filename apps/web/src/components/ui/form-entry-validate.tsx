@@ -12,6 +12,7 @@ import {
   FormEntryDescOrError,
 } from "./form-entry";
 import { Input } from "./input";
+import { PasswordInput } from "./password-input";
 
 type SettingsTextEntryProps = {
   title: string;
@@ -20,6 +21,7 @@ type SettingsTextEntryProps = {
   placeholder?: string;
   tooltipStyleDescription?: boolean;
   value: string;
+  password?: boolean;
   setValue: Dispatch<SetStateAction<string>>;
 };
 
@@ -30,6 +32,7 @@ export function FormEntryText({
   placeholder,
   tooltipStyleDescription,
   value,
+  password,
   setValue,
 }: SettingsTextEntryProps) {
   const [error, handleChange] = useValidateInput(value, setValue, schema);
@@ -42,11 +45,19 @@ export function FormEntryText({
       <div className="grid">
         <FormEntryTitle className="mb-2">{title}</FormEntryTitle>
         <FormEntryInput>
-          <Input
-            value={value}
-            onChange={(e) => handleChange(e.target.value)}
-            placeholder={placeholder}
-          />
+          {password ? (
+            <PasswordInput
+              value={value}
+              onChange={(e) => handleChange(e.target.value)}
+              placeholder={placeholder}
+            />
+          ) : (
+            <Input
+              value={value}
+              onChange={(e) => handleChange(e.target.value)}
+              placeholder={placeholder}
+            />
+          )}
         </FormEntryInput>
         <FormEntryDescOrError className="mt-1" />
       </div>

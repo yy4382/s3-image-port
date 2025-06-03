@@ -62,6 +62,7 @@ function S3SettingsForm() {
         description={t("accessKeyDesc")}
         placeholder="XXXXXXXX"
         tooltipStyleDescription
+        password
       />
       <FormEntryTextAtom
         {...getS3Part("secretAccKey")}
@@ -69,6 +70,7 @@ function S3SettingsForm() {
         description={t("secretKeyDesc")}
         placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         tooltipStyleDescription
+        password
       />
       <S3Validation />
     </div>
