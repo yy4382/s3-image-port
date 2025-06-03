@@ -92,7 +92,7 @@
     "gallery": {
       "title": "Gallery",
       "autoRefresh": "Auto Refresh",
-      "autoRefreshDesc": "Auto refresh the gallery when a new photo is uploaded."
+      "autoRefreshDesc": "Refresh the gallery every time it loads. If enabled, there will be more List requests, which may slightly increase S3 costs."
     }
   },
   "gallery": {

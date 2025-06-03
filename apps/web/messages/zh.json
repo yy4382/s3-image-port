@@ -92,7 +92,7 @@
     "gallery": {
       "title": "画廊",
       "autoRefresh": "自动刷新",
-      "autoRefreshDesc": "当有新照片上传时自动刷新画廊。"
+      "autoRefreshDesc": "每次加载画廊时自动刷新。如果启用，会出现更多的 List 请求，可能会小幅增加 S3 费用。"
     }
   },
   "gallery": {
