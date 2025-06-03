@@ -123,7 +123,7 @@ export const filteredPhotosCountAtom = atom((get) => {
   return get(filteredPhotosAtom).length;
 });
 
-export const PER_PAGE = 12;
+export const PER_PAGE = 20;
 export const currentPageAtom = atom(1);
 
 export const showingPhotosAtom = atom<Photo[]>((get) => {
@@ -201,8 +201,12 @@ const scaleCurGroup = (
   });
 };
 
-export const photoSizeAtom = atom((get) => {
-  // debugger;
+export const photoSizeAtom = atom<
+  {
+    size: { width: number; height: number };
+    position: { x: number; y: number };
+  }[]
+>((get) => {
   const originalSizes = get(showingPhotosAtom).map((photo) => {
     const size = get(naturalSizesAtom).get(photo.Key);
     if (size) {
@@ -215,27 +219,71 @@ export const photoSizeAtom = atom((get) => {
     return DEFAULT_IMAGE_SIZE;
   });
 
-  const grouped: [number, number][][] = [];
+  const processedPhotos: {
+    size: { width: number; height: number };
+    position: { x: number; y: number };
+  }[] = [];
   let curWidth = 0;
   let curGroup: [number, number][] = [];
-  originalSizes.forEach((size) => {
-    if (curWidth + size[0] + GAP_PX > get(containerWidthAtom)) {
-      // this element will be put in the next line
-      // scale & push the current line
+  let yOffset = 0;
+
+  originalSizes.forEach((size, index) => {
+    if (
+      curWidth + size[0] + (curGroup.length > 0 ? GAP_PX : 0) >
+        get(containerWidthAtom) &&
+      curGroup.length > 0
+    ) {
+      // This element will be put in the next line
+      // Scale & process the current line
       scaleCurGroup(curGroup, get(containerWidthAtom), GAP_PX);
-      grouped.push(curGroup);
-      // start a new line (reset cur* variables)
+      let xOffset = 0;
+      let maxRowHeight = 0;
+      curGroup.forEach((scaledSize) => {
+        processedPhotos.push({
+          size: { width: scaledSize[0], height: scaledSize[1] },
+          position: { x: xOffset, y: yOffset },
+        });
+        xOffset += scaledSize[0] + GAP_PX;
+        if (scaledSize[1] > maxRowHeight) {
+          maxRowHeight = scaledSize[1];
+        }
+      });
+      yOffset += maxRowHeight + GAP_PX;
+      // Start a new line (reset cur* variables)
       curWidth = 0;
       curGroup = [];
     }
-    curWidth += size[0] + GAP_PX;
+    curWidth += size[0] + (curGroup.length > 0 ? GAP_PX : 0);
     curGroup.push(size);
+
+    // If this is the last element, process the remaining group
+    if (index === originalSizes.length - 1) {
+      if (curGroup.length > 0) {
+        // if there is only one element in the last line, no need to scale, unless it's wider than container
+        if (
+          curGroup.length > 1 ||
+          (curGroup.length === 1 && curGroup[0][0] > get(containerWidthAtom))
+        ) {
+          scaleCurGroup(curGroup, get(containerWidthAtom), GAP_PX);
+        }
+        let xOffset = 0;
+        let maxRowHeight = 0;
+        curGroup.forEach((scaledSize) => {
+          processedPhotos.push({
+            size: { width: scaledSize[0], height: scaledSize[1] },
+            position: { x: xOffset, y: yOffset },
+          });
+          xOffset += scaledSize[0] + GAP_PX;
+          if (scaledSize[1] > maxRowHeight) {
+            maxRowHeight = scaledSize[1];
+          }
+        });
+        // No yOffset increment for the last line's items themselves, only after the row is complete
+      }
+    }
   });
-  if (curGroup.length > 1)
-    // if there is only one element in the last line, no need to scale
-    scaleCurGroup(curGroup, get(containerWidthAtom), GAP_PX);
-  grouped.push(curGroup);
-  return grouped.flat();
+
+  return processedPhotos;
 });
 
 export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());

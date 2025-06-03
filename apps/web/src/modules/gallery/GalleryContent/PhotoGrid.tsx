@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
 import { useFetchPhotoList } from "../galleryStore";
 import {
@@ -40,13 +40,32 @@ export function PhotoGrid() {
 
     observer.observe(containerRef.current!);
   }, [setContainerWidth]);
+
+  const containerHeight = useMemo(() => {
+    const lastPhoto = photoSize.at(-1);
+    if (!lastPhoto) {
+      return 0;
+    }
+    return lastPhoto.position.y + lastPhoto.size.height;
+  }, [photoSize]);
+
   return (
     <div ref={containerRef} className="max-w-full">
       {photos.length > 0 ? (
         <div className="flex flex-col gap-4 w-full">
-          <div className="flex flex-wrap gap-2 w-full">
+          <div
+            className="w-full relative"
+            style={{
+              height: containerHeight,
+            }}
+          >
             {photos.map((photo, i) => (
-              <PhotoItem key={photo.Key} photo={photo} size={photoSize[i]} />
+              <PhotoItem
+                key={photo.Key}
+                photo={photo}
+                size={photoSize[i].size}
+                position={photoSize[i].position}
+              />
             ))}
           </div>
           <PaginationWithLogic

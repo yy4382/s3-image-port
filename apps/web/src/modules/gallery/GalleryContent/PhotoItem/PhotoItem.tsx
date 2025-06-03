@@ -30,27 +30,28 @@ import {
 import { setNaturalSizesAtom } from "../../galleryStore";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { motion } from "motion/react";
 
 export function PhotoItem({
   photo,
   size,
+  position,
 }: {
   photo: Photo;
-  size: [number, number];
+  size: { width: number; height: number };
+  position: { x: number; y: number };
 }) {
-  return (
-    <div className="relative">
-      <PhotoDisplay photo={photo} size={size} />
-    </div>
-  );
+  return <PhotoDisplay photo={photo} size={size} position={position} />;
 }
 
 function PhotoDisplay({
   photo,
   size,
+  position,
 }: {
   photo: Photo;
-  size: [number, number];
+  size: { width: number; height: number };
+  position: { x: number; y: number };
 }) {
   const s3Key = photo.Key;
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -68,10 +69,17 @@ function PhotoDisplay({
   const handleOpenModal = useOpenModal(photo.Key);
 
   return (
-    <div
+    <motion.div
       ref={wrapperRef}
-      className="overflow-hidden transition-all duration-75 group"
-      style={{ width: size[0], height: size[1] }}
+      className="overflow-hidden group absolute"
+      style={{
+        width: size.width,
+        height: size.height,
+        left: position.x,
+        top: position.y,
+      }}
+      layout="preserve-aspect"
+      transition={{ ease: "easeInOut", duration: 0.2 }}
     >
       {loadingState === "loading" && <Skeleton className="w-full h-full" />}
       {loadingState === "error" && <PhotoDisplayError s3Key={s3Key} />}
@@ -84,8 +92,8 @@ function PhotoDisplay({
           s3Key={s3Key}
           url={key2Url(s3Key, s3Settings)}
           setLoadingState={setLoadingState}
-          width={size[0]}
-          height={size[1]}
+          width={size.width}
+          height={size.height}
           draggable="false"
         />
       )}
@@ -98,7 +106,7 @@ function PhotoDisplay({
           />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
