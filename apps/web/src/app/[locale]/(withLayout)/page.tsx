@@ -1,7 +1,10 @@
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { GitHubStarsButton } from "@/components/animate-ui/buttons/github-stars";
+import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Home - S3 Image Port",
@@ -40,27 +43,25 @@ export default async function Home({
                 {t("compatibility")}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 sm:gap-4 md:pt-6 justify-center items-center">
-              <Link
-                className={buttonVariants({ variant: "default" })}
-                href="/onboard"
-              >
-                {t("getStarted")}
-              </Link>
-              <a
-                className={buttonVariants({ variant: "secondary" })}
-                target="_blank"
-                href="https://docs.iport.yfi.moe"
-              >
-                {t("readDocs")}
-              </a>
-              <a
-                className={buttonVariants({ variant: "ghost" })}
-                href="https://github.com/yy4382/s3-image-port"
-                target="_blank"
-              >
-                {t("viewSource")}
-              </a>
+            <div className="flex flex-col gap-2 sm:gap-4 md:pt-6 justify-center items-center">
+              <div className="flex gap-2 sm:gap-4 justify-center items-center">
+                <Link href="/onboard">
+                  <Button className="hover:scale-105 transition-all duration-300">
+                    {t("getStarted")} <ArrowRight size={16} />
+                  </Button>
+                </Link>
+                <a
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "hover:scale-105 transition-all duration-300",
+                  )}
+                  target="_blank"
+                  href="https://docs.iport.yfi.moe"
+                >
+                  {t("readDocs")}
+                </a>
+              </div>
+              <GitHubStarsButton username="yy4382" repo="s3-image-port" />
             </div>
             {/* TODO: Replace this div with your Checkbox component when available */}
             {/* <div className="pt-2 transition-opacity opacity-40 hover:opacity-80">
