@@ -176,5 +176,9 @@
     "alerts": {
       "s3NotConfigured": "S3 settings are not configured"
     }
+  },
+  "banner": {
+    "title": "You are now in a beta (v2) version of the website.",
+    "description": "Go to the stable <a>V1 site</a>."
   }
 }

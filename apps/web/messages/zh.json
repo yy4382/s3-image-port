@@ -176,5 +176,9 @@
     "alerts": {
       "s3NotConfigured": "S3 设置未配置"
     }
+  },
+  "banner": {
+    "title": "您现在位于 V2 测试版中。",
+    "description": "前往 <a>V1 版本网站</a>。"
   }
 }
