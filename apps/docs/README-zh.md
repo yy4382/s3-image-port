@@ -6,13 +6,7 @@
 
 ![poster](./zh/images/poster-zh.png)
 
-## 在线实例和部署
-
-一个公共实例托管在 [Vercel](https://vercel.com)，可通过 [iport.yfi.moe](https://iport.yfi.moe)访问。您只需在 “设置 ”选项卡下输入特定的 S3 设置，即可立即开始使用。
-
-该项目是开源的，并且一切数据都留在您本地的浏览器中不会被上传，您也可以选择 Fork 本仓库，将其部署到自己的 Vercel 账户或服务器上。
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyy4382%2Fs3-image-port)
+前往 <https://iport.yfi.moe>，您只需在 “设置 ”选项卡下输入特定的 S3 设置，即可立即开始使用。
 
 ## 特性和功能
 
