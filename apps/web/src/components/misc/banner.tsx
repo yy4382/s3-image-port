@@ -21,7 +21,7 @@ const Banner = ({ defaultVisible = true }: BannerProps) => {
   if (!isVisible) return null;
 
   return (
-    <section className="w-full border-b bg-white px-4 py-3 shadow-sm">
+    <section className="w-full border-b bg-white dark:bg-black px-4 py-3 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="flex-1 text-center">
           <span className="text-sm">
