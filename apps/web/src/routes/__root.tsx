@@ -4,11 +4,13 @@ import {
   HeadContent,
   Scripts,
   Link,
+  useMatchRoute,
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { Provider as JotaiProvider } from "jotai";
 import globalCss from "@/styles/globals.css?url";
+import { routing } from "@/i18n/routing";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -30,8 +32,17 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
+  const matchRoute = useMatchRoute();
+  const params = matchRoute({ to: "/$locale" });
+
+  const locale = params
+    ? routing.locales.includes(params.locale as "en" | "zh")
+      ? params.locale
+      : "en"
+    : "en";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
