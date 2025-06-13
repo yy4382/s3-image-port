@@ -30,19 +30,9 @@ export default defineConfig({
     tanstackStart({
       target: "static",
       spa: {
+        maskPath: "/",
         enabled: true,
-        maskPath: "/en",
-        prerender: {
-          enabled: true,
-          crawlLinks: true,
-          retryCount: 3,
-        },
       },
-      // prerender: {
-      //   enabled: true,
-      //   filter: () => true,
-      //   crawlLinks: true,
-      // },
     }),
   ],
 });
