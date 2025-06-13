@@ -28,13 +28,12 @@ export default defineConfig({
     tsconfigPaths(),
     Icons({ compiler: "jsx", jsx: "react" }),
     tanstackStart({
+      target: "static",
       spa: {
         enabled: true,
         maskPath: "/en",
         prerender: {
           enabled: true,
-          retryCount: 3,
-          crawlLinks: true,
           outputPath: "/index.html",
         },
       },

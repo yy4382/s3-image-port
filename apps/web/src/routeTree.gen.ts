@@ -8,304 +8,304 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as LocaleRouteRouteImport } from "./routes/$locale/route";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as LocaleOnboardRouteImport } from "./routes/$locale/onboard";
-import { Route as LocaleWithLayoutRouteRouteImport } from "./routes/$locale/_withLayout/route";
-import { Route as LocaleWithLayoutIndexRouteImport } from "./routes/$locale/_withLayout/index";
-import { Route as LocaleImageKeyRouteImport } from "./routes/$locale/image.$key";
-import { Route as LocaleWithLayoutUploadRouteImport } from "./routes/$locale/_withLayout/upload";
-import { Route as LocaleWithLayoutSettingsRouteImport } from "./routes/$locale/_withLayout/settings";
-import { Route as LocaleWithLayoutGalleryRouteImport } from "./routes/$locale/_withLayout/gallery";
-import { Route as LocaleWithLayoutSettingsIndexRouteImport } from "./routes/$locale/_withLayout/settings/index";
-import { Route as LocaleWithLayoutSettingsUploadRouteImport } from "./routes/$locale/_withLayout/settings/upload";
-import { Route as LocaleWithLayoutSettingsS3RouteImport } from "./routes/$locale/_withLayout/settings/s3";
-import { Route as LocaleWithLayoutSettingsProfilesRouteImport } from "./routes/$locale/_withLayout/settings/profiles";
-import { Route as LocaleWithLayoutSettingsGalleryRouteImport } from "./routes/$locale/_withLayout/settings/gallery";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as LocaleOnboardRouteImport } from './routes/$locale/onboard'
+import { Route as LocaleWithLayoutRouteRouteImport } from './routes/$locale/_withLayout/route'
+import { Route as LocaleWithLayoutIndexRouteImport } from './routes/$locale/_withLayout/index'
+import { Route as LocaleImageKeyRouteImport } from './routes/$locale/image.$key'
+import { Route as LocaleWithLayoutUploadRouteImport } from './routes/$locale/_withLayout/upload'
+import { Route as LocaleWithLayoutSettingsRouteImport } from './routes/$locale/_withLayout/settings'
+import { Route as LocaleWithLayoutGalleryRouteImport } from './routes/$locale/_withLayout/gallery'
+import { Route as LocaleWithLayoutSettingsIndexRouteImport } from './routes/$locale/_withLayout/settings/index'
+import { Route as LocaleWithLayoutSettingsUploadRouteImport } from './routes/$locale/_withLayout/settings/upload'
+import { Route as LocaleWithLayoutSettingsS3RouteImport } from './routes/$locale/_withLayout/settings/s3'
+import { Route as LocaleWithLayoutSettingsProfilesRouteImport } from './routes/$locale/_withLayout/settings/profiles'
+import { Route as LocaleWithLayoutSettingsGalleryRouteImport } from './routes/$locale/_withLayout/settings/gallery'
 
 const LocaleRouteRoute = LocaleRouteRouteImport.update({
-  id: "/$locale",
-  path: "/$locale",
+  id: '/$locale',
+  path: '/$locale',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LocaleOnboardRoute = LocaleOnboardRouteImport.update({
-  id: "/onboard",
-  path: "/onboard",
+  id: '/onboard',
+  path: '/onboard',
   getParentRoute: () => LocaleRouteRoute,
-} as any);
+} as any)
 const LocaleWithLayoutRouteRoute = LocaleWithLayoutRouteRouteImport.update({
-  id: "/_withLayout",
+  id: '/_withLayout',
   getParentRoute: () => LocaleRouteRoute,
-} as any);
+} as any)
 const LocaleWithLayoutIndexRoute = LocaleWithLayoutIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => LocaleWithLayoutRouteRoute,
-} as any);
+} as any)
 const LocaleImageKeyRoute = LocaleImageKeyRouteImport.update({
-  id: "/image/$key",
-  path: "/image/$key",
+  id: '/image/$key',
+  path: '/image/$key',
   getParentRoute: () => LocaleRouteRoute,
-} as any);
+} as any)
 const LocaleWithLayoutUploadRoute = LocaleWithLayoutUploadRouteImport.update({
-  id: "/upload",
-  path: "/upload",
+  id: '/upload',
+  path: '/upload',
   getParentRoute: () => LocaleWithLayoutRouteRoute,
-} as any);
+} as any)
 const LocaleWithLayoutSettingsRoute =
   LocaleWithLayoutSettingsRouteImport.update({
-    id: "/settings",
-    path: "/settings",
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => LocaleWithLayoutRouteRoute,
-  } as any);
+  } as any)
 const LocaleWithLayoutGalleryRoute = LocaleWithLayoutGalleryRouteImport.update({
-  id: "/gallery",
-  path: "/gallery",
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => LocaleWithLayoutRouteRoute,
-} as any);
+} as any)
 const LocaleWithLayoutSettingsIndexRoute =
   LocaleWithLayoutSettingsIndexRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => LocaleWithLayoutSettingsRoute,
-  } as any);
+  } as any)
 const LocaleWithLayoutSettingsUploadRoute =
   LocaleWithLayoutSettingsUploadRouteImport.update({
-    id: "/upload",
-    path: "/upload",
+    id: '/upload',
+    path: '/upload',
     getParentRoute: () => LocaleWithLayoutSettingsRoute,
-  } as any);
+  } as any)
 const LocaleWithLayoutSettingsS3Route =
   LocaleWithLayoutSettingsS3RouteImport.update({
-    id: "/s3",
-    path: "/s3",
+    id: '/s3',
+    path: '/s3',
     getParentRoute: () => LocaleWithLayoutSettingsRoute,
-  } as any);
+  } as any)
 const LocaleWithLayoutSettingsProfilesRoute =
   LocaleWithLayoutSettingsProfilesRouteImport.update({
-    id: "/profiles",
-    path: "/profiles",
+    id: '/profiles',
+    path: '/profiles',
     getParentRoute: () => LocaleWithLayoutSettingsRoute,
-  } as any);
+  } as any)
 const LocaleWithLayoutSettingsGalleryRoute =
   LocaleWithLayoutSettingsGalleryRouteImport.update({
-    id: "/gallery",
-    path: "/gallery",
+    id: '/gallery',
+    path: '/gallery',
     getParentRoute: () => LocaleWithLayoutSettingsRoute,
-  } as any);
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/$locale": typeof LocaleWithLayoutRouteRouteWithChildren;
-  "/$locale/onboard": typeof LocaleOnboardRoute;
-  "/$locale/gallery": typeof LocaleWithLayoutGalleryRoute;
-  "/$locale/settings": typeof LocaleWithLayoutSettingsRouteWithChildren;
-  "/$locale/upload": typeof LocaleWithLayoutUploadRoute;
-  "/$locale/image/$key": typeof LocaleImageKeyRoute;
-  "/$locale/": typeof LocaleWithLayoutIndexRoute;
-  "/$locale/settings/gallery": typeof LocaleWithLayoutSettingsGalleryRoute;
-  "/$locale/settings/profiles": typeof LocaleWithLayoutSettingsProfilesRoute;
-  "/$locale/settings/s3": typeof LocaleWithLayoutSettingsS3Route;
-  "/$locale/settings/upload": typeof LocaleWithLayoutSettingsUploadRoute;
-  "/$locale/settings/": typeof LocaleWithLayoutSettingsIndexRoute;
+  '/': typeof IndexRoute
+  '/$locale': typeof LocaleWithLayoutRouteRouteWithChildren
+  '/$locale/onboard': typeof LocaleOnboardRoute
+  '/$locale/gallery': typeof LocaleWithLayoutGalleryRoute
+  '/$locale/settings': typeof LocaleWithLayoutSettingsRouteWithChildren
+  '/$locale/upload': typeof LocaleWithLayoutUploadRoute
+  '/$locale/image/$key': typeof LocaleImageKeyRoute
+  '/$locale/': typeof LocaleWithLayoutIndexRoute
+  '/$locale/settings/gallery': typeof LocaleWithLayoutSettingsGalleryRoute
+  '/$locale/settings/profiles': typeof LocaleWithLayoutSettingsProfilesRoute
+  '/$locale/settings/s3': typeof LocaleWithLayoutSettingsS3Route
+  '/$locale/settings/upload': typeof LocaleWithLayoutSettingsUploadRoute
+  '/$locale/settings/': typeof LocaleWithLayoutSettingsIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/$locale": typeof LocaleWithLayoutIndexRoute;
-  "/$locale/onboard": typeof LocaleOnboardRoute;
-  "/$locale/gallery": typeof LocaleWithLayoutGalleryRoute;
-  "/$locale/upload": typeof LocaleWithLayoutUploadRoute;
-  "/$locale/image/$key": typeof LocaleImageKeyRoute;
-  "/$locale/settings/gallery": typeof LocaleWithLayoutSettingsGalleryRoute;
-  "/$locale/settings/profiles": typeof LocaleWithLayoutSettingsProfilesRoute;
-  "/$locale/settings/s3": typeof LocaleWithLayoutSettingsS3Route;
-  "/$locale/settings/upload": typeof LocaleWithLayoutSettingsUploadRoute;
-  "/$locale/settings": typeof LocaleWithLayoutSettingsIndexRoute;
+  '/': typeof IndexRoute
+  '/$locale': typeof LocaleWithLayoutIndexRoute
+  '/$locale/onboard': typeof LocaleOnboardRoute
+  '/$locale/gallery': typeof LocaleWithLayoutGalleryRoute
+  '/$locale/upload': typeof LocaleWithLayoutUploadRoute
+  '/$locale/image/$key': typeof LocaleImageKeyRoute
+  '/$locale/settings/gallery': typeof LocaleWithLayoutSettingsGalleryRoute
+  '/$locale/settings/profiles': typeof LocaleWithLayoutSettingsProfilesRoute
+  '/$locale/settings/s3': typeof LocaleWithLayoutSettingsS3Route
+  '/$locale/settings/upload': typeof LocaleWithLayoutSettingsUploadRoute
+  '/$locale/settings': typeof LocaleWithLayoutSettingsIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/$locale": typeof LocaleRouteRouteWithChildren;
-  "/$locale/_withLayout": typeof LocaleWithLayoutRouteRouteWithChildren;
-  "/$locale/onboard": typeof LocaleOnboardRoute;
-  "/$locale/_withLayout/gallery": typeof LocaleWithLayoutGalleryRoute;
-  "/$locale/_withLayout/settings": typeof LocaleWithLayoutSettingsRouteWithChildren;
-  "/$locale/_withLayout/upload": typeof LocaleWithLayoutUploadRoute;
-  "/$locale/image/$key": typeof LocaleImageKeyRoute;
-  "/$locale/_withLayout/": typeof LocaleWithLayoutIndexRoute;
-  "/$locale/_withLayout/settings/gallery": typeof LocaleWithLayoutSettingsGalleryRoute;
-  "/$locale/_withLayout/settings/profiles": typeof LocaleWithLayoutSettingsProfilesRoute;
-  "/$locale/_withLayout/settings/s3": typeof LocaleWithLayoutSettingsS3Route;
-  "/$locale/_withLayout/settings/upload": typeof LocaleWithLayoutSettingsUploadRoute;
-  "/$locale/_withLayout/settings/": typeof LocaleWithLayoutSettingsIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/$locale': typeof LocaleRouteRouteWithChildren
+  '/$locale/_withLayout': typeof LocaleWithLayoutRouteRouteWithChildren
+  '/$locale/onboard': typeof LocaleOnboardRoute
+  '/$locale/_withLayout/gallery': typeof LocaleWithLayoutGalleryRoute
+  '/$locale/_withLayout/settings': typeof LocaleWithLayoutSettingsRouteWithChildren
+  '/$locale/_withLayout/upload': typeof LocaleWithLayoutUploadRoute
+  '/$locale/image/$key': typeof LocaleImageKeyRoute
+  '/$locale/_withLayout/': typeof LocaleWithLayoutIndexRoute
+  '/$locale/_withLayout/settings/gallery': typeof LocaleWithLayoutSettingsGalleryRoute
+  '/$locale/_withLayout/settings/profiles': typeof LocaleWithLayoutSettingsProfilesRoute
+  '/$locale/_withLayout/settings/s3': typeof LocaleWithLayoutSettingsS3Route
+  '/$locale/_withLayout/settings/upload': typeof LocaleWithLayoutSettingsUploadRoute
+  '/$locale/_withLayout/settings/': typeof LocaleWithLayoutSettingsIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/$locale"
-    | "/$locale/onboard"
-    | "/$locale/gallery"
-    | "/$locale/settings"
-    | "/$locale/upload"
-    | "/$locale/image/$key"
-    | "/$locale/"
-    | "/$locale/settings/gallery"
-    | "/$locale/settings/profiles"
-    | "/$locale/settings/s3"
-    | "/$locale/settings/upload"
-    | "/$locale/settings/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/$locale'
+    | '/$locale/onboard'
+    | '/$locale/gallery'
+    | '/$locale/settings'
+    | '/$locale/upload'
+    | '/$locale/image/$key'
+    | '/$locale/'
+    | '/$locale/settings/gallery'
+    | '/$locale/settings/profiles'
+    | '/$locale/settings/s3'
+    | '/$locale/settings/upload'
+    | '/$locale/settings/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/$locale"
-    | "/$locale/onboard"
-    | "/$locale/gallery"
-    | "/$locale/upload"
-    | "/$locale/image/$key"
-    | "/$locale/settings/gallery"
-    | "/$locale/settings/profiles"
-    | "/$locale/settings/s3"
-    | "/$locale/settings/upload"
-    | "/$locale/settings";
+    | '/'
+    | '/$locale'
+    | '/$locale/onboard'
+    | '/$locale/gallery'
+    | '/$locale/upload'
+    | '/$locale/image/$key'
+    | '/$locale/settings/gallery'
+    | '/$locale/settings/profiles'
+    | '/$locale/settings/s3'
+    | '/$locale/settings/upload'
+    | '/$locale/settings'
   id:
-    | "__root__"
-    | "/"
-    | "/$locale"
-    | "/$locale/_withLayout"
-    | "/$locale/onboard"
-    | "/$locale/_withLayout/gallery"
-    | "/$locale/_withLayout/settings"
-    | "/$locale/_withLayout/upload"
-    | "/$locale/image/$key"
-    | "/$locale/_withLayout/"
-    | "/$locale/_withLayout/settings/gallery"
-    | "/$locale/_withLayout/settings/profiles"
-    | "/$locale/_withLayout/settings/s3"
-    | "/$locale/_withLayout/settings/upload"
-    | "/$locale/_withLayout/settings/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/$locale'
+    | '/$locale/_withLayout'
+    | '/$locale/onboard'
+    | '/$locale/_withLayout/gallery'
+    | '/$locale/_withLayout/settings'
+    | '/$locale/_withLayout/upload'
+    | '/$locale/image/$key'
+    | '/$locale/_withLayout/'
+    | '/$locale/_withLayout/settings/gallery'
+    | '/$locale/_withLayout/settings/profiles'
+    | '/$locale/_withLayout/settings/s3'
+    | '/$locale/_withLayout/settings/upload'
+    | '/$locale/_withLayout/settings/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  LocaleRouteRoute: typeof LocaleRouteRouteWithChildren;
+  IndexRoute: typeof IndexRoute
+  LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/$locale": {
-      id: "/$locale";
-      path: "/$locale";
-      fullPath: "/$locale";
-      preLoaderRoute: typeof LocaleRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/$locale/onboard": {
-      id: "/$locale/onboard";
-      path: "/onboard";
-      fullPath: "/$locale/onboard";
-      preLoaderRoute: typeof LocaleOnboardRouteImport;
-      parentRoute: typeof LocaleRouteRoute;
-    };
-    "/$locale/_withLayout": {
-      id: "/$locale/_withLayout";
-      path: "";
-      fullPath: "/$locale";
-      preLoaderRoute: typeof LocaleWithLayoutRouteRouteImport;
-      parentRoute: typeof LocaleRouteRoute;
-    };
-    "/$locale/_withLayout/": {
-      id: "/$locale/_withLayout/";
-      path: "/";
-      fullPath: "/$locale/";
-      preLoaderRoute: typeof LocaleWithLayoutIndexRouteImport;
-      parentRoute: typeof LocaleWithLayoutRouteRoute;
-    };
-    "/$locale/image/$key": {
-      id: "/$locale/image/$key";
-      path: "/image/$key";
-      fullPath: "/$locale/image/$key";
-      preLoaderRoute: typeof LocaleImageKeyRouteImport;
-      parentRoute: typeof LocaleRouteRoute;
-    };
-    "/$locale/_withLayout/upload": {
-      id: "/$locale/_withLayout/upload";
-      path: "/upload";
-      fullPath: "/$locale/upload";
-      preLoaderRoute: typeof LocaleWithLayoutUploadRouteImport;
-      parentRoute: typeof LocaleWithLayoutRouteRoute;
-    };
-    "/$locale/_withLayout/settings": {
-      id: "/$locale/_withLayout/settings";
-      path: "/settings";
-      fullPath: "/$locale/settings";
-      preLoaderRoute: typeof LocaleWithLayoutSettingsRouteImport;
-      parentRoute: typeof LocaleWithLayoutRouteRoute;
-    };
-    "/$locale/_withLayout/gallery": {
-      id: "/$locale/_withLayout/gallery";
-      path: "/gallery";
-      fullPath: "/$locale/gallery";
-      preLoaderRoute: typeof LocaleWithLayoutGalleryRouteImport;
-      parentRoute: typeof LocaleWithLayoutRouteRoute;
-    };
-    "/$locale/_withLayout/settings/": {
-      id: "/$locale/_withLayout/settings/";
-      path: "/";
-      fullPath: "/$locale/settings/";
-      preLoaderRoute: typeof LocaleWithLayoutSettingsIndexRouteImport;
-      parentRoute: typeof LocaleWithLayoutSettingsRoute;
-    };
-    "/$locale/_withLayout/settings/upload": {
-      id: "/$locale/_withLayout/settings/upload";
-      path: "/upload";
-      fullPath: "/$locale/settings/upload";
-      preLoaderRoute: typeof LocaleWithLayoutSettingsUploadRouteImport;
-      parentRoute: typeof LocaleWithLayoutSettingsRoute;
-    };
-    "/$locale/_withLayout/settings/s3": {
-      id: "/$locale/_withLayout/settings/s3";
-      path: "/s3";
-      fullPath: "/$locale/settings/s3";
-      preLoaderRoute: typeof LocaleWithLayoutSettingsS3RouteImport;
-      parentRoute: typeof LocaleWithLayoutSettingsRoute;
-    };
-    "/$locale/_withLayout/settings/profiles": {
-      id: "/$locale/_withLayout/settings/profiles";
-      path: "/profiles";
-      fullPath: "/$locale/settings/profiles";
-      preLoaderRoute: typeof LocaleWithLayoutSettingsProfilesRouteImport;
-      parentRoute: typeof LocaleWithLayoutSettingsRoute;
-    };
-    "/$locale/_withLayout/settings/gallery": {
-      id: "/$locale/_withLayout/settings/gallery";
-      path: "/gallery";
-      fullPath: "/$locale/settings/gallery";
-      preLoaderRoute: typeof LocaleWithLayoutSettingsGalleryRouteImport;
-      parentRoute: typeof LocaleWithLayoutSettingsRoute;
-    };
+    '/$locale': {
+      id: '/$locale'
+      path: '/$locale'
+      fullPath: '/$locale'
+      preLoaderRoute: typeof LocaleRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$locale/onboard': {
+      id: '/$locale/onboard'
+      path: '/onboard'
+      fullPath: '/$locale/onboard'
+      preLoaderRoute: typeof LocaleOnboardRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/_withLayout': {
+      id: '/$locale/_withLayout'
+      path: ''
+      fullPath: '/$locale'
+      preLoaderRoute: typeof LocaleWithLayoutRouteRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/_withLayout/': {
+      id: '/$locale/_withLayout/'
+      path: '/'
+      fullPath: '/$locale/'
+      preLoaderRoute: typeof LocaleWithLayoutIndexRouteImport
+      parentRoute: typeof LocaleWithLayoutRouteRoute
+    }
+    '/$locale/image/$key': {
+      id: '/$locale/image/$key'
+      path: '/image/$key'
+      fullPath: '/$locale/image/$key'
+      preLoaderRoute: typeof LocaleImageKeyRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/_withLayout/upload': {
+      id: '/$locale/_withLayout/upload'
+      path: '/upload'
+      fullPath: '/$locale/upload'
+      preLoaderRoute: typeof LocaleWithLayoutUploadRouteImport
+      parentRoute: typeof LocaleWithLayoutRouteRoute
+    }
+    '/$locale/_withLayout/settings': {
+      id: '/$locale/_withLayout/settings'
+      path: '/settings'
+      fullPath: '/$locale/settings'
+      preLoaderRoute: typeof LocaleWithLayoutSettingsRouteImport
+      parentRoute: typeof LocaleWithLayoutRouteRoute
+    }
+    '/$locale/_withLayout/gallery': {
+      id: '/$locale/_withLayout/gallery'
+      path: '/gallery'
+      fullPath: '/$locale/gallery'
+      preLoaderRoute: typeof LocaleWithLayoutGalleryRouteImport
+      parentRoute: typeof LocaleWithLayoutRouteRoute
+    }
+    '/$locale/_withLayout/settings/': {
+      id: '/$locale/_withLayout/settings/'
+      path: '/'
+      fullPath: '/$locale/settings/'
+      preLoaderRoute: typeof LocaleWithLayoutSettingsIndexRouteImport
+      parentRoute: typeof LocaleWithLayoutSettingsRoute
+    }
+    '/$locale/_withLayout/settings/upload': {
+      id: '/$locale/_withLayout/settings/upload'
+      path: '/upload'
+      fullPath: '/$locale/settings/upload'
+      preLoaderRoute: typeof LocaleWithLayoutSettingsUploadRouteImport
+      parentRoute: typeof LocaleWithLayoutSettingsRoute
+    }
+    '/$locale/_withLayout/settings/s3': {
+      id: '/$locale/_withLayout/settings/s3'
+      path: '/s3'
+      fullPath: '/$locale/settings/s3'
+      preLoaderRoute: typeof LocaleWithLayoutSettingsS3RouteImport
+      parentRoute: typeof LocaleWithLayoutSettingsRoute
+    }
+    '/$locale/_withLayout/settings/profiles': {
+      id: '/$locale/_withLayout/settings/profiles'
+      path: '/profiles'
+      fullPath: '/$locale/settings/profiles'
+      preLoaderRoute: typeof LocaleWithLayoutSettingsProfilesRouteImport
+      parentRoute: typeof LocaleWithLayoutSettingsRoute
+    }
+    '/$locale/_withLayout/settings/gallery': {
+      id: '/$locale/_withLayout/settings/gallery'
+      path: '/gallery'
+      fullPath: '/$locale/settings/gallery'
+      preLoaderRoute: typeof LocaleWithLayoutSettingsGalleryRouteImport
+      parentRoute: typeof LocaleWithLayoutSettingsRoute
+    }
   }
 }
 
 interface LocaleWithLayoutSettingsRouteChildren {
-  LocaleWithLayoutSettingsGalleryRoute: typeof LocaleWithLayoutSettingsGalleryRoute;
-  LocaleWithLayoutSettingsProfilesRoute: typeof LocaleWithLayoutSettingsProfilesRoute;
-  LocaleWithLayoutSettingsS3Route: typeof LocaleWithLayoutSettingsS3Route;
-  LocaleWithLayoutSettingsUploadRoute: typeof LocaleWithLayoutSettingsUploadRoute;
-  LocaleWithLayoutSettingsIndexRoute: typeof LocaleWithLayoutSettingsIndexRoute;
+  LocaleWithLayoutSettingsGalleryRoute: typeof LocaleWithLayoutSettingsGalleryRoute
+  LocaleWithLayoutSettingsProfilesRoute: typeof LocaleWithLayoutSettingsProfilesRoute
+  LocaleWithLayoutSettingsS3Route: typeof LocaleWithLayoutSettingsS3Route
+  LocaleWithLayoutSettingsUploadRoute: typeof LocaleWithLayoutSettingsUploadRoute
+  LocaleWithLayoutSettingsIndexRoute: typeof LocaleWithLayoutSettingsIndexRoute
 }
 
 const LocaleWithLayoutSettingsRouteChildren: LocaleWithLayoutSettingsRouteChildren =
@@ -316,18 +316,18 @@ const LocaleWithLayoutSettingsRouteChildren: LocaleWithLayoutSettingsRouteChildr
     LocaleWithLayoutSettingsS3Route: LocaleWithLayoutSettingsS3Route,
     LocaleWithLayoutSettingsUploadRoute: LocaleWithLayoutSettingsUploadRoute,
     LocaleWithLayoutSettingsIndexRoute: LocaleWithLayoutSettingsIndexRoute,
-  };
+  }
 
 const LocaleWithLayoutSettingsRouteWithChildren =
   LocaleWithLayoutSettingsRoute._addFileChildren(
     LocaleWithLayoutSettingsRouteChildren,
-  );
+  )
 
 interface LocaleWithLayoutRouteRouteChildren {
-  LocaleWithLayoutGalleryRoute: typeof LocaleWithLayoutGalleryRoute;
-  LocaleWithLayoutSettingsRoute: typeof LocaleWithLayoutSettingsRouteWithChildren;
-  LocaleWithLayoutUploadRoute: typeof LocaleWithLayoutUploadRoute;
-  LocaleWithLayoutIndexRoute: typeof LocaleWithLayoutIndexRoute;
+  LocaleWithLayoutGalleryRoute: typeof LocaleWithLayoutGalleryRoute
+  LocaleWithLayoutSettingsRoute: typeof LocaleWithLayoutSettingsRouteWithChildren
+  LocaleWithLayoutUploadRoute: typeof LocaleWithLayoutUploadRoute
+  LocaleWithLayoutIndexRoute: typeof LocaleWithLayoutIndexRoute
 }
 
 const LocaleWithLayoutRouteRouteChildren: LocaleWithLayoutRouteRouteChildren = {
@@ -335,33 +335,33 @@ const LocaleWithLayoutRouteRouteChildren: LocaleWithLayoutRouteRouteChildren = {
   LocaleWithLayoutSettingsRoute: LocaleWithLayoutSettingsRouteWithChildren,
   LocaleWithLayoutUploadRoute: LocaleWithLayoutUploadRoute,
   LocaleWithLayoutIndexRoute: LocaleWithLayoutIndexRoute,
-};
+}
 
 const LocaleWithLayoutRouteRouteWithChildren =
   LocaleWithLayoutRouteRoute._addFileChildren(
     LocaleWithLayoutRouteRouteChildren,
-  );
+  )
 
 interface LocaleRouteRouteChildren {
-  LocaleWithLayoutRouteRoute: typeof LocaleWithLayoutRouteRouteWithChildren;
-  LocaleOnboardRoute: typeof LocaleOnboardRoute;
-  LocaleImageKeyRoute: typeof LocaleImageKeyRoute;
+  LocaleWithLayoutRouteRoute: typeof LocaleWithLayoutRouteRouteWithChildren
+  LocaleOnboardRoute: typeof LocaleOnboardRoute
+  LocaleImageKeyRoute: typeof LocaleImageKeyRoute
 }
 
 const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
   LocaleWithLayoutRouteRoute: LocaleWithLayoutRouteRouteWithChildren,
   LocaleOnboardRoute: LocaleOnboardRoute,
   LocaleImageKeyRoute: LocaleImageKeyRoute,
-};
+}
 
 const LocaleRouteRouteWithChildren = LocaleRouteRoute._addFileChildren(
   LocaleRouteRouteChildren,
-);
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LocaleRouteRoute: LocaleRouteRouteWithChildren,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
