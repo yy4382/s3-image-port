@@ -34,7 +34,8 @@ export default defineConfig({
         maskPath: "/en",
         prerender: {
           enabled: true,
-          outputPath: "/index.html",
+          crawlLinks: true,
+          retryCount: 3,
         },
       },
       // prerender: {
