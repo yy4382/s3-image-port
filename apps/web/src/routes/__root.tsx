@@ -20,11 +20,49 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      { title: "TanStack Start" },
+      { title: "S3 Image Port" },
+      {
+        name: "og:image",
+        content: "https://imageport.app/og.png",
+      },
+      {
+        name: "og:title",
+        content: "S3 Image Port",
+      },
+      {
+        name: "og:description",
+        content: "Manage your images in S3",
+      },
+      {
+        name: "og:url",
+        content: "https://imageport.app",
+      },
+      {
+        name: "og:type",
+        content: "website",
+      },
+      {
+        name: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:title",
+        content: "S3 Image Port",
+      },
+
+      {
+        name: "twitter:description",
+        content: "Manage your images in S3",
+      },
+      {
+        name: "twitter:image",
+        content: "https://imageport.app/og.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: globalCss },
       { rel: "icon", href: "/favicon.svg" },
+      { rel: "canonical", href: "https://imageport.app" },
     ],
   }),
 
