@@ -44,7 +44,7 @@ import {
   uploadSettingsAtom,
 } from "../settings/settingsStore";
 import key2Url from "@/lib/utils/key2Url";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 
 type UploadObject = {

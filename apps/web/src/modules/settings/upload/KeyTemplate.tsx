@@ -1,7 +1,7 @@
 import { SetStateAction, useMemo } from "react";
 import * as z from "zod/v4";
 import { FormEntryText } from "@/components/ui/form-entry-validate";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 export const keyTemplateSchema = z
   .string()
@@ -41,7 +41,9 @@ export function KeyTemplate({
   return (
     <FormEntryText
       title={t("title")}
-      description={t("description")}
+      // dirty hack to avoid hydration error
+      // on the server side, the escape single quote is not removed for unknown reason, causing a hydration error
+      description={t("description").replaceAll("'", "")}
       value={v}
       setValue={set}
       schema={advancedSchema}

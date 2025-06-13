@@ -11,7 +11,7 @@ import { format, startOfDay, endOfDay, subMonths } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { timeRangesGetter } from "../galleryStore";
 import { getTimeRange, type DisplayOptions } from "./displayControlStore";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 const TIME_RANGES = timeRangesGetter();
 

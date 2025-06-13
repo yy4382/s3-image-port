@@ -15,7 +15,7 @@ import {
   showingPhotosAtom,
 } from "../galleryStore";
 import { PhotoItem } from "./PhotoItem/PhotoItem";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);

@@ -5,7 +5,7 @@ import { KeyTemplate } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "../settingsStore";
 import { focusAtom } from "jotai-optics";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 function UploadSettings() {
   const t = useTranslations("settings");

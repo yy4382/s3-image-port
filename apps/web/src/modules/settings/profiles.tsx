@@ -24,7 +24,7 @@ import { migrateFromV1, optionsAtom, optionsSchema } from "./settingsStore";
 import { toast } from "sonner";
 import { useCallback, useEffect, useRef } from "react";
 import { ClientOnly } from "@/components/misc/client-only";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import z from "zod/v4";
 import { Skeleton } from "@/components/ui/skeleton";
 

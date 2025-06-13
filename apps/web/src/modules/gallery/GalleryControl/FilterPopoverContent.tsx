@@ -21,7 +21,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 interface FilterPopoverContentProps {
   currentDisplayOptions: DisplayOptions;

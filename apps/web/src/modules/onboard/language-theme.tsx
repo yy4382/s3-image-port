@@ -1,6 +1,5 @@
 "use client";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useLocale } from "use-intl";
 import { localeLocalNames } from "@/i18n/routing";
 import {
   RadioGroup,
@@ -14,6 +13,7 @@ import McSystem from "~icons/mingcute/computer-line.jsx";
 import { MotionHighlight } from "@/components/animate-ui/effects/motion-highlight";
 import { ClientOnly } from "@/components/misc/client-only";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getRouteApi } from "@tanstack/react-router";
 
 export function LanguageTheme() {
   return (
@@ -24,12 +24,15 @@ export function LanguageTheme() {
   );
 }
 
+const routeApi = getRouteApi("/$locale/onboard");
 function Language() {
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = routeApi.useNavigate();
   const handleLocaleChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale });
+    navigate({
+      search: (prev) => ({ ...prev }),
+      params: (prev) => ({ ...prev, locale: newLocale }),
+    });
   };
 
   return (

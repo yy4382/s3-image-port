@@ -1,9 +1,6 @@
 "use client";
-import { redirect, useRouter } from "@/i18n/navigation";
 import key2Url from "@/lib/utils/key2Url";
 import { useAtomValue } from "jotai";
-import { useLocale } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
@@ -24,22 +21,10 @@ import {
 import { format } from "date-fns";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
+import { getRouteApi } from "@tanstack/react-router";
 
-export default function PhotoModal() {
-  const locale = useLocale();
-  const searchParams = useSearchParams();
-  const path = useMemo(() => {
-    return searchParams.get("imagePath");
-  }, [searchParams]);
 
-  if (!path) {
-    return redirect({ href: "/gallery", locale });
-  }
-
-  return <PhotoModalContent path={path} />;
-}
-
-function PhotoModalContent({ path }: { path: string }) {
+export function PhotoModal({ path }: { path: string }) {
   const s3Options = useAtomValue(validS3SettingsAtom);
   const url = useMemo(() => {
     if (!s3Options) {
@@ -68,18 +53,19 @@ function PhotoModalContent({ path }: { path: string }) {
   );
 }
 
+const routeApi = getRouteApi("/$locale/image/$key");
 function PhotoModalToolbar({ path }: { path: string }) {
-  const searchParams = useSearchParams();
   const photos = useAtomValue(photosAtomReadOnly);
   const s3Options = useAtomValue(validS3SettingsAtom);
-  const router = useRouter();
+  const navigate = routeApi.useNavigate();
 
-  const handleBack = useCallback(() => {
-    const newSearch = new URLSearchParams(searchParams);
-    newSearch.delete("imagePath");
-
-    router.push(`/gallery?${newSearch.toString()}`);
-  }, [router, searchParams]);
+  const handleBack = () => {
+    navigate({
+      to: "/$locale/gallery",
+      params: (prev) => ({ ...prev, key: undefined }),
+      search: (prev) => prev,
+    });
+  };
 
   useEffect(() => {
     function handleEscBack(event: KeyboardEvent) {

@@ -13,26 +13,11 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    // "plugins": [
-    //   {
-    //     "name": "next"
-    //   }
-    // ],
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["unplugin-icons/types/react"],
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "types": ["unplugin-icons/types/react", "vite/client"]
   },
-  "include": [
-    "apps/next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

@@ -24,7 +24,7 @@ function OnboardWrapper() {
 export { OnboardWrapper as Onboard };
 
 function Onboard() {
-  const [step, setStep, nextStep] = useStep(TOTAL_STEPS, "step");
+  const [step, setStep, nextStep] = useStep();
   const [ref, bounds] = useMeasure();
 
   const mainContent = useMemo<{
@@ -32,22 +32,22 @@ function Onboard() {
     buttons?: React.ReactNode;
   }>(() => {
     switch (step) {
-      case 0: {
+      case 1: {
         return { content: <OnboardWelcome /> };
       }
-      case 1: {
+      case 2: {
         return {
           content: <OnboardS3GetReady />,
           buttons: <OnboardS3GetReadyAction />,
         };
       }
-      case 2: {
+      case 3: {
         return { content: <S3Onboard /> };
       }
-      case 3: {
+      case 4: {
         return { content: <div>Step 4</div> };
       }
-      case 4: {
+      case 5: {
         return { content: <div>Step 5</div> };
       }
       default: {
@@ -111,7 +111,7 @@ function OnboardStep({ buttons }: { buttons?: React.ReactNode }) {
             key={stepIndex}
             className={cn(
               "bg-muted-foreground/50 size-2 rounded-full transition-colors",
-              step === stepIndex && "bg-primary",
+              step === stepIndex + 1 && "bg-primary",
             )}
           ></div>
         ))}

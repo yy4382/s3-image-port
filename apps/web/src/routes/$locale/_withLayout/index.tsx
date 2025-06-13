@@ -1,27 +1,17 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import type { Metadata } from "next";
 import { GitHubStarsButton } from "@/components/animate-ui/buttons/github-stars";
-import { ArrowRight } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
+import { useTranslations, useLocale } from "use-intl";
 
-export const metadata: Metadata = {
-  title: "Home - S3 Image Port",
-  description:
-    "Welcome to S3 Image Port. Upload, manage, and view your S3 images with ease.",
-};
+export const Route = createFileRoute("/$locale/_withLayout/")({
+  component: RouteComponent,
+});
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  const t = await getTranslations("index");
-
+function RouteComponent() {
+  const t = useTranslations("index");
+  const locale = useLocale();
   return (
     <div className="p-2 flex items-center justify-center flex-1">
       <div className="max-w-4xl lg:max-w-[60rem] w-full flex flex-grow flex-col justify-center mx-auto h-full">
@@ -45,7 +35,11 @@ export default async function Home({
             </div>
             <div className="flex flex-col gap-2 sm:gap-4 md:pt-6 justify-center items-center">
               <div className="flex gap-2 sm:gap-4 justify-center items-center">
-                <Link href="/onboard">
+                <Link
+                  to="/$locale/onboard"
+                  params={{ locale }}
+                  search={{ step: 1 }}
+                >
                   <Button className="hover:scale-105 transition-all duration-300">
                     {t("getStarted")} <ArrowRight size={16} />
                   </Button>

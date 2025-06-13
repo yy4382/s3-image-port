@@ -1,39 +1,38 @@
-import { useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
-import { createContext, useCallback, useEffect, useState } from "react";
+import { getRouteApi } from "@tanstack/react-router";
+import { createContext, useCallback } from "react";
+import z from "zod/v4";
 
 export const TOTAL_STEPS = 5;
+export const stepSchemaDisplay = z.int().min(1).max(TOTAL_STEPS);
 
-export const useStep = (totalSteps: number, searchParamKey: string) => {
-  const [step, setStepRaw] = useState<number | null>(null);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  useEffect(() => {
-    const stepParam = searchParams.get(searchParamKey) ?? "1";
-    const step = parseInt(stepParam);
-    // Handle NaN case by defaulting to step 1 (index 0)
-    const validStep = isNaN(step) ? 1 : step;
-    setStepRaw(validStep - 1);
-  }, [searchParamKey, searchParams]);
+const routeApi = getRouteApi("/$locale/onboard");
+export const useStep = () => {
+  const step = routeApi.useSearch().step;
+  const navigate = routeApi.useNavigate();
 
   const setStep = useCallback(
     (step: number) => {
-      // Handle NaN values by returning early
-      if (isNaN(step) || step < 0 || step >= totalSteps) {
+      const newStep = stepSchemaDisplay.safeParse(step);
+      if (!newStep.success) {
         return;
       }
-      setStepRaw(step);
-      const params = new URLSearchParams(searchParams);
-      params.set(searchParamKey, (step + 1).toString());
-      router.push(`?${params.toString()}`);
+      navigate({
+        to: "/$locale/onboard",
+        search: (prev) => ({ ...prev, step: newStep.data }),
+      });
     },
-    [searchParamKey, searchParams, router, totalSteps],
+    [navigate],
   );
 
   const nextStep = useCallback(() => {
-    setStep((step ?? 0) + 1);
-  }, [setStep, step]);
+    if (step === TOTAL_STEPS) {
+      return;
+    }
+    navigate({
+      to: "/$locale/onboard",
+      search: (prev) => ({ ...prev, step: step + 1 }),
+    });
+  }, [navigate, step]);
 
   return [step, setStep, nextStep] as const;
 };

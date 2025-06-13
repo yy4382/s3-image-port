@@ -28,9 +28,8 @@ import {
   selectedPhotosAtom,
 } from "../../galleryStore";
 import { setNaturalSizesAtom } from "../../galleryStore";
-import { useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
+import { getRouteApi } from "@tanstack/react-router";
 
 export function PhotoItem({
   photo,
@@ -163,17 +162,21 @@ export function PhotoImg({
   );
 }
 
+const routeApi = getRouteApi("/$locale/_withLayout/gallery");
 function useOpenModal(s3Key: string) {
-  const search = useSearchParams();
-  const router = useRouter();
+  const navigate = routeApi.useNavigate();
 
   return useCallback(() => {
     if (!s3Key) return;
-    const newSearch = new URLSearchParams(search);
-    newSearch.set("imagePath", s3Key);
-
-    router.push(`/photo?${newSearch.toString()}`);
-  }, [search, s3Key, router]);
+    navigate({
+      to: "/$locale/image/$key",
+      params: (prev) => ({
+        ...prev,
+        key: s3Key,
+      }),
+      search: (prev) => prev,
+    });
+  }, [s3Key, navigate]);
 }
 
 function PhotoDisplayError({ s3Key }: { s3Key: string }) {

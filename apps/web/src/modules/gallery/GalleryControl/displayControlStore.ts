@@ -30,30 +30,32 @@ export type DisplayOptions = z.infer<typeof displayOptionsSchema>;
 
 export const displayOptionsAtom = atom<DisplayOptions>(OptDefault);
 
-export function displayOptionsToSearchParams(options: DisplayOptions) {
-  const params = new URLSearchParams();
+export function displayOptionsToSearchParams(
+  options: DisplayOptions,
+): Partial<DisplayOptions> {
+  const params: Partial<DisplayOptions> = {};
   const { searchTerm, prefix, dateRangeType, sortBy, sortOrder } = options;
   if (searchTerm !== OptDefault.searchTerm) {
-    params.set("searchTerm", searchTerm);
+    params["searchTerm"] = searchTerm;
   }
   if (prefix !== OptDefault.prefix) {
-    params.set("prefix", prefix);
+    params["prefix"] = prefix;
   }
   if (!deepEqual(dateRangeType, OptDefault.dateRangeType)) {
     if (typeof dateRangeType === "string") {
-      params.set("dateRangeType", dateRangeType);
+      params["dateRangeType"] = dateRangeType;
     } else {
       const stored = dateRangeType.map((d) =>
         d ? format(d, "yyyy-MM-ddX") : null,
       );
-      params.set("dateRangeType", JSON.stringify(stored));
+      params["dateRangeType"] = JSON.stringify(stored);
     }
   }
   if (sortBy !== OptDefault.sortBy) {
-    params.set("sortBy", sortBy);
+    params["sortBy"] = sortBy;
   }
   if (sortOrder !== OptDefault.sortOrder) {
-    params.set("sortOrder", sortOrder);
+    params["sortOrder"] = sortOrder;
   }
   return params;
 }

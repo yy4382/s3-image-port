@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { FormEntrySwitchAtom } from "@/components/ui/form-entry-validate";
 import { gallerySettingsAtom } from "../settingsStore";
 import { focusAtom } from "jotai-optics";

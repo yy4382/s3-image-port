@@ -1,12 +1,10 @@
 "use client";
 
-import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useSetAtom } from "jotai";
+import { useMemo, useState } from "react";
 import {
   displayOptionsToSearchParams,
-  displayOptionsAtom,
   displayOptionsSchema,
-  searchParamsToDisplayOptions,
   type DisplayOptions,
 } from "./displayControlStore";
 import { currentPageAtom } from "../galleryStore";
@@ -22,43 +20,39 @@ import { FilterIcon, ArrowUpDownIcon } from "lucide-react";
 import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
-import { useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
+import { getRouteApi } from "@tanstack/react-router";
+
+const routeApi = getRouteApi("/$locale/_withLayout/gallery");
 
 function useSearchDisplayOptions() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = routeApi.useSearch();
+  const navigate = routeApi.useNavigate();
 
   const setCurrentPage = useSetAtom(currentPageAtom);
-  const [search, setSearch] = useAtom(displayOptionsAtom);
 
   const handleUpdate = (
     update:
       | Partial<DisplayOptions>
       | ((prev: DisplayOptions) => Partial<DisplayOptions>),
   ) => {
+    const oldSearch = searchParams;
     let newSearchOptions: Partial<DisplayOptions>;
     if (typeof update === "function") {
-      newSearchOptions = update(displayOptionsSchema.parse(search));
+      newSearchOptions = update(oldSearch);
     } else {
       newSearchOptions = update;
     }
     setCurrentPage(1);
     const newSearchParams = displayOptionsToSearchParams({
-      ...search,
+      ...oldSearch,
       ...newSearchOptions,
     });
-    router.replace(`?${newSearchParams.toString()}`);
+    navigate({ search: newSearchParams });
   };
 
-  useEffect(() => {
-    const parsedSearchParams = searchParamsToDisplayOptions(searchParams);
-    setSearch(parsedSearchParams);
-  }, [setSearch, searchParams]);
-
   return {
-    search,
+    search: displayOptionsSchema.parse(searchParams),
     handleUpdate,
   };
 }

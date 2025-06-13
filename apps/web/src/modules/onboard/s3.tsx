@@ -1,5 +1,5 @@
 import { FormEntryTextAtom } from "@/components/ui/form-entry-validate";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { s3SettingsAtom } from "../settings/settingsStore";
 import { s3SettingsSchema } from "../settings/settingsStore";
 import { S3Options } from "../settings/settingsStore";

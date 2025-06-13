@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 interface BannerProps {
   defaultVisible?: boolean;

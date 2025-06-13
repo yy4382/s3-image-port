@@ -18,7 +18,7 @@ import {
   getTimeRange,
 } from "./GalleryControl/displayControlStore";
 import { displayOptionsAtom } from "./GalleryControl/displayControlStore";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { enableMapSet } from "immer";
 
 enableMapSet();
