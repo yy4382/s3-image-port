@@ -18,7 +18,11 @@ export const Route = createFileRoute("/$locale")({
 function RouteComponent() {
   const { locale, messages } = Route.useLoaderData();
   return (
-    <IntlProvider locale={locale} messages={messages}>
+    <IntlProvider
+      locale={locale}
+      messages={messages}
+      timeZone={Intl.DateTimeFormat().resolvedOptions().timeZone}
+    >
       <Outlet />
     </IntlProvider>
   );
