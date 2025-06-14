@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { Provider as JotaiProvider } from "jotai";
-import "@/app/globals.css";
+import "@/styles/globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
