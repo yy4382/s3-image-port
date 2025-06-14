@@ -173,6 +173,11 @@ const uploadAll = atom(null, async (get, set, s3Settings: S3Options) => {
   );
 });
 
+/**
+ * A enhanced hook like `useAtom(UploadObjectAtom)` but replace the `set` with custom callback
+ * @param atom - The file atom
+ * @returns The file and update functions
+ */
 function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
   const [file, setFile] = useAtom(atom);
 
@@ -207,12 +212,39 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
   };
 }
 
+/**
+ * Handle paste event to append files to the file list
+ */
+function useHandlePaste() {
+  const appendFiles = useSetAtom(appendFileAtom);
+
+  function handlePaste(event: ClipboardEvent) {
+    if (!event.clipboardData) return;
+    const items = event.clipboardData.items;
+    if (!items) return;
+    const files = Array.from(items)
+      .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+      .map((item) => item.getAsFile())
+      .filter((file) => file !== null);
+    appendFiles(files);
+  }
+
+  useEffect(() => {
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [handlePaste]);
+}
+
 export function Upload() {
   const [fileAtoms, dispatch] = useAtom(fileAtomAtoms);
   const triggerUpload = useSetAtom(uploadAll);
   const [hasUploaded, removeUploaded] = useAtom(removeUploadedFileAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("upload");
+
+  useHandlePaste();
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
