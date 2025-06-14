@@ -23,6 +23,7 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { format } from "date-fns";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
+import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 
 export default function PhotoModal() {
   const locale = useLocale();
@@ -165,9 +166,11 @@ function PhotoModalToolbar({ path }: { path: string }) {
         <Button size="icon" variant="ghost" onClick={handleCopy}>
           <CopyIcon />
         </Button>
-        <Button size="icon" variant="ghost" onClick={handleDelete}>
-          <Trash2Icon />
-        </Button>
+        <DeleteSecondConfirm deleteFn={handleDelete} itemNames={[path]}>
+          <Button size="icon" variant="ghost">
+            <Trash2Icon />
+          </Button>
+        </DeleteSecondConfirm>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost">

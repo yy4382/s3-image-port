@@ -218,16 +218,21 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
 function useHandlePaste() {
   const appendFiles = useSetAtom(appendFileAtom);
 
-  function handlePaste(event: ClipboardEvent) {
-    if (!event.clipboardData) return;
-    const items = event.clipboardData.items;
-    if (!items) return;
-    const files = Array.from(items)
-      .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
-      .map((item) => item.getAsFile())
-      .filter((file) => file !== null);
-    appendFiles(files);
-  }
+  const handlePaste = useCallback(
+    (event: ClipboardEvent) => {
+      if (!event.clipboardData) return;
+      const items = event.clipboardData.items;
+      if (!items) return;
+      const files = Array.from(items)
+        .filter(
+          (item) => item.kind === "file" && item.type.startsWith("image/"),
+        )
+        .map((item) => item.getAsFile())
+        .filter((file) => file !== null);
+      appendFiles(files);
+    },
+    [appendFiles],
+  );
 
   useEffect(() => {
     window.addEventListener("paste", handlePaste);

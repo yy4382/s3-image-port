@@ -11,6 +11,7 @@ import { DisplayControl } from "./DisplayControl";
 import { Suspense, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
+import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 
 export function useDeletePhotos() {
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
@@ -72,12 +73,14 @@ export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
             >
               <McCheckbox /> {selectedPhotos.size}
             </Button>
-            <Button
-              variant={"destructive"}
-              onClick={() => handleDelete(Array.from(selectedPhotos))}
+            <DeleteSecondConfirm
+              deleteFn={() => handleDelete(Array.from(selectedPhotos))}
+              itemNames={Array.from(selectedPhotos)}
             >
-              <McDelete /> {selectedPhotos.size}
-            </Button>
+              <Button variant={"destructive"}>
+                <McDelete /> {selectedPhotos.size}
+              </Button>
+            </DeleteSecondConfirm>
           </>
         )}
       </div>
