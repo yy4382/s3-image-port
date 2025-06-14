@@ -22,11 +22,20 @@ import McFile from "~icons/mingcute/file-upload-line.jsx";
 import type { Options, Options as Profile } from "./settingsStore";
 import { migrateFromV1, optionsAtom, optionsSchema } from "./settingsStore";
 import { toast } from "sonner";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ClientOnly } from "@/components/misc/client-only";
 import { useTranslations } from "next-intl";
 import z from "zod/v4";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const CURRENT_PROFILE = "CURRENT";
 
@@ -346,19 +355,45 @@ function ProfileItem({
             >
               {t("load")}
             </Button>
-            <Button
-              variant="destructive"
-              className="flex-1 min-w-[calc(50%-0.25rem)]"
-              onClick={() => {
-                onDelete(name);
-              }}
-            >
-              {t("delete")}
-            </Button>
+            <DeleteProfileConfirm deleteFn={() => onDelete(name)} />
           </>
         )}
       </div>
     </div>
+  );
+}
+
+function DeleteProfileConfirm({ deleteFn }: { deleteFn: () => void }) {
+  const [open, setOpen] = useState(false);
+  const t = useTranslations("settings.profiles");
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="destructive"
+          className="flex-1 min-w-[calc(50%-0.25rem)]"
+        >
+          {t("delete")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Confirm</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this profile?
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={deleteFn}>
+              {t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 }
 
