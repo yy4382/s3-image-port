@@ -4,7 +4,7 @@ import key2Url from "@/lib/utils/key2Url";
 import { useAtomValue } from "jotai";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
 import { Button } from "@/components/ui/button";
@@ -73,12 +73,24 @@ function PhotoModalToolbar({ path }: { path: string }) {
   const s3Options = useAtomValue(validS3SettingsAtom);
   const router = useRouter();
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     const newSearch = new URLSearchParams(searchParams);
     newSearch.delete("imagePath");
 
     router.push(`/gallery?${newSearch.toString()}`);
-  };
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    function handleEscBack(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        handleBack();
+      }
+    }
+    window.addEventListener("keydown", handleEscBack);
+    return () => {
+      window.removeEventListener("keydown", handleEscBack);
+    };
+  }, [handleBack]);
 
   const photo = useMemo(() => {
     return photos.find((photo) => photo.Key === path);
