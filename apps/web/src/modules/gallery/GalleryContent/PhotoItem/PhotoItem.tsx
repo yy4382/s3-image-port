@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ImageCheckbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -24,6 +23,7 @@ import McZoomIn from "~icons/mingcute/zoom-in-line.jsx";
 import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
 import {
   DEFAULT_IMAGE_SIZE,
+  filteredPhotosAtom,
   selectModeAtom,
   selectedPhotosAtom,
 } from "../../galleryStore";
@@ -31,6 +31,7 @@ import { setNaturalSizesAtom } from "../../galleryStore";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
+import McCheckFill from "~icons/mingcute/checkbox-fill";
 
 export function PhotoItem({
   photo,
@@ -210,28 +211,60 @@ function PhotoDisplayError({ s3Key }: { s3Key: string }) {
 
 const toggleSelectedAtom = atom(
   null,
-  (get, set, key: string, check?: boolean) => {
+  (get, set, key: string, check: boolean | "toggle", shift: boolean) => {
     if (check === undefined) {
-      const newSet = produce(get(selectedPhotosAtom), (draft) => {
-        if (draft.has(key)) {
-          draft.delete(key);
+      const oldSet = get(selectedPhotosAtom);
+      let newSet = new Set(oldSet);
+      if (oldSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        if (shift) {
+          newSet = getShiftSelected(get(filteredPhotosAtom), newSet, key);
         } else {
-          draft.add(key);
+          newSet.add(key);
         }
-      });
+      }
       set(selectedPhotosAtom, newSet);
     } else {
-      const newSet = produce(get(selectedPhotosAtom), (draft) => {
-        if (check) {
-          draft.add(key);
+      const oldSet = get(selectedPhotosAtom);
+      let newSet = new Set(oldSet);
+      if (check) {
+        if (shift) {
+          newSet = getShiftSelected(get(filteredPhotosAtom), newSet, key);
         } else {
-          draft.delete(key);
+          newSet.add(key);
         }
-      });
+      } else {
+        newSet.delete(key);
+      }
       set(selectedPhotosAtom, newSet);
     }
   },
 );
+
+const getShiftSelected = (
+  photoList: readonly Photo[],
+  currentSelected: Set<string>,
+  key: string,
+) => {
+  const lastSelected = [...currentSelected].pop();
+  if (!lastSelected) {
+    return new Set([key]);
+  }
+  const lastSelectedIndex = photoList.findIndex((p) => p.Key === lastSelected);
+  const currentSelectingIndex = photoList.findIndex((p) => p.Key === key);
+  if (lastSelectedIndex === -1 || currentSelectingIndex === -1) {
+    return currentSelected;
+  }
+  const startIndex = Math.min(lastSelectedIndex, currentSelectingIndex);
+  const endIndex = Math.max(lastSelectedIndex, currentSelectingIndex);
+  const newSet = produce(currentSelected, (draft) => {
+    for (let i = startIndex; i <= endIndex; i++) {
+      draft.add(photoList[i].Key);
+    }
+  });
+  return newSet;
+};
 
 type PhotoItemOverlayProps = {
   photo: Photo;
@@ -254,8 +287,8 @@ function PhotoItemOverlay({
     <>
       <div
         className="absolute top-0 bottom-0 left-0 right-0 hover-to-show"
-        onClick={() => {
-          if (selectMode) toggleSelected(photo.Key);
+        onClick={(e) => {
+          if (selectMode) toggleSelected(photo.Key, "toggle", e.shiftKey);
           else onOpenModal();
         }}
       >
@@ -263,8 +296,12 @@ function PhotoItemOverlay({
       </div>
       <ImageCheckbox
         checked={selected}
-        onCheckedChange={(c) => {
-          toggleSelected(photo.Key, !!c);
+        onCheckedChange={(c, e) => {
+          toggleSelected(
+            photo.Key,
+            !!c,
+            (e.nativeEvent as PointerEvent).shiftKey,
+          );
         }}
         className={cn("absolute top-2 left-2 hover-to-show", {
           "!opacity-100 !pointer-events-auto": selected,
@@ -318,5 +355,41 @@ function PhotoInfo({ photo }: { photo: Photo }) {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
+  );
+}
+
+function ImageCheckbox({
+  className,
+  checked,
+  onCheckedChange,
+}: {
+  defaultChecked?: boolean;
+  className?: string;
+  checked?: boolean;
+  onCheckedChange: (
+    checked: boolean,
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      data-state={checked ? "checked" : "unchecked"}
+      className={cn(
+        "peer relative group data-[state=checked]:text-primary text-white/80 hover:text-white focus-visible:border-ring focus-visible:ring-ring/50 size-8 shrink-0 outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        className,
+      )}
+      onClick={(e) => {
+        e.preventDefault();
+        onCheckedChange(!checked, e);
+      }}
+    >
+      <div className="inset-[5px] absolute group-data-[state=checked]:bg-white dark:group-data-[state=checked]:bg-black z-10"></div>
+      <span className="flex items-center justify-center text-current transition-none">
+        <McCheckFill className="size-8 z-20" />
+      </span>
+    </button>
   );
 }

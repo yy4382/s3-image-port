@@ -5,7 +5,7 @@ import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
-import { useFetchPhotoList } from "../galleryStore";
+import { selectedPhotosAtom, useFetchPhotoList } from "../galleryStore";
 import {
   containerWidthAtom,
   currentPageAtom,
@@ -26,6 +26,7 @@ export function PhotoGrid() {
   const listPhotos = useFetchPhotoList();
   const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
   const t = useTranslations("gallery.grid");
+  const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
 
   useEffect(() => {
     setContainerWidth(containerRef.current?.clientWidth ?? 600); // Set initial width immediately
@@ -48,6 +49,25 @@ export function PhotoGrid() {
     }
     return lastPhoto.position.y + lastPhoto.size.height;
   }, [photoSize]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key.toLocaleLowerCase() === "a") {
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          setSelectedPhotos((prev) => {
+            const newSet = new Set(prev);
+            for (const photo of photos) {
+              newSet.add(photo.Key);
+            }
+            return newSet;
+          });
+        }
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [photos, setSelectedPhotos]);
 
   return (
     <div ref={containerRef} className="max-w-full">
