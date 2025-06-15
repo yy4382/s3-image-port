@@ -1,9 +1,7 @@
 "use client";
 
-import { atomWithStorage } from "jotai/utils";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import { Button } from "@/components/ui/button";
-import { resetGalleryStateAtom } from "../gallery/galleryStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +17,12 @@ import McDownload from "~icons/mingcute/download-2-line.jsx";
 import McUpload from "~icons/mingcute/upload-2-line.jsx";
 import McClipboard from "~icons/mingcute/clipboard-line.jsx";
 import McFile from "~icons/mingcute/file-upload-line.jsx";
-import type { Options, Options as Profile } from "./settingsStore";
-import { migrateFromV1, optionsAtom, optionsSchema } from "./settingsStore";
+import type { Options as Profile } from "./settingsStore";
+import { optionsAtom } from "./settingsStore";
 import { toast } from "sonner";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClientOnly } from "@/components/misc/client-only";
 import { useTranslations } from "next-intl";
-import z from "zod/v4";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -36,213 +33,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-const CURRENT_PROFILE = "CURRENT";
-
-// The current profile is not stored in here!
-const profileListAtom = atomWithStorage<
-  [string, Profile | typeof CURRENT_PROFILE][]
->("s3ip:profile:profiles", [["Default", CURRENT_PROFILE]]);
-
-function useRenameProfile() {
-  const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const rename = useCallback(
-    ({ oldName, newName }: { oldName: string; newName: string }) => {
-      if (oldName === newName) {
-        toast.error(t("sameNameError"));
-        return;
-      }
-      if (profileList.find((p) => p[0] === newName)) {
-        toast.error(t("nameExists"));
-        return;
-      }
-      const newProfiles = profileList.map((p) => {
-        if (p[0] === oldName) {
-          return [newName, p[1]] as [string, Profile | typeof CURRENT_PROFILE];
-        }
-        return p;
-      });
-      setProfileList(newProfiles);
-    },
-    [profileList, setProfileList, t],
-  );
-
-  return rename;
-}
-
-function useLoadProfile() {
-  const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const [options, setOptions] = useAtom(optionsAtom);
-  const resetGalleryState = useSetAtom(resetGalleryStateAtom);
-
-  const load = useCallback(
-    (name: string) => {
-      let profileToBeLoad: Profile | typeof CURRENT_PROFILE | undefined;
-      let currentProfileName: string | undefined;
-      let currentProfileIndex = -1;
-      let targetProfileIndex = -1;
-
-      // Single pass to find all required information
-      for (let i = 0; i < profileList.length; i++) {
-        const [profileName, profile] = profileList[i];
-        if (profileName === name) {
-          profileToBeLoad = profile;
-          targetProfileIndex = i;
-        }
-        if (profile === CURRENT_PROFILE) {
-          currentProfileName = profileName;
-          currentProfileIndex = i;
-        }
-      }
-
-      if (
-        !profileToBeLoad ||
-        !currentProfileName ||
-        currentProfileIndex === -1
-      ) {
-        toast.error(t("loadFailed"));
-        return;
-      }
-
-      if (profileToBeLoad !== CURRENT_PROFILE) {
-        const currentProfile = options;
-
-        // Create new profiles array with updated values
-        const newProfiles = [...profileList];
-        newProfiles[currentProfileIndex] = [currentProfileName, currentProfile];
-        newProfiles[targetProfileIndex] = [name, CURRENT_PROFILE];
-
-        setOptions(profileToBeLoad);
-        setProfileList(newProfiles);
-        resetGalleryState();
-
-        toast.success(t("loadSuccess", { name }));
-      }
-    },
-    [options, profileList, resetGalleryState, setOptions, setProfileList, t],
-  );
-  return load;
-}
-
-const useDuplicateProfile = () => {
-  const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const options = useAtomValue(optionsAtom);
-  const duplicate = useCallback(
-    ({
-      name,
-      newName: initialNewNameSuggestion,
-    }: {
-      name: string;
-      newName: string;
-    }) => {
-      // Find a unique name
-      let newName = initialNewNameSuggestion;
-      let counter = 1;
-      while (profileList.find((p) => p[0] === newName)) {
-        counter++;
-        newName = `${name} (copy ${counter})`;
-      }
-
-      // Get the profile to duplicate
-      const profileToDuplicate =
-        profileList.find((p) => p[0] === name)?.[1] === CURRENT_PROFILE
-          ? options
-          : profileList.find((p) => p[0] === name)?.[1];
-
-      if (profileToDuplicate) {
-        setProfileList([...profileList, [newName, profileToDuplicate]]);
-        toast.success(t("duplicateSuccess", { name, newName }));
-      } else {
-        toast.error(t("duplicateFailed"));
-      }
-    },
-    [profileList, setProfileList, options, t],
-  );
-  return duplicate;
-};
-
-const useDeleteProfile = () => {
-  const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const deleteProfile = useCallback(
-    (nameToDelete: string) => {
-      const profileToDelete = profileList.find((p) => p[0] === nameToDelete);
-
-      if (!profileToDelete) {
-        toast.error(t("profileNotFound"));
-        return;
-      }
-
-      if (profileToDelete[1] === CURRENT_PROFILE) {
-        toast.error(t("cannotDeleteCurrent"));
-        return;
-      }
-
-      const newProfiles = profileList.filter((p) => p[0] !== nameToDelete);
-      setProfileList(newProfiles);
-      toast.success(t("deleteSuccess", { nameToDelete }));
-    },
-    [profileList, setProfileList, t],
-  );
-  return deleteProfile;
-};
-
-function parseProfile(
-  profileJson: string,
-): { name: string; data: Options } | Error {
-  let jsonParsed: Record<string, unknown>;
-  try {
-    jsonParsed = JSON.parse(profileJson);
-  } catch (error) {
-    return new Error("Failed to parse profile", { cause: error });
-  }
-
-  const parsed = z
-    .object({
-      name: z.string(),
-      data: optionsSchema,
-    })
-    .safeParse(jsonParsed);
-
-  if (!parsed.success) {
-    return new Error("Failed to parse profile", { cause: parsed.error });
-  }
-
-  return parsed.data;
-}
-
-function useImportProfile() {
-  const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const importProfile = useCallback(
-    (newProfile: { name: string; data: Options }) => {
-      try {
-        const data = newProfile.data;
-        const name = newProfile.name;
-
-        if (profileList.find((p) => p[0] === name)) {
-          toast.error(t("nameExistsImport", { name }));
-          return;
-        }
-
-        setProfileList([...profileList, [name, data]]);
-        toast.success(t("importSuccess", { name }));
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          toast.error(t("validationFailed", { error: z.prettifyError(error) }));
-        } else {
-          toast.error(t("parseFailed"));
-        }
-        console.error("Import profile error:", error);
-      }
-    },
-    [profileList, setProfileList, t],
-  );
-  return importProfile;
-}
+import {
+  CURRENT_PROFILE,
+  parseProfile,
+  profileListAtom,
+  useDeleteProfile,
+  useDuplicateProfile,
+  useHandleV1ClipboardImport,
+  useImportProfile,
+  useLoadProfile,
+  useRenameProfile,
+} from "./profiles-utils";
 
 type ProfileItemProps = {
   name: string;
@@ -454,25 +255,7 @@ function ProfileImporter() {
     reader.readAsText(file);
   };
 
-  const handleV1ClipboardImport = async () => {
-    let text;
-    try {
-      text = await navigator.clipboard.readText();
-    } catch (error) {
-      toast.error(t("failedToReadClipboard"));
-      console.error("Clipboard read error:", error);
-    }
-    const result = migrateFromV1(text);
-    if (result instanceof Error) {
-      toast.error(t("errors.invalidFormat"));
-      console.error("Failed to parse profile", result);
-      return;
-    }
-    importProfile({
-      name: `Migrated ${new Date().toISOString()}`,
-      data: result,
-    });
-  };
+  const handleV1ClipboardImport = useHandleV1ClipboardImport();
 
   return (
     <>

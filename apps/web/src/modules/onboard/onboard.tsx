@@ -11,6 +11,9 @@ import { S3Onboard } from "./s3";
 import { OnboardS3GetReady, OnboardS3GetReadyAction } from "./s3-get-ready";
 import { StepContext, TOTAL_STEPS } from "./onboard-util";
 import { useStep } from "./onboard-util";
+import { V1Migrate, V1MigrateAction } from "./v1-migrate";
+import { useRouter } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 
 function OnboardWrapper() {
   return (
@@ -36,19 +39,19 @@ function Onboard() {
         return { content: <OnboardWelcome /> };
       }
       case 1: {
+        return { content: <V1Migrate />, buttons: <V1MigrateAction /> };
+      }
+      case 2: {
         return {
           content: <OnboardS3GetReady />,
           buttons: <OnboardS3GetReadyAction />,
         };
       }
-      case 2: {
+      case 3: {
         return { content: <S3Onboard /> };
       }
-      case 3: {
-        return { content: <div>Step 4</div> };
-      }
       case 4: {
-        return { content: <div>Step 5</div> };
+        return { content: <Finish />, buttons: <FinishAction /> };
       }
       default: {
         return { content: <div>&nbsp;</div> };
@@ -135,5 +138,28 @@ function OnboardWelcome() {
       </div>
       <LanguageTheme />
     </div>
+  );
+}
+
+function Finish() {
+  return (
+    <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-xl font-semibold">Welcome to S3 Image Port!</h2>
+        <p className="text-muted-foreground">
+          You&apos;re all set up! You can start using S3 Image Port now.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function FinishAction() {
+  const router = useRouter();
+  const locale = useLocale();
+  return (
+    <Button onClick={() => router.push("/gallery", { locale })}>
+      Start using
+    </Button>
   );
 }
