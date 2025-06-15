@@ -16,6 +16,7 @@ import {
 } from "../galleryStore";
 import { PhotoItem } from "./PhotoItem/PhotoItem";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);
@@ -23,9 +24,7 @@ export function PhotoGrid() {
   const photoSize = useAtomValue(photoSizeAtom);
   const setContainerWidth = useSetAtom(containerWidthAtom);
   const containerRef = useRef<HTMLDivElement>(null);
-  const listPhotos = useFetchPhotoList();
   const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
-  const t = useTranslations("gallery.grid");
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
 
   useEffect(() => {
@@ -98,25 +97,34 @@ export function PhotoGrid() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center w-full h-64 p-8 bg-muted/20 rounded-lg border border-dashed border-muted-foreground/30">
-          <div className="flex flex-col items-center gap-2 mb-4">
-            <div className="h-12 w-12 text-muted-foreground/70">
-              {/* Photo icon placeholder */}
-              <McEmptyBox className="w-full h-full" />
-            </div>
-            <p className="text-lg text-muted-foreground text-center">
-              {t("noPhotosFound")}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => listPhotos()}
-            className="flex items-center gap-2"
-          >
-            {t("loadPhotos")}
-          </Button>
-        </div>
+        <PhotoGridEmpty />
       )}
+    </div>
+  );
+}
+
+function PhotoGridEmpty() {
+  const t = useTranslations("gallery.grid");
+  const { fetchPhotoList, isLoading } = useFetchPhotoList();
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-64 p-8 bg-muted/20 rounded-lg border border-dashed border-muted-foreground/30">
+      <div className="flex flex-col items-center gap-2 mb-4">
+        <div className="h-12 w-12 text-muted-foreground/70">
+          <McEmptyBox className="w-full h-full" />
+        </div>
+        <p className="text-lg text-muted-foreground text-center">
+          {t("noPhotosFound")}
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        onClick={() => fetchPhotoList()}
+        className="flex items-center gap-2"
+        disabled={isLoading}
+      >
+        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+        {t("loadPhotos")}
+      </Button>
     </div>
   );
 }

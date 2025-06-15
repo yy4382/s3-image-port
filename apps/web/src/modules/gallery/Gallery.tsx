@@ -24,19 +24,19 @@ const shouldRunAutoRefreshAtom = atom((get) => {
 });
 
 export function Gallery() {
-  const listPhotos = useFetchPhotoList();
+  const { fetchPhotoList } = useFetchPhotoList();
   const shouldRunAutoRefresh = useAtomValue(shouldRunAutoRefreshAtom);
   const galleryDirty = useAtomValue(galleryDirtyStatusAtom);
 
   useEffect(() => {
     if (shouldRunAutoRefresh || galleryDirty) {
-      listPhotos(false);
+      fetchPhotoList(false);
     }
-  }, [shouldRunAutoRefresh, listPhotos, galleryDirty]);
+  }, [shouldRunAutoRefresh, fetchPhotoList, galleryDirty]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <GalleryControl onRefresh={listPhotos} />
+      <GalleryControl />
       <ClientOnly>
         <PhotoGrid />
       </ClientOnly>

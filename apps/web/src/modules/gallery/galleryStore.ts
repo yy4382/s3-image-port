@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { validS3SettingsAtom } from "../settings/settingsStore";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
 import {
@@ -304,6 +304,8 @@ export const useFetchPhotoList = () => {
   const t = useTranslations("gallery.store");
   const setGalleryDirty = useSetAtom(galleryDirtyStatusAtom);
 
+  const [status, setStatus] = useState<"idle" | "loading">("idle");
+
   const fetchPhotoList = useCallback(
     async (showToast = true) => {
       if (!s3Settings) {
@@ -315,6 +317,7 @@ export const useFetchPhotoList = () => {
       }
       let photos: Photo[];
       try {
+        setStatus("loading");
         photos = await new ImageS3Client(s3Settings).list();
         setGalleryDirty(false);
       } catch (error) {
@@ -323,6 +326,8 @@ export const useFetchPhotoList = () => {
         }
         console.error("Failed to fetch photos", error);
         return;
+      } finally {
+        setStatus("idle");
       }
       if (photos) {
         if (showToast) {
@@ -340,7 +345,9 @@ export const useFetchPhotoList = () => {
     [s3Settings, setPhotos, t, setGalleryDirty],
   );
 
-  return fetchPhotoList;
+  const isLoading = status === "loading";
+
+  return { fetchPhotoList, status, isLoading };
 };
 
 // used when changing profiles

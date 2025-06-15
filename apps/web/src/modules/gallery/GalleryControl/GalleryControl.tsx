@@ -12,11 +12,12 @@ import { Suspense, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
+import { cn } from "@/lib/utils";
 
 export function useDeletePhotos() {
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
-  const listPhotos = useFetchPhotoList();
+  const { fetchPhotoList } = useFetchPhotoList();
   const t = useTranslations("gallery.control");
 
   const handleDelete = useCallback(
@@ -45,26 +46,31 @@ export function useDeletePhotos() {
         console.error("Failed to delete photos", error);
       } finally {
         setSelectedPhotos(new Set<string>());
-        await listPhotos();
+        await fetchPhotoList();
       }
     },
-    [s3Settings, listPhotos, t, setSelectedPhotos],
+    [s3Settings, fetchPhotoList, t, setSelectedPhotos],
   );
 
   return handleDelete;
 }
 
-export function GalleryControl({ onRefresh }: { onRefresh: () => void }) {
+export function GalleryControl() {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const handleDelete = useDeletePhotos();
+  const { fetchPhotoList, isLoading } = useFetchPhotoList();
 
   return (
     <div className="flex gap-2 justify-between">
       {s3Settings === undefined && <InvalidS3Dialog />}
       <div className="flex gap-2">
-        <Button onClick={onRefresh} size={"icon"}>
-          <McRefresh />
+        <Button
+          onClick={() => fetchPhotoList()}
+          disabled={isLoading}
+          size={"icon"}
+        >
+          <McRefresh className={cn(isLoading && "animate-spin")} />
         </Button>
         {selectedPhotos.size > 0 && (
           <>
