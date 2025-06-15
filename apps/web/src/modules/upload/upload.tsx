@@ -46,6 +46,7 @@ import {
 import key2Url from "@/lib/utils/key2Url";
 import { useTranslations } from "next-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
+import { setGalleryDirtyAtom } from "../gallery/galleryStore";
 
 type UploadObject = {
   file: File;
@@ -155,6 +156,7 @@ const uploadAtom = atom(
         ...prev,
         status: "uploaded",
       }));
+      set(setGalleryDirtyAtom);
     } catch (error) {
       console.error("Upload failed", error);
       set(atom, (prev) => ({

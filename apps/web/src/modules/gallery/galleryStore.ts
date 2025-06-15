@@ -52,6 +52,12 @@ export function timeRangesGetter(): { duration: Duration; type: string }[] {
   ];
 }
 
+export const galleryDirtyStatusAtom = atom(false);
+
+export const setGalleryDirtyAtom = atom(null, (_, set) => {
+  set(galleryDirtyStatusAtom, true);
+});
+
 const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
 
 export const photosAtomReadOnly = atom((get) => get(photosAtom));
@@ -296,6 +302,7 @@ export const useFetchPhotoList = () => {
   const setPhotos = useSetAtom(photosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("gallery.store");
+  const setGalleryDirty = useSetAtom(galleryDirtyStatusAtom);
 
   const fetchPhotoList = useCallback(
     async (showToast = true) => {
@@ -309,6 +316,7 @@ export const useFetchPhotoList = () => {
       let photos: Photo[];
       try {
         photos = await new ImageS3Client(s3Settings).list();
+        setGalleryDirty(false);
       } catch (error) {
         if (showToast) {
           toast.error(t("failedToFetchPhotos"));
@@ -329,7 +337,7 @@ export const useFetchPhotoList = () => {
         console.error("Failed to fetch photos");
       }
     },
-    [s3Settings, setPhotos, t],
+    [s3Settings, setPhotos, t, setGalleryDirty],
   );
 
   return fetchPhotoList;
@@ -342,4 +350,5 @@ export const resetGalleryStateAtom = atom(null, (_get, set) => {
   set(displayOptionsAtom, displayOptionsDefault); // Reset display options
   set(currentPageAtom, 1);
   set(naturalSizesAtom, new Map());
+  set(galleryDirtyStatusAtom, true); // gallery is always dirty after reset to trigger a refresh
 });

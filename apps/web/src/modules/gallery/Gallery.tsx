@@ -1,6 +1,6 @@
 "use client";
 
-import { useFetchPhotoList } from "./galleryStore";
+import { galleryDirtyStatusAtom, useFetchPhotoList } from "./galleryStore";
 import { PhotoGrid } from "./GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
 import { ClientOnly } from "@/components/misc/client-only";
@@ -26,12 +26,13 @@ const shouldRunAutoRefreshAtom = atom((get) => {
 export function Gallery() {
   const listPhotos = useFetchPhotoList();
   const shouldRunAutoRefresh = useAtomValue(shouldRunAutoRefreshAtom);
+  const galleryDirty = useAtomValue(galleryDirtyStatusAtom);
 
   useEffect(() => {
-    if (shouldRunAutoRefresh) {
+    if (shouldRunAutoRefresh || galleryDirty) {
       listPhotos(false);
     }
-  }, [shouldRunAutoRefresh, listPhotos]);
+  }, [shouldRunAutoRefresh, listPhotos, galleryDirty]);
 
   return (
     <div className="flex flex-col gap-6 w-full">

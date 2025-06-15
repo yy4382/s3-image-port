@@ -27,6 +27,9 @@ export function useDeletePhotos() {
       }
       try {
         toast.message(t("requestingDelete"));
+
+        // because the photo list is always re-fetched in the finally block,
+        // there's no need to set the gallery dirty status here
         if (Array.isArray(photos)) {
           await Promise.all(
             photos.map(async (key) => {
