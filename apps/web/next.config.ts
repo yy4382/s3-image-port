@@ -20,7 +20,9 @@ const nextConfig: NextConfig = {
 
     return config;
   },
-  /* config options here */
+  experimental: {
+    reactCompiler: true,
+  },
 };
 
 const withBundleAnalyzer = withBundleAnalyzerI({
