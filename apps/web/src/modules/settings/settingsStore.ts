@@ -170,7 +170,7 @@ export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {
       pubUrl: String(oldS3Settings?.pubUrl ?? ""),
     },
     upload: {
-      keyTemplate: String(oldAppSettings?.keyTemplate ?? ""),
+      keyTemplate: String(oldAppSettings?.keyTemplate ?? defaultKeyTemplate),
       compressionOption: null,
     },
     gallery: {
