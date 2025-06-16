@@ -32,6 +32,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import McCheckFill from "~icons/mingcute/checkbox-fill";
+import { useHover, useMediaQuery } from "@uidotdev/usehooks";
 
 export function PhotoItem({
   photo,
@@ -55,8 +56,8 @@ function PhotoDisplay({
   position: { x: number; y: number };
 }) {
   const s3Key = photo.Key;
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const s3Settings = useAtomValue(validS3SettingsAtom);
+  const [wrapperRef, hovering] = useHover();
 
   const [loadingState, setLoadingState] = useState<
     "loading" | "loaded" | "error"
@@ -66,8 +67,6 @@ function PhotoDisplay({
   const selected = useMemo(() => {
     return allSelected.has(photo.Key);
   }, [allSelected, photo.Key]);
-
-  const handleOpenModal = useOpenModal(photo.Key);
 
   return (
     <motion.div
@@ -99,13 +98,11 @@ function PhotoDisplay({
         />
       )}
       {loadingState === "loaded" && (
-        <div className="absolute inset-0 z-20">
-          <PhotoItemOverlay
-            photo={photo}
-            selected={selected}
-            onOpenModal={handleOpenModal}
-          />
-        </div>
+        <PhotoItemOverlay
+          photo={photo}
+          selected={selected}
+          hovering={hovering}
+        />
       )}
     </motion.div>
   );
@@ -269,13 +266,13 @@ const getShiftSelected = (
 type PhotoItemOverlayProps = {
   photo: Photo;
   selected: boolean;
-  onOpenModal: () => void;
+  hovering: boolean;
 };
 
 function PhotoItemOverlay({
   photo,
   selected,
-  onOpenModal,
+  hovering,
 }: PhotoItemOverlayProps) {
   const selectMode = useAtomValue(selectModeAtom);
   const toggleSelected = useSetAtom(toggleSelectedAtom);
@@ -283,13 +280,38 @@ function PhotoItemOverlay({
     navigator.clipboard.writeText(photo.url);
     toast.success("Copied to clipboard");
   }
+  const onOpenModal = useOpenModal(photo.Key);
+
+  const isTouch = useMediaQuery("(pointer: coarse)");
+  const [touchOverlayShow, setTouchOverlayShow] = useState(false);
+  const showOverlay = useMemo(() => {
+    return hovering || (isTouch && touchOverlayShow) || selected;
+  }, [hovering, isTouch, touchOverlayShow, selected]);
+
   return (
-    <>
+    <motion.div
+      className="absolute inset-0 z-20"
+      animate={{
+        visibility: showOverlay ? "visible" : "hidden",
+        opacity: showOverlay ? 1 : 0,
+      }}
+      onTouchStart={() => {
+        setTouchOverlayShow(true);
+      }}
+      transition={{ ease: "easeInOut", duration: 0.15 }}
+    >
       <div
-        className="absolute top-0 bottom-0 left-0 right-0 hover-to-show"
+        className="absolute top-0 bottom-0 left-0 right-0"
         onClick={(e) => {
-          if (selectMode) toggleSelected(photo.Key, "toggle", e.shiftKey);
-          else onOpenModal();
+          console.log("click");
+          if (selectMode) {
+            console.log("selectMode");
+            toggleSelected(photo.Key, "toggle", e.shiftKey);
+          } else if (isTouch) {
+            setTouchOverlayShow(!touchOverlayShow);
+          } else {
+            onOpenModal();
+          }
         }}
       >
         <div className="absolute top-0 h-14 left-0 right-0 bg-gradient-to-bottom" />
@@ -303,28 +325,77 @@ function PhotoItemOverlay({
             (e.nativeEvent as PointerEvent).shiftKey,
           );
         }}
-        className={cn("absolute top-2 left-2 hover-to-show", {
+        className={cn("absolute top-2 left-2", {
           "!opacity-100 !pointer-events-auto": selected,
         })}
       />
-      <div className="hover-to-show absolute left-4 bottom-4">
+      <div className="absolute left-4 bottom-4">
         <PhotoInfo photo={photo}></PhotoInfo>
       </div>
-      <Button
-        aria-label={selectMode ? "Open fullscreen" : "Copy Link"}
-        className="absolute bottom-4 right-4 hover-to-show"
-        size={"icon"}
-        variant="secondary"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (selectMode) onOpenModal();
-          else copy(photo);
-        }}
-      >
-        {" "}
-        {selectMode ? <McZoomIn /> : <McCopy />}
-      </Button>
-    </>
+      {isTouch || !selectMode ? (
+        <PhotoActionCopyLink
+          onCopyLink={() => copy(photo)}
+          className="absolute bottom-4 right-4"
+        />
+      ) : (
+        <PhotoActionOpenModal
+          className="absolute bottom-4 right-4"
+          onOpenModal={onOpenModal}
+        />
+      )}
+      {isTouch && (
+        <PhotoActionOpenModal
+          className="absolute top-4 right-4"
+          onOpenModal={onOpenModal}
+        />
+      )}
+    </motion.div>
+  );
+}
+
+function PhotoActionOpenModal({
+  className,
+  onOpenModal,
+}: {
+  className?: string;
+  onOpenModal: () => void;
+}) {
+  return (
+    <Button
+      aria-label="Open fullscreen"
+      variant="secondary"
+      size="icon"
+      className={className}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpenModal();
+      }}
+    >
+      <McZoomIn />
+    </Button>
+  );
+}
+
+function PhotoActionCopyLink({
+  className,
+  onCopyLink,
+}: {
+  className?: string;
+  onCopyLink: () => void;
+}) {
+  return (
+    <Button
+      aria-label="Copy link"
+      variant="secondary"
+      size="icon"
+      className={className}
+      onClick={(e) => {
+        e.stopPropagation();
+        onCopyLink();
+      }}
+    >
+      <McCopy />
+    </Button>
   );
 }
 
