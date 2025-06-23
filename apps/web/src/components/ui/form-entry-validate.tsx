@@ -23,6 +23,11 @@ type SettingsTextEntryProps = {
   value: string;
   password?: boolean;
   setValue: Dispatch<SetStateAction<string>>;
+  customInput?: (props: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+  }) => React.ReactNode;
 };
 
 export function FormEntryText({
@@ -34,6 +39,7 @@ export function FormEntryText({
   value,
   password,
   setValue,
+  customInput,
 }: SettingsTextEntryProps) {
   const [error, handleChange] = useValidateInput(value, setValue, schema);
   return (
@@ -51,6 +57,12 @@ export function FormEntryText({
               onChange={(e) => handleChange(e.target.value)}
               placeholder={placeholder}
             />
+          ) : customInput ? (
+            customInput({
+              value,
+              onChange: handleChange,
+              placeholder,
+            })
           ) : (
             <Input
               value={value}
