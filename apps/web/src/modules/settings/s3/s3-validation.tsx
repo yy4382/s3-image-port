@@ -21,6 +21,7 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export type ValidationStatus =
   | { status: "idle" }
@@ -55,15 +56,17 @@ function StatusIcon({ status }: StatusIconProps) {
 
 // 简短状态文本
 function StatusText({ status }: { status: ValidationStatus["status"] }) {
+  const t = useTranslations("settings.s3Validation.status");
+
   switch (status) {
     case "testing":
       return null;
     case "success":
-      return <span className="text-sm text-gray-600">Valid</span>;
+      return <span className="text-sm text-gray-600">{t("valid")}</span>;
     case "failed":
-      return <span className="text-sm text-gray-600">Check config</span>;
+      return <span className="text-sm text-gray-600">{t("checkConfig")}</span>;
     case "cors-incomplete":
-      return <span className="text-sm text-gray-600">CORS needed</span>;
+      return <span className="text-sm text-gray-600">{t("corsNeeded")}</span>;
     default:
       return null;
   }
@@ -95,20 +98,21 @@ function DialogContent({
 }: {
   validationStatus: ValidationStatus;
 }) {
+  const t = useTranslations("settings.s3Validation");
   const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"];
 
   if (validationStatus.status === "failed") {
     return (
       <div className="space-y-4">
         <p className="text-sm text-gray-600">
-          Unable to connect to your S3 bucket. Please check:
+          {t("messages.connectionFailed")}
         </p>
         <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-          <li>All required fields are filled</li>
-          <li>Endpoint URL is correct</li>
-          <li>Credentials have proper permissions</li>
-          <li>Bucket name and region are valid</li>
-          <li>CORS is configured for your origin</li>
+          <li>{t("checklist.allFieldsFilled")}</li>
+          <li>{t("checklist.endpointCorrect")}</li>
+          <li>{t("checklist.credentialsValid")}</li>
+          <li>{t("checklist.bucketValid")}</li>
+          <li>{t("checklist.corsConfigured")}</li>
         </ul>
       </div>
     );
@@ -117,13 +121,16 @@ function DialogContent({
   if (validationStatus.status === "cors-incomplete") {
     return (
       <div className="space-y-4">
-        <p className="text-muted-foreground">
-          ✅ Your S3 settings are <strong>correct</strong> and working!
-        </p>
+        <p
+          className="text-muted-foreground"
+          dangerouslySetInnerHTML={{
+            __html: `✅ ${t("messages.settingsCorrect")}`,
+          }}
+        />
 
         <div className="flex flex-col gap-1">
           <p className="text-muted-foreground">
-            You just need to add CORS permissions for these methods:
+            {t("messages.corsPermissionsNeeded")}
           </p>
 
           <p className="">
@@ -136,7 +143,9 @@ function DialogContent({
         <hr className="my-2" />
 
         <div className="flex flex-col gap-1">
-          <p className="font-medium text-sm text-muted-foreground">Status:</p>
+          <p className="font-medium text-sm text-muted-foreground">
+            {t("messages.statusLabel")}
+          </p>
           <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
             {requiredMethods.map((method) => {
               const isAllowed =
@@ -159,14 +168,17 @@ function DialogContent({
 }
 
 // 获取Dialog标题
-function getDialogTitle(status: ValidationStatus["status"]) {
+function getDialogTitle(
+  status: ValidationStatus["status"],
+  t: ReturnType<typeof useTranslations>,
+) {
   switch (status) {
     case "failed":
-      return "Configuration Issue";
+      return t("dialog.configurationIssue");
     case "cors-incomplete":
-      return "CORS Setup Required";
+      return t("dialog.corsSetupRequired");
     default:
-      return "Details";
+      return t("dialog.details");
   }
 }
 
@@ -180,6 +192,8 @@ function TestButton({
   isLoading: boolean;
   disabled?: boolean;
 }) {
+  const t = useTranslations("settings.s3Validation");
+
   return (
     <Button
       onClick={onTest}
@@ -188,13 +202,14 @@ function TestButton({
       variant="outline"
       className="text-xs h-7 px-3"
     >
-      {isLoading ? "Testing" : "Test"}
+      {isLoading ? t("status.testing") : t("testButton")}
     </Button>
   );
 }
 
 // S3验证主组件
 export function S3Validation() {
+  const t = useTranslations("settings.s3Validation");
   const s3Settings = useAtomValue(s3SettingsAtom);
   const [validationStatus, setValidationStatus] = useState<ValidationStatus>({
     status: "idle",
@@ -265,7 +280,7 @@ export function S3Validation() {
               <UIDialogContent className="max-w-sm">
                 <DialogHeader>
                   <DialogTitle className="text-base">
-                    {getDialogTitle(validationStatus.status)}
+                    {getDialogTitle(validationStatus.status, t)}
                   </DialogTitle>
                 </DialogHeader>
                 <DialogContent validationStatus={validationStatus} />

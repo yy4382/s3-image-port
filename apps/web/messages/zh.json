@@ -50,6 +50,33 @@
       "validSuccess": "S3 设置有效",
       "validError": "{error}"
     },
+    "s3Validation": {
+      "status": {
+        "valid": "有效",
+        "checkConfig": "检查配置",
+        "corsNeeded": "需要 CORS",
+        "testing": "测试中"
+      },
+      "dialog": {
+        "configurationIssue": "配置问题",
+        "corsSetupRequired": "需要设置 CORS",
+        "details": "详细信息"
+      },
+      "messages": {
+        "connectionFailed": "无法连接到您的 S3 存储桶。请检查：",
+        "settingsCorrect": "您的 S3 设置是<strong>正确的</strong>并且可以使用！",
+        "corsPermissionsNeeded": "您只需要为这些方法添加 CORS 权限：",
+        "statusLabel": "状态："
+      },
+      "checklist": {
+        "allFieldsFilled": "所有必填字段已填写",
+        "endpointCorrect": "端点 URL 正确",
+        "credentialsValid": "凭证具有适当权限",
+        "bucketValid": "存储桶名称和区域有效",
+        "corsConfigured": "为您的源配置了 CORS"
+      },
+      "testButton": "测试"
+    },
     "profiles": {
       "title": "配置",
       "current": "当前",

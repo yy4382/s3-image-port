@@ -50,6 +50,33 @@
       "validSuccess": "✓ S3 settings are valid",
       "validError": "⚠ {error}"
     },
+    "s3Validation": {
+      "status": {
+        "valid": "Valid",
+        "checkConfig": "Check config",
+        "corsNeeded": "CORS needed",
+        "testing": "Testing"
+      },
+      "dialog": {
+        "configurationIssue": "Configuration Issue",
+        "corsSetupRequired": "CORS Setup Required",
+        "details": "Details"
+      },
+      "messages": {
+        "connectionFailed": "Unable to connect to your S3 bucket. Please check:",
+        "settingsCorrect": "Your S3 settings are <strong>correct</strong> and working!",
+        "corsPermissionsNeeded": "You just need to add CORS permissions for these methods:",
+        "statusLabel": "Status:"
+      },
+      "checklist": {
+        "allFieldsFilled": "All required fields are filled",
+        "endpointCorrect": "Endpoint URL is correct",
+        "credentialsValid": "Credentials have proper permissions",
+        "bucketValid": "Bucket name and region are valid",
+        "corsConfigured": "CORS is configured for your origin"
+      },
+      "testButton": "Test"
+    },
     "profiles": {
       "title": "Profiles",
       "current": "Current",
