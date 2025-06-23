@@ -45,7 +45,7 @@ export default async function Home({
             </div>
             <div className="flex flex-col gap-2 sm:gap-4 md:pt-6 justify-center items-center">
               <div className="flex gap-2 sm:gap-4 justify-center items-center">
-                <Link href="/onboard">
+                <Link href="/settings/s3">
                   <Button className="hover:scale-105 transition-all duration-300">
                     {t("getStarted")} <ArrowRight size={16} />
                   </Button>
