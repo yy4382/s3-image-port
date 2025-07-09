@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { FormEntrySwitchAtom } from "@/components/ui/form-entry-validate";
-import { gallerySettingsAtom } from "../settingsStore";
+import { gallerySettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
 
 export function GallerySettings() {

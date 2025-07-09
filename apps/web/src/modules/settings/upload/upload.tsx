@@ -3,7 +3,7 @@
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
 import { KeyTemplate } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
-import { uploadSettingsAtom } from "../settingsStore";
+import { uploadSettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
 import { useTranslations } from "next-intl";
 

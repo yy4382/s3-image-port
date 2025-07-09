@@ -1,5 +1,4 @@
 import { LinkWithActive } from "@/components/misc/link-with-active";
-import { MigrationIndicator } from "@/modules/settings/MigrationIndicator";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -27,7 +26,6 @@ export default async function SettingsLayout({
 
   return (
     <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
-      <MigrationIndicator />
       <Card className="h-fit">
         <CardContent className="flex flex-col md:grid md:grid-cols-[auto_1fr] gap-4">
           <div className="flex flex-col gap-4 md:min-w-48">

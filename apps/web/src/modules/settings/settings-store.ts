@@ -39,9 +39,8 @@ export const optionsSchema = z.object({
 
 export type Options = z.infer<typeof optionsSchema>;
 
-export const optionsAtom = atomWithStorageMigration<Options>(
-  "s3ip:options",
-  {
+export const getDefaultOptions = (): Options => {
+  return {
     s3: {
       endpoint: "",
       bucket: "",
@@ -58,7 +57,12 @@ export const optionsAtom = atomWithStorageMigration<Options>(
     gallery: {
       autoRefresh: true,
     },
-  },
+  };
+};
+
+export const optionsAtom = atomWithStorageMigration<Options>(
+  "s3ip:options",
+  getDefaultOptions(),
   undefined,
   {
     version: 1,
@@ -88,45 +92,6 @@ export const validS3SettingsAtom = atom((get) => {
   }
   return undefined;
 });
-
-/**
- * Try to migrate from v1 (nuxt version) to current version
- */
-export function tryMigrateFromV1(): Options {
-  const oldS3SettingsStr = localStorage.getItem("s3-settings");
-  const oldAppSettingsStr = localStorage.getItem("app-settings");
-
-  if (!oldS3SettingsStr || !oldAppSettingsStr) {
-    throw new Error("No old settings found");
-  }
-
-  if (oldAppSettingsStr) {
-    localStorage.removeItem("app-settings");
-  }
-  if (oldS3SettingsStr) {
-    localStorage.removeItem("s3-settings");
-  }
-
-  let oldS3Settings: Record<string, unknown>;
-  let oldAppSettings: Record<string, unknown>;
-
-  try {
-    oldS3Settings = JSON.parse(oldS3SettingsStr);
-    oldAppSettings = JSON.parse(oldAppSettingsStr);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to parse old settings");
-  }
-
-  const newOptions = migrateFromV1({
-    s3: oldS3Settings,
-    app: oldAppSettings,
-  });
-  if (newOptions instanceof Error) {
-    throw newOptions;
-  }
-  return newOptions;
-}
 
 export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {
   let v1ProfileRawObject: object;
@@ -170,7 +135,7 @@ export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {
       pubUrl: String(oldS3Settings?.pubUrl ?? ""),
     },
     upload: {
-      keyTemplate: String(oldAppSettings?.keyTemplate ?? defaultKeyTemplate),
+      keyTemplate: String(oldAppSettings?.keyTemplate || defaultKeyTemplate),
       compressionOption: null,
     },
     gallery: {

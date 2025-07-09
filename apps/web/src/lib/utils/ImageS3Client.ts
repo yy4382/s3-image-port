@@ -7,7 +7,7 @@ import {
   HeadObjectCommand,
   GetBucketCorsCommand,
 } from "@aws-sdk/client-s3";
-import type { S3Options } from "@/modules/settings/settingsStore";
+import type { S3Options } from "@/modules/settings/settings-store";
 import mime from "mime";
 import key2Url from "./key2Url";
 

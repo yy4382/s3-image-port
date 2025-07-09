@@ -5,7 +5,7 @@ import { useAtomValue } from "jotai";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
-import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
+import { validS3SettingsAtom } from "@/modules/settings/settings-store";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
 import { Button } from "@/components/ui/button";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";

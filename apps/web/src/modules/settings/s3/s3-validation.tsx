@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { s3SettingsAtom, s3SettingsSchema } from "../settingsStore";
+import { s3SettingsAtom, s3SettingsSchema } from "../settings-store";
 import {
   Loader2,
   CheckCircle,

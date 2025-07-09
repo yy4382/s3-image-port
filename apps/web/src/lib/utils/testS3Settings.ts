@@ -1,4 +1,4 @@
-import type { S3Options } from "@/modules/settings/settingsStore";
+import type { S3Options } from "@/modules/settings/settings-store";
 import ImageS3Client from "./ImageS3Client";
 
 const ALL_METHODS = ["GET", "HEAD", "PUT", "POST", "DELETE"] as const;

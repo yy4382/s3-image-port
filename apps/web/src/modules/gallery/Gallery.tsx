@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import {
   gallerySettingsAtom,
   validS3SettingsAtom,
-} from "../settings/settingsStore";
+} from "../settings/settings-store";
 import { atom, useAtomValue } from "jotai";
 
 const shouldRunAutoRefreshAtom = atom((get) => {

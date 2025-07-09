@@ -6,7 +6,7 @@ import {
   s3SettingsAtom,
   s3SettingsSchema,
   type S3Options,
-} from "../settingsStore";
+} from "../settings-store";
 import {
   FormEntrySwitchAtom,
   FormEntryTextAtom,

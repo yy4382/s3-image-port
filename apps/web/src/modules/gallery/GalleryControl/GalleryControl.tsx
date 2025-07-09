@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { selectedPhotosAtom, useFetchPhotoList } from "../galleryStore";
-import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
+import { validS3SettingsAtom } from "@/modules/settings/settings-store";
 import McCheckbox from "~icons/mingcute/checkbox-line.jsx";
 import McDelete from "~icons/mingcute/delete-3-line.jsx";
 import McRefresh from "~icons/mingcute/refresh-2-line.jsx";

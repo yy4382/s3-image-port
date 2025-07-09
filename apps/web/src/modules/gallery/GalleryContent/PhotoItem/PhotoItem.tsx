@@ -20,7 +20,7 @@ import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
 import McKey2Line from "~icons/mingcute/key-2-line.jsx";
 import McTimeLine from "~icons/mingcute/time-line.jsx";
 import McZoomIn from "~icons/mingcute/zoom-in-line.jsx";
-import { validS3SettingsAtom } from "@/modules/settings/settingsStore";
+import { validS3SettingsAtom } from "@/modules/settings/settings-store";
 import {
   DEFAULT_IMAGE_SIZE,
   filteredPhotosAtom,

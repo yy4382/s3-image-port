@@ -42,7 +42,7 @@ import {
   validS3SettingsAtom,
   type S3Options,
   uploadSettingsAtom,
-} from "../settings/settingsStore";
+} from "../settings/settings-store";
 import key2Url from "@/lib/utils/key2Url";
 import { useTranslations } from "next-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";

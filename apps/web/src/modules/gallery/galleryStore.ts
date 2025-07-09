@@ -9,7 +9,7 @@ import {
   type Duration,
 } from "date-fns";
 import { atom, useAtomValue, useSetAtom } from "jotai";
-import { validS3SettingsAtom } from "../settings/settingsStore";
+import { validS3SettingsAtom } from "../settings/settings-store";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
