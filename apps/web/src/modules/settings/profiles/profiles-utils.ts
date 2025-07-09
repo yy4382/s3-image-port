@@ -240,7 +240,6 @@ export function useHandleV1ClipboardImport() {
     if (!text) {
       return { success: false };
     }
-    console.log("text", text);
     const result = migrateFromV1(text);
     if (result instanceof Error) {
       toast.error(t("errors.invalidFormat"));

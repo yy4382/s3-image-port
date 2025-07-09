@@ -2,11 +2,13 @@ import { NextIntlClientProvider } from "next-intl";
 import { PropsWithChildren } from "react";
 import en from "@/../messages/en.json";
 import { render } from "@testing-library/react";
+import { Toaster } from "sonner";
 
 const TestProviders = ({ children }: PropsWithChildren) => {
   return (
     <NextIntlClientProvider locale="en" messages={en}>
       {children}
+      <Toaster toastOptions={{ duration: 10000 }} />
     </NextIntlClientProvider>
   );
 };

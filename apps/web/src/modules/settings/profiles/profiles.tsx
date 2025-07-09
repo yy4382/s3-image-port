@@ -85,6 +85,8 @@ function ProfileItem({
       className={`border border-border rounded-lg p-4 ${
         isCurrent ? "ring-2 ring-primary" : ""
       }`}
+      data-testid={`profile-item-${name.replaceAll(" ", "-")}`}
+      data-is-current={isCurrent}
     >
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-medium text-lg">
