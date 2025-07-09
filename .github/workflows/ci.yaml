@@ -38,24 +38,26 @@ jobs:
           cd apps/web
           pnpm lint
 
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-  #     - uses: pnpm/action-setup@v4
-  #       name: Install pnpm
-  #       with:
-  #         run_install: true
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: true
 
-  #     - name: Test
-  #       run: pnpm run test
+      - name: Test
+        run: |
+          cd apps/web
+          pnpm run test
 
   # test-build-docker:
   #   runs-on: ubuntu-latest
