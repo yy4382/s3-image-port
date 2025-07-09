@@ -1,13 +1,7 @@
 import type { Photo } from "@/lib/utils/ImageS3Client";
 import { atomWithStorage } from "jotai/utils";
 import z from "zod/v4";
-import {
-  compareAsc,
-  compareDesc,
-  isAfter,
-  isBefore,
-  type Duration,
-} from "date-fns";
+import { compareAsc, compareDesc, isAfter, isBefore } from "date-fns";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { validS3SettingsAtom } from "../settings/settings-store";
 import { useCallback, useState } from "react";
@@ -22,35 +16,6 @@ import { useTranslations } from "next-intl";
 import { enableMapSet } from "immer";
 
 enableMapSet();
-
-export function timeRangesGetter(): { duration: Duration; type: string }[] {
-  return [
-    {
-      duration: { days: 7 },
-      type: "7d",
-    },
-    {
-      duration: { days: 14 },
-      type: "14d",
-    },
-    {
-      duration: { days: 30 },
-      type: "30d",
-    },
-    {
-      duration: { months: 3 },
-      type: "3m",
-    },
-    {
-      duration: { months: 6 },
-      type: "6m",
-    },
-    {
-      duration: { years: 1 },
-      type: "1y",
-    },
-  ];
-}
 
 export const galleryDirtyStatusAtom = atom(false);
 

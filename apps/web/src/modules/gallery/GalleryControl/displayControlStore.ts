@@ -1,7 +1,13 @@
-import { endOfDay, format, parse, startOfDay, sub } from "date-fns";
+import {
+  type Duration,
+  endOfDay,
+  format,
+  parse,
+  startOfDay,
+  sub,
+} from "date-fns";
 import { atom } from "jotai";
 import z from "zod/v4";
-import { timeRangesGetter } from "../galleryStore";
 import deepEqual from "deep-equal";
 
 const OptDefault = {
@@ -13,6 +19,35 @@ const OptDefault = {
 } as const satisfies DisplayOptions;
 
 export { OptDefault as displayOptionsDefault };
+
+export function timeRangesGetter(): { duration: Duration; type: string }[] {
+  return [
+    {
+      duration: { days: 7 },
+      type: "7d",
+    },
+    {
+      duration: { days: 14 },
+      type: "14d",
+    },
+    {
+      duration: { days: 30 },
+      type: "30d",
+    },
+    {
+      duration: { months: 3 },
+      type: "3m",
+    },
+    {
+      duration: { months: 6 },
+      type: "6m",
+    },
+    {
+      duration: { years: 1 },
+      type: "1y",
+    },
+  ];
+}
 
 export const displayOptionsSchema = z.object({
   searchTerm: z.string().default("").catch(""),

@@ -9,8 +9,11 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format, startOfDay, endOfDay, subMonths } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import { timeRangesGetter } from "../galleryStore";
-import { getTimeRange, type DisplayOptions } from "./displayControlStore";
+import {
+  getTimeRange,
+  timeRangesGetter,
+  type DisplayOptions,
+} from "./displayControlStore";
 import { useTranslations } from "next-intl";
 
 const TIME_RANGES = timeRangesGetter();
