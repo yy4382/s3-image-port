@@ -1,4 +1,4 @@
-import { Profiles } from "@/modules/settings/profiles";
+import { Profiles } from "@/modules/settings/profiles/profiles";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 

@@ -1,8 +1,8 @@
 import { atomWithStorage } from "jotai/utils";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { resetGalleryStateAtom } from "../gallery/galleryStore";
-import type { Options, Options as Profile } from "./settings-store";
-import { migrateFromV1, optionsAtom, optionsSchema } from "./settings-store";
+import { resetGalleryStateAtom } from "../../gallery/galleryStore";
+import type { Options, Options as Profile } from "../settings-store";
+import { migrateFromV1, optionsAtom, optionsSchema } from "../settings-store";
 import { toast } from "sonner";
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
