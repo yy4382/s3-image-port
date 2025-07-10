@@ -33,6 +33,11 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [{ text: "Cloudflare R2 逐步指南", link: "for-cloudflare-r2" }],
     },
     {
+      text: "迁移",
+      collapsed: false,
+      items: [{ text: "从 v1 升级", link: "migrate-from-v1" }],
+    },
+    {
       text: "小技巧",
       collapsed: false,
       items: [
