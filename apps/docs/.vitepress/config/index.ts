@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress";
 import { en } from "./en";
 import { zh } from "./zh";
+import llmstxt from "vitepress-plugin-llms";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -37,5 +38,8 @@ export default defineConfig({
       pattern:
         "https://github.com/yy4382/s3-image-port/edit/main/apps/docs/:path",
     },
+  },
+  vite: {
+    plugins: [llmstxt()],
   },
 });
