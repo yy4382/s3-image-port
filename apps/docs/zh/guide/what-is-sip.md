@@ -28,7 +28,7 @@ S3 Image Port 是一个控制面板，用于管理 AWS S3 存储桶或 S3 兼容
 
 - 图片存放在您自己的 S3 储存桶中，访问也不流经本项目，这意味着即使本项目突然消失，您的图片访问也不会中断（更不会有数据丢失）。
 - 传统图床除了存储图片本身外，一般还有一个数据库存储各种元信息，如果丢失了数据、仅剩下图片备份，很难完全恢复到之前状态（比如 URL 和 文件路径之间的对应可能依赖与这个数据库）。
-- **完全可以自定义的访问路径**：由于 `S3 Image Port` 并不特别关心图片是怎么被访问的，因此您可以完全控制图片 URL（例如 [利用 WebP Cloud 扩展 Public URL 功能](/zh/guide/use-webp-cloud-service) 中所用的方法）。
+- **完全可以自定义的访问路径**：由于 `S3 Image Port` 并不特别关心图片是怎么被访问的，因此您可以完全控制图片 URL（例如 [利用 WebP Cloud 扩展 Public URL 功能](/zh/guide/use-webp-cloud-services) 中所用的方法）。
 
 关于最初开发 `S3 Image Port` 和做出这些设计选择的理由，我在一篇博客文章 [把 S3 ( R2 / OSS / COS ... ) 作为图床使用的图片管理方案](https://yfi.moe/post/manage-website-images#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-s3-r2) 有过说明，感兴趣的话可以一看。
 
