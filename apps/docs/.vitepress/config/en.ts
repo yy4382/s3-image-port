@@ -34,6 +34,11 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ],
     },
     {
+      text: "Migration",
+      collapsed: false,
+      items: [{ text: "Migrate from v1", link: "migrate-from-v1" }],
+    },
+    {
       text: "Tips & Tricks",
       collapsed: false,
       items: [

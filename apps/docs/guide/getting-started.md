@@ -4,9 +4,15 @@ outline: [2, 4]
 
 # Getting Started
 
+:::info
+If you have used the v1 version before (versions before the first half of 2025), you can refer to [Migrate from v1](/guide/migrate-from-v1) to migrate to the v2 version. The v2 version doesn't have major changes in functionality and should be easy to get started with.
+:::
+
+As a tool for managing images on S3, S3 Image Port requires you to provide S3 bucket information to access and upload images.
+
 ## Configure S3 (or its compatible services)
 
-As you can see, we are an application for managing images on S3. Although our application is out-of-the-box, you still need to configure your S3 storage bucket. Simply put, this requires 3 steps:
+If you don't have an S3 bucket yet, please create one according to the guide below. Simply put, this requires 3 steps:
 
 1. Create an S3-compatible storage bucket on the relevant platform.
 2. Obtain information such as endpoints and keys needed to access the bucket.
@@ -24,7 +30,7 @@ For details on how to configure CORS, please continue reading.
 
 Currently, we have written step-by-step guides for the following platforms. If you are using them, you can click the link to view directly. After completing the tutorial, you should be able to use the S3 Image Port!
 
-[Cloudflare R2 Step-by-Step Guide](/guide/for-cloudflare-r2)： provides a step-by-step guide on how to configure the S3 settings of this panel when using Cloudflare R2.
+- [Cloudflare R2 Step-by-Step Guide](/guide/for-cloudflare-r2) provides a step-by-step guide on how to configure the S3 settings of this panel when using Cloudflare R2.
 
 ### General Requirements
 
@@ -55,22 +61,14 @@ In simple terms, if the site `A.com` wants to access resources on the site `B.co
 To use it properly, you need to
 
 1. Include `https://imageport.app` in the allowed Origins,
-2. Allow at least the `GET`, `PUT`, and `DELETE` methods,
-3. And allow the `*` headers.
+2. Allow `GET`, `HEAD`, `POST`, `PUT`, and `DELETE` methods,
+3. And allow `*` headers.
 
 If confused, you can check the detailed guide in the [platform step-by-step tutorial](#step-by-step-guide-for-platforms) above for the platform you are using, or refer to the platform documentation yourself.
 
-## Configure S3 Image Port
+## Start Using S3 Image Port
 
-### Fill in “S3 Settings”
-
-If you have configured the S3 bucket as described above, you should now have all the information needed to fill in the S3 settings! After entering the information, you can click the test button to check if the configuration is correct.
-
-### Fill in “App Settings”
-
-Currently, we have the following four sections of settings. Although their documentation is still being written, their names are descriptive enough to indicate their functions:
-
-- Auto-refresh Gallery
-- Fuzzy Search
-- Image Conversion and Compression before Upload
-- Key (Upload Path) Template.
+1. If you have configured the S3 bucket as described above, you should now have all the information needed to fill in the S3 settings! After entering the information, you can click the test button to check if the configuration is correct.
+   Go to [S3 Settings](https://imageport.app/settings/s3) to fill in.
+2. Other settings can remain at their default values for now.
+3. Go to [Gallery](https://imageport.app/gallery), click the "Load Images" button to start using.

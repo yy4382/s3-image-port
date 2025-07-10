@@ -28,5 +28,5 @@ features:
   - title: "🔗 Copy Image Links"
     details: One-click copying of links to uploaded images in raw or markdown format
   - title: "☁️ Stateless"
-    details: Not responsible for storing images, not responsible for providing image access services, no vendor lock-in!
+    details: Not responsible for storing images, not responsible for providing image access services, no vendor lock-in
 ---
