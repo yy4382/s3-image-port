@@ -228,6 +228,8 @@ describe("Profile import export", () => {
       name: "Import from Clipboard",
     });
     await user.click(import2);
+    // clipboard read/write is async, so we need to wait for the profile to be loaded
+    await new Promise((resolve) => setTimeout(resolve, 20));
     expect(screen.getByTestId("profile-item-Default1")).not.toBeNull();
   });
   it("should import v1 profile", async () => {
@@ -263,6 +265,7 @@ describe("Profile import export", () => {
       name: "Import V1 Profile from Clipboard",
     });
     await user.click(import2);
+    // clipboard read/write is async, so we need to wait for the profile to be loaded
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(
       screen.getByTestId(`profile-item-Migrated-${date.toISOString()}`),
