@@ -12,6 +12,7 @@ import {
   FormEntryTextAtom,
 } from "@/components/ui/form-entry-validate";
 import { S3Validation } from "./s3-validation";
+import { ExternalLink } from "lucide-react";
 
 function getS3Part(opt: keyof Omit<S3Options, "forcePathStyle">) {
   return {
@@ -26,7 +27,24 @@ function S3Settings() {
   return (
     <div>
       <div className="grid gap-6">
-        <h2 className="text-2xl font-bold">{t("title")}</h2>
+        <div className="flex items-center gap-2 justify-between">
+          <h2 className="text-2xl font-bold">{t("title")}</h2>
+          <a
+            href={new URL(
+              locale === "zh"
+                ? "/zh/guide/settings-reference#s3-settings"
+                : "/guide/settings-reference#s3-settings",
+              process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                "https://docs.imageport.app",
+            ).toString()}
+            target="_blank"
+            className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            title="View documentation"
+          >
+            <span className="underline underline-offset-1">docs</span>
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
         <FormEntryTextAtom
           {...getS3Part("endpoint")}
           title={t("endpoint")}

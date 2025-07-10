@@ -20,7 +20,7 @@
     "upload": "Upload",
     "keyTemplate": {
       "title": "Key Template",
-      "description": "Template for the S3 key. Use '{{filename'}} to insert the original filename.",
+      "description": "Template for the S3 key. Learn more at <more>docs</more>, including the available placeholders.",
       "endWithExtWarning": "End with \".'{{ext'}}\" is generally recommended.",
       "deprecatedPlaceholderWarning": "placeholder {placeholder} has been deprecated, use {instead} instead"
     },

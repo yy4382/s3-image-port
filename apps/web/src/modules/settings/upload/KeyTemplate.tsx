@@ -46,7 +46,21 @@ export function KeyTemplate({
   return (
     <FormEntryText
       title={t("title")}
-      description={t("description")}
+      description={t.rich("description", {
+        more: (chunks) => (
+          <a
+            href={new URL(
+              "/zh/guide/settings-reference#key-template",
+              process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                "https://docs.imageport.app",
+            ).toString()}
+            target="_blank"
+            className="underline underline-offset-1"
+          >
+            {chunks}
+          </a>
+        ),
+      })}
       value={v}
       setValue={set}
       schema={advancedSchema}

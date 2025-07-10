@@ -20,7 +20,7 @@
     "upload": "上传",
     "keyTemplate": {
       "title": "键（名称）模板",
-      "description": "上传到 S3 时的命名模板。使用 '{{filename'}} 插入原始文件名。",
+      "description": "上传到 S3 时的命名模板。在<more>文档</more>中了解更多，包括可以使用的占位符等。",
       "endWithExtWarning": "建议以 \".'{{ext'}}\" 结尾。",
       "deprecatedPlaceholderWarning": "占位符{placeholder}已被弃用，请使用{instead}替代"
     },

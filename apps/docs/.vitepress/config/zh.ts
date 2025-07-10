@@ -25,6 +25,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: "什么是 S3 Image Port？", link: "what-is-sip" },
         { text: "开始使用", link: "getting-started" },
+        { text: "设置参考", link: "settings-reference" },
       ],
     },
     {
