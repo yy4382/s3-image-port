@@ -33,6 +33,7 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import McCheckFill from "~icons/mingcute/checkbox-fill";
 import { useHover, useMediaQuery } from "@uidotdev/usehooks";
+import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";
 
 export function PhotoItem({
   photo,
@@ -67,6 +68,14 @@ function PhotoDisplay({
   const selected = useMemo(() => {
     return allSelected.has(photo.Key);
   }, [allSelected, photo.Key]);
+
+  const router = useRouter();
+  const delayedHoverCb = useCallback(() => {
+    console.debug("prefetching page for", photo.Key);
+    router.prefetch(`/photo?imagePath=${photo.Key}`);
+  }, [router, photo.Key]);
+
+  useDelayedHover(hovering, 200, delayedHoverCb);
 
   return (
     <motion.div
