@@ -24,9 +24,7 @@ outline: [2, 4]
 
 目前，我们为以下平台编写了逐步指南，如果这正是你在使用的，可以直接点击链接去那里查看，在做完教程中的内容后，您应该就可以使用 S3 Image Port 了！
 
-[Cloudflare R2 逐步指南](/zh/guide/for-cloudflare-r2) 中提供了如何在使用 Cloudflare R2 的情况下配置 本面板的 S3 设置的逐步指南。
-
-腾讯云 COS 的逐步指南正在编写中。
+- [Cloudflare R2 逐步指南](/zh/guide/for-cloudflare-r2) 中提供了如何在使用 Cloudflare R2 的情况下配置 本面板的 S3 设置的逐步指南。
 
 ### 通用要求
 
