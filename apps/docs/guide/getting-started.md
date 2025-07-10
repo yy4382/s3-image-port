@@ -49,12 +49,12 @@ If you are directly using the "public storage bucket" function of certain S3-com
 :::info What is CORS?
 **Cross-Origin Resource Sharing** ([CORS](https://developer.mozilla.org/en-US/docs/Glossary/CORS)) is a mechanism that uses [HTTP](https://developer.mozilla.org/en-US/docs/Glossary/HTTP) headers to allow servers to indicate any origins (domain, scheme, or port) other than their own from which a browser should permit loading resources.
 
-In simple terms, if the site `A.com` wants to access resources on the site `B.com`, `B.com` needs to configure CORS to allow it. In this case, `iport.yfi.moe` is like `A.com`, and the link to your S3 storage bucket is like `B.com`. Therefore, we need to configure CORS policies on the S3 storage bucket to allow access requests from `iport.yfi.moe`.
+In simple terms, if the site `A.com` wants to access resources on the site `B.com`, `B.com` needs to configure CORS to allow it. In this case, `imageport.app` is like `A.com`, and the link to your S3 storage bucket is like `B.com`. Therefore, we need to configure CORS policies on the S3 storage bucket to allow access requests from `imageport.app`.
 :::
 
 To use it properly, you need to
 
-1. Include `https://iport.yfi.moe` in the allowed Origins,
+1. Include `https://imageport.app` in the allowed Origins,
 2. Allow at least the `GET`, `PUT`, and `DELETE` methods,
 3. And allow the `*` headers.
 

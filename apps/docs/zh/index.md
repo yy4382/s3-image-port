@@ -18,7 +18,7 @@ hero:
       link: /zh/guide/what-is-sip
     - theme: alt
       text: 官方实例
-      link: https://iport.yfi.moe
+      link: https://imageport.app/zh
 
 features:
   - title: "⬆️ 上传图片"

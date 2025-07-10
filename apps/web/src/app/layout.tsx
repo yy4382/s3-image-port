@@ -5,7 +5,7 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://iport.yfi.moe"),
+  metadataBase: new URL("https://imageport.app"),
   title: "S3 Image Port",
   icons: {
     icon: "/favicon.svg",

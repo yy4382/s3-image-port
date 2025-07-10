@@ -48,12 +48,12 @@ In order for S3 Image Port to be able to access and manipulate your data in Clou
 - Select the storage bucket you just created.
 - Click `Settings` and on the right side of the `CORS Policy` board click `Add/Edit CORS Policy` and modify it as you wish.
 
-Below is an example of a CORS policy that makes the [official instance](https://iport.yfi.moe) work:
+Below is an example of a CORS policy that makes the [official instance](https://imageport.app) work:
 
 ```json
 [
   {
-    "AllowedOrigins": ["https://iport.yfi.moe"],
+    "AllowedOrigins": ["https://imageport.app"],
     "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD", "POST"],
     "AllowedHeaders": ["*"]
   }

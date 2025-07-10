@@ -9,7 +9,7 @@ export const zh = defineConfig({
         link: "/zh/guide/what-is-sip",
         activeMatch: "/zh/guide/",
       },
-      { text: "开始使用", link: "https://iport.yfi.moe" },
+      { text: "开始使用", link: "https://imageport.app/zh" },
     ],
     sidebar: {
       "/zh/guide/": { base: "/zh/guide/", items: sidebarGuide() },

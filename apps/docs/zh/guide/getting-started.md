@@ -51,12 +51,12 @@ S3 Image Port 需要以下信息/权限以正常工作：
 :::info 什么是 CORS？
 **跨源资源共享**（[CORS](https://developer.mozilla.org/zh-CN/docs/Glossary/CORS)，或通俗地译为跨域资源共享）是一种基于 [HTTP](https://developer.mozilla.org/zh-CN/docs/Glossary/HTTP) 头的机制，该机制通过允许服务器标示除了它自己以外的其他[源](https://developer.mozilla.org/zh-CN/docs/Glossary/Origin)（域、协议或端口），使得浏览器允许这些源访问加载自己的资源。
 
-简单来讲，就是如果 `A.com` 的网站想要访问 `B.com` 网站上的资源，需要 `B.com` 配置 CORS 来同意。在现在的情况下，`iport.yfi.moe` 相当于 `A.com`，而你的 S3 储存桶的链接类似于 `B.com`，因此我们需要在 S3 储存桶那边配置 CORS 策略来同意来自 `iport.yfi.moe` 的访问请求。
+简单来讲，就是如果 `A.com` 的网站想要访问 `B.com` 网站上的资源，需要 `B.com` 配置 CORS 来同意。在现在的情况下，`imageport.app` 相当于 `A.com`，而你的 S3 储存桶的链接类似于 `B.com`，因此我们需要在 S3 储存桶那边配置 CORS 策略来同意来自 `imageport.app` 的访问请求。
 :::
 
 为了正常使用，你需要
 
-1. 将 `https://iport.yfi.moe` 放入允许的 Origin 中，
+1. 将 `https://imageport.app` 放入允许的 Origin 中，
 2. 至少允许 `GET`, `PUT` 和 `DELETE` 方法，
 3. 并且允许 `*` header。
 

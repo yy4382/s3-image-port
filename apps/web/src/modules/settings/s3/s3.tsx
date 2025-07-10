@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { focusAtom } from "jotai-optics";
 import {
   s3SettingsAtom,
@@ -22,7 +22,7 @@ function getS3Part(opt: keyof Omit<S3Options, "forcePathStyle">) {
 
 function S3Settings() {
   const t = useTranslations("settings.s3Settings");
-
+  const locale = useLocale();
   return (
     <div>
       <div className="grid gap-6">
@@ -90,7 +90,13 @@ function S3Settings() {
             mono: (chunks) => <span className="font-mono">{chunks}</span>,
             more: (chunks) => (
               <a
-                href="https://docs.iport.yfi.moe/guide/getting-started#public-url"
+                href={new URL(
+                  locale === "zh"
+                    ? "/zh/guide/getting-started#public-url"
+                    : "/guide/getting-started#public-url",
+                  process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                    "https://docs.imageport.app",
+                ).toString()}
                 target="_blank"
                 className="hover:text-primary underline-offset-2 underline"
               >

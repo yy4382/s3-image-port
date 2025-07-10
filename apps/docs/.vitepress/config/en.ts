@@ -5,7 +5,7 @@ export const en = defineConfig({
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/what-is-sip", activeMatch: "/guide/" },
-      { text: "Start using", link: "https://iport.yfi.moe" },
+      { text: "Start using", link: "https://imageport.app" },
     ],
     sidebar: {
       "/guide/": { base: "/guide/", items: sidebarGuide() },

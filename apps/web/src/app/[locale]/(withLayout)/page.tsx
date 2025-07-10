@@ -56,7 +56,11 @@ export default async function Home({
                     "hover:scale-105 transition-all duration-300",
                   )}
                   target="_blank"
-                  href="https://docs.iport.yfi.moe"
+                  href={new URL(
+                    locale === "zh" ? "/zh" : "/",
+                    process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                      "https://docs.imageport.app",
+                  ).toString()}
                 >
                   {t("readDocs")}
                 </a>
