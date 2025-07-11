@@ -138,20 +138,20 @@
       "noPhotosFound": "No photos found",
       "loadPhotos": "Load Photos"
     },
-    "display": {
-      "search": "Search..."
-    },
+    "display": {},
     "filter": {
       "filterOptions": "Filter Options",
       "filterByProperty": "Filter photos by property.",
       "filterByPrefix": "Filter by Prefix",
       "directoryTree": "Find images like in a directory tree.",
-      "filterByDate": "Filter by Date",
-      "clickToOpenCalendar": "Click to open calendar to select date range.",
+      "filterByDate": "Filter by date",
+      "clickToOpenCalendar": "Click the button to open the calendar and select a date range.",
       "selectPrefix": "Select prefix...",
       "noPrefix": "(no prefix)",
       "searchPrefix": "Search prefix...",
-      "noPrefixFound": "No prefix found."
+      "noPrefixFound": "No prefix found.",
+      "search": "Search",
+      "searchPlaceholder": "Search by image name..."
     },
     "sort": {
       "sortOptions": "Sort Options",

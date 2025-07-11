@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { Input } from "@/components/ui/input";
 
 interface FilterPopoverContentProps {
   currentDisplayOptions: DisplayOptions;
@@ -50,6 +51,15 @@ export function FilterPopoverContent({
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">{t("filterByProperty")}</p>
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="search-filter">{t("search")}</Label>
+        <Input
+          id="search-filter"
+          placeholder={t("searchPlaceholder")}
+          value={currentDisplayOptions.searchTerm}
+          onChange={(e) => handleUpdate({ searchTerm: e.target.value })}
+        />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="prefix-filter">{t("filterByPrefix")}</Label>

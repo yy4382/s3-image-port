@@ -36,6 +36,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "deep-equal": "^2.2.3",
+    "fuse.js": "^7.1.0",
     "immer": "^10.1.1",
     "jotai": "^2.12.3",
     "jotai-devtools": "^0.12.0",

@@ -146,12 +146,14 @@
       "filterByProperty": "根据属性筛选图片。",
       "filterByPrefix": "按前缀过滤",
       "directoryTree": "像在目录树中一样查找图像。",
-      "filterByDate": "按日期过滤",
-      "clickToOpenCalendar": "点击以打开日历选择日期范围。",
+      "filterByDate": "按日期筛选",
+      "clickToOpenCalendar": "点击按钮打开日历以选择日期范围。",
       "selectPrefix": "选择前缀...",
-      "noPrefix": "(无前缀)",
+      "noPrefix": "（无前缀）",
       "searchPrefix": "搜索前缀...",
-      "noPrefixFound": "未找到前缀。"
+      "noPrefixFound": "未找到前缀。",
+      "search": "搜索",
+      "searchPlaceholder": "按图片名称搜索..."
     },
     "sort": {
       "sortOptions": "排序选项",

@@ -14,6 +14,7 @@ import {
 import { displayOptionsAtom } from "./GalleryControl/displayControlStore";
 import { useTranslations } from "next-intl";
 import { enableMapSet } from "immer";
+import Fuse from "fuse.js";
 
 enableMapSet();
 
@@ -50,14 +51,18 @@ export const availablePrefixesAtom = atom<
 export const filteredPhotosAtom = atom<Photo[]>((get) => {
   const photos = get(photosAtom);
   const displayOptions = get(displayOptionsAtom);
-  const displayedPhotos = photos
+
+  const searchedPhotos = displayOptions.searchTerm
+    ? new Fuse(photos, {
+        keys: ["Key"],
+        threshold: 0.3,
+      })
+        .search(displayOptions.searchTerm)
+        .map((result) => result.item)
+    : photos;
+
+  const displayedPhotos = searchedPhotos
     .filter((photo) => {
-      if (
-        displayOptions.searchTerm &&
-        !photo.Key.includes(displayOptions.searchTerm)
-      ) {
-        return false;
-      }
       if (
         displayOptions.prefix !== undefined &&
         !photo.Key.startsWith(displayOptions.prefix)
@@ -77,6 +82,9 @@ export const filteredPhotosAtom = atom<Photo[]>((get) => {
       return true;
     })
     .sort((a, b) => {
+      if (displayOptions.searchTerm) {
+        return 0; // Fuse.js already sorted by relevance
+      }
       if (displayOptions.sortBy === "key") {
         return displayOptions.sortOrder === "asc"
           ? a.Key.localeCompare(b.Key)
