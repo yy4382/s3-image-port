@@ -24,11 +24,7 @@ Configurations that will NOT be migrated include:
 - Upload compression will be disabled by default; you can manually enable it if needed
 - Other settings
 
-Configurations that are not migrated will retain their default values after importing the v1 configuration.
-
-## Breaking Changes
-
-The gallery fuzzy search feature has been temporarily removed. If needed, you can [create an Issue](https://github.com/yy4382/s3-image-port/issues/new) to discuss it.
+Configurations that are not migrated will retain their default values after importing the v1 configuration.s
 
 ## Deprecated Settings
 
