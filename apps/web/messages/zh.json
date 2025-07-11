@@ -138,9 +138,6 @@
       "noPhotosFound": "未找到照片",
       "loadPhotos": "加载照片"
     },
-    "display": {
-      "search": "搜索..."
-    },
     "filter": {
       "filterOptions": "过滤选项",
       "filterByProperty": "根据属性筛选图片。",

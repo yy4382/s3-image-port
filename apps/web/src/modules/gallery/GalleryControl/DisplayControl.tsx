@@ -65,7 +65,7 @@ function useSearchDisplayOptions() {
 
 export function DisplayControl() {
   const { search, handleUpdate } = useSearchDisplayOptions();
-  const t = useTranslations("gallery.display");
+  const t = useTranslations("gallery.filter");
 
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
   const [sortPopoverOpen, setSortPopoverOpen] = useState(false);
@@ -83,7 +83,7 @@ export function DisplayControl() {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder={t("search")}
+        placeholder={t("searchPlaceholder")}
         className="flex-grow max-w-72"
         onChange={(e) => {
           handleUpdate({ searchTerm: e.target.value });
