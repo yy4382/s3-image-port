@@ -2,16 +2,13 @@
 
 [English](README.md) · [简体中文](/apps/docs/README-zh.md)
 
-> [!NOTE]
-> V2 will be released soon. The main branch is the v2 developing branch, which is not stable.
->
-> Please refer to the [v1 branch](https://github.com/yy4382/s3-image-port/tree/v1) for the currently deployed version.
->
-> The following README is for v1.
+S3 Image Port is a control panel for managing images in your AWS S3 buckets or any S3-compatible service (like Cloudflare R2, DigitalOcean Spaces, etc.).
 
-A custom front-end panel designed to manage images hosted on **S3-like** storage services (e.g. Cloudflare R2), where traditionally no dedicated image management panel exists. This solution provides a simple yet powerful interface for **uploading**, **managing**, and **integrating** images into your projects.
+> Unlike traditional image hosting services, S3 Image Port does not store your images or handle the delivery. It only provides a management interface. We designed it to be a **no vendor lock-in** solution: your images reside in your own S3 bucket, completely independent of this project. Even if S3 Image Port were to go offline, you would not need to migrate anything.
 
-Start using at <https://iport.yfi.moe>!
+The panel itself is stateless and doesn't store any of your data.
+
+Start using at <https://imageport.app>!
 
 ## Features
 
@@ -20,26 +17,21 @@ Start using at <https://iport.yfi.moe>!
 - :link: **Copy Image Links**: One-click copying of links to uploaded images in raw or markdown format.
 - :wastebasket: **Delete Images**: Remove images from your bucket directly through the panel.
 
-The interface is fully responsive and works seamlessly on mobile devices as well.
+## Not an Image Hosting Service
+
+S3 Image Port is not an image hosting service in the traditional sense. A typical image host stores and serves your images. S3 Image Port doesn't store your files or get involved in the access flow. This has several advantages:
+
+- **Your data is yours**: Your images are in your own S3 bucket. If this project disappears, your images and their access are unaffected.
+- **No extra database**: Traditional hosts often have a database for metadata. If that's lost, recovery is hard. Here, everything is just files in your bucket.
+- **Customizable access path**: Since the panel doesn't serve the images, you have full control over the image URLs.
 
 ## Usage
 
-Before using the application, configure your S3 settings in the Settings tab. Required fields include the S3 endpoint, bucket name, region, and two keys (access key and secret key). Optional advanced settings like setting a public URL format are available if your S3 bucket uses a custom domain.
+Before using the application, you need to configure your S3 settings. For a detailed guide, please refer to our [Getting Started documentation](https://docs.imageport.app/guide/getting-started).
 
-For obtaining S3 related keys, please refer to the documentation of your storage service provider. If you are using Cloudflare R2 Storage, you can check out the [Step-By-Step Guide for Cloudflare R2](https://docs.iport.yfi.moe/guide/for-cloudflare-r2).
+For obtaining S3 related keys, please refer to the documentation of your storage service provider. If you are using Cloudflare R2 Storage, you can check out the [Step-By-Step Guide for Cloudflare R2](https://docs.imageport.app/guide/for-cloudflare-r2).
 
-You can then customize this application to a certain extent. Go to the `App Settings` page and you can configure some important options. Particularly, if you want to modify the key template, you should carefully read the [Special Note on `Key (Path) Template`](#special-note-on-key-path-template).
-
-### Special Note on `Key (Path) Template`
-
-> [!CAUTION]
-> MODIFY THIS OPTION AT YOUR OWN RISK! If the new key collides with the existing key, the existing file is **overwritten**.
-
-This option provides a way to customize the **path** to the uploaded image in the storage bucket, also known as the `key`. By default, its value is `i/{{year}}/{{month}}/{{day}}/{{random}}.{{ext}}`, which means that if you upload a `png` image on 2024-05-15, the relative path of your image in the bucket might be `i/2024/05/15/kgj7e-1z.png`.
-
-Available placeholders (or variables) include `year`, `month`, `day`, `random`, `filename`, `ext`. They should be enclosed in `{{` and `}}` otherwise they can't be parsed dynamically.
-
-The random placeholder is not completely random. It concatenates the milliseconds from 0 am and a two-digit random number to generate the value. Therefore, it is recommended to use it together with year, month and/or day.
+You can also customize this application to a certain extent. Go to the `Settings` page and you can configure some important options.
 
 ## Feedback and Contributions
 
