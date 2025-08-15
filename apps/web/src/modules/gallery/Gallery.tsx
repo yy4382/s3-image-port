@@ -12,6 +12,9 @@ import {
 import { atom, useAtomValue } from "jotai";
 
 const shouldRunAutoRefreshAtom = atom((get) => {
+  if (get(galleryDirtyStatusAtom)) {
+    return true;
+  }
   const gallerySettings = get(gallerySettingsAtom);
   if (!gallerySettings.autoRefresh) {
     return false;
@@ -26,13 +29,12 @@ const shouldRunAutoRefreshAtom = atom((get) => {
 export function Gallery() {
   const { fetchPhotoList } = useFetchPhotoList();
   const shouldRunAutoRefresh = useAtomValue(shouldRunAutoRefreshAtom);
-  const galleryDirty = useAtomValue(galleryDirtyStatusAtom);
 
   useEffect(() => {
-    if (shouldRunAutoRefresh || galleryDirty) {
+    if (shouldRunAutoRefresh) {
       fetchPhotoList(false);
     }
-  }, [shouldRunAutoRefresh, fetchPhotoList, galleryDirty]);
+  }, [shouldRunAutoRefresh, fetchPhotoList]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
