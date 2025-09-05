@@ -32,6 +32,9 @@
     },
     "s3Settings": {
       "title": "S3",
+      "provider": "Provider",
+      "s3Compatible": "S3 Compatible",
+      "b2": "Backblaze B2",
       "endpoint": "Endpoint",
       "endpointDesc": "S3 endpoint",
       "bucket": "Bucket Name",

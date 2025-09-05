@@ -304,4 +304,30 @@ describe("S3Settings", () => {
       expect(getConfigInAtom().pubUrl).toEqual("not a valid url");
     });
   });
+
+  describe("B2 provider", () => {
+    it("should derive region and endpoint from key id", async () => {
+      render(
+        <>
+          <S3Settings />
+          <S3SettingsString />
+        </>,
+      );
+
+      // Switch to B2 provider
+      fireEvent.mouseDown(screen.getByRole("combobox"));
+      fireEvent.click(await screen.findByText("Backblaze B2"));
+
+      const input = screen.getByLabelText("Access Key");
+      fireEvent.change(input, { target: { value: "002key" } });
+
+      await screen.findByDisplayValue("002key");
+
+      expect(getConfigInAtom().region).toEqual("us-west-002");
+      expect(getConfigInAtom().endpoint).toEqual(
+        "https://s3.us-west-002.backblazeb2.com",
+      );
+      expect(getConfigInAtom().forcePathStyle).toEqual(true);
+    });
+  });
 });

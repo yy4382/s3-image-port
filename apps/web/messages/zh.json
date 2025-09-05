@@ -32,6 +32,9 @@
     },
     "s3Settings": {
       "title": "S3",
+      "provider": "提供商",
+      "s3Compatible": "S3 兼容",
+      "b2": "Backblaze B2",
       "endpoint": "端点",
       "endpointDesc": "S3 端点",
       "bucket": "存储桶名称",

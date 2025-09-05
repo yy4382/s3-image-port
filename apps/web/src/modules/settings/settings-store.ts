@@ -5,6 +5,9 @@ import { keyTemplateSchema } from "./upload/KeyTemplate";
 import z from "zod/v4";
 import { compressOptionSchema } from "@/lib/utils/imageCompress";
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
+
+export const s3ProviderAtom = atomWithStorage<"s3" | "b2">("S3_PROVIDER", "s3");
 
 export const s3SettingsSchema = z.object({
   endpoint: z.url(),
