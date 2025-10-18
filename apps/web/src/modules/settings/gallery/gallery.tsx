@@ -2,13 +2,24 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { ExternalLink } from "lucide-react";
-import { FormEntrySwitchAtom } from "@/components/ui/form-entry-validate";
 import { gallerySettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Switch } from "@/components/animate-ui/radix/switch";
+import { useAtom } from "jotai";
 
+const autoRefreshAtom = focusAtom(gallerySettingsAtom, (optic) =>
+  optic.prop("autoRefresh"),
+);
 export function GallerySettings() {
   const t = useTranslations("settings.gallery");
   const locale = useLocale();
+  const [autoRefresh, setAutoRefresh] = useAtom(autoRefreshAtom);
   return (
     <div>
       <div className="grid gap-6">
@@ -30,13 +41,20 @@ export function GallerySettings() {
             <ExternalLink className="h-4 w-4" />
           </a>
         </div>
-        <FormEntrySwitchAtom
+        {/* <FormEntrySwitchAtom
           title={t("autoRefresh")}
           description={t("autoRefreshDesc")}
           atom={focusAtom(gallerySettingsAtom, (optic) =>
             optic.prop("autoRefresh"),
           )}
-        />
+        /> */}
+        <Field className="gap-1" orientation="horizontal">
+          <FieldContent>
+            <FieldLabel>{t("autoRefresh")}</FieldLabel>
+            <FieldDescription>{t("autoRefreshDesc")}</FieldDescription>
+          </FieldContent>
+          <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
+        </Field>
       </div>
     </div>
   );

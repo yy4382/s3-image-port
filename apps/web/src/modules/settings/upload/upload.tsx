@@ -1,7 +1,7 @@
 "use client";
 
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
-import { KeyTemplate } from "@/modules/settings/upload/KeyTemplate";
+import { KeyTemplateIndependent } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
@@ -46,7 +46,9 @@ const keyTemplateAtom = focusAtom(uploadSettingsAtom, (optic) =>
 
 function KeyTemplateWrapper() {
   const [keyTemplate, setKeyTemplate] = useAtom(keyTemplateAtom);
-  return <KeyTemplate v={keyTemplate} set={setKeyTemplate} />;
+  return (
+    <KeyTemplateIndependent value={keyTemplate} onChange={setKeyTemplate} />
+  );
 }
 
 const CompressOptionAtom = focusAtom(uploadSettingsAtom, (optic) =>

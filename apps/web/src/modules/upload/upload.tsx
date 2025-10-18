@@ -1,7 +1,7 @@
 "use client";
 
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
-import { KeyTemplate } from "@/modules/settings/upload/KeyTemplate";
+import { KeyTemplateIndependent } from "@/modules/settings/upload/KeyTemplate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -419,9 +419,9 @@ function FilePreview({
             <DropdownMenuContent align="end" className="p-4">
               <div className="space-y-6">
                 <div>
-                  <KeyTemplate
-                    v={file.key.template}
-                    set={(k) => {
+                  <KeyTemplateIndependent
+                    value={file.key.template}
+                    onChange={(k) => {
                       updateTemplate(k);
                     }}
                   />
