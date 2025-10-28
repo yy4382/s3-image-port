@@ -13,6 +13,7 @@ import { createHeadTags } from "../lib/seo";
 import globalsCss from "@/styles/globals.css?url";
 import { produce } from "immer";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
 
 export const Route = createRootRoute({
   head: () =>
@@ -28,10 +29,10 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const match = useMatch({ from: "/$locale", shouldThrow: false });
-  const locale = match?.params.locale;
+  const locale = useSetHtmlLang();
+
   return (
-    <html suppressHydrationWarning lang={locale ?? "en"}>
+    <html suppressHydrationWarning {...(locale && { lang: locale })}>
       <head>
         <HeadContent />
       </head>
@@ -53,4 +54,17 @@ function RootComponent() {
       </body>
     </html>
   );
+}
+
+function useSetHtmlLang() {
+  const locale = useMatch({
+    from: "/$locale",
+    shouldThrow: false,
+    select: (data) => data.params.locale,
+  });
+
+  useEffect(() => {
+    document.documentElement.lang = locale ?? "en";
+  }, [locale]);
+  return locale;
 }
