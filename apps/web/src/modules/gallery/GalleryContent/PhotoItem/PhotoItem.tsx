@@ -73,14 +73,15 @@ function PhotoDisplay({
   const router = useRouter();
   const locale = useLocale();
   const search = route.useSearch();
+  const galleryState = JSON.stringify(search);
   const delayedHoverCb = useCallback(() => {
     console.debug("prefetching page for", photo.Key);
     router.preloadRoute({
       to: "/$locale/photo",
       params: { locale },
-      search: { imagePath: photo.Key, galleryState: search.displayOptions },
+      search: { imagePath: photo.Key, galleryState },
     });
-  }, [router, photo.Key, search.displayOptions, locale]);
+  }, [router, photo.Key, galleryState, locale]);
 
   useDelayedHover(hovering, 200, delayedHoverCb);
 
@@ -188,7 +189,7 @@ function useOpenModal(s3Key: string) {
     navigate({
       to: "/$locale/photo",
       params: { locale },
-      search: { imagePath: s3Key, galleryState: search.displayOptions },
+      search: { imagePath: s3Key, galleryState: JSON.stringify(search) },
     });
   }, [search, s3Key, locale, navigate]);
 }
@@ -322,7 +323,6 @@ function PhotoItemOverlay({
       <div
         className="absolute top-0 bottom-0 left-0 right-0"
         onClick={(e) => {
-          console.log("click");
           if (selectMode) {
             console.log("selectMode");
             toggleSelected(photo.Key, "toggle", e.shiftKey);

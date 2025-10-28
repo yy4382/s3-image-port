@@ -45,7 +45,6 @@ const Header: React.FC = () => {
             to="/$locale/gallery"
             params={{ locale }}
             className={getNavLinkClass}
-            search={{ displayOptions: undefined }}
           >
             <McPhotoAlbum className="text-2xl md:text-base" />
             <span className="hidden md:block">{t("gallery")}</span>

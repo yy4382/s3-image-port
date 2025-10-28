@@ -50,55 +50,66 @@ export function timeRangesGetter(): { duration: Duration; type: string }[] {
 }
 
 export const displayOptionsSchema = z.object({
-  searchTerm: z.string().default("").catch(""),
-  prefix: z.string().optional().catch(undefined),
+  searchTerm: z.string().default(""),
+  prefix: z.string().optional(),
   dateRangeType: z
     .enum([...timeRangesGetter().map((t) => t.type)])
     .or(z.tuple([z.coerce.date().nullable(), z.coerce.date().nullable()]))
-    .default([null, null])
-    .catch([null, null]),
-  sortBy: z.enum(["key", "date"]).catch("key").default("key"),
-  sortOrder: z.enum(["asc", "desc"]).catch("desc").default("desc"),
+    .default([null, null]),
+  sortBy: z.enum(["key", "date"]).default("key").catch("key"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc").catch("desc"),
 });
 
 export type DisplayOptions = z.infer<typeof displayOptionsSchema>;
 
+export const displayOptionsSearchSchema = z.object({
+  searchTerm: z.string().optional().catch(undefined),
+  prefix: z.string().optional().catch(undefined),
+  dateRangeType: z.string().optional().catch(undefined),
+  sortBy: z.string().optional().catch(undefined),
+  sortOrder: z.string().optional().catch(undefined),
+});
+
 export const displayOptionsAtom = atom<DisplayOptions>(OptDefault);
 
 export function displayOptionsToSearchParams(options: DisplayOptions) {
-  const params = new URLSearchParams();
+  const params: z.infer<typeof displayOptionsSearchSchema> = {};
   const { searchTerm, prefix, dateRangeType, sortBy, sortOrder } = options;
   if (searchTerm !== OptDefault.searchTerm) {
-    params.set("searchTerm", searchTerm);
+    params.searchTerm = searchTerm;
   }
   if (prefix !== OptDefault.prefix) {
-    params.set("prefix", prefix);
+    params.prefix = prefix;
   }
   if (!deepEqual(dateRangeType, OptDefault.dateRangeType)) {
     if (typeof dateRangeType === "string") {
-      params.set("dateRangeType", dateRangeType);
+      params.dateRangeType = dateRangeType;
     } else {
       const stored = dateRangeType.map((d) =>
         d ? format(d, "yyyy-MM-ddX") : null,
       );
-      params.set("dateRangeType", JSON.stringify(stored));
+      params.dateRangeType = JSON.stringify(stored);
     }
   }
   if (sortBy !== OptDefault.sortBy) {
-    params.set("sortBy", sortBy);
+    params.sortBy = sortBy;
   }
   if (sortOrder !== OptDefault.sortOrder) {
-    params.set("sortOrder", sortOrder);
+    params.sortOrder = sortOrder;
   }
   return params;
 }
 
-export function searchParamsToDisplayOptions(params: URLSearchParams) {
-  const searchTerm = params.get("searchTerm");
-  const prefix = params.get("prefix");
-  const dateRangeTypeRaw = params.get("dateRangeType");
-  const sortBy = params.get("sortBy");
-  const sortOrder = params.get("sortOrder");
+export function searchParamsToDisplayOptions(
+  params: z.infer<typeof displayOptionsSearchSchema>,
+) {
+  const {
+    searchTerm,
+    prefix,
+    dateRangeType: dateRangeTypeRaw,
+    sortBy,
+    sortOrder,
+  } = params;
 
   let dateRangeType: DisplayOptions["dateRangeType"];
   if (dateRangeTypeRaw) {

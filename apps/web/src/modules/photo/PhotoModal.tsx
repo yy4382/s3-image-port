@@ -22,7 +22,7 @@ import {
 import { format } from "date-fns";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
-import { getRouteApi, Navigate } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 
 const route = getRouteApi("/$locale/photo");
 
@@ -30,18 +30,7 @@ export default function PhotoModal() {
   const search = route.useSearch();
   const path = search.imagePath;
 
-  if (!path) {
-    return (
-      <Navigate
-        from="/$locale/photo"
-        to="/$locale/gallery"
-        params={(prev) => ({ locale: prev.locale })}
-        search={(prev) => ({ displayOptions: prev.galleryState as string })}
-      />
-    );
-  }
-
-  return <PhotoModalContent path={path as string} />;
+  return <PhotoModalContent path={path} />;
 }
 
 function PhotoModalContent({ path }: { path: string }) {
@@ -83,7 +72,7 @@ function PhotoModalToolbar({ path }: { path: string }) {
     navigate({
       to: "/$locale/gallery",
       params: { locale },
-      search: (prev) => ({ displayOptions: prev.galleryState as string }),
+      search: (prev) => JSON.parse(prev.galleryState ?? "{}"),
     });
   }, [navigate, locale]);
 
@@ -147,6 +136,7 @@ function PhotoModalToolbar({ path }: { path: string }) {
         return;
       }
 
+      // @ts-expect-error - ArrayBuffer vs ArrayBufferLike error
       const blob = new Blob([await res.Body.transformToByteArray()]);
 
       const url = URL.createObjectURL(blob);

@@ -1,7 +1,7 @@
 import { Gallery } from "@/modules/gallery/Gallery";
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod/v4";
 import { createHeadTags } from "../../../lib/seo";
+import { displayOptionsSearchSchema } from "@/modules/gallery/GalleryControl/displayControlStore";
 
 export const Route = createFileRoute("/$locale/_root-layout/gallery")({
   head: () =>
@@ -11,12 +11,9 @@ export const Route = createFileRoute("/$locale/_root-layout/gallery")({
         "Browse, search, and manage images stored in your S3 buckets.",
     }),
   component: RouteComponent,
-  validateSearch: (search) => ({
-    displayOptions: z.string().optional().parse(search.displayOptions),
-  }),
+  validateSearch: displayOptionsSearchSchema,
 });
 
 function RouteComponent() {
-  const a = Route.useSearch();
   return <Gallery />;
 }

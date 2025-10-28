@@ -145,7 +145,7 @@ export {
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-  useTooltip,
+  // useTooltip,
   type TooltipContextType,
   type TooltipProps,
   type TooltipTriggerProps,

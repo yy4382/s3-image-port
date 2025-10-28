@@ -1,7 +1,7 @@
 "use client";
 
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import {
   displayOptionsToSearchParams,
   displayOptionsAtom,
@@ -29,10 +29,10 @@ const route = getRouteApi("/$locale/_root-layout/gallery");
 
 function useSearchDisplayOptions() {
   const navigate = route.useNavigate();
-  const displayOptions = route.useSearch().displayOptions ?? "";
+  const searchParams = route.useSearch();
 
   const setCurrentPage = useSetAtom(currentPageAtom);
-  const [search, setSearch] = useAtom(displayOptionsAtom);
+  const [displayOptions, setDisplayOptions] = useAtom(displayOptionsAtom);
 
   const handleUpdate = (
     update:
@@ -41,30 +41,30 @@ function useSearchDisplayOptions() {
   ) => {
     let newSearchOptions: Partial<DisplayOptions>;
     if (typeof update === "function") {
-      newSearchOptions = update(displayOptionsSchema.parse(search));
+      newSearchOptions = update(displayOptionsSchema.parse(displayOptions));
     } else {
       newSearchOptions = update;
     }
-    setCurrentPage(1);
     const newSearchParams = displayOptionsToSearchParams({
-      ...search,
+      ...displayOptions,
       ...newSearchOptions,
     });
-    navigate({
-      to: ".",
-      search: { displayOptions: newSearchParams.toString() },
+    startTransition(() => {
+      setCurrentPage(1);
+      navigate({
+        to: ".",
+        search: newSearchParams,
+      });
     });
   };
 
   useEffect(() => {
-    const parsedSearchParams = searchParamsToDisplayOptions(
-      new URLSearchParams(displayOptions),
-    );
-    setSearch(parsedSearchParams);
-  }, [setSearch, displayOptions]);
+    const parsedSearchParams = searchParamsToDisplayOptions(searchParams);
+    setDisplayOptions(parsedSearchParams);
+  }, [setDisplayOptions, searchParams]);
 
   return {
-    search,
+    search: displayOptions,
     handleUpdate,
   };
 }
