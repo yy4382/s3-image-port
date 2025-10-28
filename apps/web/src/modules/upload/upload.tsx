@@ -17,7 +17,7 @@ import {
   type CompressOption,
 } from "@/lib/utils/imageCompress";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
-import { ClientOnly } from "@/components/misc/client-only";
+import { ClientOnly } from "@tanstack/react-router";
 import {
   atom,
   useAtom,

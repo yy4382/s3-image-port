@@ -3,7 +3,7 @@
 import { galleryDirtyStatusAtom, useFetchPhotoList } from "./galleryStore";
 import { PhotoGrid } from "./GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
-import { ClientOnly } from "@/components/misc/client-only";
+import { ClientOnly } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
   gallerySettingsAtom,

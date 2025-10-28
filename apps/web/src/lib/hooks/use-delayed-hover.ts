@@ -1,5 +1,11 @@
 // useDelayedHover.ts
-import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  startTransition,
+} from "react";
 
 export function useDelayedHover(
   isHovering: boolean,
@@ -24,7 +30,9 @@ export function useDelayedHover(
       }, delay);
     } else {
       clear();
-      setDelayedHover(false);
+      startTransition(() => {
+        setDelayedHover(false);
+      });
     }
 
     return () => clear();

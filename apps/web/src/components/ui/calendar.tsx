@@ -61,6 +61,7 @@ export const Calendar = ({
         ...classNames,
       }}
       components={{
+        // eslint-disable-next-line react-x/no-nested-component-definitions
         Chevron: ({ ...props }) => <Chevron {...props} />,
       }}
       {...props}

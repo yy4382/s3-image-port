@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/animate-ui/radix/switch";
-import { ClientOnly } from "@/components/misc/client-only";
+import { ClientOnly } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function S3SettingsHookFrom() {

@@ -150,6 +150,7 @@ function SlidingNumber({
   const newIntStr =
     padStart && newIntStrRaw?.length === 1 ? "0" + newIntStrRaw : newIntStrRaw;
 
+  // eslint-disable-next-line react-hooks/refs
   const prevFormatted = formatNumber(prevNumberRef.current);
   const [prevIntStrRaw = "", prevDecStrRaw = ""] = prevFormatted.split(".");
   const prevIntStr =

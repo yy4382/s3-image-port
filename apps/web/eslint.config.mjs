@@ -15,7 +15,7 @@ export default defineConfig([
       tseslint.configs.recommended,
       reactHooks.configs.flat["recommended-latest"],
       react.configs.recommended,
-      reactRefresh.configs.vite,
+      // reactRefresh.configs.vite,
     ],
     rules: {
       "react-x/no-use-context": "off",
@@ -24,6 +24,19 @@ export default defineConfig([
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
+        },
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "zod",
+              importNames: ["default"],
+              message:
+                "Please use the named import instead of the default import.\nUsing default import causes larger bundle size because it includes all locales.",
+            },
+          ],
         },
       ],
     },

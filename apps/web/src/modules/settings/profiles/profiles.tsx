@@ -21,7 +21,7 @@ import type { Options as Profile } from "../settings-store";
 import { optionsAtom } from "../settings-store";
 import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
-import { ClientOnly } from "@/components/misc/client-only";
+import { ClientOnly } from "@tanstack/react-router";
 import { useTranslations } from "use-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

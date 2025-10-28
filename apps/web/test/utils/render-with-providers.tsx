@@ -4,7 +4,6 @@ import en from "@/../messages/en.json";
 import { render } from "@testing-library/react";
 import { Toaster } from "sonner";
 
-// eslint-disable-next-line react-refresh/only-export-components
 const TestProviders = ({ children }: PropsWithChildren) => {
   return (
     <IntlProvider locale="en" messages={en}>

@@ -2,7 +2,6 @@
 
 import { useLocale } from "use-intl";
 import { Button } from "../ui/button";
-import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,20 +10,20 @@ import {
 } from "../ui/dropdown-menu";
 import { CheckIcon, Globe } from "lucide-react";
 import { localeLocalNames } from "@/i18n/routing";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, ClientOnly } from "@tanstack/react-router";
 
-export function LocaleSwitcher() {
-  const [mounted, setMounted] = useState(false);
+function LocaleSwitcherWrapper() {
+  return (
+    <ClientOnly>
+      <LocaleSwitcher />
+    </ClientOnly>
+  );
+}
+export { LocaleSwitcherWrapper as LocaleSwitcher };
+
+function LocaleSwitcher() {
   const locale = useLocale();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   const handleLocaleChange = (newLocale: string) => {
     navigate({

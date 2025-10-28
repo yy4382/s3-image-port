@@ -1,7 +1,7 @@
 import PhotoModal from "@/modules/photo/PhotoModal";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { createHeadTags } from "../../lib/seo";
-import z from "zod";
+import { z } from "zod";
 
 export const Route = createFileRoute("/$locale/photo")({
   head: () =>
