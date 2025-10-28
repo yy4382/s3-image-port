@@ -1,4 +1,5 @@
-"use client";
+/* eslint-disable react-hooks/preserve-manual-memoization, react-x/no-clone-element */
+"use no memo";
 
 import * as React from "react";
 import { AnimatePresence, Transition, motion } from "motion/react";
@@ -272,7 +273,7 @@ function MotionHighlight<T extends string>({
   );
 
   return (
-    <MotionHighlightContext.Provider
+    <MotionHighlightContext
       value={{
         mode,
         activeValue,
@@ -296,8 +297,10 @@ function MotionHighlight<T extends string>({
         ? controlledItems
           ? render(children)
           : render(
+              // eslint-disable-next-line react-x/no-children-map
               React.Children.map(children, (child, index) => (
                 <MotionHighlightItem
+                  // eslint-disable-next-line react-x/no-array-index-key
                   key={index}
                   className={props?.itemsClassName}
                 >
@@ -306,7 +309,7 @@ function MotionHighlight<T extends string>({
               )),
             )
         : children}
-    </MotionHighlightContext.Provider>
+    </MotionHighlightContext>
   );
 }
 
@@ -471,6 +474,7 @@ function MotionHighlightItem({
     if (mode === "children") {
       return React.cloneElement(
         element,
+        // eslint-disable-next-line react-hooks/refs
         {
           key: childValue,
           ref: localRef,
@@ -512,7 +516,7 @@ function MotionHighlightItem({
 
           <div
             data-slot="motion-highlight-item"
-            className={cn("relative z-[1]", className)}
+            className={cn("relative z-1", className)}
             {...dataAttributes}
           >
             {children}
@@ -521,6 +525,7 @@ function MotionHighlightItem({
       );
     }
 
+    // eslint-disable-next-line react-hooks/refs
     return React.cloneElement(element, {
       ref: localRef,
       ...getNonOverridingDataAttributes(element, {
@@ -586,7 +591,7 @@ function MotionHighlightItem({
 export {
   MotionHighlight,
   MotionHighlightItem,
-  useMotionHighlight,
+  // useMotionHighlight,
   type MotionHighlightProps,
   type MotionHighlightItemProps,
 };

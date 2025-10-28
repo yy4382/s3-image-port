@@ -5,8 +5,6 @@ import McSun from "~icons/mingcute/sun-line.jsx";
 import McMoon from "~icons/mingcute/moon-line.jsx";
 import McSystem from "~icons/mingcute/computer-line.jsx";
 import { Button } from "../ui/button";
-import { useState } from "react";
-import { useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +12,7 @@ import {
 } from "../ui/dropdown-menu";
 import { useTranslations } from "use-intl";
 import { MotionHighlight } from "../animate-ui/effects/motion-highlight";
+import { ClientOnly } from "@tanstack/react-router";
 
 function ThemeSwitcherContent() {
   const theme = useTheme();
@@ -69,34 +68,27 @@ function ThemeSwitcherButton() {
 }
 
 export function ThemeSwitcher() {
-  const [mounted, setMounted] = useState(false);
   const t = useTranslations("theme");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
   return (
     <div>
-      <div className="hidden md:block">
-        <ThemeSwitcherContent />
-      </div>
-      <div className="md:hidden">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost">
-              <ThemeSwitcherButton />
-              <span className="sr-only">{t("toggleTheme")}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-fit bg-transparent  min-w-fit p-0">
-            <ThemeSwitcherContent />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <ClientOnly>
+        <div className="hidden md:block">
+          <ThemeSwitcherContent />
+        </div>
+        <div className="md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <ThemeSwitcherButton />
+                <span className="sr-only">{t("toggleTheme")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-fit bg-transparent  min-w-fit p-0">
+              <ThemeSwitcherContent />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </ClientOnly>
     </div>
   );
 }

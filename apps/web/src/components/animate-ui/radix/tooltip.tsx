@@ -65,13 +65,13 @@ function Tooltip(props: TooltipProps) {
   );
 
   return (
-    <TooltipContext.Provider value={{ isOpen }}>
+    <TooltipContext value={{ isOpen }}>
       <TooltipPrimitive.Root
         data-slot="tooltip"
         {...props}
         onOpenChange={handleOpenChange}
       />
-    </TooltipContext.Provider>
+    </TooltipContext>
   );
 }
 

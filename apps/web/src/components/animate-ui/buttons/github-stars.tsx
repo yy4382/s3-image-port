@@ -150,7 +150,9 @@ function GitHubStarsButton({
     if (stars > 0 && isComponentInView) motionVal.set(stars);
   }, [motionVal, stars, isComponentInView]);
 
+  // eslint-disable-next-line react-hooks/refs
   const fillPercentage = Math.min(100, (motionNumberRef.current / stars) * 100);
+  // eslint-disable-next-line react-hooks/refs
   const formattedResult = formatNumber(motionNumberRef.current, formatted);
   const ghostFormattedNumber = formatNumber(stars, formatted);
 
