@@ -1,6 +1,6 @@
 import { atom, type SetStateAction } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import z from "zod/v4";
+import { z } from "zod";
 
 const withVersionSchema = z.object({
   version: z.number(),

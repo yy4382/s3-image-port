@@ -1,15 +1,16 @@
-import { NextIntlClientProvider } from "next-intl";
+import { IntlProvider } from "use-intl";
 import { PropsWithChildren } from "react";
 import en from "@/../messages/en.json";
 import { render } from "@testing-library/react";
 import { Toaster } from "sonner";
 
+// eslint-disable-next-line react-refresh/only-export-components
 const TestProviders = ({ children }: PropsWithChildren) => {
   return (
-    <NextIntlClientProvider locale="en" messages={en}>
+    <IntlProvider locale="en" messages={en}>
       {children}
       <Toaster toastOptions={{ duration: 10000 }} />
-    </NextIntlClientProvider>
+    </IntlProvider>
   );
 };
 

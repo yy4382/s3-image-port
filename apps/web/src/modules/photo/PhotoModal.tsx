@@ -1,9 +1,7 @@
 "use client";
-import { redirect, useRouter } from "@/i18n/navigation";
 import key2Url from "@/lib/utils/key2Url";
 import { useAtomValue } from "jotai";
-import { useLocale } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { useLocale } from "use-intl";
 import { useCallback, useEffect, useMemo } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
@@ -24,19 +22,26 @@ import {
 import { format } from "date-fns";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
+import { getRouteApi, Navigate } from "@tanstack/react-router";
+
+const route = getRouteApi("/$locale/photo");
 
 export default function PhotoModal() {
-  const locale = useLocale();
-  const searchParams = useSearchParams();
-  const path = useMemo(() => {
-    return searchParams.get("imagePath");
-  }, [searchParams]);
+  const search = route.useSearch();
+  const path = search.imagePath;
 
   if (!path) {
-    return redirect({ href: "/gallery", locale });
+    return (
+      <Navigate
+        from="/$locale/photo"
+        to="/$locale/gallery"
+        params={(prev) => ({ locale: prev.locale })}
+        search={(prev) => ({ displayOptions: prev.galleryState as string })}
+      />
+    );
   }
 
-  return <PhotoModalContent path={path} />;
+  return <PhotoModalContent path={path as string} />;
 }
 
 function PhotoModalContent({ path }: { path: string }) {
@@ -69,17 +74,18 @@ function PhotoModalContent({ path }: { path: string }) {
 }
 
 function PhotoModalToolbar({ path }: { path: string }) {
-  const searchParams = useSearchParams();
+  const navigate = route.useNavigate();
   const photos = useAtomValue(photosAtomReadOnly);
   const s3Options = useAtomValue(validS3SettingsAtom);
-  const router = useRouter();
+  const locale = useLocale();
 
   const handleBack = useCallback(() => {
-    const newSearch = new URLSearchParams(searchParams);
-    newSearch.delete("imagePath");
-
-    router.push(`/gallery?${newSearch.toString()}`);
-  }, [router, searchParams]);
+    navigate({
+      to: "/$locale/gallery",
+      params: { locale },
+      search: (prev) => ({ displayOptions: prev.galleryState as string }),
+    });
+  }, [navigate, locale]);
 
   useEffect(() => {
     function handleEscBack(event: KeyboardEvent) {

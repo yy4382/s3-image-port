@@ -22,13 +22,14 @@ import { FilterIcon, ArrowUpDownIcon } from "lucide-react";
 import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
-import { useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
+import { getRouteApi } from "@tanstack/react-router";
+
+const route = getRouteApi("/$locale/_root-layout/gallery");
 
 function useSearchDisplayOptions() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = route.useNavigate();
+  const displayOptions = route.useSearch().displayOptions ?? "";
 
   const setCurrentPage = useSetAtom(currentPageAtom);
   const [search, setSearch] = useAtom(displayOptionsAtom);
@@ -49,13 +50,18 @@ function useSearchDisplayOptions() {
       ...search,
       ...newSearchOptions,
     });
-    router.replace(`?${newSearchParams.toString()}`);
+    navigate({
+      to: ".",
+      search: { displayOptions: newSearchParams.toString() },
+    });
   };
 
   useEffect(() => {
-    const parsedSearchParams = searchParamsToDisplayOptions(searchParams);
+    const parsedSearchParams = searchParamsToDisplayOptions(
+      new URLSearchParams(displayOptions),
+    );
     setSearch(parsedSearchParams);
-  }, [setSearch, searchParams]);
+  }, [setSearch, displayOptions]);
 
   return {
     search,

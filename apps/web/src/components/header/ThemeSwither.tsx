@@ -12,7 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { MotionHighlight } from "../animate-ui/effects/motion-highlight";
 
 function ThemeSwitcherContent() {

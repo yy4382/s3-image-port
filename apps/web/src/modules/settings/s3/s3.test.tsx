@@ -4,6 +4,7 @@ import { render } from "@/../test/utils/render-with-providers";
 import { fireEvent, screen } from "@testing-library/react";
 import { useAtomValue } from "jotai";
 import { s3SettingsAtom } from "../settings-store";
+import userEvent from "@testing-library/user-event";
 
 const TEST_ID = "s3-settings-test";
 
@@ -34,7 +35,7 @@ describe("S3Settings", () => {
       );
       expect(getConfigInAtom().endpoint).toEqual("");
     });
-    it("can be set", () => {
+    it("can be set", async () => {
       render(
         <>
           <S3Settings />
@@ -42,7 +43,10 @@ describe("S3Settings", () => {
         </>,
       );
       const input = screen.getByLabelText("Endpoint");
-      fireEvent.change(input, { target: { value: "https://example.com" } });
+      const user = userEvent.setup();
+      await user.type(input, "htt://111");
+
+      await user.tab();
       expect(input.getAttribute("value")).toEqual("https://example.com");
       expect(getConfigInAtom().endpoint).toEqual("https://example.com");
     });

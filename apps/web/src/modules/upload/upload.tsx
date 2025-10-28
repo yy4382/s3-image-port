@@ -26,7 +26,13 @@ import {
   type PrimitiveAtom,
 } from "jotai";
 import { splitAtom } from "jotai/utils";
-import { SetStateAction, useCallback, useEffect, useState } from "react";
+import {
+  SetStateAction,
+  startTransition,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { monotonicFactory } from "ulid";
@@ -44,7 +50,7 @@ import {
   uploadSettingsAtom,
 } from "../settings/settings-store";
 import key2Url from "@/lib/utils/key2Url";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 import { setGalleryDirtyAtom } from "../gallery/galleryStore";
 
@@ -463,7 +469,9 @@ function FilePreviewThumbnail({ file }: { file: File }) {
 
     if (file.type.startsWith("image/")) {
       url = URL.createObjectURL(file);
-      setFileUrl(url);
+      startTransition(() => {
+        setFileUrl(url);
+      });
     }
 
     // Cleanup function to revoke the object URL

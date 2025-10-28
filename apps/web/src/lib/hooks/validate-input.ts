@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
-import z from "zod/v4";
+import { z } from "zod";
 
 export function useValidateInput<T>(
   value: T,

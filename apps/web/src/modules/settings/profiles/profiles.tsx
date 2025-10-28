@@ -22,7 +22,7 @@ import { optionsAtom } from "../settings-store";
 import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import { ClientOnly } from "@/components/misc/client-only";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,

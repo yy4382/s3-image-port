@@ -28,12 +28,12 @@ import {
   selectedPhotosAtom,
 } from "../../galleryStore";
 import { setNaturalSizesAtom } from "../../galleryStore";
-import { useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import McCheckFill from "~icons/mingcute/checkbox-fill";
 import { useHover, useMediaQuery } from "@uidotdev/usehooks";
 import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";
+import { getRouteApi, useRouter } from "@tanstack/react-router";
+import { useLocale } from "use-intl";
 
 export function PhotoItem({
   photo,
@@ -47,6 +47,7 @@ export function PhotoItem({
   return <PhotoDisplay photo={photo} size={size} position={position} />;
 }
 
+const route = getRouteApi("/$locale/_root-layout/gallery");
 function PhotoDisplay({
   photo,
   size,
@@ -70,10 +71,16 @@ function PhotoDisplay({
   }, [allSelected, photo.Key]);
 
   const router = useRouter();
+  const locale = useLocale();
+  const search = route.useSearch();
   const delayedHoverCb = useCallback(() => {
     console.debug("prefetching page for", photo.Key);
-    router.prefetch(`/photo?imagePath=${photo.Key}`);
-  }, [router, photo.Key]);
+    router.preloadRoute({
+      to: "/$locale/photo",
+      params: { locale },
+      search: { imagePath: photo.Key, galleryState: search.displayOptions },
+    });
+  }, [router, photo.Key, search.displayOptions, locale]);
 
   useDelayedHover(hovering, 200, delayedHoverCb);
 
@@ -171,16 +178,19 @@ export function PhotoImg({
 }
 
 function useOpenModal(s3Key: string) {
-  const search = useSearchParams();
-  const router = useRouter();
+  const search = route.useSearch();
+  const navigate = route.useNavigate();
+  const locale = useLocale();
 
   return useCallback(() => {
     if (!s3Key) return;
-    const newSearch = new URLSearchParams(search);
-    newSearch.set("imagePath", s3Key);
 
-    router.push(`/photo?${newSearch.toString()}`);
-  }, [search, s3Key, router]);
+    navigate({
+      to: "/$locale/photo",
+      params: { locale },
+      search: { imagePath: s3Key, galleryState: search.displayOptions },
+    });
+  }, [search, s3Key, locale, navigate]);
 }
 
 function PhotoDisplayError({ s3Key }: { s3Key: string }) {

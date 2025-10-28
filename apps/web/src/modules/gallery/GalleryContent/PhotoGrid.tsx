@@ -15,7 +15,7 @@ import {
   showingPhotosAtom,
 } from "../galleryStore";
 import { PhotoItem } from "./PhotoItem/PhotoItem";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 
 export function PhotoGrid() {

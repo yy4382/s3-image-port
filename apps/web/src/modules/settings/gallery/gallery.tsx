@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations, useLocale } from "use-intl";
 import { ExternalLink } from "lucide-react";
 import { gallerySettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
@@ -30,7 +30,7 @@ export function GallerySettings() {
               locale === "zh"
                 ? "/zh/guide/settings-reference#gallery-settings"
                 : "/guide/settings-reference#gallery-settings",
-              process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+              import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
                 "https://docs.imageport.app",
             ).toString()}
             target="_blank"

@@ -14,7 +14,7 @@ import {
   timeRangesGetter,
   type DisplayOptions,
 } from "./displayControlStore";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 const TIME_RANGES = timeRangesGetter();
 

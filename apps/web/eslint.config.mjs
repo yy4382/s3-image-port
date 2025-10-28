@@ -1,19 +1,24 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import js from "@eslint/js";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import react from "eslint-plugin-react-x";
+import tseslint from "typescript-eslint";
+import { defineConfig, globalIgnores } from "eslint/config";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-  ...compat.config({
-    extends: ["next/core-web-vitals", "next/typescript"],
+export default defineConfig([
+  globalIgnores(["dist", "coverage", ".tanstack"]),
+  {
+    files: ["**/*.{ts,tsx}"],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat["recommended-latest"],
+      react.configs.recommended,
+      reactRefresh.configs.vite,
+    ],
     rules: {
+      "react-x/no-use-context": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -21,26 +26,10 @@ const eslintConfig = [
           varsIgnorePattern: "^_",
         },
       ],
-      "@next/next/no-img-element": "off",
-      "no-restricted-imports": [
-        "error",
-        {
-          name: "next/link",
-          message: "Please import from `@/i18n/navigation` instead.",
-        },
-        {
-          name: "next/navigation",
-          importNames: [
-            "redirect",
-            "permanentRedirect",
-            "useRouter",
-            "usePathname",
-          ],
-          message: "Please import from `@/i18n/navigation` instead.",
-        },
-      ],
     },
-  }),
-];
-
-export default eslintConfig;
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+  },
+]);

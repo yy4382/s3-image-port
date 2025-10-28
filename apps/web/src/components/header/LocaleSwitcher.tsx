@@ -1,7 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { useLocale } from "use-intl";
 import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
 import {
@@ -12,12 +11,12 @@ import {
 } from "../ui/dropdown-menu";
 import { CheckIcon, Globe } from "lucide-react";
 import { localeLocalNames } from "@/i18n/routing";
+import { useNavigate } from "@tanstack/react-router";
 
 export function LocaleSwitcher() {
   const [mounted, setMounted] = useState(false);
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
@@ -28,7 +27,11 @@ export function LocaleSwitcher() {
   }
 
   const handleLocaleChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale });
+    navigate({
+      to: ".",
+      reloadDocument: true,
+      params: { locale: newLocale },
+    });
   };
 
   // 构建语言选项列表

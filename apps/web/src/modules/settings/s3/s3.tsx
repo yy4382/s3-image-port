@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "use-intl";
 import {
   s3SettingsAtom,
   s3SettingsSchema,
@@ -48,8 +48,8 @@ function S3SettingsHookFrom() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="gap-1">
-              <FieldLabel>{t("endpoint")}</FieldLabel>
-              <Input {...field} />
+              <FieldLabel htmlFor="s3-endpoint">{t("endpoint")}</FieldLabel>
+              <Input {...field} id="s3-endpoint" />
               <FieldDescription>{t("endpointDesc")}</FieldDescription>
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -61,8 +61,8 @@ function S3SettingsHookFrom() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid} className="gap-1">
-                <FieldLabel>{t("bucket")}</FieldLabel>
-                <Input {...field} placeholder="my-bucket" />
+                <FieldLabel htmlFor="s3-bucket">{t("bucket")}</FieldLabel>
+                <Input {...field} id="s3-bucket" placeholder="my-bucket" />
                 <FieldDescription>{t("bucketDesc")}</FieldDescription>
                 {fieldState.error && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -73,8 +73,8 @@ function S3SettingsHookFrom() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid} className="gap-1">
-                <FieldLabel>{t("region")}</FieldLabel>
-                <Input {...field} placeholder="us-east-1" />
+                <FieldLabel htmlFor="s3-region">{t("region")}</FieldLabel>
+                <Input {...field} id="s3-region" placeholder="us-east-1" />
                 <FieldDescription>{t("regionDesc")}</FieldDescription>
                 {fieldState.error && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -86,8 +86,8 @@ function S3SettingsHookFrom() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="gap-1">
-              <FieldLabel>{t("accessKey")}</FieldLabel>
-              <PasswordInput {...field} />
+              <FieldLabel htmlFor="s3-access-key">{t("accessKey")}</FieldLabel>
+              <PasswordInput {...field} id="s3-access-key" />
               <FieldDescription>{t("accessKeyDesc")}</FieldDescription>
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -98,8 +98,8 @@ function S3SettingsHookFrom() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="gap-1">
-              <FieldLabel>{t("secretKey")}</FieldLabel>
-              <PasswordInput {...field} />
+              <FieldLabel htmlFor="s3-secret-key">{t("secretKey")}</FieldLabel>
+              <PasswordInput {...field} id="s3-secret-key" />
               <FieldDescription>{t("secretKeyDesc")}</FieldDescription>
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -111,7 +111,9 @@ function S3SettingsHookFrom() {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} orientation="horizontal">
               <FieldContent>
-                <FieldLabel>{t("pathStyle")}</FieldLabel>
+                <FieldLabel htmlFor="s3-path-style">
+                  {t("pathStyle")}
+                </FieldLabel>
                 <FieldDescription>
                   {t.rich("pathStyleDesc", {
                     more: (chunks) => (
@@ -127,6 +129,7 @@ function S3SettingsHookFrom() {
                 </FieldDescription>
               </FieldContent>
               <Switch
+                id="s3-path-style"
                 name={t("pathStyle")}
                 checked={field.value}
                 onCheckedChange={field.onChange}
@@ -140,8 +143,12 @@ function S3SettingsHookFrom() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field className="gap-1" data-invalid={fieldState.invalid}>
-              <FieldLabel>{t("publicUrl")}</FieldLabel>
-              <Input {...field} placeholder="https://example1.com" />
+              <FieldLabel htmlFor="s3-public-url">{t("publicUrl")}</FieldLabel>
+              <Input
+                {...field}
+                id="s3-public-url"
+                placeholder="https://example1.com"
+              />
               <FieldDescription>
                 {t.rich("publicUrlDesc", {
                   mono: (chunks) => <span className="font-mono">{chunks}</span>,
@@ -151,7 +158,7 @@ function S3SettingsHookFrom() {
                         locale === "zh"
                           ? "/zh/guide/getting-started#public-url"
                           : "/guide/getting-started#public-url",
-                        process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                        import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
                           "https://docs.imageport.app",
                       ).toString()}
                       target="_blank"
@@ -184,7 +191,7 @@ function S3Settings() {
               locale === "zh"
                 ? "/zh/guide/settings-reference#s3-settings"
                 : "/guide/settings-reference#s3-settings",
-              process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+              import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
                 "https://docs.imageport.app",
             ).toString()}
             target="_blank"

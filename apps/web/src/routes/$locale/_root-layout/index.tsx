@@ -1,27 +1,25 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import type { Metadata } from "next";
+import { createFileRoute } from "@tanstack/react-router";
 import { GitHubStarsButton } from "@/components/animate-ui/buttons/github-stars";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "use-intl";
+import { Link } from "@tanstack/react-router";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { createHeadTags } from "../../../lib/seo";
 
-export const metadata: Metadata = {
-  title: "Home - S3 Image Port",
-  description:
-    "Welcome to S3 Image Port. Upload, manage, and view your S3 images with ease.",
-};
+export const Route = createFileRoute("/$locale/_root-layout/")({
+  head: ({ params }) =>
+    createHeadTags({
+      path: `/${params.locale}`,
+      description: "Manage and view your S3 images.",
+      locale: params.locale,
+    }),
+  component: RouteComponent,
+});
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  const t = await getTranslations("index");
-
+function RouteComponent() {
+  const t = useTranslations("index");
+  const locale = useLocale();
   return (
     <div className="p-2 flex items-center justify-center flex-1">
       <div className="max-w-4xl lg:max-w-[60rem] w-full flex flex-grow flex-col justify-center mx-auto h-full">
@@ -45,7 +43,7 @@ export default async function Home({
             </div>
             <div className="flex flex-col gap-2 sm:gap-4 md:pt-6 justify-center items-center">
               <div className="flex gap-2 sm:gap-4 justify-center items-center">
-                <Link href="/settings/s3">
+                <Link to="/$locale/settings" params={{ locale }}>
                   <Button className="hover:scale-105 transition-all duration-300">
                     {t("getStarted")} <ArrowRight size={16} />
                   </Button>
@@ -58,7 +56,7 @@ export default async function Home({
                   target="_blank"
                   href={new URL(
                     locale === "zh" ? "/zh" : "/",
-                    process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                    import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
                       "https://docs.imageport.app",
                   ).toString()}
                 >

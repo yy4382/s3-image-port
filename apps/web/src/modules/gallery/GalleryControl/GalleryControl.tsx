@@ -9,7 +9,7 @@ import McRefresh from "~icons/mingcute/refresh-2-line.jsx";
 import { toast } from "sonner";
 import { DisplayControl } from "./DisplayControl";
 import { Suspense, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { cn } from "@/lib/utils";

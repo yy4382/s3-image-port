@@ -7,11 +7,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { buttonVariants } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { Link } from "@tanstack/react-router";
+import { useTranslations, useLocale } from "use-intl";
 
 export function InvalidS3Dialog() {
   const t = useTranslations("settings.s3Invalid");
+  const locale = useLocale();
   return (
     <Dialog open={true}>
       <DialogContent showClose={false}>
@@ -23,7 +24,8 @@ export function InvalidS3Dialog() {
         </div>
         <DialogFooter>
           <Link
-            href="/settings/s3"
+            to="/$locale/settings/s3"
+            params={{ locale }}
             className={buttonVariants({ variant: "default" })}
           >
             {t("editLink")}

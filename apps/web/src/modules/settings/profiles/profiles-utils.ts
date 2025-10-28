@@ -5,8 +5,8 @@ import type { Options, Options as Profile } from "../settings-store";
 import { migrateFromV1, optionsAtom, optionsSchema } from "../settings-store";
 import { toast } from "sonner";
 import { useCallback } from "react";
-import { useTranslations } from "next-intl";
-import z from "zod/v4";
+import { useTranslations } from "use-intl";
+import { z } from "zod";
 
 export const CURRENT_PROFILE = "CURRENT";
 

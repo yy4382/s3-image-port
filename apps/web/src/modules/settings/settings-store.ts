@@ -2,7 +2,7 @@ import { atomWithStorageMigration } from "@/lib/atoms/atomWithStorageMigration";
 import { defaultKeyTemplate } from "@/lib/utils/generateKey";
 import { focusAtom } from "jotai-optics";
 import { keyTemplateSchema } from "./upload/KeyTemplate";
-import z from "zod/v4";
+import { z } from "zod";
 import { compressOptionSchema } from "@/lib/utils/imageCompress";
 import { atom } from "jotai";
 

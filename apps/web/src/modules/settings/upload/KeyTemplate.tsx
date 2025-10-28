@@ -1,6 +1,6 @@
 import { SetStateAction, useEffect } from "react";
-import * as z from "zod/v4";
-import { useTranslations } from "next-intl";
+import { z } from "zod/v4";
+import { useTranslations } from "use-intl";
 import { Input } from "@/components/ui/input";
 import { motion } from "motion/react";
 import { defaultKeyTemplate } from "@/lib/utils/generateKey";
@@ -135,7 +135,7 @@ export function KeyTemplateForm({ lens }: { lens: Lens<string> }) {
             <a
               href={new URL(
                 "/zh/guide/settings-reference#key-template",
-                process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+                import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
                   "https://docs.imageport.app",
               ).toString()}
               target="_blank"

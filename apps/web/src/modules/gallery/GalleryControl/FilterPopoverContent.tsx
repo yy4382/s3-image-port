@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { useAtomsDebugValue } from "jotai-devtools";
 import { Label } from "@/components/ui/label";
 import { Check, ChevronsUpDown, XIcon } from "lucide-react";
 import { availablePrefixesAtom } from "../galleryStore";
@@ -21,7 +20,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 import { Input } from "@/components/ui/input";
 
 interface FilterPopoverContentProps {
@@ -103,7 +102,6 @@ function PrefixSelector({
   const setValue = (value: string | undefined) => {
     handleUpdate({ prefix: value });
   };
-  useAtomsDebugValue();
   const t = useTranslations("gallery.filter");
 
   const currentPrefix = currentDisplayOptions.prefix;

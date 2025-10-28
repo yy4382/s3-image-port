@@ -7,7 +7,7 @@ import {
   sub,
 } from "date-fns";
 import { atom } from "jotai";
-import z from "zod/v4";
+import { z } from "zod";
 import deepEqual from "deep-equal";
 
 const OptDefault = {

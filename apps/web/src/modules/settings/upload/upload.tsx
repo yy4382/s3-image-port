@@ -5,7 +5,7 @@ import { KeyTemplateIndependent } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations, useLocale } from "use-intl";
 import { ExternalLink } from "lucide-react";
 
 function UploadSettings() {
@@ -22,7 +22,7 @@ function UploadSettings() {
               locale === "zh"
                 ? "/zh/guide/settings-reference#upload-settings"
                 : "/guide/settings-reference#upload-settings",
-              process.env.NEXT_PUBLIC_DOCS_ORIGIN ??
+              import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
                 "https://docs.imageport.app",
             ).toString()}
             target="_blank"

@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"; // Import Switch
 import type { CompressOption } from "@/lib/utils/imageCompress"; // Adjust the import path as needed
-import { useTranslations } from "next-intl";
+import { useTranslations } from "use-intl";
 
 const PROCESS_OPTION_DEFAULTS = {
   jpeg: { quality: 75 },

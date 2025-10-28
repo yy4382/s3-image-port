@@ -1,5 +1,5 @@
 import mime from "mime";
-import * as z from "zod/v4";
+import { z } from "zod/v4";
 
 export const compressOptionSchema = z.union([
   z.object({

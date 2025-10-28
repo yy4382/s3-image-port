@@ -166,15 +166,17 @@ function GitHubStarsButton({
       )}
     >
       {segments.map((segment, index) => (
+        // eslint-disable-next-line react-x/no-array-index-key
         <React.Fragment key={index}>
           {Array.from(segment).map((digit, digitIndex) => (
+            // eslint-disable-next-line react-x/no-array-index-key
             <SlidingNumber key={`${index}-${digitIndex}`} number={+digit} />
           ))}
           {index < segments.length - 1 && <span>,</span>}
         </React.Fragment>
       ))}
 
-      {formatted && unit && <span className="leading-[1]">{unit}</span>}
+      {formatted && unit && <span className="leading-none">{unit}</span>}
     </span>
   );
 
@@ -244,6 +246,7 @@ function GitHubStarsButton({
                   />
                   {[...Array(6)].map((_, i) => (
                     <motion.div
+                      // eslint-disable-next-line react-x/no-array-index-key
                       key={i}
                       className="absolute w-1 h-1 rounded-full bg-yellow-500"
                       initial={animations.particle(i).initial}
