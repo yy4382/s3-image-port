@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/animate-ui/radix/switch";
-import { ClientOnly } from "@tanstack/react-router";
+import { ClientOnly, Link } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function S3SettingsHookFrom() {
@@ -153,19 +153,15 @@ function S3SettingsHookFrom() {
                 {t.rich("publicUrlDesc", {
                   mono: (chunks) => <span className="font-mono">{chunks}</span>,
                   more: (chunks) => (
-                    <a
-                      href={new URL(
-                        locale === "zh"
-                          ? "/zh/guide/getting-started#public-url"
-                          : "/guide/getting-started#public-url",
-                        import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
-                          "https://docs.imageport.app",
-                      ).toString()}
+                    <Link
+                      to="/$locale/docs/$"
+                      params={{ locale, _splat: "getting-started" }}
+                      hash="public-url"
                       target="_blank"
                       className="hover:text-primary underline-offset-2 underline"
                     >
                       {chunks}
-                    </a>
+                    </Link>
                   ),
                 })}
               </FieldDescription>
@@ -186,21 +182,18 @@ function S3Settings() {
       <div className="grid gap-6">
         <div className="flex items-center gap-2 justify-between">
           <h2 className="text-2xl font-bold">{t("title")}</h2>
-          <a
-            href={new URL(
-              locale === "zh"
-                ? "/zh/guide/settings-reference#s3-settings"
-                : "/guide/settings-reference#s3-settings",
-              import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
-                "https://docs.imageport.app",
-            ).toString()}
+          <Link
+            from="/$locale"
+            to="/$locale/docs/$"
+            params={{ locale, _splat: "settings-reference" }}
+            hash="s3-settings"
             target="_blank"
             className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             title="View documentation"
           >
             <span className="underline underline-offset-1">docs</span>
             <ExternalLink className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
         <ClientOnly fallback={<Skeleton className="w-full h-[580px]" />}>
           <S3SettingsHookFrom />

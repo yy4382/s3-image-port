@@ -6,7 +6,11 @@ import { routeTree } from "./routeTree.gen";
 
 // Create a new router instance
 export function getRouter() {
-  const router = createRouter({ routeTree });
+  const router = createRouter({
+    routeTree,
+    scrollRestoration: true,
+    defaultHashScrollIntoView: { behavior: "smooth" },
+  });
   return router;
 }
 

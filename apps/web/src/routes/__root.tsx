@@ -16,16 +16,16 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
 
 export const Route = createRootRoute({
-  head: () =>
-    produce(
-      createHeadTags({
-        includeFavicon: true,
-      }),
-      (draft) => {
-        draft.links.push({ rel: "stylesheet", href: globalsCss });
-      },
-    ),
   component: RootComponent,
+  head: () =>
+    produce(createHeadTags({ includeFavicon: true }), (draft) => {
+      draft.links.push({ rel: "stylesheet", href: globalsCss });
+      draft.meta.push({
+        name: "viewport",
+        content: "width=device-width, initial-scale=1.0",
+      });
+      draft.meta.push({ name: "charset", content: "utf-8" });
+    }),
 });
 
 function RootComponent() {

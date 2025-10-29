@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/field";
 import { Switch } from "@/components/animate-ui/radix/switch";
 import { useAtom } from "jotai";
+import { Link } from "@tanstack/react-router";
 
 const autoRefreshAtom = focusAtom(gallerySettingsAtom, (optic) =>
   optic.prop("autoRefresh"),
@@ -25,21 +26,18 @@ export function GallerySettings() {
       <div className="grid gap-6">
         <div className="flex items-center gap-2 justify-between">
           <h2 className="text-2xl font-bold">{t("title")}</h2>
-          <a
-            href={new URL(
-              locale === "zh"
-                ? "/zh/guide/settings-reference#gallery-settings"
-                : "/guide/settings-reference#gallery-settings",
-              import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
-                "https://docs.imageport.app",
-            ).toString()}
+          <Link
+            from="/$locale"
+            to="/$locale/docs/$"
+            params={{ locale, _splat: "settings-reference" }}
+            hash="gallery-settings"
             target="_blank"
             className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             title="View documentation"
           >
             <span className="underline underline-offset-1">docs</span>
             <ExternalLink className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
         {/* <FormEntrySwitchAtom
           title={t("autoRefresh")}

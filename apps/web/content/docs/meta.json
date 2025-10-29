@@ -1,0 +1,15 @@
+{
+  "title": "Docs",
+
+  "pages": [
+    "---Introduction---",
+    "index",
+    "getting-started",
+    "---Guides---",
+    "for-cloudflare-r2",
+    "use-webp-cloud-services",
+    "---Manuals---",
+    "settings-reference",
+    "migrate-from-v1"
+  ]
+}

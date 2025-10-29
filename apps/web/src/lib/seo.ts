@@ -10,10 +10,9 @@ const DEFAULT_DESCRIPTION = "Manage your images in S3";
 const OG_IMAGE_PATH = "/og.png";
 const OG_IMAGE_ALT = "S3 Image Port Site Preview";
 
-type HeadOptions = {
+export type HeadOptions = {
   title?: string;
   description?: string;
-  path?: string;
   locale?: string;
   includeFavicon?: boolean;
 };
@@ -21,11 +20,9 @@ type HeadOptions = {
 export function createHeadTags({
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
-  path = "/",
   locale,
   includeFavicon = false,
 }: HeadOptions = {}) {
-  const canonical = new URL(path, SITE_URL).toString();
   const imageUrl = new URL(OG_IMAGE_PATH, SITE_URL).toString();
 
   const meta: Array<
@@ -36,7 +33,6 @@ export function createHeadTags({
     { property: "og:type", content: "website" },
     { property: "og:title", content: title },
     { property: "og:description", content: description },
-    { property: "og:url", content: canonical },
     { property: "og:image", content: imageUrl },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
@@ -53,10 +49,7 @@ export function createHeadTags({
 
   const links: Array<
     DetailedHTMLProps<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-  > = [
-    { rel: "canonical", href: canonical },
-    ...(includeFavicon ? [{ rel: "icon", href: "/favicon.svg" }] : []),
-  ];
+  > = [...(includeFavicon ? [{ rel: "icon", href: "/favicon.svg" }] : [])];
 
   return {
     meta,

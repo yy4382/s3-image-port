@@ -7,6 +7,7 @@ import McSettings from "~icons/mingcute/settings-3-fill";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { useLocale, useTranslations } from "use-intl";
 import { Link } from "@tanstack/react-router";
+import { BookIcon } from "lucide-react";
 
 // Placeholder hooks and components - replace with actual implementations
 // You'll need libraries for color mode, breakpoints, and UI components (like Popover, Button, Icon)
@@ -70,6 +71,15 @@ const Header: React.FC = () => {
         <div className="flex-1 flex justify-end items-center md:gap-2 gap-0">
           <LocaleSwitcher />
           <ThemeSwitcher />
+
+          <Link
+            to="/$locale/docs/$"
+            params={{ locale }}
+            className={buttonVariants({ size: "icon", variant: "ghost" })}
+            aria-label="Documentation"
+          >
+            <BookIcon />
+          </Link>
 
           <a
             target="_blank"

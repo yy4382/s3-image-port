@@ -7,6 +7,7 @@ import { uploadSettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
 import { useTranslations, useLocale } from "use-intl";
 import { ExternalLink } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 function UploadSettings() {
   const t = useTranslations("settings");
@@ -17,21 +18,18 @@ function UploadSettings() {
       <div className="grid gap-6">
         <div className="flex items-center gap-2 justify-between">
           <h2 className="text-2xl font-bold">{t("upload")}</h2>
-          <a
-            href={new URL(
-              locale === "zh"
-                ? "/zh/guide/settings-reference#upload-settings"
-                : "/guide/settings-reference#upload-settings",
-              import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
-                "https://docs.imageport.app",
-            ).toString()}
+          <Link
+            from="/$locale"
+            to="/$locale/docs/$"
+            params={({ locale }) => ({ locale, _splat: "settings-reference" })}
+            hash="upload-settings"
             target="_blank"
             className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             title="View documentation"
           >
             <span className="underline underline-offset-1">docs</span>
             <ExternalLink className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
         <KeyTemplateWrapper />
         <CompressOptionWrapper />

@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as LocalePhotoRouteImport } from './routes/$locale/photo'
 import { Route as LocaleRootLayoutRouteRouteImport } from './routes/$locale/_root-layout/route'
+import { Route as LocaleDocsRouteRouteImport } from './routes/$locale/_docs/route'
 import { Route as LocaleRootLayoutIndexRouteImport } from './routes/$locale/_root-layout/index'
 import { Route as LocaleRootLayoutUploadRouteImport } from './routes/$locale/_root-layout/upload'
 import { Route as LocaleRootLayoutGalleryRouteImport } from './routes/$locale/_root-layout/gallery'
@@ -22,6 +24,7 @@ import { Route as LocaleRootLayoutSettingsUploadRouteImport } from './routes/$lo
 import { Route as LocaleRootLayoutSettingsS3RouteImport } from './routes/$locale/_root-layout/settings/s3'
 import { Route as LocaleRootLayoutSettingsProfileRouteImport } from './routes/$locale/_root-layout/settings/profile'
 import { Route as LocaleRootLayoutSettingsGalleryRouteImport } from './routes/$locale/_root-layout/settings/gallery'
+import { Route as LocaleDocsDocsSplatRouteImport } from './routes/$locale/_docs/docs/$'
 
 const LocaleRouteRoute = LocaleRouteRouteImport.update({
   id: '/$locale',
@@ -33,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSearchRoute = ApiSearchRouteImport.update({
+  id: '/api/search',
+  path: '/api/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LocalePhotoRoute = LocalePhotoRouteImport.update({
   id: '/photo',
   path: '/photo',
@@ -40,6 +48,10 @@ const LocalePhotoRoute = LocalePhotoRouteImport.update({
 } as any)
 const LocaleRootLayoutRouteRoute = LocaleRootLayoutRouteRouteImport.update({
   id: '/_root-layout',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleDocsRouteRoute = LocaleDocsRouteRouteImport.update({
+  id: '/_docs',
   getParentRoute: () => LocaleRouteRoute,
 } as any)
 const LocaleRootLayoutIndexRoute = LocaleRootLayoutIndexRouteImport.update({
@@ -93,15 +105,22 @@ const LocaleRootLayoutSettingsGalleryRoute =
     path: '/gallery',
     getParentRoute: () => LocaleRootLayoutSettingsRouteRoute,
   } as any)
+const LocaleDocsDocsSplatRoute = LocaleDocsDocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
+  getParentRoute: () => LocaleDocsRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRootLayoutRouteRouteWithChildren
   '/$locale/photo': typeof LocalePhotoRoute
+  '/api/search': typeof ApiSearchRoute
   '/$locale/settings': typeof LocaleRootLayoutSettingsRouteRouteWithChildren
   '/$locale/gallery': typeof LocaleRootLayoutGalleryRoute
   '/$locale/upload': typeof LocaleRootLayoutUploadRoute
   '/$locale/': typeof LocaleRootLayoutIndexRoute
+  '/$locale/docs/$': typeof LocaleDocsDocsSplatRoute
   '/$locale/settings/gallery': typeof LocaleRootLayoutSettingsGalleryRoute
   '/$locale/settings/profile': typeof LocaleRootLayoutSettingsProfileRoute
   '/$locale/settings/s3': typeof LocaleRootLayoutSettingsS3Route
@@ -112,8 +131,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRootLayoutIndexRoute
   '/$locale/photo': typeof LocalePhotoRoute
+  '/api/search': typeof ApiSearchRoute
   '/$locale/gallery': typeof LocaleRootLayoutGalleryRoute
   '/$locale/upload': typeof LocaleRootLayoutUploadRoute
+  '/$locale/docs/$': typeof LocaleDocsDocsSplatRoute
   '/$locale/settings/gallery': typeof LocaleRootLayoutSettingsGalleryRoute
   '/$locale/settings/profile': typeof LocaleRootLayoutSettingsProfileRoute
   '/$locale/settings/s3': typeof LocaleRootLayoutSettingsS3Route
@@ -124,12 +145,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRouteRouteWithChildren
+  '/$locale/_docs': typeof LocaleDocsRouteRouteWithChildren
   '/$locale/_root-layout': typeof LocaleRootLayoutRouteRouteWithChildren
   '/$locale/photo': typeof LocalePhotoRoute
+  '/api/search': typeof ApiSearchRoute
   '/$locale/_root-layout/settings': typeof LocaleRootLayoutSettingsRouteRouteWithChildren
   '/$locale/_root-layout/gallery': typeof LocaleRootLayoutGalleryRoute
   '/$locale/_root-layout/upload': typeof LocaleRootLayoutUploadRoute
   '/$locale/_root-layout/': typeof LocaleRootLayoutIndexRoute
+  '/$locale/_docs/docs/$': typeof LocaleDocsDocsSplatRoute
   '/$locale/_root-layout/settings/gallery': typeof LocaleRootLayoutSettingsGalleryRoute
   '/$locale/_root-layout/settings/profile': typeof LocaleRootLayoutSettingsProfileRoute
   '/$locale/_root-layout/settings/s3': typeof LocaleRootLayoutSettingsS3Route
@@ -142,10 +166,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$locale'
     | '/$locale/photo'
+    | '/api/search'
     | '/$locale/settings'
     | '/$locale/gallery'
     | '/$locale/upload'
     | '/$locale/'
+    | '/$locale/docs/$'
     | '/$locale/settings/gallery'
     | '/$locale/settings/profile'
     | '/$locale/settings/s3'
@@ -156,8 +182,10 @@ export interface FileRouteTypes {
     | '/'
     | '/$locale'
     | '/$locale/photo'
+    | '/api/search'
     | '/$locale/gallery'
     | '/$locale/upload'
+    | '/$locale/docs/$'
     | '/$locale/settings/gallery'
     | '/$locale/settings/profile'
     | '/$locale/settings/s3'
@@ -167,12 +195,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$locale'
+    | '/$locale/_docs'
     | '/$locale/_root-layout'
     | '/$locale/photo'
+    | '/api/search'
     | '/$locale/_root-layout/settings'
     | '/$locale/_root-layout/gallery'
     | '/$locale/_root-layout/upload'
     | '/$locale/_root-layout/'
+    | '/$locale/_docs/docs/$'
     | '/$locale/_root-layout/settings/gallery'
     | '/$locale/_root-layout/settings/profile'
     | '/$locale/_root-layout/settings/s3'
@@ -183,6 +214,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
+  ApiSearchRoute: typeof ApiSearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -201,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/search': {
+      id: '/api/search'
+      path: '/api/search'
+      fullPath: '/api/search'
+      preLoaderRoute: typeof ApiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$locale/photo': {
       id: '/$locale/photo'
       path: '/photo'
@@ -213,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/$locale'
       preLoaderRoute: typeof LocaleRootLayoutRouteRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/_docs': {
+      id: '/$locale/_docs'
+      path: ''
+      fullPath: '/$locale'
+      preLoaderRoute: typeof LocaleDocsRouteRouteImport
       parentRoute: typeof LocaleRouteRoute
     }
     '/$locale/_root-layout/': {
@@ -278,8 +324,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocaleRootLayoutSettingsGalleryRouteImport
       parentRoute: typeof LocaleRootLayoutSettingsRouteRoute
     }
+    '/$locale/_docs/docs/$': {
+      id: '/$locale/_docs/docs/$'
+      path: '/docs/$'
+      fullPath: '/$locale/docs/$'
+      preLoaderRoute: typeof LocaleDocsDocsSplatRouteImport
+      parentRoute: typeof LocaleDocsRouteRoute
+    }
   }
 }
+
+interface LocaleDocsRouteRouteChildren {
+  LocaleDocsDocsSplatRoute: typeof LocaleDocsDocsSplatRoute
+}
+
+const LocaleDocsRouteRouteChildren: LocaleDocsRouteRouteChildren = {
+  LocaleDocsDocsSplatRoute: LocaleDocsDocsSplatRoute,
+}
+
+const LocaleDocsRouteRouteWithChildren = LocaleDocsRouteRoute._addFileChildren(
+  LocaleDocsRouteRouteChildren,
+)
 
 interface LocaleRootLayoutSettingsRouteRouteChildren {
   LocaleRootLayoutSettingsGalleryRoute: typeof LocaleRootLayoutSettingsGalleryRoute
@@ -324,11 +389,13 @@ const LocaleRootLayoutRouteRouteWithChildren =
   )
 
 interface LocaleRouteRouteChildren {
+  LocaleDocsRouteRoute: typeof LocaleDocsRouteRouteWithChildren
   LocaleRootLayoutRouteRoute: typeof LocaleRootLayoutRouteRouteWithChildren
   LocalePhotoRoute: typeof LocalePhotoRoute
 }
 
 const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
+  LocaleDocsRouteRoute: LocaleDocsRouteRouteWithChildren,
   LocaleRootLayoutRouteRoute: LocaleRootLayoutRouteRouteWithChildren,
   LocalePhotoRoute: LocalePhotoRoute,
 }
@@ -340,6 +407,7 @@ const LocaleRouteRouteWithChildren = LocaleRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LocaleRouteRoute: LocaleRouteRouteWithChildren,
+  ApiSearchRoute: ApiSearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

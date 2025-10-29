@@ -10,7 +10,6 @@ import { createHeadTags } from "../../../lib/seo";
 export const Route = createFileRoute("/$locale/_root-layout/")({
   head: ({ params }) =>
     createHeadTags({
-      path: `/${params.locale}`,
       description: "Manage and view your S3 images.",
       locale: params.locale,
     }),
@@ -48,20 +47,17 @@ function RouteComponent() {
                     {t("getStarted")} <ArrowRight size={16} />
                   </Button>
                 </Link>
-                <a
+                <Link
                   className={cn(
                     buttonVariants({ variant: "secondary" }),
                     "hover:scale-105 transition-all duration-300",
                   )}
-                  target="_blank"
-                  href={new URL(
-                    locale === "zh" ? "/zh" : "/",
-                    import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
-                      "https://docs.imageport.app",
-                  ).toString()}
+                  from="/$locale"
+                  to="/$locale/docs/$"
+                  params={({ locale }) => ({ locale })}
                 >
                   {t("readDocs")}
-                </a>
+                </Link>
               </div>
               <GitHubStarsButton username="yy4382" repo="s3-image-port" />
             </div>

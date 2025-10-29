@@ -38,3 +38,5 @@ coverage/
 out/
 *.tsbuildinfo
 next-env.d.ts
+
+.source

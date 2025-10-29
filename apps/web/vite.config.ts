@@ -6,11 +6,13 @@ import tailwindcss from "@tailwindcss/vite";
 import Icons from "unplugin-icons/vite";
 import analyzer from "vite-bundle-analyzer";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import mdx from "fumadocs-mdx/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     Icons({ compiler: "jsx", jsx: "react" }),
+    mdx(await import("./source.config")),
     tsconfigPaths(),
     tailwindcss(),
     tanstackStart({
@@ -24,18 +26,17 @@ export default defineConfig({
       },
       prerender: {
         filter: ({ path }) => {
-          return ["/en", "/zh", "/"].includes(path);
+          if (["/en", "/zh", "/"].includes(path)) return true;
+          if (path.includes("/docs") && !path.includes("/#")) {
+            return true;
+          }
+          return false;
         },
       },
       pages: [
-        {
-          path: "/en",
-          prerender: { enabled: true },
-        },
-        {
-          path: "/zh",
-          prerender: { enabled: true },
-        },
+        { path: "/en", prerender: { enabled: true } },
+        { path: "/zh", prerender: { enabled: true } },
+        { path: "/api/search", prerender: { enabled: true } },
       ],
     }),
     react({

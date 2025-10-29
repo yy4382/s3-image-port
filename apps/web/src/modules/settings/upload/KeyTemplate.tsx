@@ -14,6 +14,7 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
+import { Link } from "@tanstack/react-router";
 
 export const keyTemplateSchema = z
   .string()
@@ -132,17 +133,19 @@ export function KeyTemplateForm({ lens }: { lens: Lens<string> }) {
       <FieldDescription>
         {t.rich("description", {
           more: (chunks) => (
-            <a
-              href={new URL(
-                "/zh/guide/settings-reference#key-template",
-                import.meta.env.NEXT_PUBLIC_DOCS_ORIGIN ??
-                  "https://docs.imageport.app",
-              ).toString()}
+            <Link
+              from="/$locale"
+              to="/$locale/docs/$"
+              params={({ locale }) => ({
+                locale,
+                _splat: "settings-reference",
+              })}
+              hash="key-template"
               target="_blank"
               className="underline underline-offset-1"
             >
               {chunks}
-            </a>
+            </Link>
           ),
         })}
       </FieldDescription>

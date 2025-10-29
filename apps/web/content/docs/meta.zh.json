@@ -1,0 +1,14 @@
+{
+  "title": "文档",
+  "pages": [
+    "---介绍---",
+    "index",
+    "getting-started",
+    "---指南---",
+    "for-cloudflare-r2",
+    "use-webp-cloud-services",
+    "---手册---",
+    "settings-reference",
+    "migrate-from-v1"
+  ]
+}
