@@ -26,13 +26,7 @@ import {
   type PrimitiveAtom,
 } from "jotai";
 import { splitAtom } from "jotai/utils";
-import {
-  SetStateAction,
-  startTransition,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { startTransition, useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { monotonicFactory } from "ulid";
@@ -201,17 +195,13 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
     [setFile],
   );
   const updateTemplate = useCallback(
-    (templateAction: SetStateAction<string>) => {
-      const template =
-        typeof templateAction === "function"
-          ? templateAction(file.key.template)
-          : templateAction;
+    (template: string) => {
       setFile((prev) => ({
         ...prev,
         key: prev.key.updateTemplate(template),
       }));
     },
-    [setFile, file.key.template],
+    [setFile],
   );
   return {
     file,

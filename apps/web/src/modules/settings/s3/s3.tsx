@@ -1,172 +1,150 @@
 "use client";
 
 import { useLocale, useTranslations } from "use-intl";
-import {
-  s3SettingsAtom,
-  s3SettingsSchema,
-  type S3Options,
-} from "../settings-store";
+import { s3SettingsAtom, s3SettingsSchema } from "../settings-store";
 import { S3Validation } from "./s3-validation";
 import { ExternalLink } from "lucide-react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   Field,
   FieldContent,
   FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/animate-ui/radix/switch";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAppForm } from "@/components/misc/field/field-context";
+import { startTransition } from "react";
 
-function S3SettingsHookFrom() {
+function S3SettingsTsForm() {
   const t = useTranslations("settings.s3Settings");
-  const locale = useLocale();
   const defaultValues = useAtomValue(s3SettingsAtom);
   const setValues = useSetAtom(s3SettingsAtom);
-  const form = useForm<S3Options>({
-    resolver: zodResolver(s3SettingsSchema),
-    values: defaultValues,
-    mode: "onTouched",
+  const form = useAppForm({
+    defaultValues,
+    validators: {
+      onChange: s3SettingsSchema,
+    },
+    listeners: {
+      onChange: ({ formApi }) => {
+        startTransition(() => {
+          setValues(formApi.state.values);
+        });
+      },
+    },
   });
-
-  const onChange: SubmitHandler<S3Options> = (data) => {
-    setValues(data);
-  };
-
   return (
-    <form onChange={form.handleSubmit(onChange)}>
+    <form>
       <FieldGroup className="gap-4">
-        <Controller
+        <form.AppField
           name="endpoint"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="gap-1">
-              <FieldLabel htmlFor="s3-endpoint">{t("endpoint")}</FieldLabel>
-              <Input {...field} id="s3-endpoint" />
-              <FieldDescription>{t("endpointDesc")}</FieldDescription>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          children={(field) => (
+            <field.TextField
+              label={t("endpoint")}
+              description={t("endpointDesc")}
+            />
           )}
         />
         <div className="grid gap-2 grid-cols-2 items-start">
-          <Controller
+          <form.AppField
             name="bucket"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="gap-1">
-                <FieldLabel htmlFor="s3-bucket">{t("bucket")}</FieldLabel>
-                <Input {...field} id="s3-bucket" placeholder="my-bucket" />
-                <FieldDescription>{t("bucketDesc")}</FieldDescription>
-                {fieldState.error && <FieldError errors={[fieldState.error]} />}
-              </Field>
+            children={(field) => (
+              <field.TextField
+                label={t("bucket")}
+                description={t("bucketDesc")}
+              />
             )}
           />
-          <Controller
+          <form.AppField
             name="region"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="gap-1">
-                <FieldLabel htmlFor="s3-region">{t("region")}</FieldLabel>
-                <Input {...field} id="s3-region" placeholder="us-east-1" />
-                <FieldDescription>{t("regionDesc")}</FieldDescription>
-                {fieldState.error && <FieldError errors={[fieldState.error]} />}
-              </Field>
+            children={(field) => (
+              <field.TextField
+                label={t("region")}
+                description={t("regionDesc")}
+              />
             )}
           />
         </div>
-        <Controller
+        <form.AppField
           name="accKeyId"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="gap-1">
-              <FieldLabel htmlFor="s3-access-key">{t("accessKey")}</FieldLabel>
-              <PasswordInput {...field} id="s3-access-key" />
-              <FieldDescription>{t("accessKeyDesc")}</FieldDescription>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          children={(field) => (
+            <field.PasswordField
+              label={t("accessKey")}
+              description={t("accessKeyDesc")}
+            />
           )}
         />
-        <Controller
+        <form.AppField
           name="secretAccKey"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="gap-1">
-              <FieldLabel htmlFor="s3-secret-key">{t("secretKey")}</FieldLabel>
-              <PasswordInput {...field} id="s3-secret-key" />
-              <FieldDescription>{t("secretKeyDesc")}</FieldDescription>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          children={(field) => (
+            <field.PasswordField
+              label={t("secretKey")}
+              description={t("secretKeyDesc")}
+            />
           )}
         />
-        <Controller
+        <form.Field
           name="forcePathStyle"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} orientation="horizontal">
-              <FieldContent>
-                <FieldLabel htmlFor="s3-path-style">
-                  {t("pathStyle")}
-                </FieldLabel>
-                <FieldDescription>
-                  {t.rich("pathStyleDesc", {
-                    more: (chunks) => (
-                      <a
-                        href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html"
-                        target="_blank"
-                        className="hover:text-primary underline-offset-2 underline"
-                      >
-                        {chunks}
-                      </a>
-                    ),
-                  })}
-                </FieldDescription>
-              </FieldContent>
-              <Switch
-                id="s3-path-style"
-                name={t("pathStyle")}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                aria-invalid={fieldState.invalid}
-              />
-            </Field>
-          )}
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid} orientation="horizontal">
+                <FieldContent>
+                  <FieldLabel htmlFor="s3-path-style">
+                    {t("pathStyle")}
+                  </FieldLabel>
+                  <FieldDescription>
+                    {t.rich("pathStyleDesc", {
+                      more: (chunks) => (
+                        <a
+                          href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html"
+                          target="_blank"
+                          className="hover:text-primary underline-offset-2 underline"
+                        >
+                          {chunks}
+                        </a>
+                      ),
+                    })}
+                  </FieldDescription>
+                </FieldContent>
+                <Switch
+                  id="s3-path-style"
+                  name={t("pathStyle")}
+                  checked={field.state.value}
+                  onCheckedChange={field.handleChange}
+                  aria-invalid={isInvalid}
+                />
+              </Field>
+            );
+          }}
         />
-        <Controller
+        <form.AppField
           name="pubUrl"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field className="gap-1" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="s3-public-url">{t("publicUrl")}</FieldLabel>
-              <Input
-                {...field}
-                id="s3-public-url"
-                placeholder="https://example1.com"
-              />
-              <FieldDescription>
-                {t.rich("publicUrlDesc", {
-                  mono: (chunks) => <span className="font-mono">{chunks}</span>,
-                  more: (chunks) => (
-                    <Link
-                      to="/$locale/docs/$"
-                      params={{ locale, _splat: "getting-started" }}
-                      hash="public-url"
-                      target="_blank"
-                      className="hover:text-primary underline-offset-2 underline"
-                    >
-                      {chunks}
-                    </Link>
-                  ),
-                })}
-              </FieldDescription>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          children={(field) => (
+            <field.TextField
+              label={t("publicUrl")}
+              description={t.rich("publicUrlDesc", {
+                mono: (chunks) => <span className="font-mono">{chunks}</span>,
+                more: (chunks) => (
+                  <Link
+                    from="/$locale"
+                    to="/$locale/docs/$"
+                    params={({ locale }) => ({
+                      locale,
+                      _splat: "getting-started",
+                    })}
+                    hash="public-url"
+                    target="_blank"
+                    className="hover:text-primary underline-offset-2 underline"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            />
           )}
         />
       </FieldGroup>
@@ -196,7 +174,7 @@ function S3Settings() {
           </Link>
         </div>
         <ClientOnly fallback={<Skeleton className="w-full h-[580px]" />}>
-          <S3SettingsHookFrom />
+          <S3SettingsTsForm />
         </ClientOnly>
         <S3Validation />
       </div>
