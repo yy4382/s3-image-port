@@ -3,6 +3,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist/client",
   "framework": null,
+  "redirects": [{ "source": "/", "destination": "/en", "permanent": true }],
   "rewrites": [
     {
       "source": "/(.*)",
