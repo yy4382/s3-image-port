@@ -5,13 +5,12 @@ import { KeyTemplateIndependent } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
-import { useTranslations, useLocale } from "use-intl";
+import { useTranslations } from "use-intl";
 import { ExternalLink } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 function UploadSettings() {
   const t = useTranslations("settings");
-  const locale = useLocale();
 
   return (
     <div>

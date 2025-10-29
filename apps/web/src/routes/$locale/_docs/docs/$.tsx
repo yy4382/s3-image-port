@@ -99,6 +99,7 @@ function transformPageTree(tree: PageTree.Folder): PageTree.Folder {
       ...item,
       icon: (
         <span
+          // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
           dangerouslySetInnerHTML={{
             __html: item.icon,
           }}

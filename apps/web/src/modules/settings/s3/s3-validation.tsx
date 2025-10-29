@@ -123,6 +123,7 @@ function DialogContent({
       <div className="space-y-4">
         <p
           className="text-muted-foreground"
+          // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
           dangerouslySetInnerHTML={{
             __html: `✅ ${t("messages.settingsCorrect")}`,
           }}
