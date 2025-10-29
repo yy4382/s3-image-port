@@ -25,6 +25,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1.0",
       });
       draft.meta.push({ name: "charset", content: "utf-8" });
+      draft.links.push({ rel: "sitemap", href: "/sitemap.xml" });
     }),
 });
 

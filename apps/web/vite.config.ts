@@ -17,6 +17,12 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({
       router: { entry: "main.tsx" },
+      sitemap: {
+        enabled: true,
+        host: process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : "https://imageport.app",
+      },
       spa: {
         enabled: true,
         prerender: {
