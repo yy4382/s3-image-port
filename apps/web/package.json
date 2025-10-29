@@ -79,6 +79,7 @@
     "@tailwindcss/vite": "^4.1.16",
     "@tanstack/react-router-devtools": "^1.133.36",
     "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14",
     "@types/deep-equal": "^1.0.4",

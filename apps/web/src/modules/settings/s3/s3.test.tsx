@@ -1,10 +1,24 @@
 import { S3Settings } from "./s3";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render } from "@/../test/utils/render-with-providers";
 import { fireEvent, screen } from "@testing-library/react";
 import { useAtomValue } from "jotai";
 import { s3SettingsAtom } from "../settings-store";
-import userEvent from "@testing-library/user-event";
+import { ReactNode } from "react";
+
+vi.mock(import("@tanstack/react-router"), async (importOriginal) => {
+  const original = await importOriginal();
+  return {
+    ...original,
+    Link: (props) => {
+      return (
+        <a href={props.href ?? props.to?.toString() ?? ""}>
+          {props.children as ReactNode}
+        </a>
+      );
+    },
+  };
+});
 
 const TEST_ID = "s3-settings-test";
 
@@ -43,26 +57,27 @@ describe("S3Settings", () => {
         </>,
       );
       const input = screen.getByLabelText("Endpoint");
-      const user = userEvent.setup();
-      await user.type(input, "htt://111");
-
-      await user.tab();
+      fireEvent.change(input, { target: { value: "https://example.com" } });
+      fireEvent.blur(input);
       expect(input.getAttribute("value")).toEqual("https://example.com");
       expect(getConfigInAtom().endpoint).toEqual("https://example.com");
     });
-    it("warn if not valid", () => {
+    it("warn if not valid", async () => {
       render(
         <>
           <S3Settings />
           <S3SettingsString />
         </>,
       );
-      fireEvent.change(screen.getByLabelText("Endpoint"), {
+      const input = screen.getByLabelText("Endpoint");
+      fireEvent.change(input, {
         target: { value: "not a valid url" },
       });
+      fireEvent.blur(input);
       expect(
-        screen.queryByText("Invalid URL", { exact: false }),
+        await screen.findByText("Invalid URL", { exact: false }),
       ).not.toBeNull();
+
       expect(getConfigInAtom().endpoint).toEqual("not a valid url");
     });
   });

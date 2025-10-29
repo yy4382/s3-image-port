@@ -4,7 +4,7 @@ import en from "@/../messages/en.json";
 import { render } from "@testing-library/react";
 import { Toaster } from "sonner";
 
-const TestProviders = ({ children }: PropsWithChildren) => {
+export const TestProviders = ({ children }: PropsWithChildren) => {
   return (
     <IntlProvider locale="en" messages={en}>
       {children}
