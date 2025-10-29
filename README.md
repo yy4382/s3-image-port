@@ -1,6 +1,6 @@
 # S3 Image Port
 
-[English](README.md) · [简体中文](/apps/docs/README-zh.md)
+[English](README.md) · [简体中文](/README-zh.md)
 
 S3 Image Port is a control panel for managing images in your AWS S3 buckets or any S3-compatible service (like Cloudflare R2, DigitalOcean Spaces, etc.).
 

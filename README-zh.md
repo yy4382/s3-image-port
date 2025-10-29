@@ -1,6 +1,6 @@
 # S3 Image Port
 
-[English](https://docs.imageport.app/) · [简体中文](/docs/README-zh.md)
+[English](README.md) · [简体中文](/README-zh.md)
 
 S3 Image Port 是一个控制面板，用于管理 AWS S3 存储桶或 S3 兼容服务
 （如 Cloudflare R2、DigitalOcean Spaces、腾讯 COS、阿里云 OSS 等）中的图片。
@@ -13,8 +13,6 @@ S3 Image Port 是一个控制面板，用于管理 AWS S3 存储桶或 S3 兼容
 
 本面板本身不存储任何数据，所有数据都存储在您的 S3 存储桶中。因此，您可以随时迁移或删除本面板，而不会丢失任何数据。
 
-![poster](./zh/images/poster-zh.png)
-
 前往 <https://imageport.app>，您只需在 “设置 ”选项卡下输入特定的 S3 设置，即可立即开始使用。
 
 ## 特性和功能
@@ -23,8 +21,6 @@ S3 Image Port 是一个控制面板，用于管理 AWS S3 存储桶或 S3 兼容
 - :framed_picture: **图库**：在图库中浏览和查找所有您已经上传的图片，支持丰富的过滤选项。
 - :link: **复制图片地址**：只需一次点击，就可以复制图片的纯链接或 Markdown 格式链接。
 - :wastebasket: **删除图片**：在管理面板中快速删除您已上传的图片。
-
-![features](./zh/images/features-zh.jpg)
 
 ## S3 Image Port 不是图床
 
