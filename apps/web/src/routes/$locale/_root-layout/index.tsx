@@ -61,10 +61,6 @@ function RouteComponent() {
               </div>
               <GitHubStarsButton username="yy4382" repo="s3-image-port" />
             </div>
-            {/* TODO: Replace this div with your Checkbox component when available */}
-            {/* <div className="pt-2 transition-opacity opacity-40 hover:opacity-80">
-              {t("noLongerShow")}
-            </div> */}
           </div>
         </div>
       </div>

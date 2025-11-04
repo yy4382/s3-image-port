@@ -9,9 +9,7 @@
     "description": "轻松上传、查看和删除 S3 中的图片",
     "compatibility": "同时兼容多种 S3 兼容服务",
     "getStarted": "开始使用",
-    "readDocs": "阅读文档",
-    "viewSource": "查看源码",
-    "noLongerShow": "不再显示此页面"
+    "readDocs": "阅读文档"
   },
   "settings": {
     "title": "设置",
@@ -36,10 +34,13 @@
       }
     },
     "imageCompress": {
-      "enable": "启用图像转换和压缩",
       "targetFormat": "目标格式",
       "selectFormat": "选择格式",
-      "quality": "质量：{quality}"
+      "quality": "质量",
+      "qualityDesc": "压缩图像的质量，1 到 100 之间的整数。",
+      "description": "在上传之前转换或压缩您的图像。",
+      "enableDesc": "如果关闭，图像将按原样上传到 S3。",
+      "title": "图像转换和压缩"
     },
     "s3Settings": {
       "title": "S3",
@@ -56,10 +57,7 @@
       "pathStyle": "使用路径形式 API",
       "pathStyleDesc": "强制使用已经被废弃的<more>路径形式 API</more>。",
       "publicUrl": "公共 URL",
-      "publicUrlDesc": "公共存储桶的访问URL。<mono>public-url/object-path</mono>应该能够访问存储桶中的对象。\n在<more>文档</more>中了解更多。",
-      "validateBtn": "验证 S3 设置",
-      "validSuccess": "S3 设置有效",
-      "validError": "{error}"
+      "publicUrlDesc": "公共存储桶的访问URL。<mono>public-url/object-path</mono>应该能够访问存储桶中的对象。\n在<more>文档</more>中了解更多。"
     },
     "s3Validation": {
       "status": {
@@ -191,9 +189,7 @@
   },
   "upload": {
     "dropzone": {
-      "title": "拖放文件到这里",
-      "description": "或点击浏览",
-      "browseFiles": "浏览文件"
+      "title": "拖放文件到这里"
     },
     "fileList": {
       "title": "待上传文件",
@@ -214,9 +210,5 @@
     "alerts": {
       "s3NotConfigured": "S3 设置未配置"
     }
-  },
-  "banner": {
-    "title": "您现在位于 V2 测试版中。",
-    "description": "前往 <a>V1 版本网站</a>。"
   }
 }

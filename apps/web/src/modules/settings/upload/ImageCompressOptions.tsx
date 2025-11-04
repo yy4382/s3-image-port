@@ -6,11 +6,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch"; // Import Switch
+import { Switch } from "@/components/animate-ui/radix/switch";
 import type { CompressOption } from "@/lib/utils/imageCompress"; // Adjust the import path as needed
 import { useTranslations } from "use-intl";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import { NumberField } from "@base-ui-components/react/number-field";
+import { MoveHorizontalIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const PROCESS_OPTION_DEFAULTS = {
   jpeg: { quality: 75 },
@@ -66,67 +75,105 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
   const currentType = isProcessingEnabled ? value.type : undefined;
 
   return (
-    <div className="space-y-4">
+    <FieldSet>
+      {/* <FieldLegend>{t("title")}</FieldLegend>
+      <FieldDescription>{t("description")}</FieldDescription> */}
       {/* Enable/Disable Switch */}
-      <div className="flex items-center space-x-2">
-        <Label htmlFor="enable-processing">{t("enable")}</Label>
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor="enable-processing">{t("title")}</FieldLabel>
+          <FieldDescription>
+            {t("description")} {t("enableDesc")}
+          </FieldDescription>
+        </FieldContent>
         <Switch
           id="enable-processing"
           checked={isProcessingEnabled}
           onCheckedChange={handleEnabledChange}
         />
-      </div>
+      </Field>
 
-      {/* Format Selection - Disabled if not enabled */}
-      <div>
-        <Label
-          htmlFor="image-type-select"
-          className={!isProcessingEnabled ? "text-muted-foreground" : ""}
-        >
-          {t("targetFormat")}
-        </Label>
-        <Select
-          value={currentType}
-          onValueChange={(newVal: CompressOption["type"]) =>
-            handleTypeChange(newVal)
-          }
-          disabled={!isProcessingEnabled}
-        >
-          <SelectTrigger
-            id="image-type-select"
-            disabled={!isProcessingEnabled}
-            className="mt-2"
+      {isProcessingEnabled && (
+        <Field className="gap-1">
+          <FieldLabel htmlFor="image-type-select">
+            {t("targetFormat")}
+          </FieldLabel>
+          <Select
+            value={currentType}
+            onValueChange={(newVal: CompressOption["type"]) =>
+              handleTypeChange(newVal)
+            }
           >
-            <SelectValue placeholder={t("selectFormat")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="avif">AVIF</SelectItem>
-            <SelectItem value="jpeg">JPEG</SelectItem>
-            <SelectItem value="webp">WebP</SelectItem>
-            <SelectItem value="png">PNG</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+            <SelectTrigger id="image-type-select">
+              <SelectValue placeholder={t("selectFormat")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="avif">AVIF</SelectItem>
+              <SelectItem value="jpeg">JPEG</SelectItem>
+              <SelectItem value="webp">WebP</SelectItem>
+              <SelectItem value="png">PNG</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+      )}
 
       {/* Quality Slider - Shown only for relevant types and if enabled */}
       {isProcessingEnabled &&
         quality !== undefined &&
         currentType !== "png" && (
           <div>
-            <Label htmlFor="quality-slider">{t("quality", { quality })}</Label>
-            <Slider
+            <NumberField.Root
               id="quality-slider"
-              min={0}
+              min={1}
               max={100}
               step={1}
-              value={[quality]}
-              onValueChange={handleQualityChange}
-              className="mt-2"
-              disabled={!isProcessingEnabled} // Technically redundant due to outer check, but safe
-            />
+              value={quality}
+              onValueChange={(value) => handleQualityChange([value ?? 75])}
+              snapOnStep={true}
+            >
+              <Field className="gap-1">
+                <NumberField.ScrubArea className="cursor-ew-resize w-fit!">
+                  <FieldLabel
+                    htmlFor="quality-slider"
+                    className="cursor-ew-resize text-sm font-medium text-gray-900"
+                  >
+                    {t("quality")}
+                  </FieldLabel>
+                  <NumberField.ScrubAreaCursor className="drop-shadow-[0_1px_1px_#0008] filter">
+                    <MoveHorizontalIcon />
+                  </NumberField.ScrubAreaCursor>
+                </NumberField.ScrubArea>
+                <NumberField.Group className="shadow-xs max-w-fit rounded-md">
+                  <NumberField.Decrement
+                    className={cn(
+                      buttonVariants({
+                        size: "icon",
+                        variant: "outline",
+                      }),
+                      "rounded-r-none shadow-none",
+                    )}
+                  >
+                    -
+                  </NumberField.Decrement>
+                  <NumberField.Input className="placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 h-9 w-18 min-w-0 text-center border-y border-input bg-transparent px-3 py-1 text-base transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
+                  <NumberField.Increment
+                    className={cn(
+                      buttonVariants({
+                        size: "icon",
+                        variant: "outline",
+                      }),
+                      "rounded-l-none shadow-none",
+                    )}
+                  >
+                    +
+                  </NumberField.Increment>
+                </NumberField.Group>
+                <FieldDescription>{t("qualityDesc")}</FieldDescription>
+              </Field>
+            </NumberField.Root>
           </div>
         )}
-    </div>
+    </FieldSet>
   );
 };
 

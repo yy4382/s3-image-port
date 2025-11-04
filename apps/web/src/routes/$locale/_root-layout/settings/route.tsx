@@ -51,7 +51,7 @@ function SettingPageSwitcher() {
           "justify-start data-[status=active]:bg-muted data-[status=active]:hover:bg-accent",
         )}
       >
-        S3
+        {t("s3")}
       </Link>
       <Link
         from="/$locale/settings"

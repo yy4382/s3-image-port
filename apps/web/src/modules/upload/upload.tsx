@@ -53,6 +53,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import { RefreshCw } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 type UploadObject = {
   file: File;
@@ -467,7 +468,7 @@ function FilePreviewEdit({
   const t = useTranslations("upload.fileList");
   const presets = useAtomValue(presetsAtom);
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pb-2">
       <div>
         <KeyTemplateConsumerInput
           value={file.key.template}
@@ -478,6 +479,7 @@ function FilePreviewEdit({
           {t("keyWillBe")} {file.key.toString()}
         </p>
       </div>
+      <Separator />
       {file.supportProcess && (
         <ImageCompressOptions
           value={file.compressOption}

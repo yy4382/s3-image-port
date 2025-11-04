@@ -9,9 +9,7 @@
     "description": "Upload, view and delete images in your S3 bucket with ease",
     "compatibility": "Also works with lots of S3-compatible services",
     "getStarted": "Get Started",
-    "readDocs": "Read Docs",
-    "viewSource": "View Source",
-    "noLongerShow": "Don't show this page again"
+    "readDocs": "Read Docs"
   },
   "settings": {
     "title": "Settings",
@@ -36,10 +34,13 @@
       }
     },
     "imageCompress": {
-      "enable": "Enable Image Convert & Compression",
       "targetFormat": "Target Format",
       "selectFormat": "Select format",
-      "quality": "Quality: {quality}"
+      "quality": "Quality",
+      "title": "Image convertion and compression",
+      "description": "Convert or compress your image before uploading them.",
+      "enableDesc": "If turned off, images will be uploaded to S3 as is.",
+      "qualityDesc": "Quality for the compressed image, integer from 1 to 100."
     },
     "s3Settings": {
       "title": "S3",
@@ -56,10 +57,7 @@
       "pathStyle": "Use Path Style API",
       "pathStyleDesc": "Force using the deprecated <more>path style API</more>.",
       "publicUrl": "Public URL",
-      "publicUrlDesc": "The access url for the public bucket. <mono>public-url/object-path</mono> should be able to access the object in bucket. Learn more at <more>docs</more>.",
-      "validateBtn": "Validate S3 Settings",
-      "validSuccess": "✓ S3 settings are valid",
-      "validError": "⚠ {error}"
+      "publicUrlDesc": "The access url for the public bucket. <mono>public-url/object-path</mono> should be able to access the object in bucket. Learn more at <more>docs</more>."
     },
     "s3Validation": {
       "status": {
@@ -191,9 +189,7 @@
   },
   "upload": {
     "dropzone": {
-      "title": "Drag & Drop files here",
-      "description": "or click to browse",
-      "browseFiles": "Browse Files"
+      "title": "Drag & Drop files here"
     },
     "fileList": {
       "title": "Files to upload",
@@ -214,9 +210,5 @@
     "alerts": {
       "s3NotConfigured": "S3 settings are not configured"
     }
-  },
-  "banner": {
-    "title": "You are now in a beta (v2) version of the website.",
-    "description": "Go to the stable <a>V1 site</a>."
   }
 }
