@@ -6,6 +6,7 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
   GetBucketCorsCommand,
+  CopyObjectCommand,
 } from "@aws-sdk/client-s3";
 import type { S3Options } from "@/modules/settings/settings-store";
 import mime from "mime";
@@ -178,6 +179,93 @@ class ImageS3Client {
     }
 
     return response;
+  }
+
+  /**
+   * Renames an object by copying it to a new key and deleting the old one.
+   * This is the most ACID approach possible with S3 (server-side copy, no data transfer).
+   *
+   * IMPORTANT: Race condition exists - another process could create an object at newKey
+   * between the existence check and the copy operation. This is a limitation of S3's API.
+   *
+   * Notes:
+   * - There's a brief window between copy and delete where both objects exist
+   * - Checks if newKey already exists to prevent accidental data loss
+   * - Use force=true to intentionally overwrite an existing object at newKey
+   *
+   * @param oldKey The current key of the object
+   * @param newKey The new key for the object
+   * @param force If true, allows overwriting an existing object at newKey (default: false)
+   * @returns The response from the copy operation
+   * @throws Error if newKey already exists and force=false
+   */
+  async rename(oldKey: string, newKey: string, force = false) {
+    // Step 1: Check if newKey already exists (to prevent data loss)
+    if (!force) {
+      try {
+        await this.head(newKey);
+        // If head succeeds, object exists at newKey
+        throw new Error(
+          `Object already exists at key "${newKey}". Use force=true to overwrite, or choose a different key.`,
+        );
+      } catch (error: unknown) {
+        // If head fails with 404/NotFound, the key doesn't exist (safe to proceed)
+        // If it's our custom error about existing object, re-throw it
+        if (
+          error instanceof Error &&
+          error.message?.includes("Object already exists")
+        ) {
+          throw error;
+        }
+        // Other errors (404, NotFound) mean object doesn't exist - continue
+        const awsError = error as {
+          $metadata?: { httpStatusCode?: number };
+          name?: string;
+        };
+        if (
+          awsError.$metadata?.httpStatusCode !== 404 &&
+          awsError.name !== "NotFound"
+        ) {
+          // Unexpected error during head operation
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(
+            `Failed to check if ${newKey} exists: ${errorMessage}`,
+          );
+        }
+      }
+    }
+
+    // Step 2: Copy the object to the new key (server-side, preserves metadata)
+    const copyCommand = new CopyObjectCommand({
+      Bucket: this.bucket,
+      CopySource: `${this.bucket}/${oldKey}`,
+      Key: newKey,
+    });
+    const copyResponse = await this.client.send(copyCommand);
+
+    // Check if copy was successful
+    const copyStatusCode = copyResponse.$metadata.httpStatusCode!;
+    if (copyStatusCode >= 300) {
+      throw new Error(`Rename copy operation get http code: ${copyStatusCode}`);
+    }
+
+    // Step 3: Delete the old object
+    try {
+      await this.delete(oldKey);
+    } catch (error) {
+      // Copy succeeded but delete failed - log warning but don't throw
+      // This leaves both objects in the bucket, which is safer than losing data
+      console.error(
+        `Rename: Copy succeeded but delete of old key failed for ${oldKey}`,
+        error,
+      );
+      throw new Error(
+        `Renamed to ${newKey} but failed to delete old key ${oldKey}. Both objects exist.`,
+      );
+    }
+
+    return copyResponse;
   }
 
   async getCors() {
