@@ -199,7 +199,7 @@
       "title": "待上传文件",
       "clearUploaded": "清除已上传条目",
       "uploadAll": "全部上传",
-      "process": "处理",
+      "process": "开始压缩",
       "edit": "编辑",
       "remove": "移除",
       "copy": "复制链接",
@@ -208,7 +208,8 @@
       "recompress": "重新压缩",
       "compressing": "压缩中...",
       "copyFailed": "复制键失败",
-      "keyWillBe": "名称将会是："
+      "keyWillBe": "名称将会是：",
+      "upload": "上传"
     },
     "alerts": {
       "s3NotConfigured": "S3 设置未配置"

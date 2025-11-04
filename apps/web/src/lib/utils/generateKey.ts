@@ -28,31 +28,38 @@ export class S3Key {
   template: string;
   data: Record<(typeof _availablePlaceholders)[number], string>;
   private ulid: string;
-  constructor(file: File, template: string, ulidGenerator?: ULIDFactory) {
+  constructor(
+    template: string,
+    data: Record<(typeof _availablePlaceholders)[number], string>,
+  ) {
     this.template = template;
-    this.ulid = ulidGenerator ? ulidGenerator() : ulid();
+    this.data = data;
+    this.ulid = data.ulid;
+  }
+  static create(file: File, template: string, ulidGenerator?: ULIDFactory) {
+    const generatedUlid = ulidGenerator ? ulidGenerator() : ulid();
     const data: Record<(typeof _availablePlaceholders)[number], string> = {
       year: format(new Date(), "yyyy"),
       month: format(new Date(), "MM"),
       day: format(new Date(), "dd"),
       filename: file.name.split(".").shift() || "",
       ext: mime.getExtension(file.type) ?? file.name.split(".").pop() ?? "",
-      "ulid-dayslice": `${this.ulid.slice(4, 10).toLowerCase()}-${this.ulid.slice(-4).toLowerCase()}`,
-      random: `${this.ulid.slice(4, 10).toLowerCase()}-${this.ulid.slice(-4).toLowerCase()}`,
+      "ulid-dayslice": `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
+      random: `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
       timestamp: new Date().getTime().toString(),
       ulid: ulidGenerator ? ulidGenerator() : ulid(),
     };
-    this.data = data;
+    return new S3Key(template, data);
   }
-  updateFile(file: File) {
-    this.data.filename = file.name;
-    this.data.ext =
-      mime.getExtension(file.type) ?? file.name.split(".").pop() ?? "";
-    return this;
+  static updateFile(file: File, prev: S3Key) {
+    return new S3Key(prev.template, {
+      ...prev.data,
+      filename: file.name,
+      ext: mime.getExtension(file.type) ?? file.name.split(".").pop() ?? "",
+    });
   }
-  updateTemplate(template: string) {
-    this.template = template;
-    return this;
+  static updateTemplate(template: string, prev: S3Key) {
+    return new S3Key(template, prev.data);
   }
   toString() {
     return this.template.replace(
