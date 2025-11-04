@@ -136,14 +136,7 @@
       "s3SettingsNotFound": "S3 settings not found",
       "requestingDelete": "Requested delete...",
       "deleteSuccess": "Deleted photos",
-      "deleteFailed": "Failed to delete photos",
-      "requestingRename": "Renaming photo...",
-      "renameSuccess": "Photo renamed successfully",
-      "renameFailed": "Failed to rename photo",
-      "renameObjectExists": "An object with that name already exists. Choose a different name.",
-      "renameInvalidKey": "Please enter a valid name",
-      "renameSameKey": "New name is the same as the current name",
-      "renamePartialSuccess": "Photo copied but failed to delete original. Both versions exist."
+      "deleteFailed": "Failed to delete photos"
     },
     "store": {
       "s3SettingsNotFound": "S3 settings not found",
@@ -189,6 +182,44 @@
       "months": "months",
       "years": "years",
       "selectDate": "Select date"
+    },
+    "item": {
+      "options": {
+        "open": "Open",
+        "info": "Info",
+        "download": "Download",
+        "rename": "Rename",
+        "delete": "Delete",
+        "renameModal": {
+          "title": "Rename Photo",
+          "description": "Enter a new name (key) for this photo. This will be the full path in your S3 bucket.",
+          "currentLabel": "Current:",
+          "placeholder": "Enter new key/path",
+          "cancel": "Cancel",
+          "rename": "Rename",
+          "renaming": "Renaming..."
+        },
+        "deleteModal": {
+          "title": "Delete Confirm",
+          "description": "Are you sure you want to delete this item?",
+          "cancel": "Cancel",
+          "delete": "Delete"
+        },
+        "renameMessages": {
+          "requesting": "Renaming photo...",
+          "success": "Photo renamed successfully",
+          "failed": "Failed to rename photo",
+          "objectExists": "An object with that name already exists. Choose a different name.",
+          "invalidKey": "Please enter a valid name",
+          "sameKey": "New name is the same as the current name",
+          "partialSuccess": "Photo copied but failed to delete original. Both versions exist."
+        },
+        "downloadMessages": {
+          "started": "Download started",
+          "failed": "Failed to download photo",
+          "noBody": "Failed to download photo"
+        }
+      }
     }
   },
   "theme": {
