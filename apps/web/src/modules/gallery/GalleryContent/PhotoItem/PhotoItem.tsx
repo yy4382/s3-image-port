@@ -150,6 +150,7 @@ export function PhotoImg({
   return (
     <img
       {...props}
+      className={cn("select-none", props.className)}
       ref={imgRef}
       src={url}
       alt={s3Key}
