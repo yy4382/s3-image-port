@@ -22,7 +22,18 @@
       "title": "键（名称）模板",
       "description": "上传到 S3 时的命名模板。在<more>文档</more>中了解更多，包括可以使用的占位符等。",
       "endWithExtWarning": "建议以 \".'{{ext'}}\" 结尾。",
-      "deprecatedPlaceholderWarning": "占位符{placeholder}已被弃用，请使用{instead}替代"
+      "deprecatedPlaceholderWarning": "占位符{placeholder}已被弃用，请使用{instead}替代",
+      "systemBadge": "系统",
+      "defaultKeyTemplate": "默认键（名称）模版",
+      "defaultKeyTemplateDesc": "上传文件时使用的默认模板。您可以在执行上传时覆盖此模板。",
+      "presets": {
+        "actions": "操作",
+        "addNew": "添加新预设",
+        "title": "模板预设",
+        "applyAsDefault": "设为默认",
+        "delete": "删除",
+        "edit": "编辑"
+      }
     },
     "imageCompress": {
       "enable": "启用图像转换和压缩",

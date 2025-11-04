@@ -1,7 +1,7 @@
 "use client";
 
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
-import { KeyTemplateIndependent } from "@/modules/settings/upload/KeyTemplate";
+import { KeyTemplateConsumerInput } from "../settings/upload/key-template/consumer-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -335,6 +335,10 @@ function DropZone() {
   );
 }
 
+const presetsAtom = atom(
+  (get) => get(uploadSettingsAtom).keyTemplatePresets || [],
+);
+
 function FilePreview({
   fileAtom,
   remove,
@@ -348,6 +352,7 @@ function FilePreview({
     useFileAtomOperations(fileAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("upload.fileList");
+  const presets = useAtomValue(presetsAtom);
 
   return (
     <Card className="overflow-hidden py-1">
@@ -405,7 +410,7 @@ function FilePreview({
             </Button>
           )}
 
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="">
                 <span className="sr-only">{t("edit")}</span>
@@ -415,11 +420,10 @@ function FilePreview({
             <DropdownMenuContent align="end" className="p-4">
               <div className="space-y-6">
                 <div>
-                  <KeyTemplateIndependent
+                  <KeyTemplateConsumerInput
                     value={file.key.template}
-                    onChange={(k) => {
-                      updateTemplate(k);
-                    }}
+                    onChange={updateTemplate}
+                    presets={presets}
                   />
                   <p className="text-sm text-muted-foreground mt-2">
                     {t("keyWillBe")} {file.key.toString()}
