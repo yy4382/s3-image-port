@@ -1,7 +1,7 @@
 import { atomWithStorageMigration } from "@/lib/atoms/atomWithStorageMigration";
 import { defaultKeyTemplate } from "@/lib/utils/generateKey";
 import { focusAtom } from "jotai-optics";
-import { keyTemplateSchema } from "./upload/KeyTemplate";
+import { keyTemplateSchema } from "./upload/key-template";
 import { z } from "zod";
 import { compressOptionSchema } from "@/lib/utils/imageCompress";
 import { atom } from "jotai";
@@ -20,10 +20,16 @@ export type S3Options = z.infer<typeof s3SettingsSchema>;
 
 export const uploadSettingsSchema = z.object({
   keyTemplate: keyTemplateSchema,
+  keyTemplatePresets: z
+    .array(z.object({ key: z.string(), value: z.string() }))
+    .optional(),
   compressionOption: compressOptionSchema.nullable(),
 });
 
 export type UploadOptions = z.infer<typeof uploadSettingsSchema>;
+export type KeyTemplatePreset = NonNullable<
+  z.infer<typeof uploadSettingsSchema.shape.keyTemplatePresets>
+>[number];
 
 export const gallerySettingsSchema = z.object({
   autoRefresh: z.boolean(),
@@ -52,6 +58,7 @@ export const getDefaultOptions = (): Options => {
     },
     upload: {
       keyTemplate: defaultKeyTemplate,
+      keyTemplatePresets: [],
       compressionOption: null,
     },
     gallery: {
@@ -136,6 +143,7 @@ export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {
     },
     upload: {
       keyTemplate: String(oldAppSettings?.keyTemplate || defaultKeyTemplate),
+      keyTemplatePresets: [],
       compressionOption: null,
     },
     gallery: {

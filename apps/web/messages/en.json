@@ -19,10 +19,21 @@
     "s3": "S3",
     "upload": "Upload",
     "keyTemplate": {
-      "title": "Key Template",
+      "title": "Key template",
       "description": "Template for the S3 key. Learn more at <more>docs</more>, including the available placeholders.",
       "endWithExtWarning": "End with \".'{{ext'}}\" is generally recommended.",
-      "deprecatedPlaceholderWarning": "placeholder {placeholder} has been deprecated, use {instead} instead"
+      "deprecatedPlaceholderWarning": "placeholder {placeholder} has been deprecated, use {instead} instead",
+      "systemBadge": "System",
+      "defaultKeyTemplate": "Default Key template",
+      "defaultKeyTemplateDesc": "The default template used when uploading files. You can override this template when performing uploads.",
+      "presets": {
+        "title": "Template presets",
+        "actions": "Actions",
+        "applyAsDefault": "Apply as Default",
+        "addNew": "add new preset",
+        "edit": "Edit",
+        "delete": "Delete"
+      }
     },
     "imageCompress": {
       "enable": "Enable Image Convert & Compression",

@@ -38,18 +38,21 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
-        <JotaiProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-            storageKey="s3ip:root:theme"
-          >
-            <Outlet />
-            <Toaster />
-          </ThemeProvider>
-        </JotaiProvider>
+        {/* base-ui requires an isolate root. https://base-ui.com/react/overview/quick-start#portals */}
+        <div id="app-root" className="isolate">
+          <JotaiProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+              storageKey="s3ip:root:theme"
+            >
+              <Outlet />
+              <Toaster />
+            </ThemeProvider>
+          </JotaiProvider>
+        </div>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>

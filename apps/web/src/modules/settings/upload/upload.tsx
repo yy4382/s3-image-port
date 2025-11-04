@@ -1,13 +1,13 @@
 "use client";
 
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
-import { KeyTemplateIndependent } from "@/modules/settings/upload/KeyTemplate";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "../settings-store";
 import { focusAtom } from "jotai-optics";
 import { useTranslations } from "use-intl";
 import { ExternalLink } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { KeyTemplateSettingsInput } from "./key-template/setting-input";
 
 function UploadSettings() {
   const t = useTranslations("settings");
@@ -30,21 +30,10 @@ function UploadSettings() {
             <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
-        <KeyTemplateWrapper />
+        <KeyTemplateSettingsInput />
         <CompressOptionWrapper />
       </div>
     </div>
-  );
-}
-
-const keyTemplateAtom = focusAtom(uploadSettingsAtom, (optic) =>
-  optic.prop("keyTemplate"),
-);
-
-function KeyTemplateWrapper() {
-  const [keyTemplate, setKeyTemplate] = useAtom(keyTemplateAtom);
-  return (
-    <KeyTemplateIndependent value={keyTemplate} onChange={setKeyTemplate} />
   );
 }
 
