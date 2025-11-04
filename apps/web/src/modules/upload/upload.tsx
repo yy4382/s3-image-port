@@ -5,11 +5,6 @@ import { KeyTemplateConsumerInput } from "../settings/upload/key-template/consum
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { defaultKeyTemplate, S3Key } from "@/lib/utils/generateKey";
 import {
   isSupportedFileType,
@@ -26,7 +21,13 @@ import {
   type PrimitiveAtom,
 } from "jotai";
 import { splitAtom } from "jotai/utils";
-import { startTransition, useCallback, useEffect, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { monotonicFactory } from "ulid";
@@ -47,6 +48,11 @@ import key2Url from "@/lib/utils/key2Url";
 import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 import { setGalleryDirtyAtom } from "../gallery/galleryStore";
+import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
+import { AnimatePresence, motion } from "motion/react";
+import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
+import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import { RefreshCw } from "lucide-react";
 
 type UploadObject = {
   file: File;
@@ -68,7 +74,7 @@ const appendFileAtom = atom(null, (get, set, newFiles: File[]) => {
       ({
         file,
         processedFile: null,
-        key: new S3Key(
+        key: S3Key.create(
           file,
           uploadSettings?.keyTemplate ?? defaultKeyTemplate,
           ulid,
@@ -117,7 +123,7 @@ const processAtom = atom(
       set(atom, (prev) => ({
         ...prev,
         processedFile: processed,
-        key: prev.key.updateFile(processed),
+        key: S3Key.updateFile(processed, prev.key),
         status: "processed",
       }));
     } catch (error) {
@@ -198,7 +204,7 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
     (template: string) => {
       setFile((prev) => ({
         ...prev,
-        key: prev.key.updateTemplate(template),
+        key: S3Key.updateTemplate(template, prev.key),
       }));
     },
     [setFile],
@@ -292,7 +298,7 @@ export function Upload() {
         </div>
       </div>
 
-      <div className="grid gap-1">
+      <div className="grid gap-2">
         {fileAtoms.map((fileAtom) => (
           <FilePreview
             fileAtom={fileAtom}
@@ -348,30 +354,25 @@ function FilePreview({
 }) {
   const upload = useSetAtom(uploadAtom);
   const process = useSetAtom(processAtom);
-  const { file, updateProcessOption, updateTemplate } =
-    useFileAtomOperations(fileAtom);
+  const file = useAtomValue(fileAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("upload.fileList");
-  const presets = useAtomValue(presetsAtom);
+
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <Card className="overflow-hidden py-1">
-      <div className="flex items-center px-3 py-1">
-        <FilePreviewThumbnail file={file.file} />
+    <Card className="overflow-hidden px-3 py-2.5 gap-0">
+      <div className="flex items-start sm:items-center flex-col sm:flex-row gap-2">
+        <div className="grow min-w-0 flex items-center gap-2 w-full">
+          <FilePreviewThumbnail file={file.file} />
 
-        <div className="flex-grow min-w-0 flex items-center">
           <div className="font-medium truncate text-sm" title={file.file.name}>
             {file.file.name}
           </div>
-          <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">
-            {(file.file.size / 1024).toFixed(1)} KB
-          </Badge>
-          {file.supportProcess && file.compressOption !== null && (
-            <FilePreviewProcess file={file} process={() => process(fileAtom)} />
-          )}
+          <FilePreviewProcess file={file} process={() => process(fileAtom)} />
         </div>
 
-        <div className="flex items-center space-x-1 ml-2">
+        <div className="flex items-center space-x-1 self-end-safe sm:self-center">
           {file.status === "uploaded" && (
             <Button
               variant="ghost"
@@ -406,38 +407,21 @@ function FilePreview({
               onClick={() => upload(fileAtom, s3Settings!)}
               disabled={!s3Settings}
             >
+              <span className="sr-only">{t("upload")}</span>
               <McUpload2 />
             </Button>
           )}
 
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="">
-                <span className="sr-only">{t("edit")}</span>
-                <McPencil />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="p-4">
-              <div className="space-y-6">
-                <div>
-                  <KeyTemplateConsumerInput
-                    value={file.key.template}
-                    onChange={updateTemplate}
-                    presets={presets}
-                  />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {t("keyWillBe")} {file.key.toString()}
-                  </p>
-                </div>
-                {file.supportProcess && (
-                  <ImageCompressOptions
-                    value={file.compressOption}
-                    onChange={updateProcessOption}
-                  ></ImageCompressOptions>
-                )}
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant={isEditing ? "secondary" : "ghost"}
+            size="icon"
+            onClick={() => {
+              setIsEditing((prev) => !prev);
+            }}
+          >
+            <span className="sr-only">{t("edit")}</span>
+            <McPencil />
+          </Button>
 
           <Button
             variant="ghost"
@@ -450,7 +434,57 @@ function FilePreview({
           </Button>
         </div>
       </div>
+      <AutoResizeHeight duration={0.1}>
+        <AnimatePresence initial={false} mode="popLayout">
+          {isEditing && (
+            <motion.div
+              className="pt-4"
+              initial={{ opacity: 0, filter: "blur(4px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={{
+                opacity: 0,
+                filter: "blur(4px)",
+                transition: { duration: 0.15 },
+              }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
+              <FilePreviewEdit fileAtom={fileAtom} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </AutoResizeHeight>
     </Card>
+  );
+}
+
+function FilePreviewEdit({
+  fileAtom,
+}: {
+  fileAtom: PrimitiveAtom<UploadObject>;
+}) {
+  const { file, updateProcessOption, updateTemplate } =
+    useFileAtomOperations(fileAtom);
+  const t = useTranslations("upload.fileList");
+  const presets = useAtomValue(presetsAtom);
+  return (
+    <div className="space-y-6">
+      <div>
+        <KeyTemplateConsumerInput
+          value={file.key.template}
+          onChange={updateTemplate}
+          presets={presets}
+        />
+        <p className="text-sm text-muted-foreground mt-2">
+          {t("keyWillBe")} {file.key.toString()}
+        </p>
+      </div>
+      {file.supportProcess && (
+        <ImageCompressOptions
+          value={file.compressOption}
+          onChange={updateProcessOption}
+        ></ImageCompressOptions>
+      )}
+    </div>
   );
 }
 
@@ -476,7 +510,7 @@ function FilePreviewThumbnail({ file }: { file: File }) {
     };
   }, [file]);
   return (
-    <div className="h-8 w-8 mr-2 bg-secondary rounded flex-shrink-0 overflow-hidden">
+    <div className="h-8 w-8 mr-2 bg-secondary rounded shrink-0 overflow-hidden">
       {fileUrl ? (
         <img
           src={fileUrl}
@@ -500,32 +534,47 @@ function FilePreviewProcess({
   process: () => void;
 }) {
   const t = useTranslations("upload.fileList");
-  return (
-    <>
-      {file.processedFile && (
+  const shownBadge = useMemo(() => {
+    if (file.status === "processing") {
+      return <>{t("compressing")}</>;
+    }
+    if (file.processedFile) {
+      return (
         <>
-          <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">
-            {t("compressed")} {(file.processedFile.size / 1024).toFixed(1)} KB
-          </Badge>
+          {t("compressed")} {(file.processedFile.size / 1024).toFixed(1)} KB
         </>
-      )}
+      );
+    }
+    return <>{(file.file.size / 1024).toFixed(1)} KB</>;
+  }, [file.file.size, file.processedFile, file.status, t]);
 
-      {(file.status === "pending" || file.status === "processed") && (
-        <Badge
-          variant={"default"}
-          className="ml-2 text-xs whitespace-nowrap"
-          asChild
-        >
-          <button onClick={process}>
-            {file.status === "pending" ? t("process") : t("recompress")}
-          </button>
-        </Badge>
-      )}
-      {file.status === "processing" && (
-        <Badge variant="default" className="ml-2 text-xs whitespace-nowrap">
-          {t("compressing")}
-        </Badge>
-      )}
-    </>
+  return (
+    <div className="flex gap-1">
+      {" "}
+      <Badge variant="outline" className="text-xs whitespace-nowrap h-6">
+        {shownBadge}
+      </Badge>
+      {file.supportProcess &&
+        file.compressOption !== null &&
+        (file.status === "pending" || file.status === "processed") && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge className="size-6 px-0 py-0" asChild>
+                <button
+                  onClick={process}
+                  aria-label={
+                    file.status === "pending" ? t("process") : t("recompress")
+                  }
+                >
+                  <RefreshCw className="size-5" />
+                </button>
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              {file.status === "pending" ? t("process") : t("recompress")}
+            </TooltipContent>
+          </Tooltip>
+        )}
+    </div>
   );
 }

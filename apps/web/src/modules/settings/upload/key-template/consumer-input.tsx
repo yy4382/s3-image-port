@@ -110,7 +110,7 @@ function KeyTemplateInputWithPresetsAutoComplete(
   const { value, onChange } = props;
   const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="relative w-full max-w-80 sm:max-w-[unset]">
+    <div className="relative">
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}

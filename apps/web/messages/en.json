@@ -199,7 +199,7 @@
       "title": "Files to upload",
       "clearUploaded": "Clear Uploaded Entry",
       "uploadAll": "Upload All",
-      "process": "Process",
+      "process": "Start compressing",
       "edit": "Edit",
       "remove": "Remove",
       "copy": "Copy URL",
@@ -208,7 +208,8 @@
       "recompress": "Recompress",
       "compressing": "Compressing...",
       "copyFailed": "Failed to copy key",
-      "keyWillBe": "Key will be:"
+      "keyWillBe": "Key will be:",
+      "upload": "Upload"
     },
     "alerts": {
       "s3NotConfigured": "S3 settings are not configured"
