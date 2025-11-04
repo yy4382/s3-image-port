@@ -550,7 +550,6 @@ function FilePreviewProcess({
 
   return (
     <div className="flex gap-1">
-      {" "}
       <Badge variant="outline" className="text-xs whitespace-nowrap h-6">
         {shownBadge}
       </Badge>

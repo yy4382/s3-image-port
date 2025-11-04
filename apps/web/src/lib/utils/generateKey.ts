@@ -47,7 +47,7 @@ export class S3Key {
       "ulid-dayslice": `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
       random: `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
       timestamp: new Date().getTime().toString(),
-      ulid: ulidGenerator ? ulidGenerator() : ulid(),
+      ulid: generatedUlid,
     };
     return new S3Key(template, data);
   }
