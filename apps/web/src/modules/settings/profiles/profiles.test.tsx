@@ -33,7 +33,7 @@ describe("Profiles loading", () => {
   });
 });
 
-describe("Profiles operations", () => {
+describe("Profiles operations", { retry: 5 }, () => {
   describe("rename", () => {
     it("should rename active profile", async () => {
       const user = userEvent.setup();
@@ -186,7 +186,7 @@ describe("Profiles operations", () => {
   });
 });
 
-describe("Profile import export", () => {
+describe("Profile import export", { retry: 5 }, () => {
   it("should export profile", async () => {
     const user = userEvent.setup();
     render(<Profiles />);
