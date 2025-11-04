@@ -8,9 +8,9 @@ import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
 import { Button } from "@/components/ui/button";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
-import { photosAtomReadOnly } from "../gallery/galleryStore";
+import { photosAtomReadOnly } from "../gallery/use-photo-list";
 import { toast } from "sonner";
-import { useDeletePhotos } from "../gallery/GalleryControl/GalleryControl";
+import { useDeletePhotos } from "../gallery/use-delete";
 import {
   DropdownMenu,
   DropdownMenuContent,

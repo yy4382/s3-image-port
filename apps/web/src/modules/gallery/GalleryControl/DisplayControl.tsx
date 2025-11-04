@@ -8,8 +8,8 @@ import {
   displayOptionsSchema,
   searchParamsToDisplayOptions,
   type DisplayOptions,
-} from "./displayControlStore";
-import { currentPageAtom } from "../galleryStore";
+} from "../use-display-control";
+import { currentPageAtom } from "../use-photo-list";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";

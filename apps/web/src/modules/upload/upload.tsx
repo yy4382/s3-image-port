@@ -47,7 +47,7 @@ import {
 import key2Url from "@/lib/utils/key2Url";
 import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
-import { setGalleryDirtyAtom } from "../gallery/galleryStore";
+import { setGalleryDirtyAtom } from "../gallery/use-photo-list";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";

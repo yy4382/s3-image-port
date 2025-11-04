@@ -1,6 +1,6 @@
 import { atomWithStorage } from "jotai/utils";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { resetGalleryStateAtom } from "../../gallery/galleryStore";
+import { resetGalleryStateAtom } from "../../gallery/use-photo-list";
 import type { Options, Options as Profile } from "../settings-store";
 import { migrateFromV1, optionsAtom, optionsSchema } from "../settings-store";
 import { toast } from "sonner";

@@ -5,18 +5,19 @@ import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
-import { selectedPhotosAtom, useFetchPhotoList } from "../galleryStore";
+import {} from "../use-photo-list";
 import {
-  containerWidthAtom,
   currentPageAtom,
   filteredPhotosCountAtom,
   PER_PAGE,
-  photoSizeAtom,
+  useFetchPhotoList,
   showingPhotosAtom,
-} from "../galleryStore";
+} from "../use-photo-list";
+import { containerWidthAtom, photoSizeAtom } from "../use-calculate-layout";
 import { PhotoItem } from "./PhotoItem/PhotoItem";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
+import { selectedPhotosAtom } from "../use-select";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);

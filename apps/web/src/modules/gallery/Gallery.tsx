@@ -1,6 +1,6 @@
 "use client";
 
-import { galleryDirtyStatusAtom, useFetchPhotoList } from "./galleryStore";
+import { galleryDirtyStatusAtom, useFetchPhotoList } from "./use-photo-list";
 import { PhotoGrid } from "./GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
 import { ClientOnly } from "@tanstack/react-router";
