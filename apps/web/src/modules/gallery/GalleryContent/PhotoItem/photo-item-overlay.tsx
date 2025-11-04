@@ -17,12 +17,18 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/lib/utils/ImageS3Client";
 import { getRouteApi } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { useSetAtom } from "jotai";
-import { ExpandIcon, MoreHorizontalIcon, Trash2Icon } from "lucide-react";
+import {
+  ExpandIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +39,7 @@ import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
 import McKey2Line from "~icons/mingcute/key-2-line.jsx";
 import McTimeLine from "~icons/mingcute/time-line.jsx";
 import { useDeletePhotos } from "../../use-delete";
+import { useRenamePhoto } from "../../use-rename";
 import { toggleSelectedAtom } from "../../use-select";
 
 type PhotoItemOverlayProps = {
@@ -137,11 +144,28 @@ function PhotoInfo({
 }) {
   const openModal = useOpenModal(photo.Key);
   const deletePhotos = useDeletePhotos();
+  const renamePhoto = useRenamePhoto();
   const deleteFn = useCallback(async () => {
     await deletePhotos(photo.Key);
   }, [deletePhotos, photo.Key]);
 
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [newKey, setNewKey] = useState(photo.Key);
+  const [isRenaming, setIsRenaming] = useState(false);
+
+  const handleRename = useCallback(async () => {
+    setIsRenaming(true);
+    const result = await renamePhoto(photo.Key, newKey);
+    setIsRenaming(false);
+
+    if (result.success) {
+      setShowRenameModal(false);
+      setOpened(false);
+    }
+    // Don't close modal on error - let user fix the input
+  }, [renamePhoto, photo.Key, newKey, setOpened]);
+
   return (
     <>
       <DropdownMenu open={opened} onOpenChange={setOpened} modal={false}>
@@ -180,11 +204,65 @@ function PhotoInfo({
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
+          <DropdownMenuItem
+            onClick={() => {
+              setNewKey(photo.Key);
+              setShowRenameModal(true);
+            }}
+          >
+            <PencilIcon /> Rename
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowDeleteConfirmModal(true)}>
             <Trash2Icon /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Rename Dialog */}
+      <Dialog open={showRenameModal} onOpenChange={setShowRenameModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Photo</DialogTitle>
+            <DialogDescription>
+              Enter a new name (key) for this photo. This will be the full path
+              in your S3 bucket.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="newKey" className="text-sm font-medium">
+                Current: <span className="font-mono text-xs">{photo.Key}</span>
+              </label>
+              <Input
+                id="newKey"
+                value={newKey}
+                onChange={(e) => setNewKey(e.target.value)}
+                placeholder="Enter new key/path"
+                disabled={isRenaming}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isRenaming) {
+                    handleRename();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowRenameModal(false)}
+              disabled={isRenaming}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleRename} disabled={isRenaming}>
+              {isRenaming ? "Renaming..." : "Rename"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
       <Dialog
         open={showDeleteConfirmModal}
         onOpenChange={setShowDeleteConfirmModal}

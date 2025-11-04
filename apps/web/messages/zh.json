@@ -136,7 +136,14 @@
       "s3SettingsNotFound": "未找到 S3 设置",
       "requestingDelete": "正在请求删除...",
       "deleteSuccess": "已删除照片",
-      "deleteFailed": "删除照片失败"
+      "deleteFailed": "删除照片失败",
+      "requestingRename": "正在重命名照片...",
+      "renameSuccess": "照片重命名成功",
+      "renameFailed": "重命名照片失败",
+      "renameObjectExists": "该名称的对象已存在。请选择不同的名称。",
+      "renameInvalidKey": "请输入有效的名称",
+      "renameSameKey": "新名称与当前名称相同",
+      "renamePartialSuccess": "照片已复制但删除原文件失败。两个版本都存在。"
     },
     "store": {
       "s3SettingsNotFound": "未找到 S3 设置",

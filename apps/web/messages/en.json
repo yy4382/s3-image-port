@@ -136,7 +136,14 @@
       "s3SettingsNotFound": "S3 settings not found",
       "requestingDelete": "Requested delete...",
       "deleteSuccess": "Deleted photos",
-      "deleteFailed": "Failed to delete photos"
+      "deleteFailed": "Failed to delete photos",
+      "requestingRename": "Renaming photo...",
+      "renameSuccess": "Photo renamed successfully",
+      "renameFailed": "Failed to rename photo",
+      "renameObjectExists": "An object with that name already exists. Choose a different name.",
+      "renameInvalidKey": "Please enter a valid name",
+      "renameSameKey": "New name is the same as the current name",
+      "renamePartialSuccess": "Photo copied but failed to delete original. Both versions exist."
     },
     "store": {
       "s3SettingsNotFound": "S3 settings not found",
