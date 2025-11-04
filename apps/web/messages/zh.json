@@ -136,14 +136,7 @@
       "s3SettingsNotFound": "未找到 S3 设置",
       "requestingDelete": "正在请求删除...",
       "deleteSuccess": "已删除照片",
-      "deleteFailed": "删除照片失败",
-      "requestingRename": "正在重命名照片...",
-      "renameSuccess": "照片重命名成功",
-      "renameFailed": "重命名照片失败",
-      "renameObjectExists": "该名称的对象已存在。请选择不同的名称。",
-      "renameInvalidKey": "请输入有效的名称",
-      "renameSameKey": "新名称与当前名称相同",
-      "renamePartialSuccess": "照片已复制但删除原文件失败。两个版本都存在。"
+      "deleteFailed": "删除照片失败"
     },
     "store": {
       "s3SettingsNotFound": "未找到 S3 设置",
@@ -189,6 +182,44 @@
       "months": "个月",
       "years": "年",
       "selectDate": "选择日期"
+    },
+    "item": {
+      "options": {
+        "open": "打开",
+        "info": "信息",
+        "download": "下载",
+        "rename": "重命名",
+        "delete": "删除",
+        "renameModal": {
+          "title": "重命名照片",
+          "description": "为此照片输入新名称（键）。这将是您 S3 存储桶中的完整路径。",
+          "currentLabel": "当前：",
+          "placeholder": "输入新的键/路径",
+          "cancel": "取消",
+          "rename": "重命名",
+          "renaming": "重命名中..."
+        },
+        "deleteModal": {
+          "title": "删除确认",
+          "description": "您确定要删除此项目吗？",
+          "cancel": "取消",
+          "delete": "删除"
+        },
+        "renameMessages": {
+          "requesting": "正在重命名照片...",
+          "success": "照片重命名成功",
+          "failed": "重命名照片失败",
+          "objectExists": "该名称的对象已存在。请选择不同的名称。",
+          "invalidKey": "请输入有效的名称",
+          "sameKey": "新名称与当前名称相同",
+          "partialSuccess": "照片已复制但删除原文件失败。两个版本都存在。"
+        },
+        "downloadMessages": {
+          "started": "下载已开始",
+          "failed": "下载照片失败",
+          "noBody": "下载照片失败"
+        }
+      }
     }
   },
   "theme": {

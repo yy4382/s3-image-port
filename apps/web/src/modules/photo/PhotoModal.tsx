@@ -2,7 +2,7 @@
 import key2Url from "@/lib/utils/key2Url";
 import { useAtomValue } from "jotai";
 import { useLocale } from "use-intl";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,7 @@ import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
 import { photosAtomReadOnly } from "../gallery/use-photo-list";
 import { toast } from "sonner";
 import { useDeletePhotos } from "../gallery/use-delete";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "../../components/ui/dropdown-menu";
-import { format } from "date-fns";
-import ImageS3Client from "@/lib/utils/ImageS3Client";
+import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
 
@@ -64,9 +55,11 @@ function PhotoModalContent({ path }: { path: string }) {
 
 function PhotoModalToolbar({ path }: { path: string }) {
   const navigate = route.useNavigate();
+  const search = route.useSearch();
   const photos = useAtomValue(photosAtomReadOnly);
   const s3Options = useAtomValue(validS3SettingsAtom);
   const locale = useLocale();
+  const [dropdownOpened, setDropdownOpened] = useState(false);
 
   const handleBack = useCallback(() => {
     navigate({
@@ -75,6 +68,17 @@ function PhotoModalToolbar({ path }: { path: string }) {
       search: (prev) => JSON.parse(prev.galleryState ?? "{}"),
     });
   }, [navigate, locale]);
+
+  const handleAfterRename = useCallback(
+    (newKey: string) => {
+      navigate({
+        to: "/$locale/photo",
+        params: { locale },
+        search: { imagePath: newKey, galleryState: search.galleryState },
+      });
+    },
+    [navigate, locale, search.galleryState],
+  );
 
   useEffect(() => {
     function handleEscBack(event: KeyboardEvent) {
@@ -120,36 +124,9 @@ function PhotoModalToolbar({ path }: { path: string }) {
     handleBack();
   };
 
-  const handleDownload = async () => {
-    if (!s3Options) {
-      toast.error("Please set S3 options first");
-      return;
-    }
-    if (!photo) {
-      toast.error("Photo metadata not found");
-      return;
-    }
-    try {
-      const res = await new ImageS3Client(s3Options).get(photo.Key);
-      if (!res.Body) {
-        toast.error("Failed to download photo");
-        return;
-      }
-
-      // @ts-expect-error - ArrayBuffer vs ArrayBufferLike error
-      const blob = new Blob([await res.Body.transformToByteArray()]);
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = photo.Key;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to download photo");
-    }
-  };
+  if (!photo) {
+    return null;
+  }
 
   return (
     <div className="flex justify-between items-center text-white p-2 relative z-20">
@@ -167,39 +144,18 @@ function PhotoModalToolbar({ path }: { path: string }) {
             <Trash2Icon />
           </Button>
         </DeleteSecondConfirm>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <PhotoOptions
+          photo={photo}
+          opened={dropdownOpened}
+          setOpened={setDropdownOpened}
+          onAfterDelete={handleBack}
+          onAfterRename={handleAfterRename}
+          trigger={
             <Button size="icon" variant="ghost">
               <CircleEllipsisIcon />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>
-              Key <span className="text-sm font-normal">{path}</span>
-            </DropdownMenuLabel>
-            <DropdownMenuLabel>
-              Last modified{" "}
-              <span className="text-sm font-normal">
-                {photo
-                  ? format(photo.LastModified, "yyyy-MM-dd HH:mm:ss")
-                  : "unknown"}
-              </span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDownload}>
-              Download
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                toast.error("not implemented yet");
-                console.error("Modify key is not implemented yet");
-                return;
-              }}
-            >
-              Modify Key
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          }
+        />
       </div>
     </div>
   );
