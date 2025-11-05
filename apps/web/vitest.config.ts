@@ -4,6 +4,16 @@ import Icons from "unplugin-icons/vite";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import tailwindcss from "@tailwindcss/vite";
+import type { BrowserCommand } from "vitest/node";
+
+export const grantPermissions: BrowserCommand<[string[]]> = async (
+  ctx,
+  arg1: string[],
+) => {
+  if (ctx.provider.name === "playwright") {
+    await ctx.context.grantPermissions(arg1);
+  }
+};
 
 export default defineConfig({
   plugins: [
@@ -22,6 +32,13 @@ export default defineConfig({
       enabled: true,
       provider: playwright(),
       instances: [{ browser: "chromium" }],
+      commands: { grantPermissions },
     },
   },
 });
+
+declare module "vitest/browser" {
+  interface BrowserCommands {
+    grantPermissions: (permissions: string[]) => Promise<void>;
+  }
+}

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Profiles } from "./profiles";
 import { getDefaultOptions, Options, optionsAtom } from "../settings-store";
 import { useAtom, useAtomValue } from "jotai";
@@ -6,6 +6,7 @@ import { CURRENT_PROFILE, profileListAtom } from "./profiles-utils";
 import { produce } from "immer";
 import { renderHook } from "vitest-browser-react";
 import { render } from "@/../test/utils/render-browser";
+import { commands } from "vitest/browser";
 
 async function prepareProfiles() {
   const { result } = await renderHook(() => useAtom(profileListAtom));
@@ -20,6 +21,10 @@ async function prepareProfiles() {
     ],
   ]);
 }
+
+beforeEach(async () => {
+  await commands.grantPermissions(["clipboard-read", "clipboard-write"]);
+});
 
 describe("Profiles loading", () => {
   it("should initialize with empty local storage", async () => {
