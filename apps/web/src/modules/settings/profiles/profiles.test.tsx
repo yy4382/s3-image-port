@@ -22,7 +22,7 @@ function prepareProfiles() {
   ]);
 }
 
-describe.skip("Profiles loading", () => {
+describe("Profiles loading", () => {
   it("should initialize with empty local storage", () => {
     render(<Profiles />);
     const { result } = renderHook(() => useAtomValue(optionsAtom));
@@ -33,7 +33,7 @@ describe.skip("Profiles loading", () => {
   });
 });
 
-describe.skip("Profiles operations", { retry: 5 }, () => {
+describe("Profiles operations", { retry: 5 }, () => {
   describe("rename", () => {
     it("should rename active profile", async () => {
       const user = userEvent.setup();
@@ -186,7 +186,7 @@ describe.skip("Profiles operations", { retry: 5 }, () => {
   });
 });
 
-describe.skip("Profile import export", { retry: 5 }, () => {
+describe("Profile import export", { retry: 5 }, () => {
   it("should export profile", async () => {
     const user = userEvent.setup();
     render(<Profiles />);
