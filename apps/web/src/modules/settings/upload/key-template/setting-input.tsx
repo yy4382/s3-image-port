@@ -17,7 +17,7 @@ import {
   useAtom,
   useSetAtom,
 } from "jotai";
-import { useRef, useState } from "react";
+import { ComponentPropsWithoutRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { defaultKeyTemplate } from "@/lib/utils/generateKey";
 import { cn } from "@/lib/utils";
@@ -104,13 +104,19 @@ function DefaultKeyTemplateInput() {
   const { error, warning, validate } = useKeyTemplateValidation();
   const t = useTranslations("settings.keyTemplate");
   return (
-    <Field className="gap-1">
-      <FieldLabel>{t("defaultKeyTemplate")}</FieldLabel>
+    <Field className="gap-1" data-invalid={error !== undefined}>
+      <FieldLabel htmlFor="default-key-template-input">
+        {t("defaultKeyTemplate")}
+      </FieldLabel>
       <KeyTemplateInputWithReset
         value={keyTemplate}
         onChange={(value) => {
           setKeyTemplate(value);
           validate(value);
+        }}
+        inputProps={{
+          id: "default-key-template-input",
+          "aria-invalid": !!error,
         }}
       />
       <FieldDescription className="nth-last-2:mt-0">
@@ -130,15 +136,15 @@ function DefaultKeyTemplateInput() {
 function KeyTemplateInputWithReset(props: {
   value: string;
   onChange: (value: string) => void;
+  inputProps?: ComponentPropsWithoutRef<typeof Input>;
 }) {
   const { value, onChange } = props;
-  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="relative">
       <Input
+        {...props.inputProps}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        ref={inputRef}
       />
       <motion.button
         type="button"
@@ -174,13 +180,19 @@ function PresetList() {
         <TableBody>
           <TableRow>
             <TableCell>
-              <Badge>{t("systemBadge")}</Badge>{" "}
+              <Badge data-testid="system-preset-badge">
+                {t("systemBadge")}
+              </Badge>{" "}
               <span className="text-wrap break-all">{defaultKeyTemplate}</span>
             </TableCell>
             <TableCell className="text-right">
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon-sm">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="System preset actions"
+                  >
                     <MoreHorizontalIcon />
                   </Button>
                 </DropdownMenuTrigger>
@@ -239,7 +251,7 @@ function PresetItem({
   const { error, warning, validate } = useKeyTemplateValidation();
   const t = useTranslations("settings.keyTemplate");
   return (
-    <TableRow>
+    <TableRow data-testid={`preset-user-defined-item-${preset.key}`}>
       <TableCell>
         {isEditing ? (
           <Field>
@@ -270,6 +282,7 @@ function PresetItem({
             size="icon-sm"
             onClick={() => setIsEditing(false)}
             disabled={!!error}
+            aria-label="Save"
           >
             <CheckIcon />
           </Button>
