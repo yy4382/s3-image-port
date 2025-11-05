@@ -14,6 +14,7 @@ import globalsCss from "@/styles/globals.css?url";
 import { produce } from "immer";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -91,68 +92,69 @@ function RootErrorComponent() {
         <title>Error - Something went wrong</title>
         <link rel="stylesheet" href={globalsCss} />
       </head>
-      <body className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <div className="max-w-lg w-full bg-white rounded-lg p-8 shadow-sm">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">
+      <body className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="max-w-lg w-full bg-card rounded-lg p-8 shadow-sm border">
+          <h1 className="text-2xl font-bold mb-4 text-destructive">
             ⚠️ Something went wrong
           </h1>
-          <p className="mb-4 leading-relaxed text-gray-600">
+          <p className="mb-4 leading-relaxed text-muted-foreground">
             An unrecoverable error has occurred. This is usually a temporary
             issue that can be resolved by trying one of the following options:
           </p>
 
           <div className="flex flex-col gap-3 mt-6">
-            <button
-              onClick={handleRefresh}
-              className="w-full px-4 py-2.5 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-            >
+            <Button onClick={handleRefresh} className="w-full">
               🔄 Refresh the page
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleGoHome}
-              className="w-full px-4 py-2.5 rounded-md text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              variant="secondary"
+              className="w-full"
             >
               🏠 Go to home page
-            </button>
+            </Button>
           </div>
 
           {!showWarning && (
             <div className="mt-6">
-              <p className="text-sm text-gray-500 mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 If the above options don't work:
               </p>
-              <button
+              <Button
                 onClick={() => setShowWarning(true)}
-                className="w-full px-4 py-2.5 rounded-md text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                variant="secondary"
+                className="w-full"
               >
                 Clear all stored data
-              </button>
+              </Button>
             </div>
           )}
 
           {showWarning && (
-            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-md p-4">
-              <div className="font-semibold text-amber-900 mb-2">
+            <div className="mt-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md p-4">
+              <div className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
                 ⚠️ Warning
               </div>
-              <p className="text-sm text-amber-800 leading-relaxed mb-3">
+              <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed mb-3">
                 This will clear all locally stored data including settings,
                 preferences, and any cached information. You will need to
                 reconfigure the application after this action.
               </p>
               <div className="flex gap-2">
-                <button
+                <Button
                   onClick={handleClearStorage}
-                  className="flex-1 px-4 py-2.5 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                  variant="destructive"
+                  className="flex-1"
                 >
                   Clear and restart
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setShowWarning(false)}
-                  className="flex-1 px-4 py-2.5 rounded-md text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                  variant="secondary"
+                  className="flex-1"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           )}
