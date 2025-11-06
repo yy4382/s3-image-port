@@ -1,40 +1,36 @@
-import { atomWithStorage } from "jotai/utils";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { resetGalleryStateAtom } from "../../gallery/use-photo-list";
-import type { Options, Options as Profile } from "../settings-store";
-import { migrateFromV1, optionsAtom, optionsSchema } from "../settings-store";
+import type { Options } from "../settings-store";
+import { optionsSchema, profilesAtom } from "../settings-store";
+import { migrateFromV1 } from "../schema/migrations/v1-v3";
 import { toast } from "sonner";
 import { useCallback } from "react";
 import { useTranslations } from "use-intl";
 import { z } from "zod";
-
-export const CURRENT_PROFILE = "CURRENT";
-
-// The current profile is not stored in here!
-export const profileListAtom = atomWithStorage<
-  [string, Profile | typeof CURRENT_PROFILE][]
->("s3ip:profile:profiles", [["Default", CURRENT_PROFILE]]);
+import { produce } from "immer";
 
 export function useRenameProfile() {
   const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const [profileList, setProfileList] = useAtom(profilesAtom);
   const rename = useCallback(
     ({ oldName, newName }: { oldName: string; newName: string }) => {
       if (oldName === newName) {
         toast.error(t("sameNameError"));
         return;
       }
-      if (profileList.find((p) => p[0] === newName)) {
+      if (profileList.list.find((p) => p[0] === newName)) {
         toast.error(t("nameExists"));
         return;
       }
-      const newProfiles = profileList.map((p) => {
-        if (p[0] === oldName) {
-          return [newName, p[1]] as [string, Profile | typeof CURRENT_PROFILE];
-        }
-        return p;
-      });
-      setProfileList(newProfiles);
+      setProfileList((profiles) =>
+        produce(profiles, (draft) => {
+          const oldIndex = draft.list.findIndex((p) => p[0] === oldName);
+          if (oldIndex === -1) {
+            return;
+          }
+          draft.list[oldIndex][0] = newName;
+        }),
+      );
     },
     [profileList, setProfileList, t],
   );
@@ -44,63 +40,36 @@ export function useRenameProfile() {
 
 export function useLoadProfile() {
   const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const [options, setOptions] = useAtom(optionsAtom);
+  const [profileList, setProfileList] = useAtom(profilesAtom);
   const resetGalleryState = useSetAtom(resetGalleryStateAtom);
 
-  const load = useCallback(
-    (name: string) => {
-      let profileToBeLoad: Profile | typeof CURRENT_PROFILE | undefined;
-      let currentProfileName: string | undefined;
-      let currentProfileIndex = -1;
-      let targetProfileIndex = -1;
+  const load = (name: string) => {
+    const targetProfileIndex = profileList.list.findIndex((p) => p[0] === name);
 
-      // Single pass to find all required information
-      for (let i = 0; i < profileList.length; i++) {
-        const [profileName, profile] = profileList[i];
-        if (profileName === name) {
-          profileToBeLoad = profile;
-          targetProfileIndex = i;
-        }
-        if (profile === CURRENT_PROFILE) {
-          currentProfileName = profileName;
-          currentProfileIndex = i;
-        }
-      }
+    if (targetProfileIndex === -1) {
+      toast.error(t("loadFailed"));
+      return;
+    }
 
-      if (
-        !profileToBeLoad ||
-        !currentProfileName ||
-        currentProfileIndex === -1
-      ) {
-        toast.error(t("loadFailed"));
-        return;
-      }
+    if (targetProfileIndex !== profileList.current) {
+      setProfileList((profiles) =>
+        produce(profiles, (draft) => {
+          draft.current = targetProfileIndex;
+        }),
+      );
+      resetGalleryState();
 
-      if (profileToBeLoad !== CURRENT_PROFILE) {
-        const currentProfile = options;
+      toast.success(t("loadSuccess", { name }));
+    }
+  };
 
-        // Create new profiles array with updated values
-        const newProfiles = [...profileList];
-        newProfiles[currentProfileIndex] = [currentProfileName, currentProfile];
-        newProfiles[targetProfileIndex] = [name, CURRENT_PROFILE];
-
-        setOptions(profileToBeLoad);
-        setProfileList(newProfiles);
-        resetGalleryState();
-
-        toast.success(t("loadSuccess", { name }));
-      }
-    },
-    [options, profileList, resetGalleryState, setOptions, setProfileList, t],
-  );
   return load;
 }
 
 export const useDuplicateProfile = () => {
   const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const options = useAtomValue(optionsAtom);
+  const [profileList, setProfileList] = useAtom(profilesAtom);
+
   const duplicate = useCallback(
     ({
       name,
@@ -112,52 +81,60 @@ export const useDuplicateProfile = () => {
       // Find a unique name
       let newName = initialNewNameSuggestion;
       let counter = 1;
-      while (profileList.find((p) => p[0] === newName)) {
+      while (profileList.list.find((p) => p[0] === newName)) {
         counter++;
         newName = `${name} (copy ${counter})`;
       }
 
       // Get the profile to duplicate
-      const profileToDuplicate =
-        profileList.find((p) => p[0] === name)?.[1] === CURRENT_PROFILE
-          ? options
-          : profileList.find((p) => p[0] === name)?.[1];
+      const profileToDuplicate = profileList.list.find(
+        (p) => p[0] === name,
+      )?.[1];
 
       if (profileToDuplicate) {
-        setProfileList([...profileList, [newName, profileToDuplicate]]);
+        setProfileList((profiles) =>
+          produce(profiles, (draft) => {
+            draft.list.push([newName, profileToDuplicate]);
+          }),
+        );
         toast.success(t("duplicateSuccess", { name, newName }));
       } else {
         toast.error(t("duplicateFailed"));
       }
     },
-    [profileList, setProfileList, options, t],
+    [profileList, setProfileList, t],
   );
   return duplicate;
 };
 
 export const useDeleteProfile = () => {
   const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
-  const deleteProfile = useCallback(
-    (nameToDelete: string) => {
-      const profileToDelete = profileList.find((p) => p[0] === nameToDelete);
+  const [profileList, setProfileList] = useAtom(profilesAtom);
+  const deleteProfile = (nameToDelete: string) => {
+    const profileToDeleteIndex = profileList.list.findIndex(
+      (p) => p[0] === nameToDelete,
+    );
 
-      if (!profileToDelete) {
-        toast.error(t("profileNotFound"));
-        return;
-      }
+    if (profileToDeleteIndex === -1) {
+      toast.error(t("profileNotFound"));
+      return;
+    }
 
-      if (profileToDelete[1] === CURRENT_PROFILE) {
-        toast.error(t("cannotDeleteCurrent"));
-        return;
-      }
+    if (profileToDeleteIndex === profileList.current) {
+      toast.error(t("cannotDeleteCurrent"));
+      return;
+    }
 
-      const newProfiles = profileList.filter((p) => p[0] !== nameToDelete);
-      setProfileList(newProfiles);
-      toast.success(t("deleteSuccess", { nameToDelete }));
-    },
-    [profileList, setProfileList, t],
-  );
+    setProfileList((profiles) =>
+      produce(profiles, (draft) => {
+        draft.list.splice(profileToDeleteIndex, 1);
+        if (draft.current > profileToDeleteIndex) {
+          draft.current--;
+        }
+      }),
+    );
+    toast.success(t("deleteSuccess", { nameToDelete }));
+  };
   return deleteProfile;
 };
 
@@ -187,19 +164,23 @@ export function parseProfile(
 
 export function useImportProfile() {
   const t = useTranslations("settings.profiles.errors");
-  const [profileList, setProfileList] = useAtom(profileListAtom);
+  const [profileList, setProfileList] = useAtom(profilesAtom);
   const importProfile = useCallback(
     (newProfile: { name: string; data: Options }) => {
       try {
         const data = newProfile.data;
         const name = newProfile.name;
 
-        if (profileList.find((p) => p[0] === name)) {
+        if (profileList.list.find((p) => p[0] === name)) {
           toast.error(t("nameExistsImport", { name }));
           return;
         }
 
-        setProfileList([...profileList, [name, data]]);
+        setProfileList((profiles) =>
+          produce(profiles, (draft) => {
+            draft.list.push([name, data]);
+          }),
+        );
         toast.success(t("importSuccess", { name }));
       } catch (error) {
         if (error instanceof z.ZodError) {

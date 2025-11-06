@@ -1,6 +1,6 @@
 "use client";
 
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,9 +18,8 @@ import McUpload from "~icons/mingcute/upload-2-line.jsx";
 import McClipboard from "~icons/mingcute/clipboard-line.jsx";
 import McFile from "~icons/mingcute/file-upload-line.jsx";
 import type { Options as Profile } from "../settings-store";
-import { optionsAtom } from "../settings-store";
 import { toast } from "sonner";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { useTranslations } from "use-intl";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,9 +33,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  CURRENT_PROFILE,
   parseProfile,
-  profileListAtom,
   useDeleteProfile,
   useDuplicateProfile,
   useHandleV1ClipboardImport,
@@ -44,10 +41,11 @@ import {
   useLoadProfile,
   useRenameProfile,
 } from "./profiles-utils";
+import { profilesAtom } from "../settings-store";
 
 type ProfileItemProps = {
   name: string;
-  profile: Profile | typeof CURRENT_PROFILE;
+  profile: Profile;
   isCurrent: boolean;
   onRename: (oldName: string, newName: string) => void;
   onDuplicate: (name: string, newName: string) => void;
@@ -65,10 +63,9 @@ function ProfileItem({
   onDelete,
 }: ProfileItemProps) {
   const t = useTranslations("settings.profiles");
-  const currentOptions = useAtom(optionsAtom)[0];
 
   const handleExport = () => {
-    const profileData = profile === CURRENT_PROFILE ? currentOptions : profile;
+    const profileData = profile;
     const profileJson = JSON.stringify({ name, data: profileData }, null, 2);
     navigator.clipboard
       .writeText(profileJson)
@@ -297,18 +294,12 @@ function ProfileImporter() {
 }
 
 function Profiles() {
-  const [profiles, setProfiles] = useAtom(profileListAtom);
+  const profiles = useAtomValue(profilesAtom);
   const loadProfile = useLoadProfile();
   const renameProfile = useRenameProfile();
   const duplicateProfile = useDuplicateProfile();
   const deleteProfile = useDeleteProfile();
   const t = useTranslations("settings.profiles");
-
-  useEffect(() => {
-    if (profiles.length === 0) {
-      setProfiles([["Default", CURRENT_PROFILE]]);
-    }
-  }, [profiles.length, setProfiles]);
 
   return (
     <div className="space-y-6">
@@ -326,12 +317,12 @@ function Profiles() {
             </>
           }
         >
-          {profiles.map(([name, profile]) => (
+          {profiles.list.map(([name, profile], index) => (
             <ProfileItem
               key={name}
               name={name}
               profile={profile}
-              isCurrent={profile === CURRENT_PROFILE}
+              isCurrent={index === profiles.current}
               onRename={(oldName, newName) =>
                 renameProfile({ oldName, newName })
               }
