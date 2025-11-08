@@ -42,6 +42,7 @@ import {
   useRenameProfile,
 } from "./profiles-utils";
 import { profilesAtom } from "../settings-store";
+import { SyncSettingsCard } from "../components/SyncSettingsCard";
 
 type ProfileItemProps = {
   name: string;
@@ -333,6 +334,12 @@ function Profiles() {
               onDelete={deleteProfile}
             />
           ))}
+        </ClientOnly>
+      </div>
+
+      <div className="mt-8">
+        <ClientOnly fallback={<Skeleton className="w-full h-96" />}>
+          <SyncSettingsCard />
         </ClientOnly>
       </div>
     </div>
