@@ -10,15 +10,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ProfileDiff } from "./ProfileDiff";
+import { ProfileDiff } from "./profile-diff";
 import {
   fetchRemoteProfiles,
   compareProfiles,
   ProfilesDiff,
 } from "../sync-service";
-import { profilesSchema } from "../settings-store";
+import { profilesSchema } from "../../settings-store";
 import { useAtomValue } from "jotai";
-import { profilesAtom } from "../settings-store";
+import { profilesAtom } from "../../settings-store";
 import { Loader2Icon, AlertTriangleIcon } from "lucide-react";
 import { z } from "zod";
 

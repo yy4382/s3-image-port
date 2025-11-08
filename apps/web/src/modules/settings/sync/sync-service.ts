@@ -1,8 +1,8 @@
 import { encrypt, decrypt } from "@/lib/encryption/crypto";
 import { EncryptedData } from "@/lib/encryption/types";
-import type { Options } from "./settings-store";
-import { profilesSchema } from "./settings-store";
-import { profilesSchemaForLoad } from "./schema/v3";
+import type { Options } from "../settings-store";
+import { profilesSchema } from "../settings-store";
+import { profilesSchemaForLoad } from "../schema/v3";
 import { z } from "zod";
 import * as Diff from "diff";
 
