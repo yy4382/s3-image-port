@@ -1,4 +1,4 @@
-import { encrypt, decrypt } from "@/lib/encryption/crypto";
+import { encrypt, decrypt, deriveAuthToken } from "@/lib/encryption/crypto";
 import { EncryptedData } from "@/lib/encryption/types";
 import type { Options } from "../settings-store";
 import { profilesSchema } from "../settings-store";
@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as Diff from "diff";
 
 const API_BASE = "/api/sync/profiles";
+const AUTH_HEADER = "x-sync-auth";
 
 interface StoredProfile {
   data: EncryptedData;
@@ -54,6 +55,16 @@ export interface ProfileChanges {
 
 type Profiles = z.infer<typeof profilesSchema>;
 
+async function getAuthToken(
+  passphrase: string,
+  userId: string,
+): Promise<string> {
+  if (!userId) {
+    throw new Error("User ID is required for sync operations");
+  }
+  return deriveAuthToken(passphrase, userId);
+}
+
 /**
  * Upload encrypted profiles to server
  */
@@ -66,9 +77,14 @@ export async function uploadProfiles(
   const serialized = JSON.stringify(profiles);
   const encrypted = await encrypt(serialized, passphrase);
 
+  const authToken = await getAuthToken(passphrase, userId);
+
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      [AUTH_HEADER]: authToken,
+    },
     body: JSON.stringify({
       userId,
       data: encrypted,
@@ -95,8 +111,14 @@ export async function fetchRemoteProfiles(
   passphrase: string,
   userId: string,
 ): Promise<{ profiles: Profiles; version: number; updatedAt: number } | null> {
+  const authToken = await getAuthToken(passphrase, userId);
   const response = await fetch(
     `${API_BASE}?userId=${encodeURIComponent(userId)}`,
+    {
+      headers: {
+        [AUTH_HEADER]: authToken,
+      },
+    },
   );
 
   if (!response.ok) {
@@ -122,10 +144,17 @@ export async function fetchRemoteProfiles(
 /**
  * Delete remote profiles from server
  */
-export async function deleteRemoteProfiles(userId: string): Promise<void> {
+export async function deleteRemoteProfiles(
+  passphrase: string,
+  userId: string,
+): Promise<void> {
+  const authToken = await getAuthToken(passphrase, userId);
   const response = await fetch(API_BASE, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      [AUTH_HEADER]: authToken,
+    },
     body: JSON.stringify({ userId }),
   });
 
@@ -139,10 +168,17 @@ export async function deleteRemoteProfiles(userId: string): Promise<void> {
  */
 export async function checkRemoteVersion(
   userId: string,
+  passphrase: string,
 ): Promise<{ exists: boolean; version?: number; updatedAt?: number }> {
   try {
+    const authToken = await getAuthToken(passphrase, userId);
     const response = await fetch(
       `${API_BASE}?userId=${encodeURIComponent(userId)}`,
+      {
+        headers: {
+          [AUTH_HEADER]: authToken,
+        },
+      },
     );
 
     if (!response.ok) {

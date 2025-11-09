@@ -27,7 +27,7 @@ type Profiles = z.infer<typeof profilesSchema>;
 interface SyncPullDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onApply: (remoteProfiles: Profiles) => void;
+  onApply: (payload: { profiles: Profiles; version: number }) => void;
   passphrase: string;
   userId: string;
 }
@@ -45,7 +45,10 @@ export function SyncPullDialog({
   const [loadingState, setLoadingState] = useState<LoadingState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [diff, setDiff] = useState<ProfilesDiff | null>(null);
-  const [remoteProfiles, setRemoteProfiles] = useState<Profiles | null>(null);
+  const [remoteData, setRemoteData] = useState<{
+    profiles: Profiles;
+    version: number;
+  } | null>(null);
 
   const loadRemoteProfiles = useCallback(async () => {
     startTransition(() => {
@@ -64,7 +67,7 @@ export function SyncPullDialog({
       }
 
       startTransition(() => {
-        setRemoteProfiles(result.profiles);
+        setRemoteData({ profiles: result.profiles, version: result.version });
         const profilesDiff = compareProfiles(localProfiles, result.profiles);
         setDiff(profilesDiff);
         setLoadingState("loaded");
@@ -89,8 +92,8 @@ export function SyncPullDialog({
   }, [open, passphrase, userId, loadRemoteProfiles]);
 
   const handleApply = () => {
-    if (remoteProfiles) {
-      onApply(remoteProfiles);
+    if (remoteData) {
+      onApply(remoteData);
       onOpenChange(false);
     }
   };
@@ -99,7 +102,7 @@ export function SyncPullDialog({
     setLoadingState("idle");
     setError(null);
     setDiff(null);
-    setRemoteProfiles(null);
+    setRemoteData(null);
     onOpenChange(false);
   };
 
