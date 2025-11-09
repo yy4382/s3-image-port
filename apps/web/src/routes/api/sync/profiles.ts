@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getRedisClient } from "@/lib/redis/client";
 import { z } from "zod";
 import { encryptedDataSchema } from "@/lib/encryption/types";
+import { createHash } from "node:crypto";
 
 const PROFILE_KEY_PREFIX = "profile:sync:";
 const MAX_PAYLOAD_SIZE = 1024 * 1024; // 1MB
+const AUTH_HEADER = "x-sync-auth";
 
 // Request/Response schemas
 const uploadRequestSchema = z.object({
@@ -26,13 +28,18 @@ interface StoredProfile {
   };
   version: number;
   updatedAt: number;
+  userId: string;
 }
 
 /**
- * Get the Redis key for a user's profile
+ * Get the Redis key for a profile using the hashed auth token
  */
-function getProfileKey(userId: string): string {
-  return `${PROFILE_KEY_PREFIX}${userId}`;
+function getProfileKey(authHash: string): string {
+  return `${PROFILE_KEY_PREFIX}${authHash}`;
+}
+
+function computeAuthHash(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 /**
@@ -41,12 +48,12 @@ function getProfileKey(userId: string): string {
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-function checkRateLimit(userId: string): boolean {
+function checkRateLimit(key: string): boolean {
   const now = Date.now();
-  const limit = rateLimitMap.get(userId);
+  const limit = rateLimitMap.get(key);
 
   if (!limit || now > limit.resetAt) {
-    rateLimitMap.set(userId, { count: 1, resetAt: now + 60_000 }); // 1 minute window
+    rateLimitMap.set(key, { count: 1, resetAt: now + 60_000 }); // 1 minute window
     return true;
   }
 
@@ -58,6 +65,16 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
+function unauthorizedResponse() {
+  return new Response(
+    JSON.stringify({ error: "Missing or invalid auth token" }),
+    {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+}
+
 export const Route = createFileRoute("/api/sync/profiles")({
   server: {
     handlers: {
@@ -66,6 +83,12 @@ export const Route = createFileRoute("/api/sync/profiles")({
         try {
           const url = new URL(request.url);
           const userId = url.searchParams.get("userId");
+          const authToken = request.headers.get(AUTH_HEADER);
+
+          if (!authToken) {
+            return unauthorizedResponse();
+          }
+          const authHash = computeAuthHash(authToken);
 
           if (!userId) {
             return new Response(
@@ -74,7 +97,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
             );
           }
 
-          if (!checkRateLimit(userId)) {
+          if (!checkRateLimit(authHash)) {
             return new Response(
               JSON.stringify({ error: "Rate limit exceeded" }),
               { status: 429, headers: { "Content-Type": "application/json" } },
@@ -82,7 +105,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
           }
 
           const redis = getRedisClient();
-          const key = getProfileKey(userId);
+          const key = getProfileKey(authHash);
           const stored = await redis.get(key);
 
           if (!stored) {
@@ -111,6 +134,13 @@ export const Route = createFileRoute("/api/sync/profiles")({
       POST: async ({ request }) => {
         try {
           const contentLength = request.headers.get("content-length");
+          const authToken = request.headers.get(AUTH_HEADER);
+
+          if (!authToken) {
+            return unauthorizedResponse();
+          }
+          const authHash = computeAuthHash(authToken);
+
           if (contentLength && parseInt(contentLength) > MAX_PAYLOAD_SIZE) {
             return new Response(
               JSON.stringify({ error: "Payload too large (max 1MB)" }),
@@ -133,7 +163,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
 
           const { userId, data, version } = parseResult.data;
 
-          if (!checkRateLimit(userId)) {
+          if (!checkRateLimit(authHash)) {
             return new Response(
               JSON.stringify({ error: "Rate limit exceeded" }),
               { status: 429, headers: { "Content-Type": "application/json" } },
@@ -141,7 +171,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
           }
 
           const redis = getRedisClient();
-          const key = getProfileKey(userId);
+          const key = getProfileKey(authHash);
 
           // Check for version conflict (optimistic locking)
           const existing = await redis.get(key);
@@ -167,6 +197,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
             data,
             version,
             updatedAt: Date.now(),
+            userId,
           };
 
           await redis.set(key, JSON.stringify(profile));
@@ -191,6 +222,13 @@ export const Route = createFileRoute("/api/sync/profiles")({
       DELETE: async ({ request }) => {
         try {
           const body = await request.json();
+          const authToken = request.headers.get(AUTH_HEADER);
+
+          if (!authToken) {
+            return unauthorizedResponse();
+          }
+          const authHash = computeAuthHash(authToken);
+
           const parseResult = deleteRequestSchema.safeParse(body);
 
           if (!parseResult.success) {
@@ -205,7 +243,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
 
           const { userId } = parseResult.data;
 
-          if (!checkRateLimit(userId)) {
+          if (!checkRateLimit(authHash)) {
             return new Response(
               JSON.stringify({ error: "Rate limit exceeded" }),
               { status: 429, headers: { "Content-Type": "application/json" } },
@@ -213,7 +251,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
           }
 
           const redis = getRedisClient();
-          const key = getProfileKey(userId);
+          const key = getProfileKey(authHash);
           await redis.del(key);
 
           return new Response(JSON.stringify({ success: true }), {

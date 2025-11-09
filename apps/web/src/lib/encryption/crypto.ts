@@ -5,6 +5,7 @@ const PBKDF2_ITERATIONS = 600_000; // OWASP 2023 recommendation
 const SALT_LENGTH = 32; // 256 bits
 const IV_LENGTH = 12; // 96 bits for AES-GCM
 const KEY_LENGTH = 256; // 256-bit AES key
+const AUTH_SALT_PREFIX = "s3-port-sync-auth:";
 
 /**
  * Converts ArrayBuffer to base64 string
@@ -42,6 +43,42 @@ function generateSalt(): Uint8Array {
  */
 function generateIV(): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+}
+
+/**
+ * Derive a deterministic auth token from passphrase + userId
+ * Used to authenticate sync requests without sharing the raw passphrase
+ */
+export async function deriveAuthToken(
+  passphrase: string,
+  userId: string,
+): Promise<string> {
+  try {
+    const encoder = new TextEncoder();
+    const passphraseKey = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(passphrase),
+      "PBKDF2",
+      false,
+      ["deriveBits"],
+    );
+
+    const authSalt = encoder.encode(`${AUTH_SALT_PREFIX}${userId}`);
+    const authBits = await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt: authSalt,
+        iterations: PBKDF2_ITERATIONS,
+        hash: "SHA-256",
+      },
+      passphraseKey,
+      KEY_LENGTH,
+    );
+
+    return arrayBufferToBase64(authBits);
+  } catch (error) {
+    throw new EncryptionError("Failed to derive auth token", error);
+  }
 }
 
 /**

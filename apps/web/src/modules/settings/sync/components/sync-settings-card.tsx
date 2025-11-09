@@ -127,11 +127,15 @@ export function SyncSettingsCard() {
     setPullDialogOpen(true);
   };
 
-  const handlePullApply = (remoteProfiles: typeof profiles) => {
-    setProfiles(remoteProfiles);
+  const handlePullApply = (remote: {
+    profiles: typeof profiles;
+    version: number;
+  }) => {
+    setProfiles(remote.profiles);
 
     setSyncConfig((prev) => ({
       ...prev,
+      version: remote.version,
       lastPull: Date.now(),
     }));
 
@@ -152,7 +156,7 @@ export function SyncSettingsCard() {
     setIsDeleting(true);
 
     try {
-      await deleteRemoteProfiles(syncConfig.userId);
+      await deleteRemoteProfiles(passphrase, syncConfig.userId);
       setSyncConfig((prev) => ({
         ...prev,
         version: 0,

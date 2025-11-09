@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { encrypt, decrypt, validatePassphrase } from "./crypto";
+import {
+  encrypt,
+  decrypt,
+  validatePassphrase,
+  deriveAuthToken,
+} from "./crypto";
 
 describe("Encryption utilities", () => {
   const testData = "Hello, World!";
@@ -76,6 +81,24 @@ describe("Encryption utilities", () => {
     it("should accept complex 12-15 character passphrases", () => {
       const result = validatePassphrase("Complex123!@");
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe("deriveAuthToken", () => {
+    it("produces deterministic token for same inputs", async () => {
+      const token1 = await deriveAuthToken(passphrase, "user-123");
+      const token2 = await deriveAuthToken(passphrase, "user-123");
+      expect(token1).toBe(token2);
+    });
+
+    it("produces different tokens for different users/passphrases", async () => {
+      const token1 = await deriveAuthToken(passphrase, "user-123");
+      const token2 = await deriveAuthToken("another-passphrase", "user-123");
+      const token3 = await deriveAuthToken(passphrase, "user-456");
+
+      expect(token1).not.toBe(token2);
+      expect(token1).not.toBe(token3);
+      expect(token2).not.toBe(token3);
     });
   });
 });
