@@ -55,14 +55,11 @@ export interface ProfileChanges {
 
 type Profiles = z.infer<typeof profilesSchema>;
 
-async function getAuthToken(
-  passphrase: string,
-  userId: string,
-): Promise<string> {
-  if (!userId) {
-    throw new Error("User ID is required for sync operations");
+async function getAuthToken(token: string): Promise<string> {
+  if (!token) {
+    throw new Error("Sync token is required for sync operations");
   }
-  return deriveAuthToken(passphrase, userId);
+  return deriveAuthToken(token);
 }
 
 /**
@@ -70,14 +67,14 @@ async function getAuthToken(
  */
 export async function uploadProfiles(
   profiles: Profiles,
-  passphrase: string,
-  userId: string,
+  token: string,
+  _userId: string,
   currentVersion: number,
 ): Promise<{ success: boolean; version: number; conflict?: boolean }> {
   const serialized = JSON.stringify(profiles);
-  const encrypted = await encrypt(serialized, passphrase);
+  const encrypted = await encrypt(serialized, token);
 
-  const authToken = await getAuthToken(passphrase, userId);
+  const authToken = await getAuthToken(token);
 
   const response = await fetch(API_BASE, {
     method: "POST",
@@ -86,7 +83,6 @@ export async function uploadProfiles(
       [AUTH_HEADER]: authToken,
     },
     body: JSON.stringify({
-      userId,
       data: encrypted,
       version: currentVersion + 1,
     }),
@@ -108,18 +104,15 @@ export async function uploadProfiles(
  * Fetch and decrypt remote profiles
  */
 export async function fetchRemoteProfiles(
-  passphrase: string,
-  userId: string,
+  token: string,
+  _userId: string,
 ): Promise<{ profiles: Profiles; version: number; updatedAt: number } | null> {
-  const authToken = await getAuthToken(passphrase, userId);
-  const response = await fetch(
-    `${API_BASE}?userId=${encodeURIComponent(userId)}`,
-    {
-      headers: {
-        [AUTH_HEADER]: authToken,
-      },
+  const authToken = await getAuthToken(token);
+  const response = await fetch(API_BASE, {
+    headers: {
+      [AUTH_HEADER]: authToken,
     },
-  );
+  });
 
   if (!response.ok) {
     throw new Error(`Fetch failed: ${response.statusText}`);
@@ -131,7 +124,7 @@ export async function fetchRemoteProfiles(
     return null;
   }
 
-  const decrypted = await decrypt(stored.data, passphrase);
+  const decrypted = await decrypt(stored.data, token);
   const profiles = profilesSchemaForLoad.parse(JSON.parse(decrypted));
 
   return {
@@ -145,17 +138,16 @@ export async function fetchRemoteProfiles(
  * Delete remote profiles from server
  */
 export async function deleteRemoteProfiles(
-  passphrase: string,
-  userId: string,
+  token: string,
+  _userId: string,
 ): Promise<void> {
-  const authToken = await getAuthToken(passphrase, userId);
+  const authToken = await getAuthToken(token);
   const response = await fetch(API_BASE, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
       [AUTH_HEADER]: authToken,
     },
-    body: JSON.stringify({ userId }),
   });
 
   if (!response.ok) {
@@ -167,19 +159,16 @@ export async function deleteRemoteProfiles(
  * Check if remote profile exists and get version info
  */
 export async function checkRemoteVersion(
-  userId: string,
-  passphrase: string,
+  _userId: string,
+  token: string,
 ): Promise<{ exists: boolean; version?: number; updatedAt?: number }> {
   try {
-    const authToken = await getAuthToken(passphrase, userId);
-    const response = await fetch(
-      `${API_BASE}?userId=${encodeURIComponent(userId)}`,
-      {
-        headers: {
-          [AUTH_HEADER]: authToken,
-        },
+    const authToken = await getAuthToken(token);
+    const response = await fetch(API_BASE, {
+      headers: {
+        [AUTH_HEADER]: authToken,
       },
-    );
+    });
 
     if (!response.ok) {
       return { exists: false };

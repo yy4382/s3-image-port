@@ -86,19 +86,16 @@ describe("Encryption utilities", () => {
 
   describe("deriveAuthToken", () => {
     it("produces deterministic token for same inputs", async () => {
-      const token1 = await deriveAuthToken(passphrase, "user-123");
-      const token2 = await deriveAuthToken(passphrase, "user-123");
+      const token1 = await deriveAuthToken(passphrase);
+      const token2 = await deriveAuthToken(passphrase);
       expect(token1).toBe(token2);
     });
 
-    it("produces different tokens for different users/passphrases", async () => {
-      const token1 = await deriveAuthToken(passphrase, "user-123");
-      const token2 = await deriveAuthToken("another-passphrase", "user-123");
-      const token3 = await deriveAuthToken(passphrase, "user-456");
+    it("produces different tokens for different passphrases", async () => {
+      const token1 = await deriveAuthToken(passphrase);
+      const token2 = await deriveAuthToken("another-passphrase");
 
       expect(token1).not.toBe(token2);
-      expect(token1).not.toBe(token3);
-      expect(token2).not.toBe(token3);
     });
   });
 });

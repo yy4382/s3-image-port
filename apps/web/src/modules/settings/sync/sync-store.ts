@@ -1,11 +1,11 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
+import { SYNC_TOKEN_STORAGE_KEY } from "@/lib/encryption/sync-token";
 
 // Sync configuration stored in localStorage
 const _syncConfigSchema = z.object({
   enabled: z.boolean(),
-  userId: z.string().optional(),
   lastUpload: z.number().optional(),
   lastPull: z.number().optional(),
   version: z.number().default(0),
@@ -24,18 +24,21 @@ export const syncConfigAtom = atomWithStorage<SyncConfig>(
   { getOnInit: true },
 );
 
-// Persisted passphrase in localStorage
-// Note: This is stored in localStorage because the unencrypted profiles
-// are already there. The passphrase encrypts data sent to the server,
-// but local data is not encrypted. Storing the passphrase improves UX
-// without reducing security since an attacker with localStorage access
-// already has the unencrypted profiles.
-export const syncPassphraseAtom = atomWithStorage<string>(
-  "s3ip:sync-passphrase",
+// Persisted sync token in localStorage
+// This token encrypts profiles before they leave the browser. Keeping it
+// locally mirrors the existing plaintext storage of profiles and makes the
+// UX practical without reducing security.
+export const syncTokenAtom = atomWithStorage<string>(
+  SYNC_TOKEN_STORAGE_KEY,
   "",
   undefined,
-  { getOnInit: true },
+  {
+    getOnInit: true,
+  },
 );
+
+// Temporary alias until UI is refactored.
+export const syncPassphraseAtom = syncTokenAtom;
 
 // Remote sync info fetched from server
 export interface RemoteSyncInfo {
@@ -61,6 +64,6 @@ export const isSyncEnabledAtom = atom((get) => get(syncConfigAtom).enabled);
 
 export const canSyncAtom = atom((get) => {
   const config = get(syncConfigAtom);
-  const passphrase = get(syncPassphraseAtom);
-  return config.enabled && !!config.userId && passphrase.length > 0;
+  const token = get(syncTokenAtom);
+  return config.enabled && token.trim().length > 0;
 });

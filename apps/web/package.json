@@ -28,6 +28,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.4",
+    "@scure/bip39": "2.0.1",
     "@tanstack/react-form": "^1.23.8",
     "@tanstack/react-router": "^1.133.36",
     "@tanstack/react-start": "^1.133.37",
