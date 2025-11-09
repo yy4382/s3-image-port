@@ -46,24 +46,21 @@ function generateIV(): Uint8Array {
 }
 
 /**
- * Derive a deterministic auth token from passphrase + userId
- * Used to authenticate sync requests without sharing the raw passphrase
+ * Derive a deterministic auth token from the sync token.
+ * Used to authenticate sync requests without sharing the raw token.
  */
-export async function deriveAuthToken(
-  passphrase: string,
-  userId: string,
-): Promise<string> {
+export async function deriveAuthToken(token: string): Promise<string> {
   try {
     const encoder = new TextEncoder();
     const passphraseKey = await crypto.subtle.importKey(
       "raw",
-      encoder.encode(passphrase),
+      encoder.encode(token),
       "PBKDF2",
       false,
       ["deriveBits"],
     );
 
-    const authSalt = encoder.encode(`${AUTH_SALT_PREFIX}${userId}`);
+    const authSalt = encoder.encode(AUTH_SALT_PREFIX);
     const authBits = await crypto.subtle.deriveBits(
       {
         name: "PBKDF2",

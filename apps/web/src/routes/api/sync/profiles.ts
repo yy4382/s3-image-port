@@ -10,13 +10,8 @@ const AUTH_HEADER = "x-sync-auth";
 
 // Request/Response schemas
 const uploadRequestSchema = z.object({
-  userId: z.string().min(1),
   data: encryptedDataSchema,
   version: z.number().int().nonnegative(),
-});
-
-const deleteRequestSchema = z.object({
-  userId: z.string().min(1),
 });
 
 interface StoredProfile {
@@ -28,7 +23,6 @@ interface StoredProfile {
   };
   version: number;
   updatedAt: number;
-  userId: string;
 }
 
 /**
@@ -81,21 +75,12 @@ export const Route = createFileRoute("/api/sync/profiles")({
       // Retrieve encrypted profile from server
       GET: async ({ request }) => {
         try {
-          const url = new URL(request.url);
-          const userId = url.searchParams.get("userId");
           const authToken = request.headers.get(AUTH_HEADER);
 
           if (!authToken) {
             return unauthorizedResponse();
           }
           const authHash = computeAuthHash(authToken);
-
-          if (!userId) {
-            return new Response(
-              JSON.stringify({ error: "Missing userId parameter" }),
-              { status: 400, headers: { "Content-Type": "application/json" } },
-            );
-          }
 
           if (!checkRateLimit(authHash)) {
             return new Response(
@@ -161,7 +146,7 @@ export const Route = createFileRoute("/api/sync/profiles")({
             );
           }
 
-          const { userId, data, version } = parseResult.data;
+          const { data, version } = parseResult.data;
 
           if (!checkRateLimit(authHash)) {
             return new Response(
@@ -197,7 +182,6 @@ export const Route = createFileRoute("/api/sync/profiles")({
             data,
             version,
             updatedAt: Date.now(),
-            userId,
           };
 
           await redis.set(key, JSON.stringify(profile));
@@ -221,27 +205,12 @@ export const Route = createFileRoute("/api/sync/profiles")({
       // Delete encrypted profile from server
       DELETE: async ({ request }) => {
         try {
-          const body = await request.json();
           const authToken = request.headers.get(AUTH_HEADER);
 
           if (!authToken) {
             return unauthorizedResponse();
           }
           const authHash = computeAuthHash(authToken);
-
-          const parseResult = deleteRequestSchema.safeParse(body);
-
-          if (!parseResult.success) {
-            return new Response(
-              JSON.stringify({
-                error: "Invalid request",
-                details: parseResult.error.issues,
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } },
-            );
-          }
-
-          const { userId } = parseResult.data;
 
           if (!checkRateLimit(authHash)) {
             return new Response(
