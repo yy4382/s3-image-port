@@ -1,18 +1,12 @@
 import { z } from "zod";
 
-export interface EncryptedData {
-  salt: string; // base64-encoded
-  iv: string; // base64-encoded
-  data: string; // base64-encoded ciphertext
-  version: number; // encryption version for future-proofing
-}
-
 export const encryptedDataSchema = z.object({
-  salt: z.string(),
-  iv: z.string(),
-  data: z.string(),
-  version: z.number(),
+  salt: z.string(), // base64-encoded
+  iv: z.string(), // base64-encoded
+  data: z.string(), // base64-encoded ciphertext
+  version: z.number(), // encryption version for future-proofing
 });
+export type EncryptedData = z.infer<typeof encryptedDataSchema>;
 
 export class EncryptionError extends Error {
   constructor(

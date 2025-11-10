@@ -3,11 +3,13 @@ import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import * as z4 from "zod/v4/core";
 
-const withVersionSchema = z.object({
-  version: z.number(),
-  data: z.unknown(),
-});
-
+export function zodWithVersion<T extends z4.$ZodType>(schema: T) {
+  return z.object({
+    version: z.number(),
+    data: schema,
+  });
+}
+const withVersionSchema = zodWithVersion(z.unknown());
 export type WithVersion<T> = { version: number; data: T };
 
 export function atomWithStorageMigration<K extends z4.$ZodObject>(
@@ -85,5 +87,5 @@ export function atomWithStorageMigration<K extends z4.$ZodObject>(
       set(baseAtom, { version, data: nextValue });
     },
   );
-  return anAtom;
+  return { valueAtom: anAtom, migrateRawData: getValue };
 }

@@ -1,7 +1,9 @@
 import { z } from "zod";
 import * as v3Schema from "../v3";
 
-export function migrateV2ToV3(): z.infer<typeof v3Schema.profilesSchema> {
+export function migrateV2ToV3(): z.infer<
+  typeof v3Schema.profilesSchemaForLoad
+> {
   if (!window || !window.localStorage) {
     return v3Schema.getDefaultProfiles();
   }
