@@ -15,7 +15,7 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import { createClientLoader } from "fumadocs-mdx/runtime/vite";
 import { baseOptions } from "@/lib/docs/layout";
 import { createHeadTags } from "@/lib/seo";
-import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
+// import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
 
 const clientLoader = createClientLoader(docs.doc, {
   id: "docs",
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/$locale/_docs/docs/$")({
 
 const loader = createServerFn({ method: "GET" })
   .inputValidator((params: { slugs: string[]; locale?: string }) => params)
-  .middleware([staticFunctionMiddleware])
+  // .middleware([staticFunctionMiddleware])
   .handler(async ({ data: { slugs, locale } }) => {
     const page = source.getPage(slugs, locale);
     if (!page) throw notFound();

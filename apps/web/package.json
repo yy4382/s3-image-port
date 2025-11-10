@@ -98,6 +98,7 @@
     "eslint-plugin-react-x": "^2.2.4",
     "globals": "^16.4.0",
     "jsdom": "^26.1.0",
+    "nitro": "3.0.1-alpha.0",
     "playwright": "^1.56.1",
     "tw-animate-css": "^1.2.8",
     "typescript": "~5.9.3",

@@ -7,6 +7,7 @@ import Icons from "unplugin-icons/vite";
 import analyzer from "vite-bundle-analyzer";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import mdx from "fumadocs-mdx/vite";
+import { nitro } from "nitro/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -50,6 +51,7 @@ export default defineConfig({
         plugins: ["babel-plugin-react-compiler"],
       },
     }),
+    nitro(),
     process.env.ANALYZE === "true" ? analyzer() : undefined,
   ],
   server: {

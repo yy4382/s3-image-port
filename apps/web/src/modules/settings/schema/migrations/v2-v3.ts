@@ -1,10 +1,14 @@
 import { z } from "zod";
 import * as v3Schema from "../v3";
 
+function isBrowser() {
+  return typeof window !== "undefined" && window.localStorage;
+}
+
 export function migrateV2ToV3(): z.infer<
   typeof v3Schema.profilesSchemaForLoad
 > {
-  if (!window || !window.localStorage) {
+  if (!isBrowser()) {
     return v3Schema.getDefaultProfiles();
   }
   let options: z.infer<typeof v3Schema.optionsSchemaForLoad>;
@@ -69,7 +73,7 @@ export function migrateV2ToV3(): z.infer<
 }
 
 export function migrateV2ToV3OnUnmount() {
-  if (!window || !window.localStorage) {
+  if (!isBrowser()) {
     return;
   }
   if (localStorage.getItem("s3ip:profiles-list")) {
