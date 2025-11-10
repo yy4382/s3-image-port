@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import tailwindcss from "@tailwindcss/vite";
 import type { BrowserCommand } from "vitest/node";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
 export const grantPermissions: BrowserCommand<[string[]]> = async (
   ctx,
@@ -20,6 +21,7 @@ export default defineConfig({
     Icons({ compiler: "jsx", jsx: "react" }),
     tsconfigPaths(),
     tailwindcss(),
+    tanstackStart({ router: { entry: "main.tsx" } }),
     react(),
   ],
   test: {

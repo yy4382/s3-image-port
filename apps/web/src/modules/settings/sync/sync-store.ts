@@ -2,26 +2,23 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import { SYNC_TOKEN_STORAGE_KEY } from "@/lib/encryption/sync-token";
+import { syncSettingsStoreSchema } from "../settings-store";
 
 // Sync configuration stored in localStorage
-const _syncConfigSchema = z.object({
-  enabled: z.boolean(),
-  lastUpload: z.number().optional(),
-  lastPull: z.number().optional(),
+export const syncConfigSchema = z.object({
+  enabled: z.boolean().default(false),
   version: z.number().default(0),
+  lastUpload: syncSettingsStoreSchema.nullable().default(null),
 });
 
-export type SyncConfig = z.infer<typeof _syncConfigSchema>;
-
 // Persisted sync configuration
-export const syncConfigAtom = atomWithStorage<SyncConfig>(
+export const syncConfigAtom = atomWithStorage<z.infer<typeof syncConfigSchema>>(
   "s3ip:sync-config",
   {
     enabled: false,
     version: 0,
+    lastUpload: null,
   },
-  undefined,
-  { getOnInit: true },
 );
 
 // Persisted sync token in localStorage
@@ -31,14 +28,7 @@ export const syncConfigAtom = atomWithStorage<SyncConfig>(
 export const syncTokenAtom = atomWithStorage<string>(
   SYNC_TOKEN_STORAGE_KEY,
   "",
-  undefined,
-  {
-    getOnInit: true,
-  },
 );
-
-// Temporary alias until UI is refactored.
-export const syncPassphraseAtom = syncTokenAtom;
 
 // Remote sync info fetched from server
 export interface RemoteSyncInfo {
@@ -58,9 +48,6 @@ export const syncStatusAtom = atom<SyncStatus>("idle");
 
 // Last sync error
 export const syncErrorAtom = atom<string | null>(null);
-
-// Helper atoms
-export const isSyncEnabledAtom = atom((get) => get(syncConfigAtom).enabled);
 
 export const canSyncAtom = atom((get) => {
   const config = get(syncConfigAtom);

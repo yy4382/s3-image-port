@@ -1,4 +1,7 @@
-import { atomWithStorageMigration } from "@/lib/atoms/atomWithStorageMigration";
+import {
+  atomWithStorageMigration,
+  zodWithVersion,
+} from "@/lib/atoms/atomWithStorageMigration";
 import { focusAtom } from "jotai-optics";
 import { z } from "zod";
 import { atom, SetStateAction } from "jotai";
@@ -14,40 +17,40 @@ enableMapSet();
 const {
   s3SettingsSchema,
   uploadSettingsSchema,
-  gallerySettingsSchema,
   optionsSchema,
-  profilesSchema,
   profilesSchemaForLoad,
   getDefaultOptions,
   getDefaultProfiles,
 } = v3Schema;
 
 export {
-  profilesSchema,
   s3SettingsSchema,
   uploadSettingsSchema,
-  gallerySettingsSchema,
   optionsSchema,
   getDefaultOptions,
+  getDefaultProfiles,
 };
 
 export type S3Options = z.infer<typeof s3SettingsSchema>;
 
-export type UploadOptions = z.infer<typeof uploadSettingsSchema>;
 export type KeyTemplatePreset = NonNullable<
   z.infer<typeof uploadSettingsSchema.shape.keyTemplatePresets>
 >[number];
 
-export type GalleryOptions = z.infer<typeof gallerySettingsSchema>;
-
 export type Options = z.infer<typeof optionsSchema>;
 
-export const profilesAtom = atomWithStorageMigration(
-  "s3ip:profiles-list",
+const SETTINGS_STORE_KEY = "s3ip:profiles-list";
+const SETTINGS_STORE_VERSION = 3;
+
+const {
+  valueAtom: settingsStoreAtom,
+  migrateRawData: migrateSettingsStoreRawData,
+} = atomWithStorageMigration(
+  SETTINGS_STORE_KEY,
   {
     initialFn: migrateV2ToV3,
     schema: profilesSchemaForLoad,
-    version: 3,
+    version: SETTINGS_STORE_VERSION,
     migrate: (stored, oldVersionNumber) => {
       console.error(
         `Should not have any migration for now, but got ${oldVersionNumber}, stored: ${JSON.stringify(stored)}`,
@@ -57,12 +60,52 @@ export const profilesAtom = atomWithStorageMigration(
   },
   {},
 );
-
-profilesAtom.onMount = () => {
+settingsStoreAtom.onMount = () => {
   return () => {
     migrateV2ToV3OnUnmount();
   };
 };
+
+export const syncSettingsStoreSchema = zodWithVersion(profilesSchemaForLoad);
+export const settingsStoreToSyncStore = (
+  settings: z.infer<typeof profilesSchemaForLoad>,
+) => {
+  return {
+    version: SETTINGS_STORE_VERSION,
+    data: settings,
+  };
+};
+export function migrateSyncSettingsStoreRawData(rawData: unknown) {
+  return settingsStoreToSyncStore(migrateSettingsStoreRawData(rawData));
+}
+export const syncSettingsStoreAtom = atom(
+  (get) => {
+    const settings = get(settingsStoreAtom);
+    return settingsStoreToSyncStore(settings);
+  },
+  (
+    _get,
+    set,
+    data: SetStateAction<z.infer<typeof syncSettingsStoreSchema>>,
+  ) => {
+    set(settingsStoreAtom, (prev) => {
+      if (typeof data === "function") {
+        const result = data(settingsStoreToSyncStore(prev));
+        return result.data;
+      }
+      return data.data;
+    });
+  },
+);
+
+export const profilesAtom = atom(
+  (get) => {
+    return get(settingsStoreAtom);
+  },
+  (_, set, update: SetStateAction<z.infer<typeof profilesSchemaForLoad>>) => {
+    set(settingsStoreAtom, update);
+  },
+);
 
 export const optionsAtom = atom(
   (get) => {

@@ -16,7 +16,7 @@ import { Route as LocalePhotoRouteImport } from './routes/$locale/photo'
 import { Route as LocaleRootLayoutRouteRouteImport } from './routes/$locale/_root-layout/route'
 import { Route as LocaleDocsRouteRouteImport } from './routes/$locale/_docs/route'
 import { Route as LocaleRootLayoutIndexRouteImport } from './routes/$locale/_root-layout/index'
-import { Route as ApiSyncProfilesRouteImport } from './routes/api/sync/profiles'
+import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as LocaleRootLayoutUploadRouteImport } from './routes/$locale/_root-layout/upload'
 import { Route as LocaleRootLayoutGalleryRouteImport } from './routes/$locale/_root-layout/gallery'
 import { Route as LocaleRootLayoutSettingsRouteRouteImport } from './routes/$locale/_root-layout/settings/route'
@@ -60,9 +60,9 @@ const LocaleRootLayoutIndexRoute = LocaleRootLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LocaleRootLayoutRouteRoute,
 } as any)
-const ApiSyncProfilesRoute = ApiSyncProfilesRouteImport.update({
-  id: '/api/sync/profiles',
-  path: '/api/sync/profiles',
+const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
+  id: '/api/rpc/$',
+  path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LocaleRootLayoutUploadRoute = LocaleRootLayoutUploadRouteImport.update({
@@ -125,7 +125,7 @@ export interface FileRoutesByFullPath {
   '/$locale/settings': typeof LocaleRootLayoutSettingsRouteRouteWithChildren
   '/$locale/gallery': typeof LocaleRootLayoutGalleryRoute
   '/$locale/upload': typeof LocaleRootLayoutUploadRoute
-  '/api/sync/profiles': typeof ApiSyncProfilesRoute
+  '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$locale/': typeof LocaleRootLayoutIndexRoute
   '/$locale/docs/$': typeof LocaleDocsDocsSplatRoute
   '/$locale/settings/gallery': typeof LocaleRootLayoutSettingsGalleryRoute
@@ -141,7 +141,7 @@ export interface FileRoutesByTo {
   '/api/search': typeof ApiSearchRoute
   '/$locale/gallery': typeof LocaleRootLayoutGalleryRoute
   '/$locale/upload': typeof LocaleRootLayoutUploadRoute
-  '/api/sync/profiles': typeof ApiSyncProfilesRoute
+  '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$locale/docs/$': typeof LocaleDocsDocsSplatRoute
   '/$locale/settings/gallery': typeof LocaleRootLayoutSettingsGalleryRoute
   '/$locale/settings/profile': typeof LocaleRootLayoutSettingsProfileRoute
@@ -160,7 +160,7 @@ export interface FileRoutesById {
   '/$locale/_root-layout/settings': typeof LocaleRootLayoutSettingsRouteRouteWithChildren
   '/$locale/_root-layout/gallery': typeof LocaleRootLayoutGalleryRoute
   '/$locale/_root-layout/upload': typeof LocaleRootLayoutUploadRoute
-  '/api/sync/profiles': typeof ApiSyncProfilesRoute
+  '/api/rpc/$': typeof ApiRpcSplatRoute
   '/$locale/_root-layout/': typeof LocaleRootLayoutIndexRoute
   '/$locale/_docs/docs/$': typeof LocaleDocsDocsSplatRoute
   '/$locale/_root-layout/settings/gallery': typeof LocaleRootLayoutSettingsGalleryRoute
@@ -179,7 +179,7 @@ export interface FileRouteTypes {
     | '/$locale/settings'
     | '/$locale/gallery'
     | '/$locale/upload'
-    | '/api/sync/profiles'
+    | '/api/rpc/$'
     | '/$locale/'
     | '/$locale/docs/$'
     | '/$locale/settings/gallery'
@@ -195,7 +195,7 @@ export interface FileRouteTypes {
     | '/api/search'
     | '/$locale/gallery'
     | '/$locale/upload'
-    | '/api/sync/profiles'
+    | '/api/rpc/$'
     | '/$locale/docs/$'
     | '/$locale/settings/gallery'
     | '/$locale/settings/profile'
@@ -213,7 +213,7 @@ export interface FileRouteTypes {
     | '/$locale/_root-layout/settings'
     | '/$locale/_root-layout/gallery'
     | '/$locale/_root-layout/upload'
-    | '/api/sync/profiles'
+    | '/api/rpc/$'
     | '/$locale/_root-layout/'
     | '/$locale/_docs/docs/$'
     | '/$locale/_root-layout/settings/gallery'
@@ -227,7 +227,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
   ApiSearchRoute: typeof ApiSearchRoute
-  ApiSyncProfilesRoute: typeof ApiSyncProfilesRoute
+  ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -281,11 +281,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocaleRootLayoutIndexRouteImport
       parentRoute: typeof LocaleRootLayoutRouteRoute
     }
-    '/api/sync/profiles': {
-      id: '/api/sync/profiles'
-      path: '/api/sync/profiles'
-      fullPath: '/api/sync/profiles'
-      preLoaderRoute: typeof ApiSyncProfilesRouteImport
+    '/api/rpc/$': {
+      id: '/api/rpc/$'
+      path: '/api/rpc/$'
+      fullPath: '/api/rpc/$'
+      preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$locale/_root-layout/upload': {
@@ -428,7 +428,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LocaleRouteRoute: LocaleRouteRouteWithChildren,
   ApiSearchRoute: ApiSearchRoute,
-  ApiSyncProfilesRoute: ApiSyncProfilesRoute,
+  ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
