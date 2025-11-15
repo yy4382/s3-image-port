@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { router } from "@/lib/orpc/router";
 import { onError, ORPCError, ValidationError } from "@orpc/server";
 import { z } from "zod";
+import { RequestHeadersPlugin } from "@orpc/server/plugins";
 
 const handler = new RPCHandler(router, {
   interceptors: [
@@ -31,6 +32,7 @@ const handler = new RPCHandler(router, {
       }
     }),
   ],
+  plugins: [new RequestHeadersPlugin()],
 });
 
 export const Route = createFileRoute("/api/rpc/$")({
