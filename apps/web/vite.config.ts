@@ -54,6 +54,18 @@ export default defineConfig({
     nitro(),
     process.env.ANALYZE === "true" ? analyzer() : undefined,
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("fumadocs")) {
+            return "fumadocs";
+          }
+          return null;
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
   },
