@@ -33,8 +33,12 @@ function transformUserAgent(
 
 const fetchProfiles = baseOs
   .errors({
-    NOT_FOUND: {
-      message: "Profile not found",
+    // using BAD_REQUEST instead of NOT_FOUND because nitro erases all header and body
+    // in 404 responses
+    BAD_REQUEST: {
+      data: z.object({
+        type: z.enum(["no-such-user"]),
+      }),
     },
   })
   .input(z.object({ token: z.string().nonempty() }))
@@ -44,7 +48,11 @@ const fetchProfiles = baseOs
     const authHash = await computeAuthHash(authToken);
     const stored = await settingsStoreClient.get(authHash);
     if (!stored) {
-      throw errors.NOT_FOUND();
+      throw errors.BAD_REQUEST({
+        data: {
+          type: "no-such-user",
+        },
+      });
     }
     return {
       ...stored,
@@ -54,8 +62,12 @@ const fetchProfiles = baseOs
 
 const fetchMetadata = baseOs
   .errors({
-    NOT_FOUND: {
-      message: "Metadata not found",
+    // using BAD_REQUEST instead of NOT_FOUND because nitro erases all header and body
+    // in 404 responses
+    BAD_REQUEST: {
+      data: z.object({
+        type: z.enum(["no-such-user"]),
+      }),
     },
   })
   .input(z.object({ token: z.string().nonempty() }))
@@ -64,7 +76,11 @@ const fetchMetadata = baseOs
     const authHash = await computeAuthHash(input.token);
     const stored = await settingsStoreClient.get(authHash);
     if (!stored) {
-      throw errors.NOT_FOUND();
+      throw errors.BAD_REQUEST({
+        data: {
+          type: "no-such-user",
+        },
+      });
     }
     return settingsResponseSchema.omit({ data: true }).decode({
       ...stored,
