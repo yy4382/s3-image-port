@@ -25,12 +25,12 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { syncServiceAtom } from "../sync-service";
-import { syncConfigAtom, syncStatusAtom, syncTokenAtom } from "../sync-store";
+import { syncStateAtom, syncStatusAtom, syncTokenAtom } from "../sync-store";
 import { TokenSetupDialog } from "./token-setup-dialog";
 import { focusAtom } from "jotai-optics";
 
 export function SyncSettingsCard() {
-  const [syncConfig] = useAtom(syncConfigAtom);
+  const [syncConfig] = useAtom(syncStateAtom);
   const [syncToken] = useAtom(syncTokenAtom);
   const [syncStatus, setSyncStatus] = useAtom(syncStatusAtom);
 
@@ -103,7 +103,7 @@ export function SyncSettingsCard() {
   );
 }
 
-const isEnabledAtom = focusAtom(syncConfigAtom, (optic) =>
+const isEnabledAtom = focusAtom(syncStateAtom, (optic) =>
   optic.prop("enabled"),
 );
 
@@ -118,7 +118,7 @@ function SyncSwitch() {
 
 function SyncTokenStatus() {
   const [syncToken, setSyncToken] = useAtom(syncTokenAtom);
-  const [syncConfig, setSyncConfig] = useAtom(syncConfigAtom);
+  const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
 
   const [showTokenDialog, setShowTokenDialog] = useState(false);
 

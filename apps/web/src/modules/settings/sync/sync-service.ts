@@ -1,27 +1,32 @@
-import {
-  syncSettingsStoreAtom,
-  syncSettingsStoreSchema,
-} from "../settings-store";
+import { settingsForSyncAtom, settingsForSyncSchema } from "../settings-store";
 import { z } from "zod";
 import { atom, SetStateAction } from "jotai";
 import {
   canSyncAtom,
-  syncConfigAtom,
-  syncConfigSchema,
+  syncStateAtom,
+  syncStateSchema,
   syncTokenAtom,
 } from "./sync-store";
 import deepEqual from "deep-equal";
-import { settingsInDbSchema } from "./types";
+import { settingsRecordSchema } from "./types";
 import { uploadProfiles, fetchRemoteProfiles } from "./sync-api-client";
 
 type ConflictResolver = (params: {
-  local: z.infer<typeof syncSettingsStoreSchema>;
-  remote: z.infer<typeof settingsInDbSchema>;
+  local: z.infer<typeof settingsForSyncSchema>;
+  remote: z.infer<typeof settingsRecordSchema>;
 }) => Promise<"local" | "remote" | null>;
 
+type SyncActionType =
+  | "push"
+  | "pull"
+  | "not-changed"
+  | "conflict-push"
+  | "conflict-pull"
+  | "conflict-cancel";
 type SyncResult = {
-  local?: SetStateAction<z.infer<typeof syncSettingsStoreSchema>>;
-  config?: SetStateAction<z.infer<typeof syncConfigSchema>>;
+  local?: SetStateAction<z.infer<typeof settingsForSyncSchema>>;
+  config?: SetStateAction<z.infer<typeof syncStateSchema>>;
+  action: SyncActionType;
 };
 
 export const sync = async (
@@ -30,8 +35,8 @@ export const sync = async (
     config,
     token,
   }: {
-    readonly local: z.infer<typeof syncSettingsStoreSchema>;
-    readonly config: z.infer<typeof syncConfigSchema>;
+    readonly local: z.infer<typeof settingsForSyncSchema>;
+    readonly config: z.infer<typeof syncStateSchema>;
     readonly token: string;
   },
   { conflictResolver }: { conflictResolver: ConflictResolver },
@@ -46,6 +51,7 @@ export const sync = async (
           version: data.version,
           lastUpload: local,
         }),
+        action: "push",
       };
     }
     throw new Error("Upload failed");
@@ -59,6 +65,7 @@ export const sync = async (
         version: serverSettings.version,
         lastUpload: serverSettings.data,
       }),
+      action: "not-changed",
     };
   }
 
@@ -71,6 +78,7 @@ export const sync = async (
         lastUpload: serverSettings.data,
       }),
       local: serverSettings.data,
+      action: "pull",
     };
   }
 
@@ -86,6 +94,7 @@ export const sync = async (
           version: data.version,
           lastUpload: local,
         }),
+        action: "push",
       };
     }
     throw new Error("Upload failed");
@@ -104,6 +113,7 @@ export const sync = async (
           version: serverSettings.version,
           lastUpload: serverSettings.data,
         }),
+        action: "conflict-pull",
       };
     }
     case "local": {
@@ -115,6 +125,7 @@ export const sync = async (
             version: data.version,
             lastUpload: local,
           }),
+          action: "conflict-push",
         };
       }
       if (data.conflict) {
@@ -123,7 +134,9 @@ export const sync = async (
       throw new Error("Upload failed");
     }
     case null: {
-      return {};
+      return {
+        action: "conflict-cancel",
+      };
     }
   }
 };
@@ -136,15 +149,15 @@ export const syncServiceAtom = atom(
       return;
     }
 
-    const config = get(syncConfigAtom);
-    const local = get(syncSettingsStoreAtom);
+    const config = get(syncStateAtom);
+    const local = get(settingsForSyncAtom);
     const token = get(syncTokenAtom);
     const result = await sync({ local, config, token }, { conflictResolver });
     if (result.config) {
-      set(syncConfigAtom, result.config);
+      set(syncStateAtom, result.config);
     }
     if (result.local) {
-      set(syncSettingsStoreAtom, result.local);
+      set(settingsForSyncAtom, result.local);
     }
   },
 );

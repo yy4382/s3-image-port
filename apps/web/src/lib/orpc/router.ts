@@ -1,24 +1,34 @@
 import { z } from "zod";
-import { getRedisClient } from "../redis/client";
 import { encryptedDataSchema } from "../encryption/types";
 import { sha256 } from "../utils/hash";
-import { settingsInDbEncryptedSchema } from "@/modules/settings/sync/types";
+import {
+  settingsRecordEncryptedSchema,
+  settingsResponseSchema,
+  userAgentResponseSchema,
+} from "@/modules/settings/sync/types";
 import { baseOs } from "./base-router";
+import { settingsStoreClient } from "../redis/settings-client";
+import { UAParser } from "ua-parser-js";
 
-const PROFILE_KEY_PREFIX = "profile:sync:";
 const MAX_PAYLOAD_SIZE = 1024 * 1024; // 1MB
 
-type StoredProfile = z.infer<typeof settingsInDbEncryptedSchema>;
-
-/**
- * Get the Redis key for a profile using the hashed auth token
- */
-function getProfileKey(authHash: string): string {
-  return `${PROFILE_KEY_PREFIX}${authHash}`;
-}
+type StoredProfile = z.infer<typeof settingsRecordEncryptedSchema>;
 
 async function computeAuthHash(token: string): Promise<string> {
   return sha256(token);
+}
+
+function transformUserAgent(
+  userAgent: z.infer<typeof settingsRecordEncryptedSchema>["userAgent"],
+): z.infer<typeof userAgentResponseSchema> | null {
+  if (!userAgent) {
+    return null;
+  }
+  const { os, browser } = UAParser(userAgent);
+  return userAgentResponseSchema.decode({
+    browser: browser.name,
+    os: os.name,
+  });
 }
 
 const fetchProfiles = baseOs
@@ -28,16 +38,38 @@ const fetchProfiles = baseOs
     },
   })
   .input(z.object({ token: z.string().nonempty() }))
+  .output(settingsResponseSchema)
   .handler(async ({ input, errors }) => {
     const authToken = input.token;
     const authHash = await computeAuthHash(authToken);
-    const redis = getRedisClient();
-    const key = getProfileKey(authHash);
-    const stored = await redis.get(key);
+    const stored = await settingsStoreClient.get(authHash);
     if (!stored) {
       throw errors.NOT_FOUND();
     }
-    return settingsInDbEncryptedSchema.parse(JSON.parse(stored));
+    return {
+      ...stored,
+      userAgent: transformUserAgent(stored.userAgent),
+    };
+  });
+
+const fetchMetadata = baseOs
+  .errors({
+    NOT_FOUND: {
+      message: "Metadata not found",
+    },
+  })
+  .input(z.object({ token: z.string().nonempty() }))
+  .output(settingsResponseSchema.omit({ data: true }))
+  .handler(async ({ input, errors }) => {
+    const authHash = await computeAuthHash(input.token);
+    const stored = await settingsStoreClient.get(authHash);
+    if (!stored) {
+      throw errors.NOT_FOUND();
+    }
+    return settingsResponseSchema.omit({ data: true }).decode({
+      ...stored,
+      userAgent: transformUserAgent(stored.userAgent),
+    });
   });
 
 const uploadProfiles = baseOs
@@ -47,7 +79,7 @@ const uploadProfiles = baseOs
     },
     CONFLICT: {
       message: "Version conflict",
-      data: settingsInDbEncryptedSchema,
+      data: settingsResponseSchema,
     },
   })
   .input(
@@ -57,24 +89,24 @@ const uploadProfiles = baseOs
       token: z.string().nonempty(),
     }),
   )
-  .handler(async ({ input, errors }) => {
+  .handler(async ({ input, errors, context }) => {
     const { token, data, version } = input;
     if (JSON.stringify(data).length > MAX_PAYLOAD_SIZE) {
       throw errors.PAYLOAD_TOO_LARGE();
     }
     const authHash = await computeAuthHash(token);
 
-    const redis = getRedisClient();
-    const key = getProfileKey(authHash);
-    const existing = await redis.get(key);
+    const existingProfile = await settingsStoreClient.get(authHash);
     let existingVersion = 0;
-    if (existing) {
-      const existingProfile = settingsInDbEncryptedSchema.parse(
-        JSON.parse(existing),
-      );
+    if (existingProfile) {
       existingVersion = existingProfile.version;
       if (existingProfile.version > version) {
-        throw errors.CONFLICT({ data: existingProfile });
+        throw errors.CONFLICT({
+          data: {
+            ...existingProfile,
+            userAgent: transformUserAgent(existingProfile.userAgent),
+          },
+        });
       }
     }
 
@@ -83,14 +115,19 @@ const uploadProfiles = baseOs
       data,
       version: newVersion,
       updatedAt: Date.now(),
+      userAgent: context.reqHeaders?.get("user-agent") ?? "",
     };
-    await redis.set(key, JSON.stringify(newProfile));
-    return newProfile;
+    await settingsStoreClient.set(authHash, newProfile);
+    return {
+      ...newProfile,
+      userAgent: transformUserAgent(newProfile.userAgent),
+    };
   });
 
 export const router = {
   profiles: {
     fetch: fetchProfiles,
+    fetchMetadata: fetchMetadata,
     upload: uploadProfiles,
   },
 };

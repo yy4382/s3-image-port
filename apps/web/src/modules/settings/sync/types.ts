@@ -1,15 +1,28 @@
 import { encryptedDataSchema } from "@/lib/encryption/types";
 import { z } from "zod";
-import { syncSettingsStoreSchema } from "../settings-store";
+import { settingsForSyncSchema } from "../settings-store";
 
-export const settingsInDbEncryptedSchema = z.object({
-  data: encryptedDataSchema,
+const settingsRecordSchemaBase = z.object({
   version: z.number().int(),
   updatedAt: z.number(),
 });
 
-export const settingsInDbSchema = z.object({
-  data: syncSettingsStoreSchema,
-  version: z.number().int(),
-  updatedAt: z.number(),
+export const userAgentResponseSchema = z.object({
+  browser: z.string().optional(),
+  os: z.string().optional(),
+});
+
+export const settingsRecordEncryptedSchema = settingsRecordSchemaBase.extend({
+  data: encryptedDataSchema,
+  userAgent: z.string(),
+});
+
+export const settingsResponseSchema = settingsRecordSchemaBase.extend({
+  data: encryptedDataSchema,
+  userAgent: userAgentResponseSchema.nullable(),
+});
+
+export const settingsRecordSchema = settingsRecordSchemaBase.extend({
+  data: settingsForSyncSchema,
+  userAgent: userAgentResponseSchema.nullable(),
 });
