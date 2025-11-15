@@ -28,11 +28,22 @@ import { syncServiceAtom } from "../sync-service";
 import { syncStateAtom, syncStatusAtom, syncTokenAtom } from "../sync-store";
 import { TokenSetupDialog } from "./token-setup-dialog";
 import { focusAtom } from "jotai-optics";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchMetadata } from "../sync-api-client";
+import { format } from "date-fns";
+
+const remoteMetadataQuery = (token: string) =>
+  queryOptions({
+    queryKey: ["remote-metadata"],
+    queryFn: () => fetchMetadata(token),
+  });
 
 export function SyncSettingsCard() {
   const [syncConfig] = useAtom(syncStateAtom);
   const [syncToken] = useAtom(syncTokenAtom);
   const [syncStatus, setSyncStatus] = useAtom(syncStatusAtom);
+  const { data: remoteMetadata } = useQuery(remoteMetadataQuery(syncToken));
+  const queryClient = useQueryClient();
 
   const hasValidToken = isValidSyncToken(syncToken);
 
@@ -49,6 +60,7 @@ export function SyncSettingsCard() {
       console.error(error);
     } finally {
       setSyncStatus("idle");
+      queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
     }
   };
 
@@ -93,6 +105,22 @@ export function SyncSettingsCard() {
                       </>
                     )}
                   </Button>
+                  {remoteMetadata &&
+                    remoteMetadata.version > syncConfig.version && (
+                      <div className="text-sm text-muted-foreground">
+                        Remote has been updated since last sync on this device.{" "}
+                        <br />
+                        Remote updated at{" "}
+                        {format(
+                          remoteMetadata.updatedAt,
+                          "yyyy-MM-dd HH:mm:ss",
+                        )}{" "}
+                        from{" "}
+                        {remoteMetadata.userAgent?.browser ?? "Unknown browser"}{" "}
+                        on {remoteMetadata.userAgent?.os ?? "Unknown OS"}
+                        <br />
+                      </div>
+                    )}
                 </>
               )}
             </>
