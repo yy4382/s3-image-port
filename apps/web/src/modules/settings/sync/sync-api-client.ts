@@ -122,8 +122,11 @@ export async function fetchRemoteProfiles(
       case "INPUT_VALIDATION_FAILED": {
         throw new Error(error.data.fieldErrors.token?.join(", "));
       }
-      case "NOT_FOUND": {
-        return null;
+      case "BAD_REQUEST": {
+        if (error.data.type === "no-such-user") {
+          return null;
+        }
+        throw new Error(error.message);
       }
     }
   } else if (error) {
@@ -150,8 +153,11 @@ export async function fetchMetadata(
       case "INPUT_VALIDATION_FAILED": {
         throw new Error(error.data.fieldErrors.token?.join(", "));
       }
-      case "NOT_FOUND": {
-        return null;
+      case "BAD_REQUEST": {
+        if (error.data.type === "no-such-user") {
+          return null;
+        }
+        throw new Error(error.message);
       }
     }
   } else if (error) {
