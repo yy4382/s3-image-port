@@ -3,10 +3,10 @@ import { sync } from "./sync-service";
 import { sha256 } from "@/lib/utils/hash";
 import { deriveAuthToken, encrypt } from "@/lib/encryption/crypto";
 import { produce } from "immer";
-import { settingsStoreToSyncStore } from "../settings-store";
+import { settingsIntoSyncFormat } from "../settings-store";
 import { getDefaultProfiles } from "../settings-store";
 import { z } from "zod";
-import { settingsInDbEncryptedSchema } from "./types";
+import { settingsRecordEncryptedSchema } from "./types";
 import { profilesSchemaForLoad } from "../schema/v3";
 
 const mocks = vi.hoisted(() => {
@@ -66,7 +66,7 @@ async function setupDb({
   data: z.infer<typeof profilesSchemaForLoad>;
 }) {
   const key = `profile:sync:${testAuthHash}`;
-  const unencrypted = settingsStoreToSyncStore(data);
+  const unencrypted = settingsIntoSyncFormat(data);
   const encrypted = await encrypt(JSON.stringify(unencrypted), TEST_TOKEN);
   mocks.mockDb.set(
     key,
@@ -74,12 +74,13 @@ async function setupDb({
       version: ver,
       data: encrypted,
       updatedAt: Date.now(),
-    } satisfies z.infer<typeof settingsInDbEncryptedSchema>),
+      userAgent: "test",
+    } satisfies z.infer<typeof settingsRecordEncryptedSchema>),
   );
   return { unencrypted, encrypted };
 }
 function getDefaultSyncStore() {
-  return settingsStoreToSyncStore(getDefaultProfiles());
+  return settingsIntoSyncFormat(getDefaultProfiles());
 }
 
 beforeEach(() => {

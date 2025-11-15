@@ -24,22 +24,3 @@ export async function sha256(data: string): Promise<string> {
   const { createHash } = await import("node:crypto");
   return createHash("sha256").update(data).digest("hex");
 }
-
-/**
- * Synchronous version for Node.js environments only
- * Throws an error if called in browser
- * @param data - String to hash
- * @returns Hex-encoded hash string
- */
-export function sha256Sync(data: string): string {
-  if (typeof window !== "undefined") {
-    throw new Error(
-      "sha256Sync is not available in browser. Use sha256() instead.",
-    );
-  }
-
-  // Use dynamic import with require for synchronous execution in Node.js
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const crypto = require("node:crypto") as typeof import("node:crypto");
-  return crypto.createHash("sha256").update(data).digest("hex");
-}

@@ -1,7 +1,11 @@
 import { os } from "@orpc/server";
 import { z } from "zod";
+import { RequestHeadersPluginContext } from "@orpc/server/plugins";
 
-export const baseOs = os.errors({
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface ORPCContext extends RequestHeadersPluginContext {}
+
+export const baseOs = os.$context<ORPCContext>().errors({
   INPUT_VALIDATION_FAILED: {
     status: 422,
     data: z.object({

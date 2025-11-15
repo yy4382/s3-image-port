@@ -70,7 +70,7 @@ function RootErrorComponent() {
       localStorage.clear();
       sessionStorage.clear();
       window.location.href = "/";
-    } catch (error) {
+    } catch {
       // Silently fail if localStorage is not available
       window.location.href = "/";
     }

@@ -66,34 +66,55 @@ settingsStoreAtom.onMount = () => {
   };
 };
 
-export const syncSettingsStoreSchema = zodWithVersion(profilesSchemaForLoad);
-export const settingsStoreToSyncStore = (
+export const settingsForSyncSchema = zodWithVersion(
+  profilesSchemaForLoad.omit({ current: true }),
+);
+export const settingsIntoSyncFormat = (
   settings: z.infer<typeof profilesSchemaForLoad>,
 ) => {
+  const { current: _, ...rest } = settings;
   return {
     version: SETTINGS_STORE_VERSION,
-    data: settings,
+    data: rest,
   };
 };
-export function migrateSyncSettingsStoreRawData(rawData: unknown) {
-  return settingsStoreToSyncStore(migrateSettingsStoreRawData(rawData));
+export function settingsForSyncFromUnknown(rawData: unknown) {
+  return settingsIntoSyncFormat(migrateSettingsStoreRawData(rawData));
 }
-export const syncSettingsStoreAtom = atom(
+export const settingsForSyncAtom = atom(
   (get) => {
     const settings = get(settingsStoreAtom);
-    return settingsStoreToSyncStore(settings);
+    return settingsIntoSyncFormat(settings);
   },
-  (
-    _get,
-    set,
-    data: SetStateAction<z.infer<typeof syncSettingsStoreSchema>>,
-  ) => {
+  (_get, set, data: SetStateAction<z.infer<typeof settingsForSyncSchema>>) => {
     set(settingsStoreAtom, (prev) => {
-      if (typeof data === "function") {
-        const result = data(settingsStoreToSyncStore(prev));
-        return result.data;
+      const currentIndex = prev.current;
+      const currentName = prev.list[currentIndex][0];
+      function getNewData() {
+        if (typeof data === "function") {
+          const result = data(settingsIntoSyncFormat(prev));
+          return result.data;
+        }
+        return data.data;
       }
-      return data.data;
+      const newData = getNewData();
+      const newIndex = newData.list.findIndex(([name]) => name === currentName);
+      if (newIndex !== -1) {
+        return {
+          ...newData,
+          current: newIndex,
+        };
+      }
+      if (currentIndex < newData.list.length) {
+        return {
+          ...newData,
+          current: currentIndex,
+        };
+      }
+      return {
+        ...newData,
+        current: 0,
+      };
     });
   },
 );

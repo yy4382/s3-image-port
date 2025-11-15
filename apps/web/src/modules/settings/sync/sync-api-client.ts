@@ -1,21 +1,20 @@
 import { encrypt, decrypt, deriveAuthToken } from "@/lib/encryption/crypto";
-import { syncSettingsStoreSchema } from "../settings-store";
-import { migrateSyncSettingsStoreRawData } from "../settings-store";
+import { settingsForSyncSchema } from "../settings-store";
+import { settingsForSyncFromUnknown } from "../settings-store";
 import { z } from "zod";
 import { client } from "@/lib/orpc/client";
 import { safe } from "@orpc/client";
-import { settingsInDbEncryptedSchema, settingsInDbSchema } from "./types";
+import { settingsRecordSchema, settingsResponseSchema } from "./types";
 
 async function decryptSettingsInDb(
-  data: z.infer<typeof settingsInDbEncryptedSchema>,
+  data: z.infer<typeof settingsResponseSchema>,
   token: string,
-): Promise<z.infer<typeof settingsInDbSchema>> {
+): Promise<z.infer<typeof settingsRecordSchema>> {
   const decrypted = await decrypt(data.data, token);
-  const profiles = migrateSyncSettingsStoreRawData(JSON.parse(decrypted));
+  const profiles = settingsForSyncFromUnknown(JSON.parse(decrypted));
   return {
+    ...data,
     data: profiles,
-    version: data.version,
-    updatedAt: data.updatedAt,
   };
 }
 
@@ -30,19 +29,19 @@ async function getAuthToken(token: string): Promise<string> {
  * Upload encrypted profiles to server
  */
 export async function uploadProfiles(
-  data: z.infer<typeof syncSettingsStoreSchema>,
+  data: z.infer<typeof settingsForSyncSchema>,
   token: string,
   currentVersion: number,
 ): Promise<
   | {
       success: true;
       version: number;
-      current: z.infer<typeof settingsInDbSchema>;
+      current: z.infer<typeof settingsRecordSchema>;
     }
   | {
       success: false;
       conflict: true;
-      current: z.infer<typeof settingsInDbSchema>;
+      current: z.infer<typeof settingsRecordSchema>;
     }
   | {
       success: false;
@@ -87,7 +86,7 @@ export async function uploadProfiles(
           success: false,
           conflict: true,
           current: await decryptSettingsInDb(
-            settingsInDbEncryptedSchema.decode(error.data),
+            settingsResponseSchema.decode(error.data),
             token,
           ),
         };
@@ -100,7 +99,7 @@ export async function uploadProfiles(
     success: true,
     version: fetchData.version,
     current: await decryptSettingsInDb(
-      settingsInDbEncryptedSchema.decode(fetchData),
+      settingsResponseSchema.decode(fetchData),
       token,
     ),
   };
@@ -111,7 +110,7 @@ export async function uploadProfiles(
  */
 export async function fetchRemoteProfiles(
   token: string,
-): Promise<z.infer<typeof settingsInDbSchema> | null> {
+): Promise<z.infer<typeof settingsRecordSchema> | null> {
   const authToken = await getAuthToken(token);
   const {
     error,
@@ -131,9 +130,34 @@ export async function fetchRemoteProfiles(
     throw error;
   }
   return await decryptSettingsInDb(
-    settingsInDbEncryptedSchema.decode(fetchData),
+    settingsResponseSchema.decode(fetchData),
     token,
   );
+}
+
+const _metadataSchema = settingsResponseSchema.omit({ data: true });
+export async function fetchMetadata(
+  token: string,
+): Promise<z.infer<typeof _metadataSchema> | null> {
+  const authToken = await getAuthToken(token);
+  const {
+    error,
+    data: fetchData,
+    isDefined,
+  } = await safe(client.profiles.fetchMetadata({ token: authToken }));
+  if (isDefined) {
+    switch (error.code) {
+      case "INPUT_VALIDATION_FAILED": {
+        throw new Error(error.data.fieldErrors.token?.join(", "));
+      }
+      case "NOT_FOUND": {
+        return null;
+      }
+    }
+  } else if (error) {
+    throw error;
+  }
+  return fetchData;
 }
 
 // /**
@@ -154,40 +178,5 @@ export async function fetchRemoteProfiles(
 
 //   if (!response.ok) {
 //     throw new Error(`Delete failed: ${response.statusText}`);
-//   }
-// }
-
-// /**
-//  * Check if remote profile exists and get version info
-//  */
-// async function checkRemoteVersion(
-//   _userId: string,
-//   token: string,
-// ): Promise<{ exists: boolean; version?: number; updatedAt?: number }> {
-//   try {
-//     const authToken = await getAuthToken(token);
-//     const response = await fetch(API_BASE, {
-//       headers: {
-//         [AUTH_HEADER]: authToken,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       return { exists: false };
-//     }
-
-//     const stored: StoredProfile | null = await response.json();
-
-//     if (!stored) {
-//       return { exists: false };
-//     }
-
-//     return {
-//       exists: true,
-//       version: stored.version,
-//       updatedAt: stored.updatedAt,
-//     };
-//   } catch {
-//     return { exists: false };
 //   }
 // }

@@ -8,7 +8,14 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "coverage", ".tanstack"]),
+  globalIgnores([
+    "dist",
+    "coverage",
+    ".tanstack",
+    ".output",
+    ".vercel",
+    ".nitro",
+  ]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
