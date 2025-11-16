@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { sync } from "./sync-service";
+import { sync, UserConfirmations } from "./sync-service";
 import { sha256 } from "@/lib/utils/hash";
 import { deriveAuthToken, encrypt } from "@/lib/encryption/crypto";
 import { produce } from "immer";
@@ -58,6 +58,11 @@ async function runSync(...args: Parameters<typeof sync>) {
   };
 }
 
+const userConfirmations: UserConfirmations = {
+  conflictResolver: vi.fn(),
+  confirmPull: vi.fn().mockResolvedValue(true),
+};
+
 async function setupDb({
   ver,
   data,
@@ -93,16 +98,13 @@ describe("syncServiceAtom", () => {
     expect(import.meta.env.VITEST).toBe(true);
   });
   test("local fresh, remote empty", async () => {
-    const conflictResolver = vi.fn();
     const { local, config } = await runSync(
       {
         local: getDefaultSyncStore(),
         config: { enabled: true, version: 0, lastUpload: null },
         token: TEST_TOKEN,
       },
-      {
-        conflictResolver: vi.fn(),
-      },
+      userConfirmations,
     );
     expect(mocks.redisGetFn).toHaveBeenCalledWith(
       expect.stringContaining(testAuthHash),
@@ -111,7 +113,7 @@ describe("syncServiceAtom", () => {
       expect.anything(),
       expect.stringContaining('"version":1'),
     );
-    expect(conflictResolver).not.toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
     expect(local).toEqual(getDefaultSyncStore());
     expect(config).toEqual({
       enabled: true,
@@ -124,17 +126,16 @@ describe("syncServiceAtom", () => {
       ver: 5,
       data: getDefaultProfiles(),
     });
-    const conflictResolver = vi.fn();
     const { local, config } = await runSync(
       {
         local: getDefaultSyncStore(),
         config: { enabled: true, version: 0, lastUpload: null },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
     expect(mocks.redisSetFn).not.toHaveBeenCalled();
-    expect(conflictResolver).not.toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
     expect(config.version).toBe(5);
     expect(config.lastUpload).toEqual(getDefaultSyncStore());
     expect(local).toEqual(getDefaultSyncStore());
@@ -147,16 +148,18 @@ describe("syncServiceAtom", () => {
         draft.list[0][1].s3.bucket = "aaa";
       }),
     });
-    const conflictResolver = vi.fn(() => Promise.resolve("local" as const));
+    vi.mocked(userConfirmations.conflictResolver).mockResolvedValue(
+      "local" as const,
+    );
     const { local, config } = await runSync(
       {
         local: getDefaultSyncStore(),
         config: { enabled: true, version: 0, lastUpload: null },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).toHaveBeenCalled();
     expect(local).toEqual(getDefaultSyncStore());
     expect(config).toEqual({
       enabled: true,
@@ -176,16 +179,18 @@ describe("syncServiceAtom", () => {
         draft.list[0][1].s3.bucket = "aaa";
       }),
     });
-    const conflictResolver = vi.fn(() => Promise.resolve("remote" as const));
+    vi.mocked(userConfirmations.conflictResolver).mockResolvedValue(
+      "remote" as const,
+    );
     const { local, config } = await runSync(
       {
         local: getDefaultSyncStore(),
         config: { enabled: true, version: 0, lastUpload: null },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).toHaveBeenCalled();
     expect(local).toEqual(unencrypted);
     expect(config).toEqual({
       enabled: true,
@@ -200,16 +205,15 @@ describe("syncServiceAtom", () => {
       ver: 5,
       data: getDefaultProfiles(),
     });
-    const conflictResolver = vi.fn();
     const { local, config } = await runSync(
       {
         local: getDefaultSyncStore(),
         config: { enabled: true, version: 5, lastUpload: null },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).not.toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
     expect(local).toEqual(getDefaultSyncStore());
     expect(config).toEqual({
       enabled: true,
@@ -226,7 +230,6 @@ describe("syncServiceAtom", () => {
         draft.list[0][1].s3.bucket = "aaa";
       }),
     });
-    const conflictResolver = vi.fn();
     const localState = produce(getDefaultSyncStore(), (draft) => {
       draft.data.list[0][1].s3.bucket = "bbb";
     });
@@ -236,14 +239,43 @@ describe("syncServiceAtom", () => {
         config: { enabled: true, version: 3, lastUpload: localState },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).not.toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
     expect(local).toEqual(unencrypted);
     expect(config).toEqual({
       enabled: true,
       version: 5,
       lastUpload: unencrypted,
+    });
+    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+  });
+  test("local not dirty, remote - lastUpload not matching, confirmPull false", async () => {
+    // since user cancelled pull, local and config should not be updated
+    await setupDb({
+      ver: 5,
+      data: produce(getDefaultProfiles(), (draft) => {
+        draft.list[0][1].s3.bucket = "aaa";
+      }),
+    });
+    const localState = produce(getDefaultSyncStore(), (draft) => {
+      draft.data.list[0][1].s3.bucket = "bbb";
+    });
+    vi.mocked(userConfirmations.confirmPull).mockResolvedValue(false);
+    const { local, config } = await runSync(
+      {
+        local: localState,
+        config: { enabled: true, version: 3, lastUpload: localState },
+        token: TEST_TOKEN,
+      },
+      userConfirmations,
+    );
+    expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
+    expect(local).toEqual(localState);
+    expect(config).toEqual({
+      enabled: true,
+      version: 3,
+      lastUpload: localState,
     });
     expect(mocks.redisSetFn).not.toHaveBeenCalled();
   });
@@ -256,7 +288,8 @@ describe("syncServiceAtom", () => {
     const localState = produce(getDefaultSyncStore(), (draft) => {
       draft.data.list[0][1].s3.bucket = "bbb";
     });
-    const conflictResolver = vi.fn(() => {
+
+    vi.mocked(userConfirmations.conflictResolver).mockImplementation(() => {
       expect.unreachable("should not call conflict resolver");
     });
     const { local, config } = await runSync(
@@ -265,9 +298,8 @@ describe("syncServiceAtom", () => {
         config: { enabled: true, version: 5, lastUpload: unencrypted },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).not.toHaveBeenCalled();
     expect(local).toEqual(localState);
     expect(config).toEqual({
       enabled: true,
@@ -288,18 +320,18 @@ describe("syncServiceAtom", () => {
     const localState = produce(getDefaultSyncStore(), (draft) => {
       draft.data.list[0][1].s3.bucket = "bbb";
     });
-    const conflictResolver = vi.fn(() => {
-      return Promise.resolve("local" as const);
-    });
+    vi.mocked(userConfirmations.conflictResolver).mockResolvedValue(
+      "local" as const,
+    );
     const { local, config } = await runSync(
       {
         local: localState,
         config: { enabled: true, version: 4, lastUpload: unencrypted },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).toHaveBeenCalled();
     expect(local).toEqual(localState);
     expect(config).toEqual({
       enabled: true,
@@ -323,18 +355,18 @@ describe("syncServiceAtom", () => {
     const lastUploadState = produce(getDefaultSyncStore(), (draft) => {
       draft.data.list[0][1].s3.bucket = "ccc";
     });
-    const conflictResolver = vi.fn(() => {
-      return Promise.resolve("local" as const);
-    });
+    vi.mocked(userConfirmations.conflictResolver).mockResolvedValue(
+      "local" as const,
+    );
     const { local, config } = await runSync(
       {
         local: localState,
         config: { enabled: true, version: 4, lastUpload: lastUploadState },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).toHaveBeenCalled();
     expect(local).toEqual(localState);
     expect(config).toEqual({
       enabled: true,
@@ -360,18 +392,18 @@ describe("syncServiceAtom", () => {
     const lastUploadState = produce(getDefaultSyncStore(), (draft) => {
       draft.data.list[0][1].s3.bucket = "ccc";
     });
-    const conflictResolver = vi.fn(() => {
-      return Promise.resolve("remote" as const);
-    });
+    vi.mocked(userConfirmations.conflictResolver).mockResolvedValue(
+      "remote" as const,
+    );
     const { local, config } = await runSync(
       {
         local: localState,
         config: { enabled: true, version: 4, lastUpload: lastUploadState },
         token: TEST_TOKEN,
       },
-      { conflictResolver },
+      userConfirmations,
     );
-    expect(conflictResolver).toHaveBeenCalled();
+    expect(userConfirmations.conflictResolver).toHaveBeenCalled();
     expect(local).toEqual(unencrypted);
     expect(config).toEqual({
       enabled: true,

@@ -52,9 +52,15 @@ export function SyncSettingsCard() {
   const handleSync = async () => {
     setSyncStatus("pulling");
     try {
-      await sync(() => {
-        console.log("conflict resolver: local");
-        return Promise.resolve("local");
+      await sync({
+        conflictResolver: () => {
+          console.log("conflict resolver: local");
+          return Promise.resolve("local");
+        },
+        confirmPull: () => {
+          console.log("confirm pull");
+          return Promise.resolve(true);
+        },
       });
     } catch (error) {
       console.error(error);
