@@ -11,6 +11,7 @@ export interface SettingsStoreClient {
     authHash: string,
     data: z.infer<typeof settingsRecordEncryptedSchema>,
   ): Promise<void>;
+  delete(authHash: string): Promise<void>;
 }
 
 class SettingsStoreClientRedis implements SettingsStoreClient {
@@ -47,6 +48,12 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
     const redis = this.getRedis();
     const key = this.getProfileKey(authHash);
     await redis.set(key, JSON.stringify(data));
+  }
+
+  async delete(authHash: string): Promise<void> {
+    const redis = this.getRedis();
+    const key = this.getProfileKey(authHash);
+    await redis.del(key);
   }
 }
 
