@@ -140,10 +140,35 @@ const uploadProfiles = baseOs
     };
   });
 
+const deleteProfile = baseOs
+  .errors({
+    BAD_REQUEST: {
+      data: z.object({
+        type: z.enum(["no-such-user"]),
+      }),
+    },
+  })
+  .input(z.object({ token: z.string().nonempty() }))
+  .output(z.object({ success: z.boolean() }))
+  .handler(async ({ input, errors }) => {
+    const authHash = await computeAuthHash(input.token);
+    const stored = await settingsStoreClient.get(authHash);
+    if (!stored) {
+      throw errors.BAD_REQUEST({
+        data: {
+          type: "no-such-user",
+        },
+      });
+    }
+    await settingsStoreClient.delete(authHash);
+    return { success: true };
+  });
+
 export const router = {
   profiles: {
     fetch: fetchProfiles,
     fetchMetadata: fetchMetadata,
     upload: uploadProfiles,
+    delete: deleteProfile,
   },
 };

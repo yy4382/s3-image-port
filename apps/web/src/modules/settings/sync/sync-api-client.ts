@@ -166,23 +166,30 @@ export async function fetchMetadata(
   return fetchData;
 }
 
-// /**
-//  * Delete remote profiles from server
-//  */
-// async function deleteRemoteProfiles(
-//   token: string,
-//   _userId: string,
-// ): Promise<void> {
-//   const authToken = await getAuthToken(token);
-//   const response = await fetch(API_BASE, {
-//     method: "DELETE",
-//     headers: {
-//       "Content-Type": "application/json",
-//       [AUTH_HEADER]: authToken,
-//     },
-//   });
-
-//   if (!response.ok) {
-//     throw new Error(`Delete failed: ${response.statusText}`);
-//   }
-// }
+/**
+ * Delete remote profiles from server
+ */
+export async function deleteRemoteProfiles(token: string): Promise<boolean> {
+  const authToken = await getAuthToken(token);
+  const {
+    error,
+    data: fetchData,
+    isDefined,
+  } = await safe(client.profiles.delete({ token: authToken }));
+  if (isDefined) {
+    switch (error.code) {
+      case "INPUT_VALIDATION_FAILED": {
+        throw new Error(error.data.fieldErrors.token?.join(", "));
+      }
+      case "BAD_REQUEST": {
+        if (error.data.type === "no-such-user") {
+          return false;
+        }
+        throw new Error(error.message);
+      }
+    }
+  } else if (error) {
+    throw error;
+  }
+  return fetchData.success;
+}
