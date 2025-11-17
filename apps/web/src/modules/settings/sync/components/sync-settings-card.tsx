@@ -58,6 +58,7 @@ import deepEqual from "deep-equal";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { EnableSyncDialog } from "./enable-sync-dialog";
 
 const remoteMetadataQuery = (params: { token: string; enabled: boolean }) =>
   queryOptions({
@@ -133,9 +134,24 @@ const isEnabledAtom = focusAtom(syncStateAtom, (optic) =>
 
 function SyncSwitch() {
   const [isEnabled, setIsEnabled] = useAtom(isEnabledAtom);
+  const enableConfirm = useConfirmation<boolean, boolean>();
+  const handleEnableChange = async (checked: boolean) => {
+    if (checked) {
+      const confirmed = await enableConfirm.confirm(checked);
+      if (confirmed) {
+        setIsEnabled(true);
+        return;
+      }
+    }
+    setIsEnabled(false);
+  };
   return (
-    <div className="flex items-center gap-2 py-2">
-      <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
+    <div className="py-2">
+      <Switch checked={isEnabled} onCheckedChange={handleEnableChange} />
+      <EnableSyncDialog
+        open={enableConfirm.isOpen}
+        onResolve={enableConfirm.resolve}
+      />
     </div>
   );
 }
@@ -373,14 +389,12 @@ function SyncActions() {
       )}
       <ConfirmPullDialog
         open={confirmPull.isOpen}
-        data={typeof confirmPull.data === "symbol" ? null : confirmPull.data}
+        data={confirmPull.data}
         onResolve={confirmPull.resolve}
       />
       <ConfirmConflictDialog
         open={confirmConflict.isOpen}
-        data={
-          typeof confirmConflict.data === "symbol" ? null : confirmConflict.data
-        }
+        data={confirmConflict.data}
         onResolve={confirmConflict.resolve}
       />
       <ConfirmDeleteDialog
