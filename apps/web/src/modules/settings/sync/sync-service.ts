@@ -9,7 +9,11 @@ import {
 } from "./sync-store";
 import deepEqual from "deep-equal";
 import { settingsRecordSchema } from "./types";
-import { uploadProfiles, fetchRemoteProfiles } from "./sync-api-client";
+import {
+  uploadProfiles,
+  fetchRemoteProfiles,
+  UploadProfileError,
+} from "./sync-api-client";
 import type { DiscriminatedUnion } from "@/lib/utils/type-utils";
 import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 
@@ -235,12 +239,12 @@ async function performSyncAction(
         return {
           config: (prev) => ({
             ...prev,
-            version: data.version,
+            version: data.current.version,
             lastUpload: local,
           }),
         };
       }
-      throw new Error("Upload failed");
+      throw new UploadProfileError(data.error);
     }
     case SyncActionType.PUSH: {
       const { local, config } = type.data;
@@ -249,12 +253,12 @@ async function performSyncAction(
         return {
           config: (prev) => ({
             ...prev,
-            version: data.version,
+            version: data.current.version,
             lastUpload: local,
           }),
         };
       }
-      throw new Error("Upload failed");
+      throw new UploadProfileError(data.error);
     }
     case SyncActionType.PULL: {
       const { remote } = type.data;
@@ -306,15 +310,12 @@ async function handleConflict(
         return {
           config: (prev) => ({
             ...prev,
-            version: uploadedData.version,
+            version: uploadedData.current.version,
             lastUpload: data.local,
           }),
         };
       }
-      if (uploadedData.conflict) {
-        throw new Error("Race condition, retry later");
-      }
-      throw new Error("Upload failed");
+      throw new UploadProfileError(uploadedData.error);
     }
     case "remote": {
       return {

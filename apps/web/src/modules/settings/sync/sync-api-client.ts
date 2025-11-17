@@ -3,8 +3,9 @@ import { settingsForSyncSchema } from "../settings-store";
 import { settingsForSyncFromUnknown } from "../settings-store";
 import { z } from "zod";
 import { client } from "@/lib/orpc/client";
-import { safe } from "@orpc/client";
+import { InferClientErrors, ORPCError, safe } from "@orpc/client";
 import { settingsRecordSchema, settingsResponseSchema } from "./types";
+import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 
 async function decryptSettingsInDb(
   data: z.infer<typeof settingsResponseSchema>,
@@ -25,6 +26,24 @@ async function getAuthToken(token: string): Promise<string> {
   return deriveAuthToken(token);
 }
 
+type UploadProfileErrors =
+  | Exclude<
+      Extract<
+        InferClientErrors<typeof client.profiles.upload>,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ORPCError<any, any>
+      >,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ORPCError<"CONFLICT", any>
+    >
+  | ORPCError<"CONFLICT", z.infer<typeof settingsRecordSchema>>;
+export class UploadProfileError extends Error {
+  cause: UploadProfileErrors;
+  constructor(cause: UploadProfileErrors) {
+    super(cause.message);
+    this.cause = cause;
+  }
+}
 /**
  * Upload encrypted profiles to server
  */
@@ -35,18 +54,11 @@ export async function uploadProfiles(
 ): Promise<
   | {
       success: true;
-      version: number;
       current: z.infer<typeof settingsRecordSchema>;
     }
   | {
       success: false;
-      conflict: true;
-      current: z.infer<typeof settingsRecordSchema>;
-    }
-  | {
-      success: false;
-      conflict: false;
-      error: string;
+      error: UploadProfileErrors;
     }
 > {
   const serialized = JSON.stringify(data);
@@ -68,28 +80,34 @@ export async function uploadProfiles(
   if (isDefined) {
     switch (error.code) {
       case "INPUT_VALIDATION_FAILED": {
-        return {
-          success: false,
-          conflict: false,
-          error: error.message,
-        };
+        return { success: false, error };
       }
       case "PAYLOAD_TOO_LARGE": {
-        return {
-          success: false,
-          conflict: false,
-          error: error.message,
-        };
+        return { success: false, error };
       }
       case "CONFLICT": {
+        const decrypted = await decryptSettingsInDb(
+          settingsResponseSchema.decode(error.data),
+          token,
+        );
+        const transformed = new ORPCError("CONFLICT", {
+          ...error,
+          data: decrypted,
+        });
         return {
           success: false,
-          conflict: true,
-          current: await decryptSettingsInDb(
-            settingsResponseSchema.decode(error.data),
-            token,
-          ),
+          error: transformed,
         };
+      }
+      case "TOO_MANY_REQUESTS": {
+        return { success: false, error };
+        // const retryAfterMs =
+        //   typeof error.data?.reset === "number"
+        //     ? Math.max(0, error.data.reset - Date.now())
+        //     : undefined;
+      }
+      default: {
+        assertUnreachable(error);
       }
     }
   } else if (error) {
@@ -97,7 +115,6 @@ export async function uploadProfiles(
   }
   return {
     success: true,
-    version: fetchData.version,
     current: await decryptSettingsInDb(
       settingsResponseSchema.decode(fetchData),
       token,
