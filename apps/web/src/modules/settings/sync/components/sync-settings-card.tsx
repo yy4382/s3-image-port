@@ -56,6 +56,7 @@ import {
 import { format } from "date-fns";
 import { ConfirmPullDialog } from "./confirm-pull-dialog";
 import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
+import { ConfirmConflictDialog } from "./confirm-conflict-dialog";
 import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 import { settingsForSyncAtom } from "../../settings-store";
 import deepEqual from "deep-equal";
@@ -66,14 +67,10 @@ const remoteMetadataQuery = (token: string) =>
     queryFn: () => fetchMetadata(token),
   });
 
-const confirmationNull = Symbol("confirmationNotActivate");
-function useConfirmation<TData, TResult>() {
-  const [data, setData] = useState<TData | typeof confirmationNull>(
-    confirmationNull,
-  );
-  const resolveRef = useRef<
-    ((value: TResult) => void) | typeof confirmationNull
-  >(confirmationNull);
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+function useConfirmation<TData extends {}, TResult>() {
+  const [data, setData] = useState<TData | null>(null);
+  const resolveRef = useRef<((value: TResult) => void) | null>(null);
 
   const confirm = (confirmData: TData): Promise<TResult> => {
     return new Promise<TResult>((resolve) => {
@@ -83,18 +80,16 @@ function useConfirmation<TData, TResult>() {
   };
 
   const resolve = (value: TResult) => {
-    if (resolveRef.current !== confirmationNull) {
-      resolveRef.current(value);
-    }
-    setData(confirmationNull);
-    resolveRef.current = confirmationNull;
+    resolveRef.current?.(value);
+    setData(null);
+    resolveRef.current = null;
   };
 
   return {
     data,
     confirm,
     resolve,
-    isOpen: data !== confirmationNull,
+    isOpen: data !== null,
   };
 }
 
@@ -110,7 +105,8 @@ export function SyncSettingsCard() {
         <CardHeader>
           <CardTitle>Profile Sync</CardTitle>
           <CardDescription>
-            Sync your profiles across devices using encrypted cloud storage
+            Sync your profiles across devices using end to end encrypted cloud
+            storage
           </CardDescription>
           <CardAction>
             <SyncSwitch />
@@ -238,16 +234,18 @@ function SyncActions() {
     boolean
   >();
 
-  const confirmDelete = useConfirmation<null, boolean>();
+  const confirmConflict = useConfirmation<
+    Parameters<UserConfirmations["conflictResolver"]>[0],
+    "local" | "remote" | null
+  >();
+
+  const confirmDelete = useConfirmation<"", boolean>();
 
   const { mutate: syncMutation, isPending } = useMutation({
     mutationKey: ["sync"],
     mutationFn: () =>
       sync({
-        conflictResolver: () => {
-          console.log("conflict resolver: local");
-          return Promise.resolve("local");
-        },
+        conflictResolver: confirmConflict.confirm,
         confirmPull: confirmPull.confirm,
       }),
     scope: {
@@ -316,7 +314,7 @@ function SyncActions() {
   };
 
   const handleDelete = async () => {
-    const confirmed = await confirmDelete.confirm(null);
+    const confirmed = await confirmDelete.confirm("");
     if (confirmed) {
       const result = await deleteRemoteProfiles(syncToken);
       switch (result._tag) {
@@ -402,6 +400,13 @@ function SyncActions() {
         open={confirmPull.isOpen}
         data={typeof confirmPull.data === "symbol" ? null : confirmPull.data}
         onResolve={confirmPull.resolve}
+      />
+      <ConfirmConflictDialog
+        open={confirmConflict.isOpen}
+        data={
+          typeof confirmConflict.data === "symbol" ? null : confirmConflict.data
+        }
+        onResolve={confirmConflict.resolve}
       />
       <ConfirmDeleteDialog
         open={confirmDelete.isOpen}
