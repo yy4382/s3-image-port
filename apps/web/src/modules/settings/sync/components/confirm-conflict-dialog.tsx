@@ -41,34 +41,22 @@ export function ConfirmConflictDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="rounded-lg border border-yellow-600/50 bg-yellow-50 dark:bg-yellow-950/20 p-3 space-y-2">
-            <div className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
-              Remote Settings Information
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Uploaded at:</span>
-              <span className="font-mono text-xs">
-                {format(data.remote.updatedAt, "yyyy-MM-dd HH:mm:ss")}
-              </span>
-            </div>
-            {data.remote.userAgent && (
-              <>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Browser:</span>
-                  <span className="text-xs">
-                    {data.remote.userAgent.browser ?? "Unknown"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">OS:</span>
-                  <span className="text-xs">
-                    {data.remote.userAgent.os ?? "Unknown"}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
+        <div className="space-y-2">
+          <p className="text-sm">
+            The current settings on the remote server were uploaded at{" "}
+            <code className="font-mono font-semibold">
+              {format(data.remote.updatedAt, "yyyy-MM-dd HH:mm:ss")}
+            </code>{" "}
+            from{" "}
+            <code className="font-mono font-semibold">
+              {data.remote.userAgent?.browser ?? "Unknown browser"}
+            </code>{" "}
+            on{" "}
+            <code className="font-mono font-semibold">
+              {data.remote.userAgent?.os ?? "Unknown OS"}
+            </code>
+            .
+          </p>
 
           <Separator />
 
@@ -98,11 +86,11 @@ export function ConfirmConflictDialog({
             onClick={() => onResolve("remote")}
             className="sm:flex-1"
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download />
             Use Remote
           </Button>
           <Button onClick={() => onResolve("local")} className="sm:flex-1">
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload />
             Use Local
           </Button>
         </DialogFooter>

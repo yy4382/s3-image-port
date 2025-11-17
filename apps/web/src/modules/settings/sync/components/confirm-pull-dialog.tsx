@@ -30,41 +30,30 @@ export function ConfirmPullDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
-            Pull Remote Settings
+            Pull Remote Profiles
           </DialogTitle>
           <DialogDescription>
-            Remote settings are available. Review the changes below and decide
-            whether to pull them to this device.
+            The current profiles on the remote server is newer than the local
+            ones.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                Profile on server was uploaded at:
-              </span>
-              <span className="font-mono text-xs">
-                {format(data.remote.updatedAt, "yyyy-MM-dd HH:mm:ss")}
-              </span>
-            </div>
-            {data.remote.userAgent && (
-              <>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Browser:</span>
-                  <span className="text-xs">
-                    {data.remote.userAgent.browser ?? "Unknown"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">OS:</span>
-                  <span className="text-xs">
-                    {data.remote.userAgent.os ?? "Unknown"}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
+        <div className="space-y-3">
+          <p className="text-sm">
+            The current settings on the remote server were uploaded at{" "}
+            <code className="font-mono font-semibold">
+              {format(data.remote.updatedAt, "yyyy-MM-dd HH:mm:ss")}
+            </code>{" "}
+            from{" "}
+            <code className="font-mono font-semibold">
+              {data.remote.userAgent?.browser ?? "Unknown browser"}
+            </code>{" "}
+            on{" "}
+            <code className="font-mono font-semibold">
+              {data.remote.userAgent?.os ?? "Unknown OS"}
+            </code>
+            .
+          </p>
 
           <Separator />
 
@@ -83,11 +72,11 @@ export function ConfirmPullDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onResolve(false)}>
-            Cancel pull
+            Cancel
           </Button>
           <Button onClick={() => onResolve(true)}>
-            <Download className="mr-2 h-4 w-4" />
-            Accept remote changes
+            <Download />
+            Accept changes
           </Button>
         </DialogFooter>
       </DialogContent>
