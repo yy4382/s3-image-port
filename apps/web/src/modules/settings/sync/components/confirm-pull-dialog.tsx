@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -12,6 +11,7 @@ import { Download } from "lucide-react";
 import { type UserConfirmations } from "../sync-service";
 import { format } from "date-fns";
 import { SettingsViewer } from "./settings-viewer";
+import { ConfirmDialog } from "./confirm-dialog";
 
 export function ConfirmPullDialog({
   open,
@@ -25,7 +25,7 @@ export function ConfirmPullDialog({
   if (!data) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onResolve(false)}>
+    <ConfirmDialog open={open} onResolve={onResolve}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -86,6 +86,6 @@ export function ConfirmPullDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </ConfirmDialog>
   );
 }

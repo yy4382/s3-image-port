@@ -11,6 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { getTokenPreview, isValidSyncToken } from "@/lib/encryption/sync-token";
 import { useAtom, useSetAtom } from "jotai";
@@ -20,7 +26,10 @@ import {
   Key,
   Loader2,
   Trash2,
+  RefreshCwIcon,
+  MoreVertical,
   Upload,
+  Download,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -38,9 +47,18 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { fetchMetadata } from "../sync-api-client";
+import {
+  deleteRemoteProfiles,
+  fetchMetadata,
+  fetchRemoteProfiles,
+  uploadProfiles,
+} from "../sync-api-client";
 import { format } from "date-fns";
 import { ConfirmPullDialog } from "./confirm-pull-dialog";
+import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
+import { assertUnreachable } from "@/lib/utils/assert-unreachable";
+import { settingsForSyncAtom } from "../../settings-store";
+import deepEqual from "deep-equal";
 
 const remoteMetadataQuery = (token: string) =>
   queryOptions({
@@ -48,9 +66,14 @@ const remoteMetadataQuery = (token: string) =>
     queryFn: () => fetchMetadata(token),
   });
 
+const confirmationNull = Symbol("confirmationNotActivate");
 function useConfirmation<TData, TResult>() {
-  const [data, setData] = useState<TData | null>(null);
-  const resolveRef = useRef<((value: TResult) => void) | null>(null);
+  const [data, setData] = useState<TData | typeof confirmationNull>(
+    confirmationNull,
+  );
+  const resolveRef = useRef<
+    ((value: TResult) => void) | typeof confirmationNull
+  >(confirmationNull);
 
   const confirm = (confirmData: TData): Promise<TResult> => {
     return new Promise<TResult>((resolve) => {
@@ -60,57 +83,26 @@ function useConfirmation<TData, TResult>() {
   };
 
   const resolve = (value: TResult) => {
-    resolveRef.current?.(value);
-    setData(null);
-    resolveRef.current = null;
+    if (resolveRef.current !== confirmationNull) {
+      resolveRef.current(value);
+    }
+    setData(confirmationNull);
+    resolveRef.current = confirmationNull;
   };
 
   return {
     data,
     confirm,
     resolve,
-    isOpen: data !== null,
+    isOpen: data !== confirmationNull,
   };
 }
 
 export function SyncSettingsCard() {
   const [syncConfig] = useAtom(syncStateAtom);
   const [syncToken] = useAtom(syncTokenAtom);
-  const { data: remoteMetadata } = useQuery(remoteMetadataQuery(syncToken));
-  const queryClient = useQueryClient();
 
   const hasValidToken = isValidSyncToken(syncToken);
-
-  const sync = useSetAtom(syncServiceAtom);
-
-  const confirmPull = useConfirmation<
-    Parameters<UserConfirmations["confirmPull"]>[0],
-    boolean
-  >();
-
-  const { mutate: syncMutation, isPending } = useMutation({
-    mutationKey: ["sync"],
-    mutationFn: () =>
-      sync({
-        conflictResolver: () => {
-          console.log("conflict resolver: local");
-          return Promise.resolve("local");
-        },
-        confirmPull: confirmPull.confirm,
-      }),
-    scope: {
-      id: "profile-sync",
-    },
-    onSettled: (data) => {
-      if (
-        !data ||
-        data === SyncActionType.DO_NOTHING ||
-        data === SyncActionType.NOT_CHANGED
-      )
-        return;
-      queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
-    },
-  });
 
   return (
     <>
@@ -134,53 +126,13 @@ export function SyncSettingsCard() {
               {hasValidToken && (
                 <>
                   <Separator />
-
-                  <Button
-                    onClick={() => syncMutation()}
-                    disabled={isPending}
-                    className="w-full"
-                    variant="default"
-                  >
-                    {isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Syncing...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Sync
-                      </>
-                    )}
-                  </Button>
-                  {remoteMetadata &&
-                    remoteMetadata.version > syncConfig.version && (
-                      <div className="text-sm text-muted-foreground">
-                        Remote has been updated since last sync on this device.{" "}
-                        <br />
-                        Remote updated at{" "}
-                        {format(
-                          remoteMetadata.updatedAt,
-                          "yyyy-MM-dd HH:mm:ss",
-                        )}{" "}
-                        from{" "}
-                        {remoteMetadata.userAgent?.browser ?? "Unknown browser"}{" "}
-                        on {remoteMetadata.userAgent?.os ?? "Unknown OS"}
-                        <br />
-                      </div>
-                    )}
+                  <SyncActions />
                 </>
               )}
             </>
           </CardContent>
         )}
       </Card>
-
-      <ConfirmPullDialog
-        open={confirmPull.isOpen}
-        data={confirmPull.data}
-        onResolve={confirmPull.resolve}
-      />
     </>
   );
 }
@@ -267,6 +219,193 @@ function SyncTokenStatus() {
         open={showTokenDialog}
         onOpenChange={setShowTokenDialog}
         onTokenConfirm={handleTokenConfirm}
+      />
+    </div>
+  );
+}
+
+function SyncActions() {
+  const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
+  const [syncToken] = useAtom(syncTokenAtom);
+  const { data: remoteMetadata } = useQuery(remoteMetadataQuery(syncToken));
+  const queryClient = useQueryClient();
+  const [local, setLocal] = useAtom(settingsForSyncAtom);
+
+  const sync = useSetAtom(syncServiceAtom);
+
+  const confirmPull = useConfirmation<
+    Parameters<UserConfirmations["confirmPull"]>[0],
+    boolean
+  >();
+
+  const confirmDelete = useConfirmation<null, boolean>();
+
+  const { mutate: syncMutation, isPending } = useMutation({
+    mutationKey: ["sync"],
+    mutationFn: () =>
+      sync({
+        conflictResolver: () => {
+          console.log("conflict resolver: local");
+          return Promise.resolve("local");
+        },
+        confirmPull: confirmPull.confirm,
+      }),
+    scope: {
+      id: "profile-sync",
+    },
+    onSettled: (data) => {
+      if (
+        !data ||
+        data === SyncActionType.DO_NOTHING ||
+        data === SyncActionType.NOT_CHANGED
+      )
+        return;
+      queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
+    },
+  });
+  const handleForceUpload = async () => {
+    try {
+      const remote = await fetchRemoteProfiles(syncToken);
+      if (remote && deepEqual(local, remote.data)) {
+        toast.info("Remote profile is already same as local profile");
+        setSyncConfig((prev) => ({
+          ...prev,
+          version: remote.version,
+          lastUpload: remote.data,
+        }));
+        return;
+      }
+      const result = await uploadProfiles(local, syncToken, "force");
+      if (!result.success) {
+        toast.error("Failed to upload local profile");
+        console.error("Failed to upload local profile", result);
+        return;
+      }
+      setSyncConfig((prev) => ({
+        ...prev,
+        version: result.version,
+        lastUpload: result.current.data,
+      }));
+      toast.success("Local profile uploaded successfully");
+      queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
+    } catch (error) {
+      toast.error("Failed to upload local profile");
+      console.error("Failed to upload local profile", error);
+      return;
+    }
+  };
+
+  const handleForcePull = async () => {
+    try {
+      const result = await fetchRemoteProfiles(syncToken);
+      if (!result) {
+        toast.error("No corresponding profile found on the server");
+        return;
+      }
+      setLocal(result.data);
+      setSyncConfig((prev) => ({
+        ...prev,
+        version: result.version,
+        lastUpload: result.data,
+      }));
+    } catch (error) {
+      toast.error("Failed to fetch remote profile");
+      console.error("Failed to fetch remote profile", error);
+      return;
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await confirmDelete.confirm(null);
+    if (confirmed) {
+      const result = await deleteRemoteProfiles(syncToken);
+      switch (result._tag) {
+        case "success": {
+          toast.success("Remote sync data deleted");
+          try {
+            await queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
+          } finally {
+            setSyncConfig({ enabled: true, version: 0, lastUpload: null });
+          }
+          break;
+        }
+        case "no-such-user": {
+          toast.error("No corresponding profile found on the server");
+          break;
+        }
+        case "error": {
+          toast.error("Failed to delete remote sync data");
+          break;
+        }
+        /* v8 ignore next */
+        default: {
+          assertUnreachable(result);
+        }
+      }
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        <Button
+          onClick={() => syncMutation()}
+          disabled={isPending}
+          className="flex-1"
+          variant="default"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Syncing...
+            </>
+          ) : (
+            <>
+              <RefreshCwIcon className="mr-2 h-4 w-4" />
+              Sync
+            </>
+          )}
+        </Button>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" disabled={isPending}>
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleForceUpload}>
+              <Upload className="mr-2 h-4 w-4" />
+              Force Upload
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleForcePull}>
+              <Download className="mr-2 h-4 w-4" />
+              Force Pull
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {remoteMetadata && remoteMetadata.version > syncConfig.version && (
+        <div className="text-sm text-muted-foreground">
+          Remote has been updated since last sync on this device. <br />
+          Remote updated at{" "}
+          {format(remoteMetadata.updatedAt, "yyyy-MM-dd HH:mm:ss")} from{" "}
+          {remoteMetadata.userAgent?.browser ?? "Unknown browser"} on{" "}
+          {remoteMetadata.userAgent?.os ?? "Unknown OS"}
+          <br />
+        </div>
+      )}
+      <ConfirmPullDialog
+        open={confirmPull.isOpen}
+        data={typeof confirmPull.data === "symbol" ? null : confirmPull.data}
+        onResolve={confirmPull.resolve}
+      />
+      <ConfirmDeleteDialog
+        open={confirmDelete.isOpen}
+        onResolve={confirmDelete.resolve}
       />
     </div>
   );

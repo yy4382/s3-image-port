@@ -31,7 +31,7 @@ async function getAuthToken(token: string): Promise<string> {
 export async function uploadProfiles(
   data: z.infer<typeof settingsForSyncSchema>,
   token: string,
-  currentVersion: number,
+  currentVersion: number | "force",
 ): Promise<
   | {
       success: true;
@@ -166,16 +166,32 @@ export async function fetchMetadata(
   return fetchData;
 }
 
+const DeleteRemoteResultType = {
+  SUCCESS: "success",
+  NO_SUCH_USER: "no-such-user",
+  ERROR: "error",
+} as const;
+type DeleteRemoteResult =
+  | {
+      _tag: typeof DeleteRemoteResultType.SUCCESS;
+    }
+  | {
+      _tag: typeof DeleteRemoteResultType.NO_SUCH_USER;
+    }
+  | {
+      _tag: typeof DeleteRemoteResultType.ERROR;
+      error: string;
+    };
 /**
  * Delete remote profiles from server
  */
-export async function deleteRemoteProfiles(token: string): Promise<boolean> {
+export async function deleteRemoteProfiles(
+  token: string,
+): Promise<DeleteRemoteResult> {
   const authToken = await getAuthToken(token);
-  const {
-    error,
-    data: fetchData,
-    isDefined,
-  } = await safe(client.profiles.delete({ token: authToken }));
+  const { error, isDefined } = await safe(
+    client.profiles.delete({ token: authToken }),
+  );
   if (isDefined) {
     switch (error.code) {
       case "INPUT_VALIDATION_FAILED": {
@@ -183,13 +199,13 @@ export async function deleteRemoteProfiles(token: string): Promise<boolean> {
       }
       case "BAD_REQUEST": {
         if (error.data.type === "no-such-user") {
-          return false;
+          return { _tag: DeleteRemoteResultType.NO_SUCH_USER };
         }
-        throw new Error(error.message);
+        return { _tag: DeleteRemoteResultType.ERROR, error: error.message };
       }
     }
   } else if (error) {
     throw error;
   }
-  return fetchData.success;
+  return { _tag: DeleteRemoteResultType.SUCCESS };
 }
