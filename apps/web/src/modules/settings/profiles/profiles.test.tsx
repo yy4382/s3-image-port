@@ -8,6 +8,15 @@ import { render } from "@/../test/utils/render-browser";
 import { commands } from "vitest/browser";
 import { profilesAtom } from "../settings-store";
 
+vi.mock(
+  import("@/modules/settings/sync/components/sync-settings-card"),
+  async () => {
+    return {
+      SyncSettings: vi.fn().mockReturnValue(<div>SyncSettings mock</div>),
+    };
+  },
+);
+
 async function prepareProfiles() {
   const { result } = await renderHook(() => useAtom(profilesAtom));
   result.current[1]({
