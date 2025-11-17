@@ -19,7 +19,6 @@ import { isValidSyncToken } from "@/lib/encryption/sync-token";
 import { useAtom, useSetAtom } from "jotai";
 import {
   Key,
-  Loader2,
   Trash2,
   RefreshCwIcon,
   MoreVertical,
@@ -58,6 +57,7 @@ import { settingsForSyncAtom } from "../../settings-store";
 import deepEqual from "deep-equal";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
+import { cn } from "@/lib/utils";
 
 const remoteMetadataQuery = (params: { token: string; enabled: boolean }) =>
   queryOptions({
@@ -153,7 +153,7 @@ function SyncTokenSetup() {
   return (
     <div className="space-y-3">
       <Button onClick={() => setShowTokenDialog(true)} variant="outline">
-        <Key className="h-4 w-4" />
+        <Key />
         Setup token
       </Button>
       <TokenSetupDialog
@@ -200,18 +200,25 @@ function SyncActions() {
       id: "profile-sync",
     },
     onSettled: (data) => {
-      if (
-        !data ||
-        data === SyncActionType.DO_NOTHING ||
-        data === SyncActionType.NOT_CHANGED
-      ) {
-        toast.info("No changes to sync");
-        return;
+      if (!data) {
+        toast.error("Failed to sync");
+      } else if (data === SyncActionType.NOT_CHANGED) {
+        toast.success("No changes to sync");
+      } else if (data !== SyncActionType.DO_NOTHING) {
+        toast.success("Sync completed");
       }
-      toast.success("Sync completed");
-      queryClient.invalidateQueries(
-        remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
-      );
+      if (
+        data &&
+        data !== SyncActionType.DO_NOTHING &&
+        data !== SyncActionType.NOT_CHANGED
+      ) {
+        queryClient.invalidateQueries(
+          remoteMetadataQuery({
+            token: syncToken,
+            enabled: syncConfig.enabled,
+          }),
+        );
+      }
     },
   });
   const handleForceUpload = async () => {
@@ -318,24 +325,15 @@ function SyncActions() {
             disabled={isPending}
             variant="default"
           >
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Syncing...
-              </>
-            ) : (
-              <>
-                <RefreshCwIcon className="h-4 w-4" />
-                Sync
-              </>
-            )}
+            <RefreshCwIcon className={cn(isPending && "animate-spin")} />
+            Sync
           </Button>
           <Button
             variant="secondary"
             onClick={() => setShowTokenViewer(true)}
             disabled={isPending}
           >
-            <Key className="h-4 w-4" />
+            <Key />
             Token
           </Button>
         </div>
@@ -343,20 +341,20 @@ function SyncActions() {
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" disabled={isPending}>
-              <MoreVertical className="h-4 w-4" />
+              <MoreVertical />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleForceUpload}>
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload />
               Force Upload
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleForcePull}>
-              <Download className="mr-2 h-4 w-4" />
+              <Download />
               Force Pull
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

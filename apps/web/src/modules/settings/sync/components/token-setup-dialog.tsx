@@ -17,9 +17,9 @@ import {
   createSyncToken,
   normalizeSyncToken,
   isValidSyncToken,
-  type WordCount,
 } from "@/lib/encryption/sync-token";
-import { AlertCircle, CheckCircle2, Copy, RefreshCw } from "lucide-react";
+import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
+import { TokenDisplay } from "./token-display";
 
 interface TokenSetupDialogProps {
   open: boolean;
@@ -35,20 +35,10 @@ export function TokenSetupDialog({
   const [mode, setMode] = useState<"generate" | "import">("generate");
   const [generatedToken, setGeneratedToken] = useState<string>("");
   const [importedToken, setImportedToken] = useState<string>("");
-  const [wordCount, setWordCount] = useState<WordCount>(12);
-  const [copied, setCopied] = useState(false);
 
   const handleGenerate = () => {
-    const token = createSyncToken(wordCount);
+    const token = createSyncToken(24);
     setGeneratedToken(token);
-    setCopied(false);
-  };
-
-  const handleCopy = async () => {
-    const token = mode === "generate" ? generatedToken : importedToken;
-    await navigator.clipboard.writeText(token);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleConfirm = () => {
@@ -59,7 +49,6 @@ export function TokenSetupDialog({
     // Reset state
     setGeneratedToken("");
     setImportedToken("");
-    setCopied(false);
   };
 
   const isImportValid = isValidSyncToken(importedToken);
@@ -91,34 +80,18 @@ export function TokenSetupDialog({
           </TabsList>
 
           <TabsContent value="generate" className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Label>Word Count:</Label>
-              <div className="flex gap-2">
-                {([12, 15, 18, 21, 24] as WordCount[]).map((count) => (
-                  <Button
-                    key={count}
-                    size="sm"
-                    variant={wordCount === count ? "default" : "outline"}
-                    onClick={() => setWordCount(count)}
-                  >
-                    {count}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
             <Button onClick={handleGenerate} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw />
               Generate Token
             </Button>
 
             {generatedToken && (
               <div className="space-y-3">
-                <div className="p-4 rounded-lg border bg-muted/50">
-                  <p className="font-mono text-sm break-all">
-                    {generatedToken}
-                  </p>
-                </div>
+                <TokenDisplay
+                  token={generatedToken}
+                  showToggle={false}
+                  defaultShowFull={true}
+                />
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800">
                   <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -165,29 +138,11 @@ export function TokenSetupDialog({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={handleCopy}
-            disabled={!canConfirm}
-            className="flex-1"
-          >
-            {copied ? (
-              <>
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy Token
-              </>
-            )}
-          </Button>
+        <DialogFooter>
           <Button
             onClick={handleConfirm}
             disabled={!canConfirm}
-            className="flex-1"
+            className="w-full"
           >
             Confirm & Enable Sync
           </Button>
