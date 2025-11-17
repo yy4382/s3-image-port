@@ -42,7 +42,7 @@ import {
   useRenameProfile,
 } from "./profiles-utils";
 import { profilesAtom } from "../settings-store";
-import { SyncSettingsCard } from "../sync/components/sync-settings-card";
+import { SyncSettings } from "../sync/components/sync-settings-card";
 
 type ProfileItemProps = {
   name: string;
@@ -336,12 +336,9 @@ function Profiles() {
           ))}
         </ClientOnly>
       </div>
-
-      <div className="mt-8">
-        <ClientOnly fallback={<Skeleton className="w-full h-96" />}>
-          <SyncSettingsCard />
-        </ClientOnly>
-      </div>
+      <ClientOnly fallback={<Skeleton className="w-full h-96" />}>
+        <SyncSettings />
+      </ClientOnly>
     </div>
   );
 }

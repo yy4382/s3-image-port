@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   createSyncToken,
   normalizeSyncToken,
@@ -76,25 +77,20 @@ export function TokenSetupDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant={mode === "generate" ? "default" : "outline"}
-            onClick={() => setMode("generate")}
-            className="flex-1"
-          >
-            Generate New Token
-          </Button>
-          <Button
-            variant={mode === "import" ? "default" : "outline"}
-            onClick={() => setMode("import")}
-            className="flex-1"
-          >
-            Import Existing Token
-          </Button>
-        </div>
+        <Tabs
+          value={mode}
+          onValueChange={(value) => setMode(value as "generate" | "import")}
+        >
+          <TabsList className="w-full">
+            <TabsTrigger value="generate" className="flex-1">
+              Generate new token
+            </TabsTrigger>
+            <TabsTrigger value="import" className="flex-1">
+              Use existing token
+            </TabsTrigger>
+          </TabsList>
 
-        {mode === "generate" ? (
-          <div className="space-y-4">
+          <TabsContent value="generate" className="space-y-4">
             <div className="flex items-center gap-2">
               <Label>Word Count:</Label>
               <div className="flex gap-2">
@@ -138,9 +134,9 @@ export function TokenSetupDialog({
                 </div>
               </div>
             )}
-          </div>
-        ) : (
-          <div className="space-y-4">
+          </TabsContent>
+
+          <TabsContent value="import" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="import-token">Enter Your Token</Label>
               <Input
@@ -166,8 +162,8 @@ export function TokenSetupDialog({
                 </div>
               )}
             </div>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button
