@@ -1,10 +1,8 @@
 "use client";
 
 import { Switch } from "@/components/animate-ui/radix/switch";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardAction,
   CardContent,
   CardDescription,
@@ -17,12 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import { getTokenPreview, isValidSyncToken } from "@/lib/encryption/sync-token";
+import { isValidSyncToken } from "@/lib/encryption/sync-token";
 import { useAtom, useSetAtom } from "jotai";
 import {
-  AlertCircle,
-  CheckCircle2,
   Key,
   Loader2,
   Trash2,
@@ -40,6 +35,7 @@ import {
 } from "../sync-service";
 import { syncStateAtom, syncTokenAtom } from "../sync-store";
 import { TokenSetupDialog } from "./token-setup-dialog";
+import { TokenViewerDialog } from "./token-viewer-dialog";
 import { focusAtom } from "jotai-optics";
 import {
   queryOptions,
@@ -60,11 +56,14 @@ import { ConfirmConflictDialog } from "./confirm-conflict-dialog";
 import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 import { settingsForSyncAtom } from "../../settings-store";
 import deepEqual from "deep-equal";
+import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
+import { AnimatePresence, motion } from "motion/react";
 
-const remoteMetadataQuery = (token: string) =>
+const remoteMetadataQuery = (params: { token: string; enabled: boolean }) =>
   queryOptions({
     queryKey: ["remote-metadata"],
-    queryFn: () => fetchMetadata(token),
+    queryFn: () => fetchMetadata(params.token),
+    enabled: params.enabled && !!params.token,
   });
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -93,43 +92,38 @@ function useConfirmation<TData extends {}, TResult>() {
   };
 }
 
-export function SyncSettingsCard() {
+export function SyncSettings() {
   const [syncConfig] = useAtom(syncStateAtom);
   const [syncToken] = useAtom(syncTokenAtom);
 
   const hasValidToken = isValidSyncToken(syncToken);
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Sync</CardTitle>
-          <CardDescription>
-            Sync your profiles across devices using end to end encrypted cloud
-            storage
-          </CardDescription>
-          <CardAction>
-            <SyncSwitch />
-          </CardAction>
-        </CardHeader>
+    <div className="flex flex-col gap-3">
+      <CardHeader className="px-0">
+        <CardTitle>Profile Sync</CardTitle>
+        <CardDescription>
+          Sync your settings across devices using end to end encrypted cloud
+          storage
+        </CardDescription>
+        <CardAction>
+          <SyncSwitch />
+        </CardAction>
+      </CardHeader>
 
-        {syncConfig.enabled && (
-          <CardContent className="space-y-6">
-            <>
-              <SyncTokenStatus />
-
-              {/* Sync Actions */}
-              {hasValidToken && (
-                <>
-                  <Separator />
-                  <SyncActions />
-                </>
-              )}
-            </>
-          </CardContent>
-        )}
-      </Card>
-    </>
+      <AutoResizeHeight duration={0.1}>
+        <AnimatePresence>
+          {syncConfig.enabled && (
+            <motion.div className="pb-1">
+              <CardContent className="px-0">
+                {!hasValidToken && <SyncTokenSetup />}
+                {hasValidToken && <SyncActions />}
+              </CardContent>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </AutoResizeHeight>
+    </div>
   );
 }
 
@@ -146,71 +140,22 @@ function SyncSwitch() {
   );
 }
 
-function SyncTokenStatus() {
-  const [syncToken, setSyncToken] = useAtom(syncTokenAtom);
-  const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
+function SyncTokenSetup() {
+  const [, setSyncToken] = useAtom(syncTokenAtom);
 
   const [showTokenDialog, setShowTokenDialog] = useState(false);
 
-  const hasValidToken = isValidSyncToken(syncToken);
-  const tokenPreview = hasValidToken ? getTokenPreview(syncToken) : "";
-
-  const handleClearToken = () => {
-    if (
-      confirm(
-        "Are you sure you want to clear your sync token? You'll need it to sync again.",
-      )
-    ) {
-      setSyncToken("");
-      setSyncConfig({ enabled: true, version: 0, lastUpload: null });
-      toast.info("Sync token cleared");
-    }
-  };
   const handleTokenConfirm = (token: string) => {
     setSyncToken(token);
-    setSyncConfig({ ...syncConfig, enabled: true });
     toast.success("Sync enabled successfully");
   };
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Key className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">Sync Token</span>
-        </div>
-        {hasValidToken ? (
-          <Badge variant="secondary" className="gap-1">
-            <CheckCircle2 className="h-3 w-3" />
-            Active
-          </Badge>
-        ) : (
-          <Badge variant="destructive" className="gap-1">
-            <AlertCircle className="h-3 w-3" />
-            Missing
-          </Badge>
-        )}
-      </div>
-
-      {hasValidToken && (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 p-2 rounded border bg-muted/50 font-mono text-sm">
-            {tokenPreview}
-          </div>
-          <Button variant="outline" size="sm" onClick={handleClearToken}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
-      {!hasValidToken && (
-        <Button
-          onClick={() => setShowTokenDialog(true)}
-          variant="outline"
-          className="w-full"
-        >
-          Setup Token
-        </Button>
-      )}
+      <Button onClick={() => setShowTokenDialog(true)} variant="outline">
+        <Key className="h-4 w-4" />
+        Setup token
+      </Button>
       <TokenSetupDialog
         open={showTokenDialog}
         onOpenChange={setShowTokenDialog}
@@ -222,10 +167,13 @@ function SyncTokenStatus() {
 
 function SyncActions() {
   const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
-  const [syncToken] = useAtom(syncTokenAtom);
-  const { data: remoteMetadata } = useQuery(remoteMetadataQuery(syncToken));
+  const [syncToken, setSyncToken] = useAtom(syncTokenAtom);
+  const { data: remoteMetadata } = useQuery(
+    remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
+  );
   const queryClient = useQueryClient();
   const [local, setLocal] = useAtom(settingsForSyncAtom);
+  const [showTokenViewer, setShowTokenViewer] = useState(false);
 
   const sync = useSetAtom(syncServiceAtom);
 
@@ -256,9 +204,14 @@ function SyncActions() {
         !data ||
         data === SyncActionType.DO_NOTHING ||
         data === SyncActionType.NOT_CHANGED
-      )
+      ) {
+        toast.info("No changes to sync");
         return;
-      queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
+      }
+      toast.success("Sync completed");
+      queryClient.invalidateQueries(
+        remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
+      );
     },
   });
   const handleForceUpload = async () => {
@@ -285,7 +238,9 @@ function SyncActions() {
         lastUpload: result.current.data,
       }));
       toast.success("Local profile uploaded successfully");
-      queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
+      queryClient.invalidateQueries(
+        remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
+      );
     } catch (error) {
       toast.error("Failed to upload local profile");
       console.error("Failed to upload local profile", error);
@@ -313,6 +268,12 @@ function SyncActions() {
     }
   };
 
+  const handleDeleteToken = () => {
+    setSyncToken("");
+    setSyncConfig({ enabled: true, version: 0, lastUpload: null });
+    toast.info("Sync token cleared");
+  };
+
   const handleDelete = async () => {
     const confirmed = await confirmDelete.confirm("");
     if (confirmed) {
@@ -321,7 +282,12 @@ function SyncActions() {
         case "success": {
           toast.success("Remote sync data deleted");
           try {
-            await queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
+            await queryClient.invalidateQueries(
+              remoteMetadataQuery({
+                token: syncToken,
+                enabled: syncConfig.enabled,
+              }),
+            );
           } finally {
             setSyncConfig({ enabled: true, version: 0, lastUpload: null });
           }
@@ -344,26 +310,36 @@ function SyncActions() {
   };
 
   return (
-    <div>
-      <div className="flex gap-2">
-        <Button
-          onClick={() => syncMutation()}
-          disabled={isPending}
-          className="flex-1"
-          variant="default"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Syncing...
-            </>
-          ) : (
-            <>
-              <RefreshCwIcon className="mr-2 h-4 w-4" />
-              Sync
-            </>
-          )}
-        </Button>
+    <div className="space-y-3">
+      <div className="flex gap-2 justify-between">
+        <div className="flex gap-2">
+          <Button
+            onClick={() => syncMutation()}
+            disabled={isPending}
+            variant="default"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Syncing...
+              </>
+            ) : (
+              <>
+                <RefreshCwIcon className="h-4 w-4" />
+                Sync
+              </>
+            )}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowTokenViewer(true)}
+            disabled={isPending}
+          >
+            <Key className="h-4 w-4" />
+            Token
+          </Button>
+        </div>
+
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" disabled={isPending}>
@@ -386,10 +362,11 @@ function SyncActions() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       {remoteMetadata && remoteMetadata.version > syncConfig.version && (
         <div className="text-sm text-muted-foreground">
           Remote has been updated since last sync on this device. <br />
-          Remote updated at{" "}
+          Remote updated by other device at{" "}
           {format(remoteMetadata.updatedAt, "yyyy-MM-dd HH:mm:ss")} from{" "}
           {remoteMetadata.userAgent?.browser ?? "Unknown browser"} on{" "}
           {remoteMetadata.userAgent?.os ?? "Unknown OS"}
@@ -411,6 +388,12 @@ function SyncActions() {
       <ConfirmDeleteDialog
         open={confirmDelete.isOpen}
         onResolve={confirmDelete.resolve}
+      />
+      <TokenViewerDialog
+        open={showTokenViewer}
+        onOpenChange={setShowTokenViewer}
+        token={syncToken}
+        onDelete={handleDeleteToken}
       />
     </div>
   );
