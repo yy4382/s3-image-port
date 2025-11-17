@@ -9,6 +9,7 @@ import {
 import { baseOs } from "./base-router";
 import { settingsStoreClient } from "../redis/settings-client";
 import { UAParser } from "ua-parser-js";
+import { uploadRateLimitByIp, uploadRateLimitByToken } from "./rate-limit";
 
 const MAX_PAYLOAD_SIZE = 1024 * 1024; // 1MB
 
@@ -97,6 +98,14 @@ const uploadProfiles = baseOs
       message: "Version conflict",
       data: settingsResponseSchema,
     },
+    TOO_MANY_REQUESTS: {
+      status: 429,
+      data: z.object({
+        limit: z.number(),
+        remaining: z.number(),
+        reset: z.number(),
+      }),
+    },
   })
   .input(
     z.object({
@@ -105,6 +114,8 @@ const uploadProfiles = baseOs
       token: z.string().nonempty(),
     }),
   )
+  .use(uploadRateLimitByIp)
+  .use(uploadRateLimitByToken)
   .handler(async ({ input, errors, context }) => {
     const { token, data, version } = input;
     if (JSON.stringify(data).length > MAX_PAYLOAD_SIZE) {

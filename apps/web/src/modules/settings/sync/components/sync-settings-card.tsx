@@ -46,6 +46,7 @@ import {
   deleteRemoteProfiles,
   fetchMetadata,
   fetchRemoteProfiles,
+  UploadProfileError,
   uploadProfiles,
 } from "../sync-api-client";
 import { format } from "date-fns";
@@ -181,6 +182,36 @@ function SyncTokenSetup() {
   );
 }
 
+function toastUploadProfileError(error: UploadProfileError) {
+  const cause = error.cause;
+  switch (cause.code) {
+    case "INPUT_VALIDATION_FAILED": {
+      toast.error("Invalid input when uploading local profile");
+      return;
+    }
+    case "PAYLOAD_TOO_LARGE": {
+      toast.error("Local profile is too large to upload");
+      return;
+    }
+    case "CONFLICT": {
+      toast.error(
+        "Conflict when uploading local profile, might be uploading from other device at the same time. Please sync again",
+      );
+      return;
+    }
+    case "TOO_MANY_REQUESTS": {
+      const retryAfterMs = Math.max(0, cause.data.reset - Date.now());
+      toast.error(
+        `Too many requests when uploading local profile. Try again in about ${Math.max(1, Math.ceil(retryAfterMs / 1000))} seconds.`,
+      );
+      return;
+    }
+    default: {
+      assertUnreachable(cause);
+    }
+  }
+}
+
 function SyncActions() {
   const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
   const [syncToken, setSyncToken] = useAtom(syncTokenAtom);
@@ -215,7 +246,14 @@ function SyncActions() {
     scope: {
       id: "profile-sync",
     },
-    onSettled: (data) => {
+    onError: (error) => {
+      if (error instanceof UploadProfileError) {
+        toastUploadProfileError(error);
+      } else {
+        toast.error(error.message ?? "Failed to sync");
+      }
+    },
+    onSuccess: (data) => {
       if (!data) {
         toast.error("Failed to sync");
       } else if (data === SyncActionType.NOT_CHANGED) {
@@ -251,13 +289,11 @@ function SyncActions() {
       }
       const result = await uploadProfiles(local, syncToken, "force");
       if (!result.success) {
-        toast.error("Failed to upload local profile");
-        console.error("Failed to upload local profile", result);
-        return;
+        return toastUploadProfileError(new UploadProfileError(result.error));
       }
       setSyncConfig((prev) => ({
         ...prev,
-        version: result.version,
+        version: result.current.version,
         lastUpload: result.current.data,
       }));
       toast.success("Local profile uploaded successfully");
