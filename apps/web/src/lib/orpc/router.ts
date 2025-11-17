@@ -101,7 +101,7 @@ const uploadProfiles = baseOs
   .input(
     z.object({
       data: encryptedDataSchema,
-      version: z.number().int().nonnegative(),
+      version: z.number().int().nonnegative().or(z.literal("force")),
       token: z.string().nonempty(),
     }),
   )
@@ -116,7 +116,7 @@ const uploadProfiles = baseOs
     let existingVersion = 0;
     if (existingProfile) {
       existingVersion = existingProfile.version;
-      if (existingProfile.version > version) {
+      if (typeof version === "number" && existingProfile.version > version) {
         throw errors.CONFLICT({
           data: {
             ...existingProfile,
