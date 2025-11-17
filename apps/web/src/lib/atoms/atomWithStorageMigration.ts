@@ -10,7 +10,6 @@ export function zodWithVersion<T extends z4.$ZodType>(schema: T) {
   });
 }
 const withVersionSchema = zodWithVersion(z.unknown());
-export type WithVersion<T> = { version: number; data: T };
 
 export function atomWithStorageMigration<K extends z4.$ZodObject>(
   key: string,
