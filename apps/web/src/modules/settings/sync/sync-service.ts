@@ -59,7 +59,7 @@ type SyncDiffState = DiscriminatedUnion<
   }
 >;
 
-enum SyncActionType {
+export enum SyncActionType {
   PULL = "PULL",
   PUSH = "PUSH",
   INIT_REMOTE = "INIT_REMOTE",
@@ -99,6 +99,7 @@ export const syncServiceAtom = atom(
     if (result.local) {
       set(settingsForSyncAtom, result.local);
     }
+    return result.actionType;
   },
 );
 
@@ -113,11 +114,12 @@ export const sync = async (
     readonly token: string;
   },
   userConfirmations: UserConfirmations,
-): Promise<SyncResult> => {
+): Promise<SyncResult & { actionType: SyncActionType }> => {
   const serverSettings = await fetchRemoteProfiles(token);
   const diffType = detectSyncDiff({ local, config, remote: serverSettings });
   const action = await userConfirm(diffType, userConfirmations);
-  return performSyncAction(action, { token });
+  const actionActors = await performSyncAction(action, { token });
+  return { ...actionActors, actionType: action._tag };
 };
 
 /**

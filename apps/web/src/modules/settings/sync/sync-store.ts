@@ -30,14 +30,6 @@ export const syncTokenAtom = atomWithStorage<string>(
   "",
 );
 
-// Sync status
-export type SyncStatus = "idle" | "uploading" | "pulling" | "error";
-
-export const syncStatusAtom = atom<SyncStatus>("idle");
-
-// Last sync error
-export const syncErrorAtom = atom<string | null>(null);
-
 export const canSyncAtom = atom((get) => {
   const config = get(syncStateAtom);
   const token = get(syncTokenAtom);

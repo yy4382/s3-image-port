@@ -22,15 +22,25 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { syncServiceAtom } from "../sync-service";
-import { syncStateAtom, syncStatusAtom, syncTokenAtom } from "../sync-store";
+import {
+  SyncActionType,
+  syncServiceAtom,
+  type UserConfirmations,
+} from "../sync-service";
+import { syncStateAtom, syncTokenAtom } from "../sync-store";
 import { TokenSetupDialog } from "./token-setup-dialog";
 import { focusAtom } from "jotai-optics";
-import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { fetchMetadata } from "../sync-api-client";
 import { format } from "date-fns";
+import { ConfirmPullDialog } from "./confirm-pull-dialog";
 
 const remoteMetadataQuery = (token: string) =>
   queryOptions({
@@ -38,10 +48,34 @@ const remoteMetadataQuery = (token: string) =>
     queryFn: () => fetchMetadata(token),
   });
 
+function useConfirmation<TData, TResult>() {
+  const [data, setData] = useState<TData | null>(null);
+  const resolveRef = useRef<((value: TResult) => void) | null>(null);
+
+  const confirm = (confirmData: TData): Promise<TResult> => {
+    return new Promise<TResult>((resolve) => {
+      setData(confirmData);
+      resolveRef.current = resolve;
+    });
+  };
+
+  const resolve = (value: TResult) => {
+    resolveRef.current?.(value);
+    setData(null);
+    resolveRef.current = null;
+  };
+
+  return {
+    data,
+    confirm,
+    resolve,
+    isOpen: data !== null,
+  };
+}
+
 export function SyncSettingsCard() {
   const [syncConfig] = useAtom(syncStateAtom);
   const [syncToken] = useAtom(syncTokenAtom);
-  const [syncStatus, setSyncStatus] = useAtom(syncStatusAtom);
   const { data: remoteMetadata } = useQuery(remoteMetadataQuery(syncToken));
   const queryClient = useQueryClient();
 
@@ -49,26 +83,34 @@ export function SyncSettingsCard() {
 
   const sync = useSetAtom(syncServiceAtom);
 
-  const handleSync = async () => {
-    setSyncStatus("pulling");
-    try {
-      await sync({
+  const confirmPull = useConfirmation<
+    Parameters<UserConfirmations["confirmPull"]>[0],
+    boolean
+  >();
+
+  const { mutate: syncMutation, isPending } = useMutation({
+    mutationKey: ["sync"],
+    mutationFn: () =>
+      sync({
         conflictResolver: () => {
           console.log("conflict resolver: local");
           return Promise.resolve("local");
         },
-        confirmPull: () => {
-          console.log("confirm pull");
-          return Promise.resolve(true);
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSyncStatus("idle");
+        confirmPull: confirmPull.confirm,
+      }),
+    scope: {
+      id: "profile-sync",
+    },
+    onSettled: (data) => {
+      if (
+        !data ||
+        data === SyncActionType.DO_NOTHING ||
+        data === SyncActionType.NOT_CHANGED
+      )
+        return;
       queryClient.invalidateQueries(remoteMetadataQuery(syncToken));
-    }
-  };
+    },
+  });
 
   return (
     <>
@@ -94,12 +136,12 @@ export function SyncSettingsCard() {
                   <Separator />
 
                   <Button
-                    onClick={handleSync}
-                    disabled={syncStatus !== "idle"}
+                    onClick={() => syncMutation()}
+                    disabled={isPending}
                     className="w-full"
                     variant="default"
                   >
-                    {syncStatus === "uploading" ? (
+                    {isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Syncing...
@@ -133,6 +175,12 @@ export function SyncSettingsCard() {
           </CardContent>
         )}
       </Card>
+
+      <ConfirmPullDialog
+        open={confirmPull.isOpen}
+        data={confirmPull.data}
+        onResolve={confirmPull.resolve}
+      />
     </>
   );
 }
