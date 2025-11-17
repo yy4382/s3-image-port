@@ -46,7 +46,7 @@ type ProfileItemProps = {
   remoteProfile?: ProfileType;
 };
 
-export function ProfileItem(props: ProfileItemProps) {
+function ProfileItem(props: ProfileItemProps) {
   const { name, localProfile, remoteProfile } = props;
   const t = useTranslations("settings");
 
