@@ -29,13 +29,7 @@ vi.mock(import("@/lib/redis/client"), () => {
     }),
   };
 });
-vi.mock("@/lib/orpc/client", async () => {
-  const { createRouterClient } = await import("@orpc/server");
-  const { router } = await import("@/lib/orpc/router");
-  return {
-    client: createRouterClient(router),
-  };
-});
+vi.mock(import("@/lib/orpc/client"));
 
 const TEST_TOKEN =
   "prosper law opinion either impact legend humble rural split surround excite giraffe";
@@ -93,10 +87,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("syncServiceAtom", () => {
-  test("", () => {
-    expect(import.meta.env.VITEST).toBe(true);
-  });
+describe("syncService", () => {
   test("local fresh, remote empty", async () => {
     const { local, config } = await runSync(
       {

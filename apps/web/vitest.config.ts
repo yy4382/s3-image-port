@@ -26,6 +26,9 @@ export default defineConfig({
   ],
   test: {
     setupFiles: ["./test/setup/cleanup.ts"],
+    alias: {
+      "@/.source": "./test/mocks/mdx-source.ts",
+    },
     coverage: {
       include: ["src/**/*"],
     },
