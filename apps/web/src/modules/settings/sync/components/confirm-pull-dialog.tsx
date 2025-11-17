@@ -69,20 +69,25 @@ export function ConfirmPullDialog({
           <Separator />
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">Remote Profiles:</h4>
+            <h4 className="text-sm font-semibold">
+              Settings Comparison (Local vs Remote):
+            </h4>
             <div className="max-h-[400px] overflow-y-auto">
-              <SettingsViewer data={data.remote.data.data} />
+              <SettingsViewer
+                localData={data.local.data}
+                remoteData={data.remote.data.data}
+              />
             </div>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onResolve(false)}>
-            Keep Local
+            Cancel pull
           </Button>
           <Button onClick={() => onResolve(true)}>
             <Download className="mr-2 h-4 w-4" />
-            Pull Remote
+            Accept remote changes
           </Button>
         </DialogFooter>
       </DialogContent>

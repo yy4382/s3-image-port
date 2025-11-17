@@ -3,143 +3,323 @@ import { settingsForSyncSchema } from "../../settings-store";
 import { useTranslations } from "use-intl";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { MinusIcon, PlusIcon, ChevronDownIcon } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import deepEqual from "deep-equal";
 
 export function SettingsViewer(props: {
-  data: z.infer<typeof settingsForSyncSchema.shape.data>;
+  localData: z.infer<typeof settingsForSyncSchema.shape.data>;
+  remoteData: z.infer<typeof settingsForSyncSchema.shape.data>;
 }) {
-  const list = props.data.list;
+  const { localData, remoteData } = props;
+
+  // Create a map of all profile names from both local and remote
+  const localMap = new Map(localData.list);
+  const remoteMap = new Map(remoteData.list);
+  const allNames = new Set([...localMap.keys(), ...remoteMap.keys()]);
+
   return (
-    <div className="space-y-6 px-6">
-      {list.map(([name, profile]) => (
-        <ProfileItem key={name} name={name} profile={profile} />
+    <div className="space-y-4">
+      {Array.from(allNames).map((name) => (
+        <ProfileItem
+          key={name}
+          name={name}
+          localProfile={localMap.get(name)}
+          remoteProfile={remoteMap.get(name)}
+        />
       ))}
     </div>
   );
 }
 
+type ProfileType = z.infer<
+  typeof settingsForSyncSchema.shape.data.shape.list
+>[number][1];
+
 type ProfileItemProps = {
   name: string;
-  profile: z.infer<
-    typeof settingsForSyncSchema.shape.data.shape.list
-  >[number][1];
+  localProfile?: ProfileType;
+  remoteProfile?: ProfileType;
 };
+
 export function ProfileItem(props: ProfileItemProps) {
-  const { name, profile } = props;
+  const { name, localProfile, remoteProfile } = props;
   const t = useTranslations("settings");
+
+  // Check if profile has changes
+  const hasChanges =
+    localProfile && remoteProfile && !deepEqual(localProfile, remoteProfile);
+
+  // Determine the status badge
+  let statusBadge: React.ReactNode = null;
+  if (!localProfile) {
+    statusBadge = (
+      <Badge variant="default" className="bg-green-600">
+        New in Remote
+      </Badge>
+    );
+  } else if (!remoteProfile) {
+    statusBadge = <Badge variant="destructive">Removed in Remote</Badge>;
+  } else if (hasChanges) {
+    statusBadge = <Badge variant="outline">Changed</Badge>;
+  }
+
+  // Use remote profile as primary, fall back to local if remote doesn't exist
+  const profile = remoteProfile ?? localProfile!;
+
   return (
-    <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
-      <div className="flex items-center gap-2">
-        <Badge variant="secondary">{name}</Badge>
-      </div>
-
-      <div className="space-y-3">
-        <div className="text-sm font-semibold">{t("s3Settings.title")}</div>
-        <div className="space-y-2 pl-3">
-          <ItemViewer
-            label={t("s3Settings.endpoint")}
-            value={profile.s3.endpoint}
-          />
-          <ItemViewer
-            label={t("s3Settings.bucket")}
-            value={profile.s3.bucket}
-          />
-          <ItemViewer
-            label={t("s3Settings.region")}
-            value={profile.s3.region}
-          />
-          <ItemViewer
-            label={t("s3Settings.accessKey")}
-            value={profile.s3.accKeyId}
-          />
-          <ItemViewer
-            label={t("s3Settings.secretKey")}
-            value={profile.s3.secretAccKey}
-          />
-          <ItemViewer
-            label={t("s3Settings.pathStyle")}
-            value={profile.s3.forcePathStyle.toString()}
-          />
-          <ItemViewer
-            label={t("s3Settings.publicUrl")}
-            value={profile.s3.pubUrl}
-          />
+    <Collapsible className="rounded-lg border bg-muted/30 p-4">
+      <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 [&[data-state=open]>svg]:rotate-180">
+        <div className="flex items-center gap-2">
+          {name}
+          {statusBadge}
         </div>
-      </div>
+        <ChevronDownIcon className="h-4 w-4 transition-transform duration-200" />
+      </CollapsibleTrigger>
 
-      <Separator />
+      <CollapsibleContent className="space-y-4 mt-4">
+        <div className="space-y-3">
+          <div className="text-sm font-semibold">{t("s3Settings.title")}</div>
+          <div className="space-y-2">
+            <ItemDiffViewer
+              label={t("s3Settings.endpoint")}
+              localValue={localProfile?.s3.endpoint}
+              remoteValue={remoteProfile?.s3.endpoint}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.bucket")}
+              localValue={localProfile?.s3.bucket}
+              remoteValue={remoteProfile?.s3.bucket}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.region")}
+              localValue={localProfile?.s3.region}
+              remoteValue={remoteProfile?.s3.region}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.accessKey")}
+              localValue={localProfile?.s3.accKeyId}
+              remoteValue={remoteProfile?.s3.accKeyId}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.secretKey")}
+              localValue={localProfile?.s3.secretAccKey}
+              remoteValue={remoteProfile?.s3.secretAccKey}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.pathStyle")}
+              localValue={localProfile?.s3.forcePathStyle.toString()}
+              remoteValue={remoteProfile?.s3.forcePathStyle.toString()}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.publicUrl")}
+              localValue={localProfile?.s3.pubUrl}
+              remoteValue={remoteProfile?.s3.pubUrl}
+            />
+          </div>
+        </div>
 
-      <div className="space-y-3">
-        <div className="text-sm font-semibold">{t("upload")}</div>
-        <div className="space-y-2 pl-3">
-          <ItemViewer
-            label={t("keyTemplate.title")}
-            value={profile.upload.keyTemplate}
-          />
-          {(profile.upload.keyTemplatePresets?.length ?? 0) > 0 && (
-            <>
-              <div className="text-xs font-medium text-muted-foreground mt-2">
-                {t("keyTemplate.presets.title")}
-              </div>
-              <div className="space-y-1 pl-2">
-                {profile.upload.keyTemplatePresets?.map((preset) => (
-                  <ItemViewer
-                    key={preset.key}
-                    label={preset.key}
-                    value={preset.value}
+        <Separator />
+
+        <div className="space-y-3">
+          <div className="text-sm font-semibold">{t("upload")}</div>
+          <div className="space-y-2">
+            <ItemDiffViewer
+              label={t("keyTemplate.title")}
+              localValue={localProfile?.upload.keyTemplate}
+              remoteValue={remoteProfile?.upload.keyTemplate}
+            />
+            {((remoteProfile?.upload.keyTemplatePresets?.length ?? 0) > 0 ||
+              (localProfile?.upload.keyTemplatePresets?.length ?? 0) > 0) && (
+              <>
+                <div className="text-xs font-medium text-muted-foreground mt-2">
+                  {t("keyTemplate.presets.title")}
+                </div>
+                <div className="space-y-1 pl-2">
+                  <KeyTemplatePresetsDiff
+                    localPresets={localProfile?.upload.keyTemplatePresets}
+                    remotePresets={remoteProfile?.upload.keyTemplatePresets}
                   />
-                ))}
+                </div>
+              </>
+            )}
+            <ItemDiffViewer
+              label={t("imageCompress.title")}
+              localValue={
+                localProfile?.upload.compressionOption ? "true" : "false"
+              }
+              remoteValue={
+                remoteProfile?.upload.compressionOption ? "true" : "false"
+              }
+            />
+            {(profile.upload.compressionOption ||
+              (localProfile?.upload.compressionOption &&
+                !remoteProfile?.upload.compressionOption)) && (
+              <div className="space-y-1 pl-2">
+                <ItemDiffViewer
+                  label={t("imageCompress.targetFormat")}
+                  localValue={localProfile?.upload.compressionOption?.type}
+                  remoteValue={remoteProfile?.upload.compressionOption?.type}
+                />
+                {("quality" in (profile.upload.compressionOption ?? {}) ||
+                  "quality" in
+                    (localProfile?.upload.compressionOption ?? {})) && (
+                  <ItemDiffViewer
+                    label={t("imageCompress.quality")}
+                    localValue={
+                      localProfile?.upload.compressionOption &&
+                      "quality" in localProfile.upload.compressionOption
+                        ? localProfile.upload.compressionOption.quality.toString()
+                        : undefined
+                    }
+                    remoteValue={
+                      remoteProfile?.upload.compressionOption &&
+                      "quality" in remoteProfile.upload.compressionOption
+                        ? remoteProfile.upload.compressionOption.quality.toString()
+                        : undefined
+                    }
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div className="text-sm font-semibold">{t("gallery.title")}</div>
+          <div className="space-y-2">
+            <ItemDiffViewer
+              label={t("gallery.autoRefresh")}
+              localValue={localProfile?.gallery.autoRefresh.toString()}
+              remoteValue={remoteProfile?.gallery.autoRefresh.toString()}
+            />
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function ItemDiffViewer({
+  label,
+  localValue,
+  remoteValue,
+}: {
+  label: string;
+  localValue?: string;
+  remoteValue?: string;
+}) {
+  const isDifferent = localValue !== remoteValue;
+  const isRemoved = localValue !== undefined && remoteValue === undefined;
+  const isAdded = localValue === undefined && remoteValue !== undefined;
+
+  const displayValue = remoteValue ?? localValue ?? "";
+  const isEmpty = displayValue === "";
+
+  return (
+    <div className="flex flex-col gap-1 text-sm">
+      <div className="flex items-baseline gap-2">
+        <div className="text-muted-foreground text-sm min-w-[120px] shrink-0">
+          {label}:
+        </div>
+        <div className="flex-1 space-y-1">
+          {isDifferent &&
+          localValue !== undefined &&
+          remoteValue !== undefined ? (
+            <>
+              <div className="flex items-center gap-2">
+                <Badge variant="destructive" className="px-0.5">
+                  <MinusIcon />
+                </Badge>
+                <span className="font-mono text-sm break-all text-muted-foreground line-through">
+                  {localValue === "" ? (
+                    <span className="italic">(empty)</span>
+                  ) : (
+                    localValue
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="default" className="bg-green-600 px-0.5">
+                  <PlusIcon />
+                </Badge>
+                <span className="font-mono text-sm break-all">
+                  {remoteValue === "" ? (
+                    <span className="italic">(empty)</span>
+                  ) : (
+                    remoteValue
+                  )}
+                </span>
               </div>
             </>
-          )}
-          <ItemViewer
-            label={t("imageCompress.title")}
-            value={profile.upload.compressionOption ? "true" : "false"}
-          />
-          {profile.upload.compressionOption && (
-            <div className="space-y-1 pl-2">
-              <ItemViewer
-                label={t("imageCompress.targetFormat")}
-                value={profile.upload.compressionOption.type}
-              />
-              {"quality" in profile.upload.compressionOption && (
-                <ItemViewer
-                  label={t("imageCompress.quality")}
-                  value={profile.upload.compressionOption.quality.toString()}
-                />
-              )}
+          ) : isRemoved ? (
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive" className="px-0.5">
+                <MinusIcon />
+              </Badge>
+              <span className="font-mono text-sm break-all text-muted-foreground line-through">
+                {localValue === "" ? (
+                  <span className="italic">(empty)</span>
+                ) : (
+                  localValue
+                )}
+              </span>
             </div>
+          ) : isAdded ? (
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="bg-green-600 px-0.5">
+                <PlusIcon />
+              </Badge>
+              <span className="font-mono text-sm break-all">
+                {remoteValue === "" ? (
+                  <span className="italic">(empty)</span>
+                ) : (
+                  remoteValue
+                )}
+              </span>
+            </div>
+          ) : (
+            <span className="font-mono text-sm break-all">
+              {isEmpty ? (
+                <span className="text-muted-foreground italic">(empty)</span>
+              ) : (
+                displayValue
+              )}
+            </span>
           )}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <div className="text-sm font-semibold">{t("gallery.title")}</div>
-        <div className="space-y-2 pl-3">
-          <ItemViewer
-            label={t("gallery.autoRefresh")}
-            value={profile.gallery.autoRefresh.toString()}
-          />
         </div>
       </div>
     </div>
   );
 }
 
-function ItemViewer({ label, value }: { label: string; value: string }) {
+function KeyTemplatePresetsDiff({
+  localPresets,
+  remotePresets,
+}: {
+  localPresets?: Array<{ key: string; value: string }>;
+  remotePresets?: Array<{ key: string; value: string }>;
+}) {
+  const localMap = new Map(localPresets?.map((p) => [p.key, p.value]) ?? []);
+  const remoteMap = new Map(remotePresets?.map((p) => [p.key, p.value]) ?? []);
+  const allKeys = new Set([...localMap.keys(), ...remoteMap.keys()]);
+
   return (
-    <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-baseline sm:gap-2">
-      <div className="text-muted-foreground text-sm sm:min-w-[120px] sm:shrink-0">
-        {label}:
-      </div>
-      <div className="font-mono text-sm break-all">
-        {value === "" ? (
-          <span className="text-muted-foreground italic">(empty)</span>
-        ) : (
-          value
-        )}
-      </div>
-    </div>
+    <>
+      {Array.from(allKeys).map((key) => (
+        <ItemDiffViewer
+          key={key}
+          label={key}
+          localValue={localMap.get(key)}
+          remoteValue={remoteMap.get(key)}
+        />
+      ))}
+    </>
   );
 }
