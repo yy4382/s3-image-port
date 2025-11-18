@@ -12,6 +12,7 @@ import { type UserConfirmations } from "../../actions/sync";
 import { format } from "date-fns";
 import { SettingsViewer } from "../settings-viewer";
 import { ConfirmDialog } from "./confirm-dialog";
+import { useTranslations } from "use-intl";
 
 export function ConfirmConflictDialog({
   open,
@@ -22,6 +23,8 @@ export function ConfirmConflictDialog({
   data: Parameters<UserConfirmations["conflictResolver"]>[0] | null;
   onResolve: (value: "local" | "remote" | null) => void;
 }) {
+  const t = useTranslations("settings.sync.conflictDialog");
+
   if (!data) return null;
 
   return (
@@ -33,37 +36,36 @@ export function ConfirmConflictDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            Sync Conflict Detected
+            {t("title")}
           </DialogTitle>
-          <DialogDescription>
-            Both your local settings and remote settings have been modified.
-            Please choose which version to keep.
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
           <p className="text-sm">
-            The current settings on the remote server were uploaded at{" "}
-            <code className="font-mono font-semibold">
-              {format(data.remote.updatedAt, "yyyy-MM-dd HH:mm:ss")}
-            </code>{" "}
-            from{" "}
-            <code className="font-mono font-semibold">
-              {data.remote.userAgent?.browser ?? "Unknown browser"}
-            </code>{" "}
-            on{" "}
-            <code className="font-mono font-semibold">
-              {data.remote.userAgent?.os ?? "Unknown OS"}
-            </code>
-            .
+            {t.rich("uploadedAt", {
+              time: () => (
+                <code className="font-mono font-semibold">
+                  {format(data.remote.updatedAt, "yyyy-MM-dd HH:mm:ss")}
+                </code>
+              ),
+              browser: () => (
+                <code className="font-mono font-semibold">
+                  {data.remote.userAgent?.browser ?? "Unknown browser"}
+                </code>
+              ),
+              os: () => (
+                <code className="font-mono font-semibold">
+                  {data.remote.userAgent?.os ?? "Unknown OS"}
+                </code>
+              ),
+            })}
           </p>
 
           <Separator />
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">
-              Settings Comparison (Local vs Remote):
-            </h4>
+            <h4 className="text-sm font-semibold">{t("comparison")}</h4>
             <div className="max-h-[400px] overflow-y-auto">
               <SettingsViewer
                 localData={data.local.data}
@@ -79,7 +81,7 @@ export function ConfirmConflictDialog({
             onClick={() => onResolve(null)}
             className="sm:flex-1"
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             variant="outline"
@@ -87,11 +89,11 @@ export function ConfirmConflictDialog({
             className="sm:flex-1"
           >
             <Download />
-            Use Remote
+            {t("useRemote")}
           </Button>
           <Button onClick={() => onResolve("local")} className="sm:flex-1">
             <Upload />
-            Use Local
+            {t("useLocal")}
           </Button>
         </DialogFooter>
       </DialogContent>
