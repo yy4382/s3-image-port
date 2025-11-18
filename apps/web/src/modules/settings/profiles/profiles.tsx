@@ -42,7 +42,7 @@ import {
   useRenameProfile,
 } from "./profiles-utils";
 import { profilesAtom } from "../settings-store";
-import { SyncSettings } from "../sync/components/sync-settings-card";
+import { SyncSettings } from "../sync/components/sync-settings";
 
 type ProfileItemProps = {
   name: string;
