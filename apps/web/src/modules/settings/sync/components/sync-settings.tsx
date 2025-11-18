@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useTranslations } from "use-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,17 +94,15 @@ function useConfirmation<TData extends {}, TResult>() {
 export function SyncSettings() {
   const [syncConfig] = useAtom(syncStateAtom);
   const [syncToken] = useAtom(syncTokenAtom);
+  const t = useTranslations("settings.sync");
 
   const hasValidToken = isValidSyncToken(syncToken);
 
   return (
     <div className="flex flex-col gap-3">
       <CardHeader className="px-0">
-        <CardTitle>Profile Sync</CardTitle>
-        <CardDescription>
-          Sync your settings across devices using end to end encrypted cloud
-          storage
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
         <CardAction>
           <SyncSwitch />
         </CardAction>
@@ -155,19 +154,20 @@ function SyncSwitch() {
 
 function SyncTokenSetup() {
   const [, setSyncToken] = useAtom(syncTokenAtom);
+  const t = useTranslations("settings.sync");
 
   const [showTokenDialog, setShowTokenDialog] = useState(false);
 
   const handleTokenConfirm = (token: string) => {
     setSyncToken(token);
-    toast.success("Sync enabled successfully");
+    toast.success(t("toasts.syncEnabled"));
   };
 
   return (
     <div className="space-y-3">
       <Button onClick={() => setShowTokenDialog(true)} variant="outline">
         <Key />
-        Setup token
+        {t("setupToken")}
       </Button>
       <TokenSetupDialog
         open={showTokenDialog}
@@ -178,28 +178,28 @@ function SyncTokenSetup() {
   );
 }
 
-function toastUploadProfileError(error: UploadProfileError) {
+function toastUploadProfileError(
+  error: UploadProfileError,
+  t: ReturnType<typeof useTranslations<"settings.sync">>,
+) {
   const cause = error.cause;
   switch (cause.code) {
     case "INPUT_VALIDATION_FAILED": {
-      toast.error("Invalid input when uploading local profile");
+      toast.error(t("toasts.errors.invalidInput"));
       return;
     }
     case "PAYLOAD_TOO_LARGE": {
-      toast.error("Local profile is too large to upload");
+      toast.error(t("toasts.errors.payloadTooLarge"));
       return;
     }
     case "CONFLICT": {
-      toast.error(
-        "Conflict when uploading local profile, might be uploading from other device at the same time. Please sync again",
-      );
+      toast.error(t("toasts.errors.conflict"));
       return;
     }
     case "TOO_MANY_REQUESTS": {
       const retryAfterMs = Math.max(0, cause.data.reset - Date.now());
-      toast.error(
-        `Too many requests when uploading local profile. Try again in about ${Math.max(1, Math.ceil(retryAfterMs / 1000))} seconds.`,
-      );
+      const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
+      toast.error(t("toasts.errors.tooManyRequests", { seconds }));
       return;
     }
     default: {
@@ -211,6 +211,7 @@ function toastUploadProfileError(error: UploadProfileError) {
 function SyncActions() {
   const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
   const [syncToken, setSyncToken] = useAtom(syncTokenAtom);
+  const t = useTranslations("settings.sync");
   const { data: remoteMetadata } = useQuery(
     remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
   );
@@ -244,18 +245,18 @@ function SyncActions() {
     },
     onError: (error) => {
       if (error instanceof UploadProfileError) {
-        toastUploadProfileError(error);
+        toastUploadProfileError(error, t);
       } else {
-        toast.error(error.message ?? "Failed to sync");
+        toast.error(error.message ?? t("toasts.syncFailed"));
       }
     },
     onSuccess: (data) => {
       if (!data) {
-        toast.error("Failed to sync");
+        toast.error(t("toasts.syncFailed"));
       } else if (data === SyncActionType.NOT_CHANGED) {
-        toast.success("No changes to sync");
+        toast.success(t("toasts.noChanges"));
       } else if (data !== SyncActionType.DO_NOTHING) {
-        toast.success("Sync completed");
+        toast.success(t("toasts.syncCompleted"));
       }
       if (
         data &&
@@ -277,15 +278,15 @@ function SyncActions() {
       if (result.config) {
         setSyncConfig(result.config);
       }
-      toast.success("Local profile uploaded successfully");
+      toast.success(t("toasts.uploadSuccess"));
       queryClient.invalidateQueries(
         remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
       );
     } catch (error) {
       if (error instanceof UploadProfileError) {
-        return toastUploadProfileError(error);
+        return toastUploadProfileError(error, t);
       }
-      toast.error("Failed to upload local profile");
+      toast.error(t("toasts.errors.uploadFailed"));
       console.error("Failed to upload local profile", error);
     }
   };
@@ -300,7 +301,7 @@ function SyncActions() {
         setSyncConfig(result.config);
       }
     } catch (error) {
-      toast.error("Failed to fetch remote profile");
+      toast.error(t("toasts.errors.pullFailed"));
       console.error("Failed to fetch remote profile", error);
     }
   };
@@ -308,7 +309,7 @@ function SyncActions() {
   const handleDeleteToken = () => {
     setSyncToken("");
     setSyncConfig({ enabled: true, version: 0, lastUpload: null });
-    toast.info("Sync token cleared");
+    toast.info(t("toasts.tokenCleared"));
   };
 
   const handleDelete = async () => {
@@ -316,7 +317,7 @@ function SyncActions() {
     if (confirmed) {
       const result = await deleteRemoteSync(syncToken);
       if (result.success) {
-        toast.success("Remote sync data deleted");
+        toast.success(t("toasts.deleteSuccess"));
         try {
           await queryClient.invalidateQueries(
             remoteMetadataQuery({
@@ -328,9 +329,9 @@ function SyncActions() {
           setSyncConfig({ enabled: true, version: 0, lastUpload: null });
         }
       } else if (result.reason === "no-such-user") {
-        toast.error("No corresponding profile found on the server");
+        toast.error(t("toasts.noCorrespondingProfile"));
       } else {
-        toast.error("Failed to delete remote sync data");
+        toast.error(t("toasts.deleteFailed"));
       }
     }
   };
@@ -345,7 +346,7 @@ function SyncActions() {
             variant="default"
           >
             <RefreshCwIcon className={cn(isPending && "animate-spin")} />
-            Sync
+            {t("syncButton")}
           </Button>
           <Button
             variant="secondary"
@@ -353,7 +354,7 @@ function SyncActions() {
             disabled={isPending}
           >
             <Key />
-            Token
+            {t("tokenButton")}
           </Button>
         </div>
 
@@ -366,15 +367,15 @@ function SyncActions() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleForceUpload}>
               <Upload />
-              Force Upload
+              {t("forceUpload")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleForcePull}>
               <Download />
-              Force Pull
+              {t("forcePull")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete}>
               <Trash2 />
-              Delete
+              {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -382,11 +383,12 @@ function SyncActions() {
 
       {remoteMetadata && remoteMetadata.version > syncConfig.version && (
         <div className="text-sm text-muted-foreground">
-          Remote has been updated since last sync on this device. <br />
-          Remote updated by other device at{" "}
-          {format(remoteMetadata.updatedAt, "yyyy-MM-dd HH:mm:ss")} from{" "}
-          {remoteMetadata.userAgent?.browser ?? "Unknown browser"} on{" "}
-          {remoteMetadata.userAgent?.os ?? "Unknown OS"}
+          {t("remoteUpdatedMessage")} <br />
+          {t("remoteUpdatedDetails", {
+            time: format(remoteMetadata.updatedAt, "yyyy-MM-dd HH:mm:ss"),
+            browser: remoteMetadata.userAgent?.browser ?? "Unknown browser",
+            os: remoteMetadata.userAgent?.os ?? "Unknown OS",
+          })}
           <br />
         </div>
       )}

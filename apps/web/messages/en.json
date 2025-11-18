@@ -129,6 +129,116 @@
       "title": "Gallery",
       "autoRefresh": "Auto Refresh",
       "autoRefreshDesc": "Refresh the gallery every time it loads. If enabled, there will be more List requests, which may slightly increase S3 costs."
+    },
+    "sync": {
+      "title": "Profile Sync",
+      "description": "Sync your settings across devices using end to end encrypted cloud storage",
+      "setupToken": "Setup token",
+      "syncButton": "Sync",
+      "tokenButton": "Token",
+      "forceUpload": "Force Upload",
+      "forcePull": "Force Pull",
+      "delete": "Delete",
+      "remoteUpdatedMessage": "Remote has been updated since last sync on this device.",
+      "remoteUpdatedDetails": "Remote updated by other device at {time} from {browser} on {os}",
+      "toasts": {
+        "syncEnabled": "Sync enabled successfully",
+        "tokenCleared": "Sync token cleared",
+        "uploadSuccess": "Local profile uploaded successfully",
+        "pullSuccess": "Remote profile pulled successfully",
+        "deleteSuccess": "Remote sync data deleted",
+        "noCorrespondingProfile": "No corresponding profile found on the server",
+        "deleteFailed": "Failed to delete remote sync data",
+        "syncFailed": "Failed to sync",
+        "noChanges": "No changes to sync",
+        "syncCompleted": "Sync completed",
+        "errors": {
+          "invalidInput": "Invalid input when uploading local profile",
+          "payloadTooLarge": "Local profile is too large to upload",
+          "conflict": "Conflict when uploading local profile, might be uploading from other device at the same time. Please sync again",
+          "tooManyRequests": "Too many requests when uploading local profile. Try again in about {seconds} seconds.",
+          "uploadFailed": "Failed to upload local profile",
+          "pullFailed": "Failed to fetch remote profile"
+        }
+      },
+      "enableDialog": {
+        "title": "Enable Profile Sync",
+        "description": "Understand how sync works before enabling",
+        "encryption": {
+          "title": "End-to-End Encryption",
+          "description": "Your profiles and settings are encrypted on your device before being sent to the server. The server stores only encrypted data and cannot read your information. Only devices with your sync token can decrypt and access your data."
+        },
+        "tokenStorage": {
+          "title": "Token Storage",
+          "description": "Your sync token serves as both the authentication credential and encryption key. It will be stored in your browser's localStorage for automatic syncing across sessions."
+        },
+        "security": {
+          "title": "Security Considerations",
+          "risk": "Your token is stored in the browser and could potentially be accessed by malicious browser extensions or certain types of attacks.",
+          "acceptable": "However, this risk is acceptable because your settings data is also stored in the browser. If someone can access your token, they could already read your unencrypted settings directly. The encryption primarily protects your data while it's on the server."
+        },
+        "bestPractice": {
+          "title": "💡 Best Practice",
+          "description": "Generate a unique token specifically for Image Port. Do not reuse tokens from other services to limit potential damage if the token is compromised."
+        },
+        "cancel": "Cancel",
+        "confirm": "I Understand, Enable Sync"
+      },
+      "pullDialog": {
+        "title": "Pull Remote Profiles",
+        "description": "The current profiles on the remote server is newer than the local ones.",
+        "uploadedAt": "The current settings on the remote server were uploaded at <time></time> from <browser></browser> on <os></os>.",
+        "comparison": "Settings Comparison (Local vs Remote):",
+        "cancel": "Cancel",
+        "confirm": "Accept changes"
+      },
+      "conflictDialog": {
+        "title": "Sync Conflict Detected",
+        "description": "Both your local settings and remote settings have been modified. Please choose which version to keep.",
+        "uploadedAt": "The current settings on the remote server were uploaded at <time></time> from <browser></browser> on <os></os>.",
+        "comparison": "Settings Comparison (Local vs Remote):",
+        "cancel": "Cancel",
+        "useRemote": "Use Remote",
+        "useLocal": "Use Local"
+      },
+      "deleteDialog": {
+        "title": "Delete Remote Sync Data",
+        "description": "Are you sure you want to delete your remote sync data? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "tokenSetup": {
+        "title": "Setup Sync Token",
+        "description": "Your sync token is a BIP39 mnemonic phrase that encrypts your profiles. Keep it safe - you'll need it to sync across devices.",
+        "generateTab": "Generate new token",
+        "importTab": "Use existing token",
+        "generateButton": "Generate Token",
+        "saveWarning": {
+          "title": "Save this token securely!",
+          "description": "Store it in a password manager or write it down. You cannot recover it if lost, and you'll need it to sync on other devices."
+        },
+        "importLabel": "Enter Your Token",
+        "importPlaceholder": "Enter your BIP39 mnemonic phrase...",
+        "validToken": "Valid token",
+        "invalidToken": "Invalid token",
+        "confirm": "Confirm & Enable Sync"
+      },
+      "tokenViewer": {
+        "title": "Sync Token",
+        "description": "Your sync token is used to encrypt and decrypt your profiles. Keep it safe and secure.",
+        "securityWarning": {
+          "title": "Keep your token secure!",
+          "description": "Anyone with this token can decrypt your synced profiles. Store it safely in a password manager."
+        },
+        "clearButton": "Clear Token",
+        "clearConfirm": "Are you sure you want to clear your sync token? You'll need it to sync again on this device."
+      },
+      "settingsViewer": {
+        "newInRemote": "New in Remote",
+        "removedInRemote": "Removed in Remote",
+        "changed": "Changed",
+        "empty": "(empty)"
+      }
     }
   },
   "gallery": {

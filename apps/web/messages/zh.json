@@ -129,6 +129,116 @@
       "title": "画廊",
       "autoRefresh": "自动刷新",
       "autoRefreshDesc": "每次加载画廊时自动刷新。如果启用，会出现更多的 List 请求，可能会小幅增加 S3 费用。"
+    },
+    "sync": {
+      "title": "配置同步",
+      "description": "使用端到端加密云存储在设备之间同步您的设置",
+      "setupToken": "设置令牌",
+      "syncButton": "同步",
+      "tokenButton": "令牌",
+      "forceUpload": "强制上传",
+      "forcePull": "强制拉取",
+      "delete": "删除",
+      "remoteUpdatedMessage": "远程配置自上次在此设备上同步以来已更新。",
+      "remoteUpdatedDetails": "远程配置由其他设备在 {time} 从 {browser} 在 {os} 上更新",
+      "toasts": {
+        "syncEnabled": "同步已成功启用",
+        "tokenCleared": "同步令牌已清除",
+        "uploadSuccess": "本地配置已成功上传",
+        "pullSuccess": "远程配置已成功拉取",
+        "deleteSuccess": "远程同步数据已删除",
+        "noCorrespondingProfile": "服务器上未找到相应的配置",
+        "deleteFailed": "删除远程同步数据失败",
+        "syncFailed": "同步失败",
+        "noChanges": "无需同步",
+        "syncCompleted": "同步完成",
+        "errors": {
+          "invalidInput": "上传本地配置时输入无效",
+          "payloadTooLarge": "本地配置太大，无法上传",
+          "conflict": "上传本地配置时发生冲突，可能同时从其他设备上传。请重新同步",
+          "tooManyRequests": "上传本地配置时请求过多。请在大约 {seconds} 秒后重试。",
+          "uploadFailed": "上传本地配置失败",
+          "pullFailed": "获取远程配置失败"
+        }
+      },
+      "enableDialog": {
+        "title": "启用配置同步",
+        "description": "启用前了解同步的工作原理",
+        "encryption": {
+          "title": "端到端加密",
+          "description": "您的配置和设置在发送到服务器之前会在您的设备上加密。服务器仅存储加密数据，无法读取您的信息。只有拥有同步令牌的设备才能解密和访问您的数据。"
+        },
+        "tokenStorage": {
+          "title": "令牌存储",
+          "description": "您的同步令牌既是身份验证凭据，也是加密密钥。它将存储在浏览器的 localStorage 中，以便在会话之间自动同步。"
+        },
+        "security": {
+          "title": "安全注意事项",
+          "risk": "您的令牌存储在浏览器中，可能会被恶意浏览器扩展或某些类型的攻击访问。",
+          "acceptable": "但是，这种风险是可以接受的，因为您的设置数据也存储在浏览器中。如果有人可以访问您的令牌，他们已经可以直接读取您未加密的设置。加密主要保护您的数据在服务器上的安全。"
+        },
+        "bestPractice": {
+          "title": "💡 最佳实践",
+          "description": "专门为 Image Port 生成唯一的令牌。不要重复使用其他服务的令牌，以限制令牌被泄露时的潜在损害。"
+        },
+        "cancel": "取消",
+        "confirm": "我理解，启用同步"
+      },
+      "pullDialog": {
+        "title": "拉取远程配置",
+        "description": "远程服务器上的当前配置比本地配置更新。",
+        "uploadedAt": "远程服务器上的当前设置于 <time></time> 从 <browser></browser> 在 <os></os> 上上传。",
+        "comparison": "设置比较（本地 vs 远程）：",
+        "cancel": "取消",
+        "confirm": "接受更改"
+      },
+      "conflictDialog": {
+        "title": "检测到同步冲突",
+        "description": "您的本地设置和远程设置都已修改。请选择要保留的版本。",
+        "uploadedAt": "远程服务器上的当前设置于 <time></time> 从 <browser></browser> 在 <os></os> 上上传。",
+        "comparison": "设置比较（本地 vs 远程）：",
+        "cancel": "取消",
+        "useRemote": "使用远程",
+        "useLocal": "使用本地"
+      },
+      "deleteDialog": {
+        "title": "删除远程同步数据",
+        "description": "您确定要删除远程同步数据吗？此操作无法撤消。",
+        "cancel": "取消",
+        "confirm": "删除"
+      },
+      "tokenSetup": {
+        "title": "设置同步令牌",
+        "description": "您的同步令牌是一个 BIP39 助记词短语，用于加密您的配置。请妥善保管 - 您需要它才能在设备之间同步。",
+        "generateTab": "生成新令牌",
+        "importTab": "使用现有令牌",
+        "generateButton": "生成令牌",
+        "saveWarning": {
+          "title": "请安全保存此令牌！",
+          "description": "将其存储在密码管理器中或写下来。如果丢失，您将无法恢复它，并且您需要它才能在其他设备上同步。"
+        },
+        "importLabel": "输入您的令牌",
+        "importPlaceholder": "输入您的 BIP39 助记词短语...",
+        "validToken": "有效令牌",
+        "invalidToken": "无效令牌",
+        "confirm": "确认并启用同步"
+      },
+      "tokenViewer": {
+        "title": "同步令牌",
+        "description": "您的同步令牌用于加密和解密您的配置。请妥善保管。",
+        "securityWarning": {
+          "title": "请保护您的令牌安全！",
+          "description": "任何拥有此令牌的人都可以解密您同步的配置。请将其安全地存储在密码管理器中。"
+        },
+        "clearButton": "清除令牌",
+        "clearConfirm": "您确定要清除同步令牌吗？您需要它才能在此设备上再次同步。"
+      },
+      "settingsViewer": {
+        "newInRemote": "远程新增",
+        "removedInRemote": "远程删除",
+        "changed": "已更改",
+        "empty": "（空）"
+      }
     }
   },
   "gallery": {

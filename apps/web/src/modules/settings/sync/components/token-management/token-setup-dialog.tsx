@@ -20,6 +20,7 @@ import {
 } from "@/lib/encryption/sync-token";
 import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 import { TokenDisplay } from "./token-display";
+import { useTranslations } from "use-intl";
 
 interface TokenSetupDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function TokenSetupDialog({
   onOpenChange,
   onTokenConfirm,
 }: TokenSetupDialogProps) {
+  const t = useTranslations("settings.sync.tokenSetup");
   const [mode, setMode] = useState<"generate" | "import">("generate");
   const [generatedToken, setGeneratedToken] = useState<string>("");
   const [importedToken, setImportedToken] = useState<string>("");
@@ -59,11 +61,8 @@ export function TokenSetupDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Setup Sync Token</DialogTitle>
-          <DialogDescription>
-            Your sync token is a BIP39 mnemonic phrase that encrypts your
-            profiles. Keep it safe - you&apos;ll need it to sync across devices.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <Tabs
@@ -72,17 +71,17 @@ export function TokenSetupDialog({
         >
           <TabsList className="w-full">
             <TabsTrigger value="generate" className="flex-1">
-              Generate new token
+              {t("generateTab")}
             </TabsTrigger>
             <TabsTrigger value="import" className="flex-1">
-              Use existing token
+              {t("importTab")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="generate" className="space-y-4">
             <Button onClick={handleGenerate} className="w-full">
               <RefreshCw />
-              Generate Token
+              {t("generateButton")}
             </Button>
 
             {generatedToken && (
@@ -95,13 +94,9 @@ export function TokenSetupDialog({
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800">
                   <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                    <p className="font-medium mb-1">
-                      Save this token securely!
-                    </p>
+                    <p className="font-medium mb-1">{t("saveWarning.title")}</p>
                     <p className="text-yellow-700 dark:text-yellow-300">
-                      Store it in a password manager or write it down. You
-                      cannot recover it if lost, and you&apos;ll need it to sync
-                      on other devices.
+                      {t("saveWarning.description")}
                     </p>
                   </div>
                 </div>
@@ -111,10 +106,10 @@ export function TokenSetupDialog({
 
           <TabsContent value="import" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="import-token">Enter Your Token</Label>
+              <Label htmlFor="import-token">{t("importLabel")}</Label>
               <Input
                 id="import-token"
-                placeholder="Enter your BIP39 mnemonic phrase..."
+                placeholder={t("importPlaceholder")}
                 value={importedToken}
                 onChange={(e) => setImportedToken(e.target.value)}
                 className="font-mono"
@@ -124,12 +119,14 @@ export function TokenSetupDialog({
                   {isImportValid ? (
                     <>
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span className="text-green-600">Valid token</span>
+                      <span className="text-green-600">{t("validToken")}</span>
                     </>
                   ) : (
                     <>
                       <AlertCircle className="h-4 w-4 text-destructive" />
-                      <span className="text-destructive">Invalid token</span>
+                      <span className="text-destructive">
+                        {t("invalidToken")}
+                      </span>
                     </>
                   )}
                 </div>
@@ -144,7 +141,7 @@ export function TokenSetupDialog({
             disabled={!canConfirm}
             className="w-full"
           >
-            Confirm & Enable Sync
+            {t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

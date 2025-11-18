@@ -49,6 +49,7 @@ type ProfileItemProps = {
 function ProfileItem(props: ProfileItemProps) {
   const { name, localProfile, remoteProfile } = props;
   const t = useTranslations("settings");
+  const tViewer = useTranslations("settings.sync.settingsViewer");
 
   // Check if profile has changes
   const hasChanges =
@@ -59,13 +60,15 @@ function ProfileItem(props: ProfileItemProps) {
   if (!localProfile) {
     statusBadge = (
       <Badge variant="default" className="bg-green-600">
-        New in Remote
+        {tViewer("newInRemote")}
       </Badge>
     );
   } else if (!remoteProfile) {
-    statusBadge = <Badge variant="destructive">Removed in Remote</Badge>;
+    statusBadge = (
+      <Badge variant="destructive">{tViewer("removedInRemote")}</Badge>
+    );
   } else if (hasChanges) {
-    statusBadge = <Badge variant="outline">Changed</Badge>;
+    statusBadge = <Badge variant="outline">{tViewer("changed")}</Badge>;
   }
 
   // Use remote profile as primary, fall back to local if remote doesn't exist
@@ -215,6 +218,7 @@ function ItemDiffViewer({
   localValue?: string;
   remoteValue?: string;
 }) {
+  const tViewer = useTranslations("settings.sync.settingsViewer");
   const isDifferent = localValue !== remoteValue;
   const isRemoved = localValue !== undefined && remoteValue === undefined;
   const isAdded = localValue === undefined && remoteValue !== undefined;
@@ -239,7 +243,7 @@ function ItemDiffViewer({
                 </Badge>
                 <span className="font-mono text-sm break-all text-muted-foreground line-through">
                   {localValue === "" ? (
-                    <span className="italic">(empty)</span>
+                    <span className="italic">{tViewer("empty")}</span>
                   ) : (
                     localValue
                   )}
@@ -251,7 +255,7 @@ function ItemDiffViewer({
                 </Badge>
                 <span className="font-mono text-sm break-all">
                   {remoteValue === "" ? (
-                    <span className="italic">(empty)</span>
+                    <span className="italic">{tViewer("empty")}</span>
                   ) : (
                     remoteValue
                   )}
@@ -265,7 +269,7 @@ function ItemDiffViewer({
               </Badge>
               <span className="font-mono text-sm break-all text-muted-foreground line-through">
                 {localValue === "" ? (
-                  <span className="italic">(empty)</span>
+                  <span className="italic">{tViewer("empty")}</span>
                 ) : (
                   localValue
                 )}
@@ -278,7 +282,7 @@ function ItemDiffViewer({
               </Badge>
               <span className="font-mono text-sm break-all">
                 {remoteValue === "" ? (
-                  <span className="italic">(empty)</span>
+                  <span className="italic">{tViewer("empty")}</span>
                 ) : (
                   remoteValue
                 )}
@@ -287,7 +291,9 @@ function ItemDiffViewer({
           ) : (
             <span className="font-mono text-sm break-all">
               {isEmpty ? (
-                <span className="text-muted-foreground italic">(empty)</span>
+                <span className="text-muted-foreground italic">
+                  {tViewer("empty")}
+                </span>
               ) : (
                 displayValue
               )}
