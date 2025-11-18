@@ -1,4 +1,7 @@
-import { settingsForSyncAtom, settingsForSyncSchema } from "../settings-store";
+import {
+  settingsForSyncAtom,
+  settingsForSyncSchema,
+} from "../../settings-store";
 import { z } from "zod";
 import { atom, SetStateAction } from "jotai";
 import {
@@ -6,14 +9,14 @@ import {
   syncStateAtom,
   syncStateSchema,
   syncTokenAtom,
-} from "./sync-store";
+} from "../sync-store";
 import deepEqual from "deep-equal";
-import { settingsRecordSchema } from "./types";
+import { settingsRecordSchema } from "../types";
 import {
   uploadProfiles,
   fetchRemoteProfiles,
   UploadProfileError,
-} from "./sync-api-client";
+} from "../sync-api-client";
 import type { DiscriminatedUnion } from "@/lib/utils/type-utils";
 import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 

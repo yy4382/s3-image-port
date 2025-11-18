@@ -9,7 +9,7 @@ import { commands } from "vitest/browser";
 import { profilesAtom } from "../settings-store";
 
 vi.mock(
-  import("@/modules/settings/sync/components/sync-settings-card"),
+  import("@/modules/settings/sync/components/sync-settings"),
   async () => {
     return {
       SyncSettings: vi.fn().mockReturnValue(<div>SyncSettings mock</div>),

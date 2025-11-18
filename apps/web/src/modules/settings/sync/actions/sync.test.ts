@@ -1,13 +1,15 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { sync, UserConfirmations } from "./sync-service";
+import { sync, UserConfirmations } from "./sync";
 import { sha256 } from "@/lib/utils/hash";
 import { deriveAuthToken, encrypt } from "@/lib/encryption/crypto";
 import { produce } from "immer";
-import { settingsIntoSyncFormat } from "../settings-store";
-import { getDefaultProfiles } from "../settings-store";
+import {
+  settingsIntoSyncFormat,
+  getDefaultProfiles,
+} from "../../settings-store";
 import { z } from "zod";
-import { settingsRecordEncryptedSchema } from "./types";
-import { profilesSchemaForLoad } from "../schema/v3";
+import { settingsRecordEncryptedSchema } from "../types";
+import { profilesSchemaForLoad } from "../../schema/v3";
 
 const mocks = vi.hoisted(() => {
   import.meta.env.VITEST = true;

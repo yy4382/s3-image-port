@@ -31,10 +31,10 @@ import {
   SyncActionType,
   syncServiceAtom,
   type UserConfirmations,
-} from "../sync-service";
+} from "../actions/sync";
 import { syncStateAtom, syncTokenAtom } from "../sync-store";
-import { TokenSetupDialog } from "./token-setup-dialog";
-import { TokenViewerDialog } from "./token-viewer-dialog";
+import { TokenSetupDialog } from "./token-management/token-setup-dialog";
+import { TokenViewerDialog } from "./token-management/token-viewer-dialog";
 import { focusAtom } from "jotai-optics";
 import {
   queryOptions,
@@ -42,24 +42,20 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  deleteRemoteProfiles,
-  fetchMetadata,
-  fetchRemoteProfiles,
-  UploadProfileError,
-  uploadProfiles,
-} from "../sync-api-client";
+import { fetchMetadata, UploadProfileError } from "../sync-api-client";
+import { forceUpload } from "../actions/force-upload";
+import { forcePull } from "../actions/force-pull";
+import { deleteRemoteSync } from "../actions/delete";
 import { format } from "date-fns";
-import { ConfirmPullDialog } from "./confirm-pull-dialog";
-import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
-import { ConfirmConflictDialog } from "./confirm-conflict-dialog";
+import { ConfirmPullDialog } from "./confirm-dialogs/confirm-pull-dialog";
+import { ConfirmDeleteDialog } from "./confirm-dialogs/confirm-delete-dialog";
+import { ConfirmConflictDialog } from "./confirm-dialogs/confirm-conflict-dialog";
 import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 import { settingsForSyncAtom } from "../../settings-store";
-import deepEqual from "deep-equal";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { EnableSyncDialog } from "./enable-sync-dialog";
+import { EnableSyncDialog } from "./confirm-dialogs/enable-sync-dialog";
 
 const remoteMetadataQuery = (params: { token: string; enabled: boolean }) =>
   queryOptions({
@@ -277,53 +273,35 @@ function SyncActions() {
   });
   const handleForceUpload = async () => {
     try {
-      const remote = await fetchRemoteProfiles(syncToken);
-      if (remote && deepEqual(local, remote.data)) {
-        toast.info("Remote profile is already same as local profile");
-        setSyncConfig((prev) => ({
-          ...prev,
-          version: remote.version,
-          lastUpload: remote.data,
-        }));
-        return;
+      const result = await forceUpload(local, syncToken);
+      if (result.config) {
+        setSyncConfig(result.config);
       }
-      const result = await uploadProfiles(local, syncToken, "force");
-      if (!result.success) {
-        return toastUploadProfileError(new UploadProfileError(result.error));
-      }
-      setSyncConfig((prev) => ({
-        ...prev,
-        version: result.current.version,
-        lastUpload: result.current.data,
-      }));
       toast.success("Local profile uploaded successfully");
       queryClient.invalidateQueries(
         remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
       );
     } catch (error) {
+      if (error instanceof UploadProfileError) {
+        return toastUploadProfileError(error);
+      }
       toast.error("Failed to upload local profile");
       console.error("Failed to upload local profile", error);
-      return;
     }
   };
 
   const handleForcePull = async () => {
     try {
-      const result = await fetchRemoteProfiles(syncToken);
-      if (!result) {
-        toast.error("No corresponding profile found on the server");
-        return;
+      const result = await forcePull(syncToken);
+      if (result.local) {
+        setLocal(result.local);
       }
-      setLocal(result.data);
-      setSyncConfig((prev) => ({
-        ...prev,
-        version: result.version,
-        lastUpload: result.data,
-      }));
+      if (result.config) {
+        setSyncConfig(result.config);
+      }
     } catch (error) {
       toast.error("Failed to fetch remote profile");
       console.error("Failed to fetch remote profile", error);
-      return;
     }
   };
 
@@ -336,34 +314,23 @@ function SyncActions() {
   const handleDelete = async () => {
     const confirmed = await confirmDelete.confirm("");
     if (confirmed) {
-      const result = await deleteRemoteProfiles(syncToken);
-      switch (result._tag) {
-        case "success": {
-          toast.success("Remote sync data deleted");
-          try {
-            await queryClient.invalidateQueries(
-              remoteMetadataQuery({
-                token: syncToken,
-                enabled: syncConfig.enabled,
-              }),
-            );
-          } finally {
-            setSyncConfig({ enabled: true, version: 0, lastUpload: null });
-          }
-          break;
+      const result = await deleteRemoteSync(syncToken);
+      if (result.success) {
+        toast.success("Remote sync data deleted");
+        try {
+          await queryClient.invalidateQueries(
+            remoteMetadataQuery({
+              token: syncToken,
+              enabled: syncConfig.enabled,
+            }),
+          );
+        } finally {
+          setSyncConfig({ enabled: true, version: 0, lastUpload: null });
         }
-        case "no-such-user": {
-          toast.error("No corresponding profile found on the server");
-          break;
-        }
-        case "error": {
-          toast.error("Failed to delete remote sync data");
-          break;
-        }
-        /* v8 ignore next */
-        default: {
-          assertUnreachable(result);
-        }
+      } else if (result.reason === "no-such-user") {
+        toast.error("No corresponding profile found on the server");
+      } else {
+        toast.error("Failed to delete remote sync data");
       }
     }
   };

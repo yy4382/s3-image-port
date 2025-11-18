@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Download } from "lucide-react";
-import { type UserConfirmations } from "../sync-service";
+import { type UserConfirmations } from "../../actions/sync";
 import { format } from "date-fns";
-import { SettingsViewer } from "./settings-viewer";
+import { SettingsViewer } from "../settings-viewer";
 import { ConfirmDialog } from "./confirm-dialog";
 
 export function ConfirmPullDialog({
