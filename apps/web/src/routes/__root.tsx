@@ -64,6 +64,7 @@ function RootComponent() {
             >
               <QueryClientProvider client={queryClient}>
                 <Outlet />
+                <Toaster closeButton={true} />
                 <ReactQueryDevtools
                   initialIsOpen={false}
                   buttonPosition="bottom-left"

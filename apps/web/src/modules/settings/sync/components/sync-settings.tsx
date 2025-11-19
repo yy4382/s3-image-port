@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { isValidSyncToken } from "@/lib/encryption/sync-token";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import {
   Key,
   Trash2,
@@ -28,42 +28,28 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  SyncActionType,
-  syncServiceAtom,
-  type UserConfirmations,
-} from "../actions/sync";
 import { syncStateAtom, syncTokenAtom } from "../sync-store";
 import { TokenSetupDialog } from "./token-management/token-setup-dialog";
 import { TokenViewerDialog } from "./token-management/token-viewer-dialog";
 import { focusAtom } from "jotai-optics";
-import {
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { fetchMetadata, UploadProfileError } from "../sync-api-client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UploadProfileError } from "../sync-api-client";
 import { forceUpload } from "../actions/force-upload";
 import { forcePull } from "../actions/force-pull";
 import { deleteRemoteSync } from "../actions/delete";
 import { format } from "date-fns";
-import { ConfirmPullDialog } from "./confirm-dialogs/confirm-pull-dialog";
 import { ConfirmDeleteDialog } from "./confirm-dialogs/confirm-delete-dialog";
-import { ConfirmConflictDialog } from "./confirm-dialogs/confirm-conflict-dialog";
-import { assertUnreachable } from "@/lib/utils/assert-unreachable";
 import { settingsForSyncAtom } from "../../settings-store";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { EnableSyncDialog } from "./confirm-dialogs/enable-sync-dialog";
-
-const remoteMetadataQuery = (params: { token: string; enabled: boolean }) =>
-  queryOptions({
-    queryKey: ["remote-metadata"],
-    queryFn: () => fetchMetadata(params.token),
-    enabled: params.enabled && !!params.token,
-  });
+import {
+  remoteMetadataQuery,
+  useToastUploadProfileError,
+  useSyncMutationStatus,
+} from "../use-sync";
+import { SyncProvider } from "./global/sync-provider";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 function useConfirmation<TData extends {}, TResult>() {
@@ -178,36 +164,6 @@ function SyncTokenSetup() {
   );
 }
 
-function toastUploadProfileError(
-  error: UploadProfileError,
-  t: ReturnType<typeof useTranslations<"settings.sync">>,
-) {
-  const cause = error.cause;
-  switch (cause.code) {
-    case "INPUT_VALIDATION_FAILED": {
-      toast.error(t("toasts.errors.invalidInput"));
-      return;
-    }
-    case "PAYLOAD_TOO_LARGE": {
-      toast.error(t("toasts.errors.payloadTooLarge"));
-      return;
-    }
-    case "CONFLICT": {
-      toast.error(t("toasts.errors.conflict"));
-      return;
-    }
-    case "TOO_MANY_REQUESTS": {
-      const retryAfterMs = Math.max(0, cause.data.reset - Date.now());
-      const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
-      toast.error(t("toasts.errors.tooManyRequests", { seconds }));
-      return;
-    }
-    default: {
-      assertUnreachable(cause);
-    }
-  }
-}
-
 function SyncActions() {
   const [syncConfig, setSyncConfig] = useAtom(syncStateAtom);
   const [syncToken, setSyncToken] = useAtom(syncTokenAtom);
@@ -219,59 +175,10 @@ function SyncActions() {
   const [local, setLocal] = useAtom(settingsForSyncAtom);
   const [showTokenViewer, setShowTokenViewer] = useState(false);
 
-  const sync = useSetAtom(syncServiceAtom);
-
-  const confirmPull = useConfirmation<
-    Parameters<UserConfirmations["confirmPull"]>[0],
-    boolean
-  >();
-
-  const confirmConflict = useConfirmation<
-    Parameters<UserConfirmations["conflictResolver"]>[0],
-    "local" | "remote" | null
-  >();
-
   const confirmDelete = useConfirmation<"", boolean>();
+  const isSyncPending = useSyncMutationStatus() === "pending";
+  const toastUploadProfileError = useToastUploadProfileError();
 
-  const { mutate: syncMutation, isPending } = useMutation({
-    mutationKey: ["sync"],
-    mutationFn: () =>
-      sync({
-        conflictResolver: confirmConflict.confirm,
-        confirmPull: confirmPull.confirm,
-      }),
-    scope: {
-      id: "profile-sync",
-    },
-    onError: (error) => {
-      if (error instanceof UploadProfileError) {
-        toastUploadProfileError(error, t);
-      } else {
-        toast.error(error.message ?? t("toasts.syncFailed"));
-      }
-    },
-    onSuccess: (data) => {
-      if (!data) {
-        toast.error(t("toasts.syncFailed"));
-      } else if (data === SyncActionType.NOT_CHANGED) {
-        toast.success(t("toasts.noChanges"));
-      } else if (data !== SyncActionType.DO_NOTHING) {
-        toast.success(t("toasts.syncCompleted"));
-      }
-      if (
-        data &&
-        data !== SyncActionType.DO_NOTHING &&
-        data !== SyncActionType.NOT_CHANGED
-      ) {
-        queryClient.invalidateQueries(
-          remoteMetadataQuery({
-            token: syncToken,
-            enabled: syncConfig.enabled,
-          }),
-        );
-      }
-    },
-  });
   const handleForceUpload = async () => {
     try {
       const result = await forceUpload(local, syncToken);
@@ -279,12 +186,12 @@ function SyncActions() {
         setSyncConfig(result.config);
       }
       toast.success(t("toasts.uploadSuccess"));
-      queryClient.invalidateQueries(
-        remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
-      );
+      queryClient.invalidateQueries({
+        queryKey: remoteMetadataQuery.queryKey,
+      });
     } catch (error) {
       if (error instanceof UploadProfileError) {
-        return toastUploadProfileError(error, t);
+        return toastUploadProfileError(error);
       }
       toast.error(t("toasts.errors.uploadFailed"));
       console.error("Failed to upload local profile", error);
@@ -319,12 +226,9 @@ function SyncActions() {
       if (result.success) {
         toast.success(t("toasts.deleteSuccess"));
         try {
-          await queryClient.invalidateQueries(
-            remoteMetadataQuery({
-              token: syncToken,
-              enabled: syncConfig.enabled,
-            }),
-          );
+          await queryClient.invalidateQueries({
+            queryKey: remoteMetadataQuery.queryKey,
+          });
         } finally {
           setSyncConfig({ enabled: true, version: 0, lastUpload: null });
         }
@@ -340,18 +244,26 @@ function SyncActions() {
     <div className="space-y-3">
       <div className="flex gap-2 justify-between">
         <div className="flex gap-2">
-          <Button
-            onClick={() => syncMutation()}
-            disabled={isPending}
-            variant="default"
-          >
-            <RefreshCwIcon className={cn(isPending && "animate-spin")} />
-            {t("syncButton")}
-          </Button>
+          <SyncProvider
+            render={({ syncMutation }) => {
+              return (
+                <Button
+                  onClick={() => syncMutation.mutate()}
+                  disabled={syncMutation.isPending}
+                  variant="default"
+                >
+                  <RefreshCwIcon
+                    className={cn(syncMutation.isPending && "animate-spin")}
+                  />
+                  {t("syncButton")}
+                </Button>
+              );
+            }}
+          />
           <Button
             variant="secondary"
             onClick={() => setShowTokenViewer(true)}
-            disabled={isPending}
+            disabled={isSyncPending}
           >
             <Key />
             {t("tokenButton")}
@@ -360,7 +272,7 @@ function SyncActions() {
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" disabled={isPending}>
+            <Button variant="outline" size="icon" disabled={isSyncPending}>
               <MoreVertical />
             </Button>
           </DropdownMenuTrigger>
@@ -392,16 +304,6 @@ function SyncActions() {
           <br />
         </div>
       )}
-      <ConfirmPullDialog
-        open={confirmPull.isOpen}
-        data={confirmPull.data}
-        onResolve={confirmPull.resolve}
-      />
-      <ConfirmConflictDialog
-        open={confirmConflict.isOpen}
-        data={confirmConflict.data}
-        onResolve={confirmConflict.resolve}
-      />
       <ConfirmDeleteDialog
         open={confirmDelete.isOpen}
         onResolve={confirmDelete.resolve}
