@@ -6,17 +6,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Key, RefreshCwIcon } from "lucide-react";
+import { Key, RefreshCwIcon, Clock } from "lucide-react";
 import { ConfirmDialog } from "./confirm-dialog";
 import { useTranslations } from "use-intl";
+import { PROFILE_TTL_SECONDS } from "@/lib/redis/ttl-config";
 
 interface EnableSyncDialogProps {
   open: boolean;
   onResolve: (value: boolean) => void;
 }
 
+function getTTLDays(): number | null {
+  if (!PROFILE_TTL_SECONDS || PROFILE_TTL_SECONDS === Infinity) {
+    return null;
+  }
+  return Math.floor(PROFILE_TTL_SECONDS / 60 / 60 / 24);
+}
+
 export function EnableSyncDialog({ open, onResolve }: EnableSyncDialogProps) {
   const t = useTranslations("settings.sync.enableDialog");
+  const ttlDays = getTTLDays();
 
   return (
     <ConfirmDialog open={open} onResolve={onResolve}>
@@ -89,6 +98,19 @@ export function EnableSyncDialog({ open, onResolve }: EnableSyncDialogProps) {
                 {t("security.acceptable")}
               </p>
             </div>
+          </div>
+
+          {/* Data retention */}
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              {t("dataRetention.title")}
+            </h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {ttlDays
+                ? t("dataRetention.description", { days: ttlDays })
+                : t("dataRetention.descriptionForever")}
+            </p>
           </div>
 
           {/* Best practices */}

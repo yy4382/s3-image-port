@@ -2,8 +2,11 @@ import { settingsRecordEncryptedSchema } from "@/modules/settings/sync/types";
 import Redis from "ioredis";
 import { z } from "zod";
 import { getRedisClient } from "./client";
+import { PROFILE_TTL_SECONDS } from "./ttl-config";
 
 export interface SettingsStoreClient {
+  readonly TTL_SECONDS: number;
+
   get(
     authHash: string,
   ): Promise<z.infer<typeof settingsRecordEncryptedSchema> | null>;
@@ -22,7 +25,7 @@ export interface SettingsStoreClient {
 class SettingsStoreClientRedis implements SettingsStoreClient {
   private redis: Redis | null = null;
   readonly keyPrefix = "profile:sync:";
-  readonly TTL_SECONDS = 60 * 60 * 24 * 365; // 365 days
+  readonly TTL_SECONDS = PROFILE_TTL_SECONDS;
 
   private getRedis(): Redis {
     if (!this.redis) {
