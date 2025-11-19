@@ -16,6 +16,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -63,7 +64,10 @@ function RootComponent() {
             >
               <QueryClientProvider client={queryClient}>
                 <Outlet />
-                <Toaster />
+                <ReactQueryDevtools
+                  initialIsOpen={false}
+                  buttonPosition="bottom-left"
+                />
               </QueryClientProvider>
             </ThemeProvider>
           </JotaiProvider>
