@@ -144,7 +144,30 @@ const uploadProfiles = baseOs
       updatedAt: Date.now(),
       userAgent: context.reqHeaders?.get("user-agent") ?? "",
     };
-    await settingsStoreClient.set(authHash, newProfile);
+
+    // Use atomic compare-and-swap to prevent race conditions
+    if (version === "force") {
+      await settingsStoreClient.set(authHash, newProfile);
+    } else {
+      const success = await settingsStoreClient.setIfVersionMatches(
+        authHash,
+        newProfile,
+        existingVersion,
+      );
+      if (!success) {
+        // Version changed between read and write, re-fetch and throw conflict
+        const updatedProfile = await settingsStoreClient.get(authHash);
+        if (updatedProfile) {
+          throw errors.CONFLICT({
+            data: {
+              ...updatedProfile,
+              userAgent: transformUserAgent(updatedProfile.userAgent),
+            },
+          });
+        }
+      }
+    }
+
     return {
       ...newProfile,
       userAgent: transformUserAgent(newProfile.userAgent),

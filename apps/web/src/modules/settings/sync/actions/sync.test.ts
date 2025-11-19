@@ -14,21 +14,59 @@ import { profilesSchemaForLoad } from "../../schema/v3";
 const mocks = vi.hoisted(() => {
   import.meta.env.VITEST = true;
   const mockDb = new Map<string, string>();
-  const redisGetFn = vi.fn().mockImplementation((key) => {
-    return Promise.resolve(mockDb.get(key));
+  const settingsGetFn = vi.fn().mockImplementation((authHash) => {
+    const key = `profile:sync:${authHash}`;
+    const value = mockDb.get(key);
+    return value ? Promise.resolve(JSON.parse(value)) : Promise.resolve(null);
   });
-  const redisSetFn = vi.fn().mockImplementation((key, value) => {
-    mockDb.set(key, value);
+  const settingsSetFn = vi.fn().mockImplementation((authHash, data) => {
+    const key = `profile:sync:${authHash}`;
+    mockDb.set(key, JSON.stringify(data));
     return Promise.resolve();
   });
-  return { mockDb, redisGetFn, redisSetFn };
+  const settingsSetIfVersionMatchesFn = vi
+    .fn()
+    .mockImplementation((authHash, data, expectedVersion) => {
+      const key = `profile:sync:${authHash}`;
+      const current = mockDb.get(key);
+
+      if (!current) {
+        if (expectedVersion === 0) {
+          mockDb.set(key, JSON.stringify(data));
+          return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+      }
+
+      const currentData = JSON.parse(current);
+      if (currentData.version === expectedVersion) {
+        mockDb.set(key, JSON.stringify(data));
+        return Promise.resolve(true);
+      }
+      return Promise.resolve(false);
+    });
+
+  return {
+    mockDb,
+    settingsGetFn,
+    settingsSetFn,
+    settingsSetIfVersionMatchesFn,
+  };
 });
+
 vi.mock(import("@/lib/redis/client"), () => {
   return {
-    getRedisClient: vi.fn().mockReturnValue({
-      get: mocks.redisGetFn,
-      set: mocks.redisSetFn,
-    }),
+    getRedisClient: vi.fn(),
+  };
+});
+
+vi.mock(import("@/lib/redis/settings-client"), () => {
+  return {
+    settingsStoreClient: {
+      get: mocks.settingsGetFn,
+      set: mocks.settingsSetFn,
+      setIfVersionMatches: mocks.settingsSetIfVersionMatchesFn,
+    },
   };
 });
 vi.mock(import("@/lib/orpc/client"));
@@ -99,13 +137,10 @@ describe("syncService", () => {
       },
       userConfirmations,
     );
-    expect(mocks.redisGetFn).toHaveBeenCalledWith(
+    expect(mocks.settingsGetFn).toHaveBeenCalledWith(
       expect.stringContaining(testAuthHash),
     );
-    expect(mocks.redisSetFn).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.stringContaining('"version":1'),
-    );
+    expect(mocks.settingsSetIfVersionMatchesFn).toHaveBeenCalled();
     expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
     expect(local).toEqual(getDefaultSyncStore());
     expect(config).toEqual({
@@ -127,7 +162,8 @@ describe("syncService", () => {
       },
       userConfirmations,
     );
-    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetIfVersionMatchesFn).not.toHaveBeenCalled();
     expect(userConfirmations.conflictResolver).not.toHaveBeenCalled();
     expect(config.version).toBe(5);
     expect(config.lastUpload).toEqual(getDefaultSyncStore());
@@ -159,10 +195,7 @@ describe("syncService", () => {
       version: 6,
       lastUpload: getDefaultSyncStore(),
     });
-    expect(mocks.redisSetFn).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.stringContaining('"version":6'),
-    );
+    expect(mocks.settingsSetIfVersionMatchesFn).toHaveBeenCalled();
   });
   test("local fresh, remote not empty, local remote not matching, resolve to remote", async () => {
     // local be set to remote data and version
@@ -190,7 +223,8 @@ describe("syncService", () => {
       version: 5,
       lastUpload: unencrypted,
     });
-    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetIfVersionMatchesFn).not.toHaveBeenCalled();
   });
   test("local not dirty, remote - lastUpload matching (all the same)", async () => {
     // nothing changed
@@ -213,7 +247,8 @@ describe("syncService", () => {
       version: 5,
       lastUpload: getDefaultSyncStore(),
     });
-    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetIfVersionMatchesFn).not.toHaveBeenCalled();
   });
   test("local not dirty, remote - lastUpload not matching", async () => {
     // local be set to remote data and version
@@ -241,7 +276,8 @@ describe("syncService", () => {
       version: 5,
       lastUpload: unencrypted,
     });
-    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetIfVersionMatchesFn).not.toHaveBeenCalled();
   });
   test("local not dirty, remote - lastUpload not matching, confirmPull false", async () => {
     // since user cancelled pull, local and config should not be updated
@@ -270,7 +306,8 @@ describe("syncService", () => {
       version: 3,
       lastUpload: localState,
     });
-    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetIfVersionMatchesFn).not.toHaveBeenCalled();
   });
   test("local dirty, remote - lastUpload matching", async () => {
     // upload local data to remote and version++
@@ -299,10 +336,7 @@ describe("syncService", () => {
       version: 6,
       lastUpload: localState,
     });
-    expect(mocks.redisSetFn).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.stringContaining('"version":6'),
-    );
+    expect(mocks.settingsSetIfVersionMatchesFn).toHaveBeenCalled();
   });
   test("local dirty, remote - lastUpload data matching but version not matching", async () => {
     // upload local data to remote and version++
@@ -331,10 +365,7 @@ describe("syncService", () => {
       version: 6,
       lastUpload: localState,
     });
-    expect(mocks.redisSetFn).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.stringContaining('"version":6'),
-    );
+    expect(mocks.settingsSetIfVersionMatchesFn).toHaveBeenCalled();
   });
   test("local dirty, remote - lastUpload not matching, resolve to local", async () => {
     // upload local data to remote and version++
@@ -366,10 +397,7 @@ describe("syncService", () => {
       version: 6,
       lastUpload: localState,
     });
-    expect(mocks.redisSetFn).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.stringContaining('"version":6'),
-    );
+    expect(mocks.settingsSetIfVersionMatchesFn).toHaveBeenCalled();
   });
   test("local dirty, remote - lastUpload not matching, resolve to remote", async () => {
     // set local to remote data
@@ -403,6 +431,7 @@ describe("syncService", () => {
       version: 5,
       lastUpload: unencrypted,
     });
-    expect(mocks.redisSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetFn).not.toHaveBeenCalled();
+    expect(mocks.settingsSetIfVersionMatchesFn).not.toHaveBeenCalled();
   });
 });
