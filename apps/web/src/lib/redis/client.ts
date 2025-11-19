@@ -22,7 +22,7 @@ export function getRedisClient(): Redis {
   redis = new Redis(redisUrl, {
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,
-    lazyConnect: false,
+    lazyConnect: true,
     // Connection pool settings
     enableOfflineQueue: true,
     // Reconnection strategy
