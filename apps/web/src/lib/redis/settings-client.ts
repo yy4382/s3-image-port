@@ -11,6 +11,11 @@ export interface SettingsStoreClient {
     authHash: string,
     data: z.infer<typeof settingsRecordEncryptedSchema>,
   ): Promise<void>;
+  setIfVersionMatches(
+    authHash: string,
+    data: z.infer<typeof settingsRecordEncryptedSchema>,
+    expectedVersion: number,
+  ): Promise<boolean>;
   delete(authHash: string): Promise<void>;
 }
 
@@ -48,6 +53,50 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
     const redis = this.getRedis();
     const key = this.getProfileKey(authHash);
     await redis.set(key, JSON.stringify(data));
+  }
+
+  async setIfVersionMatches(
+    authHash: string,
+    data: z.infer<typeof settingsRecordEncryptedSchema>,
+    expectedVersion: number,
+  ): Promise<boolean> {
+    const redis = this.getRedis();
+    const key = this.getProfileKey(authHash);
+    const newData = JSON.stringify(data);
+
+    // Lua script for atomic compare-and-swap based on version
+    const script = `
+      local key = KEYS[1]
+      local expectedVersion = tonumber(ARGV[1])
+      local newData = ARGV[2]
+
+      local current = redis.call('GET', key)
+
+      -- If key doesn't exist, only allow version 1
+      if not current then
+        if expectedVersion == 0 then
+          redis.call('SET', key, newData)
+          return 1
+        else
+          return 0
+        end
+      end
+
+      -- Parse current version
+      local currentData = cjson.decode(current)
+      local currentVersion = tonumber(currentData.version)
+
+      -- Check version match
+      if currentVersion == expectedVersion then
+        redis.call('SET', key, newData)
+        return 1
+      else
+        return 0
+      end
+    `;
+
+    const result = await redis.eval(script, 1, key, expectedVersion, newData);
+    return result === 1;
   }
 
   async delete(authHash: string): Promise<void> {
