@@ -140,25 +140,25 @@
       "forcePull": "强制拉取",
       "delete": "删除",
       "remoteUpdatedMessage": "远程配置自上次在此设备上同步以来已更新。",
-      "remoteUpdatedDetails": "远程配置由其他设备在 {time} 从 {browser} 在 {os} 上更新",
+      "remoteUpdatedDetails": "远程配置由其他设备于 {time} 从 {browser} 在 {os} 上更新",
       "toasts": {
         "syncEnabled": "同步已成功启用",
         "tokenCleared": "同步令牌已清除",
-        "uploadSuccess": "本地配置已成功上传",
-        "pullSuccess": "远程配置已成功拉取",
-        "deleteSuccess": "远程同步数据已删除",
-        "noCorrespondingProfile": "服务器上未找到相应的配置",
-        "deleteFailed": "删除远程同步数据失败",
+        "uploadSuccess": "已成功上传配置",
+        "pullSuccess": "已成功拉取远程配置",
+        "deleteSuccess": "已成功删除远程数据",
+        "noCorrespondingProfile": "未在服务器上找到相应的配置",
+        "deleteFailed": "删除远程数据失败",
         "syncFailed": "同步失败",
         "noChanges": "无需同步",
         "syncCompleted": "同步完成",
         "errors": {
-          "invalidInput": "上传本地配置时输入无效",
+          "invalidInput": "上传配置时输入无效",
           "payloadTooLarge": "本地配置太大，无法上传",
-          "conflict": "上传本地配置时发生冲突，可能同时从其他设备上传。请重新同步",
-          "tooManyRequests": "上传本地配置时请求过多。请在大约 {seconds} 秒后重试。",
-          "uploadFailed": "上传本地配置失败",
-          "pullFailed": "获取远程配置失败"
+          "conflict": "上传配置时发生冲突，可能同时有其他设备在上传。请重新同步",
+          "tooManyRequests": "上传请求过于频繁。请在大约 {seconds} 秒后重试。",
+          "uploadFailed": "上传配置失败",
+          "pullFailed": "拉取配置失败"
         }
       },
       "enableDialog": {
@@ -170,12 +170,12 @@
         },
         "tokenStorage": {
           "title": "令牌存储",
-          "description": "您的同步令牌既是身份验证凭据，也是加密密钥。它将存储在浏览器的 localStorage 中，以便在会话之间自动同步。"
+          "description": "您的同步令牌既是身份验证凭据，也是加密密钥。它将存储在浏览器中。"
         },
         "security": {
           "title": "安全注意事项",
           "risk": "您的令牌存储在浏览器中，可能会被恶意浏览器扩展或某些类型的攻击访问。",
-          "acceptable": "但是，这种风险是可以接受的，因为您的设置数据也存储在浏览器中。如果有人可以访问您的令牌，他们已经可以直接读取您未加密的设置。加密主要保护您的数据在服务器上的安全。"
+          "acceptable": "不过我们认为这种风险是可以接受的，因为您的设置数据也存储在浏览器中。如果有人可以访问您的令牌，他们已经可以直接读取您未加密的设置。加密主要保护您的数据在服务器上的安全。"
         },
         "dataRetention": {
           "title": "数据保留",
@@ -184,23 +184,23 @@
         },
         "bestPractice": {
           "title": "💡 最佳实践",
-          "description": "专门为 Image Port 生成唯一的令牌。不要重复使用其他服务的令牌，以限制令牌被泄露时的潜在损害。"
+          "description": "为 S3 Image Port 生成新的唯一的令牌。不要重复使用其他服务的令牌，以降低如果被攻击时造成的损失。"
         },
         "cancel": "取消",
-        "confirm": "我理解，启用同步"
+        "confirm": "我明白，启用同步"
       },
       "pullDialog": {
         "title": "拉取远程配置",
-        "description": "远程服务器上的当前配置比本地配置更新。",
-        "uploadedAt": "远程服务器上的当前设置于 <time></time> 从 <browser></browser> 在 <os></os> 上上传。",
+        "description": "远程服务器上的配置比本地配置更新。",
+        "uploadedAt": "远程服务器上的配置于 <time></time> 从 <browser></browser> 在 <os></os> 上上传。",
         "comparison": "设置比较（本地 vs 远程）：",
         "cancel": "取消",
         "confirm": "接受更改"
       },
       "conflictDialog": {
         "title": "检测到同步冲突",
-        "description": "您的本地设置和远程设置都已修改。请选择要保留的版本。",
-        "uploadedAt": "远程服务器上的当前设置于 <time></time> 从 <browser></browser> 在 <os></os> 上上传。",
+        "description": "您的本地配置和远程配置都已修改。请选择要保留的版本。",
+        "uploadedAt": "远程服务器上的配置于 <time></time> 从 <browser></browser> 在 <os></os> 上上传。",
         "comparison": "设置比较（本地 vs 远程）：",
         "cancel": "取消",
         "useRemote": "使用远程",
@@ -239,8 +239,8 @@
         "clearConfirm": "您确定要清除同步令牌吗？您需要它才能在此设备上再次同步。"
       },
       "settingsViewer": {
-        "newInRemote": "远程新增",
-        "removedInRemote": "远程删除",
+        "newInRemote": "在远程中新增",
+        "removedInRemote": "在远程中已不存在",
         "changed": "已更改",
         "empty": "（空）"
       }
