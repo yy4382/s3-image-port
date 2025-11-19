@@ -2,3 +2,6 @@ pnpm-lock.yaml
 .husky/pre-commit
 apps/docs/.vitepress/cache
 **/routeTree.gen.ts
+**/.nitro
+**/.output
+**/.claude
