@@ -138,11 +138,13 @@ const uploadProfiles = baseOs
     }
 
     const newVersion = existingVersion + 1;
+    const rawUserAgent = context.reqHeaders?.get("user-agent") ?? "";
+    const sanitizedUserAgent = rawUserAgent.slice(0, 500); // Limit length to prevent abuse
     const newProfile: StoredProfile = {
       data,
       version: newVersion,
       updatedAt: Date.now(),
-      userAgent: context.reqHeaders?.get("user-agent") ?? "",
+      userAgent: sanitizedUserAgent,
     };
 
     // Use atomic compare-and-swap to prevent race conditions
