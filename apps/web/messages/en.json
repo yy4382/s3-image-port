@@ -177,6 +177,11 @@
           "risk": "Your token is stored in the browser and could potentially be accessed by malicious browser extensions or certain types of attacks.",
           "acceptable": "However, this risk is acceptable because your settings data is also stored in the browser. If someone can access your token, they could already read your unencrypted settings directly. The encryption primarily protects your data while it's on the server."
         },
+        "dataRetention": {
+          "title": "Data Retention",
+          "description": "Your synced data will be automatically deleted from the server if not accessed for {days} days. Each time you sync (read or write), the retention period resets.",
+          "descriptionForever": "Your synced data will be stored on the server indefinitely until you manually delete it."
+        },
         "bestPractice": {
           "title": "💡 Best Practice",
           "description": "Generate a unique token specifically for Image Port. Do not reuse tokens from other services to limit potential damage if the token is compromised."
