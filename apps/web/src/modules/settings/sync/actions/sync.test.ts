@@ -63,9 +63,11 @@ vi.mock(import("@/lib/redis/client"), () => {
 vi.mock(import("@/lib/redis/settings-client"), () => {
   return {
     settingsStoreClient: {
+      TTL_SECONDS: 60 * 60 * 24 * 365,
       get: mocks.settingsGetFn,
       set: mocks.settingsSetFn,
       setIfVersionMatches: mocks.settingsSetIfVersionMatchesFn,
+      delete: vi.fn(),
     },
   };
 });
