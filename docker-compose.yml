@@ -1,5 +1,7 @@
 version: "3.8"
 
+# NOTE: This docker-compose.yml is for LOCAL DEVELOPMENT ONLY.
+
 services:
   redis:
     image: redis:7-alpine
