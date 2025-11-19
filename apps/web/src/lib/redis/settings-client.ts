@@ -22,6 +22,7 @@ export interface SettingsStoreClient {
 class SettingsStoreClientRedis implements SettingsStoreClient {
   private redis: Redis | null = null;
   readonly keyPrefix = "profile:sync:";
+  readonly TTL_SECONDS = 60 * 60 * 24 * 365; // 365 days
 
   private getRedis(): Redis {
     if (!this.redis) {
@@ -43,6 +44,8 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
     if (!value) {
       return null;
     }
+    // Refresh TTL on access to keep active accounts alive
+    await redis.expire(key, this.TTL_SECONDS);
     return settingsRecordEncryptedSchema.parse(JSON.parse(value));
   }
 
@@ -52,7 +55,7 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
   ): Promise<void> {
     const redis = this.getRedis();
     const key = this.getProfileKey(authHash);
-    await redis.set(key, JSON.stringify(data));
+    await redis.set(key, JSON.stringify(data), "EX", this.TTL_SECONDS);
   }
 
   async setIfVersionMatches(
@@ -69,13 +72,14 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
       local key = KEYS[1]
       local expectedVersion = tonumber(ARGV[1])
       local newData = ARGV[2]
+      local ttl = tonumber(ARGV[3])
 
       local current = redis.call('GET', key)
 
       -- If key doesn't exist, only allow version 1
       if not current then
         if expectedVersion == 0 then
-          redis.call('SET', key, newData)
+          redis.call('SET', key, newData, 'EX', ttl)
           return 1
         else
           return 0
@@ -88,14 +92,21 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
 
       -- Check version match
       if currentVersion == expectedVersion then
-        redis.call('SET', key, newData)
+        redis.call('SET', key, newData, 'EX', ttl)
         return 1
       else
         return 0
       end
     `;
 
-    const result = await redis.eval(script, 1, key, expectedVersion, newData);
+    const result = await redis.eval(
+      script,
+      1,
+      key,
+      expectedVersion,
+      newData,
+      this.TTL_SECONDS,
+    );
     return result === 1;
   }
 
@@ -106,4 +117,5 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
   }
 }
 
-export const settingsStoreClient = new SettingsStoreClientRedis();
+export const settingsStoreClient: SettingsStoreClient =
+  new SettingsStoreClientRedis();
