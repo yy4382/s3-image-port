@@ -6,6 +6,7 @@ import { remoteMetadataQuery } from "../../use-sync";
 import { useEffect, useRef, useState } from "react";
 import { toast, useSonner } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "use-intl";
 
 const DetectRemoteChange: SyncProviderProps["render"] = ({ syncMutation }) => {
   const syncToken = useAtomValue(syncTokenAtom);
@@ -20,6 +21,7 @@ const DetectRemoteChange: SyncProviderProps["render"] = ({ syncMutation }) => {
   >(null);
   const toastId = useRef<string | number | null>(null);
   const { toasts } = useSonner();
+  const t = useTranslations("settings.sync");
 
   useEffect(() => {
     // should not show toast (remote not changed or already dismissed)
@@ -45,30 +47,27 @@ const DetectRemoteChange: SyncProviderProps["render"] = ({ syncMutation }) => {
       };
       return;
     } else {
-      toastId.current = toast.info(
-        "Remote has been updated since last sync on this device.",
-        {
-          action: (
-            <Button
-              onClick={() => {
-                syncMutation.mutate();
-              }}
-              size="sm"
-              disabled={syncMutation.isPending}
-            >
-              Sync
-            </Button>
-          ),
-          dismissible: true,
-          onDismiss: () => {
-            setDismissedRemoteVersion(remoteMetadata?.version ?? null);
-          },
-          onAutoClose: () => {
-            setDismissedRemoteVersion(remoteMetadata?.version ?? null);
-          },
-          duration: Infinity,
+      toastId.current = toast.info(t("remoteUpdatedMessage"), {
+        action: (
+          <Button
+            onClick={() => {
+              syncMutation.mutate();
+            }}
+            size="sm"
+            disabled={syncMutation.isPending}
+          >
+            Sync
+          </Button>
+        ),
+        dismissible: true,
+        onDismiss: () => {
+          setDismissedRemoteVersion(remoteMetadata?.version ?? null);
         },
-      );
+        onAutoClose: () => {
+          setDismissedRemoteVersion(remoteMetadata?.version ?? null);
+        },
+        duration: Infinity,
+      });
     }
   }, [
     dismissedRemoteVersion,
@@ -76,6 +75,7 @@ const DetectRemoteChange: SyncProviderProps["render"] = ({ syncMutation }) => {
     remoteMetadata?.version,
     syncMutation,
     toasts,
+    t,
   ]);
   return <></>;
 };
