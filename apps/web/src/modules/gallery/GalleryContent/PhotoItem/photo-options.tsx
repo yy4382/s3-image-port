@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import type { Photo } from "@/lib/utils/ImageS3Client";
 import { format } from "date-fns";
 import {
+  CopyIcon,
   DownloadIcon,
   ExpandIcon,
   MoreHorizontalIcon,
@@ -35,6 +36,7 @@ import { useDeletePhotos } from "../../use-delete";
 import { useDownloadPhoto } from "../../use-download";
 import { useRenamePhoto } from "../../use-rename";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 
 export function PhotoOptions({
   photo,
@@ -85,6 +87,16 @@ export function PhotoOptions({
     await downloadPhoto(photo.Key);
   }, [downloadPhoto, photo.Key]);
 
+  const handleCopyMarkdown = () => {
+    const markdown = `![${photo.Key}](${photo.url})`;
+    try {
+      navigator.clipboard.writeText(markdown);
+      toast.success(t("markdownCopied"));
+    } catch {
+      toast.error(t("copyFailed"));
+    }
+  };
+
   return (
     <>
       <DropdownMenu open={opened} onOpenChange={setOpened} modal={false}>
@@ -127,6 +139,9 @@ export function PhotoOptions({
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
+          <DropdownMenuItem onClick={handleCopyMarkdown}>
+            <CopyIcon /> {t("copyMarkdown")}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleDownload}>
             <DownloadIcon /> {t("download")}
           </DropdownMenuItem>

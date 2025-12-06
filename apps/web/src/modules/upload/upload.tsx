@@ -54,6 +54,12 @@ import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import { RefreshCw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type UploadObject = {
   file: File;
@@ -374,25 +380,7 @@ function FilePreview({
         </div>
 
         <div className="flex items-center space-x-1 self-end-safe sm:self-center">
-          {file.status === "uploaded" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                try {
-                  navigator.clipboard.writeText(
-                    key2Url(file.key.toString(), s3Settings!),
-                  );
-                  toast.success(t("urlCopied"));
-                } catch {
-                  toast.error(t("copyFailed"));
-                }
-              }}
-            >
-              <span className="sr-only">{t("copy")}</span>
-              <McCopy />
-            </Button>
-          )}
+          {file.status === "uploaded" && <CopyButton file={file} />}
           {file.status === "uploading" ? (
             <Button variant="outline" size="icon" disabled>
               <McLoading className="animate-spin" />
@@ -577,5 +565,42 @@ function FilePreviewProcess({
           </Tooltip>
         )}
     </div>
+  );
+}
+
+function CopyButton({ file }: { file: UploadObject }) {
+  const t = useTranslations("upload.fileList");
+  const s3Settings = useAtomValue(validS3SettingsAtom);
+  const key = file.key.toString();
+  const url = key2Url(key, s3Settings!);
+  const markdown = `![${key}](${url})`;
+  const copy = (text: string) => {
+    try {
+      navigator.clipboard.writeText(text);
+      toast.success(t("urlCopied"));
+    } catch {
+      toast.error(t("copyFailed"));
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" aria-label="Open menu" size="icon">
+          <Button variant="ghost" size="icon">
+            <span className="sr-only">{t("copy")}</span>
+            <McCopy />
+          </Button>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-40" align="end">
+        <DropdownMenuItem onClick={() => copy(url)}>
+          {t("copyUrl")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => copy(markdown)}>
+          {t("copyMarkdown")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

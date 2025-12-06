@@ -333,7 +333,10 @@
           "started": "下载已开始",
           "failed": "下载照片失败",
           "noBody": "下载照片失败"
-        }
+        },
+        "copyMarkdown": "复制 M↓",
+        "copyFailed": "复制失败",
+        "markdownCopied": "已复制 Markdown 链接"
       }
     }
   },
@@ -351,12 +354,14 @@
       "process": "开始压缩",
       "edit": "编辑",
       "remove": "移除",
-      "copy": "复制链接",
+      "copy": "复制",
+      "copyUrl": "复制 URL",
+      "copyMarkdown": "复制 Markdown",
       "urlCopied": "链接已复制到剪贴板",
       "compressed": "已压缩",
       "recompress": "重新压缩",
       "compressing": "压缩中...",
-      "copyFailed": "复制键失败",
+      "copyFailed": "复制失败",
       "keyWillBe": "名称将会是：",
       "upload": "上传"
     },

@@ -333,7 +333,10 @@
           "started": "Download started",
           "failed": "Failed to download photo",
           "noBody": "Failed to download photo"
-        }
+        },
+        "copyMarkdown": "Copy M↓",
+        "markdownCopied": "Copied Markdown link",
+        "copyFailed": "Failed to copy"
       }
     }
   },
@@ -351,12 +354,14 @@
       "process": "Start compressing",
       "edit": "Edit",
       "remove": "Remove",
-      "copy": "Copy URL",
-      "urlCopied": "URL copied to clipboard",
+      "copy": "Copy",
+      "copyUrl": "Copy URL",
+      "copyMarkdown": "Copy Markdown",
+      "urlCopied": "Link copied to clipboard",
       "compressed": "Compressed",
       "recompress": "Recompress",
       "compressing": "Compressing...",
-      "copyFailed": "Failed to copy key",
+      "copyFailed": "Failed to copy",
       "keyWillBe": "Key will be:",
       "upload": "Upload"
     },
