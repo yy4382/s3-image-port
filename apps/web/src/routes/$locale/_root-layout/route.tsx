@@ -1,6 +1,7 @@
 import Header from "@/components/header/Header";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createHeadTags } from "../../../lib/seo";
+import { Footer } from "@/components/footer";
 
 export const Route = createFileRoute("/$locale/_root-layout")({
   head: () =>
@@ -25,6 +26,7 @@ function RouteComponent() {
         <div className="max-w-7xl mx-auto px-4 w-full flex-1 flex">
           <Outlet />
         </div>
+        <Footer />
       </div>
     </>
   );
