@@ -334,9 +334,7 @@
           "failed": "Failed to download photo",
           "noBody": "Failed to download photo"
         },
-        "copyMarkdown": "Copy M↓",
-        "markdownCopied": "Copied Markdown link",
-        "copyFailed": "Failed to copy"
+        "copyMarkdown": "Copy M↓"
       }
     }
   },
@@ -357,16 +355,22 @@
       "copy": "Copy",
       "copyUrl": "Copy URL",
       "copyMarkdown": "Copy Markdown",
-      "urlCopied": "Link copied to clipboard",
       "compressed": "Compressed",
       "recompress": "Recompress",
       "compressing": "Compressing...",
-      "copyFailed": "Failed to copy",
       "keyWillBe": "Key will be:",
       "upload": "Upload"
     },
     "alerts": {
       "s3NotConfigured": "S3 settings are not configured"
+    }
+  },
+  "common": {
+    "copy": {
+      "copied": "Copied {desc} to clipboard",
+      "copyFailed": "Failed to copy {desc}",
+      "copiedNoDesc": "Copied to clipboard",
+      "copyFailedNoDesc": "Failed to copy"
     }
   }
 }

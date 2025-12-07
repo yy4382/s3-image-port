@@ -2,15 +2,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/lib/utils/ImageS3Client";
 import { getRouteApi } from "@tanstack/react-router";
-import { useSetAtom } from "jotai";
 import { motion } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { useLocale } from "use-intl";
 import McCheckFill from "~icons/mingcute/checkbox-fill";
 import McCopy from "~icons/mingcute/copy-2-line.jsx";
-import { toggleSelectedAtom } from "../../use-select";
 import { PhotoOptions } from "./photo-options";
+import { usePhotoOperations } from "../../hooks/photo";
 
 type PhotoItemOverlayProps = {
   photo: Photo;
@@ -23,7 +21,7 @@ export function PhotoItemOverlay({
   selected,
   hovering,
 }: PhotoItemOverlayProps) {
-  const toggleSelected = useSetAtom(toggleSelectedAtom);
+  const { toggleSelected } = usePhotoOperations(photo);
   const onOpenModal = useOpenModal(photo.Key);
   const [infoDropdownOpened, setInfoDropdownOpened] = useState(false);
 
@@ -44,7 +42,7 @@ export function PhotoItemOverlay({
       <div
         className="absolute top-0 bottom-0 left-0 right-0"
         onClick={(e) => {
-          toggleSelected(photo.Key, "toggle", e.shiftKey);
+          toggleSelected("toggle", e.shiftKey);
         }}
         onDoubleClick={onOpenModal}
       >
@@ -54,11 +52,7 @@ export function PhotoItemOverlay({
       <ImageCheckbox
         checked={selected}
         onCheckedChange={(c, e) => {
-          toggleSelected(
-            photo.Key,
-            !!c,
-            (e.nativeEvent as PointerEvent).shiftKey,
-          );
+          toggleSelected(!!c, (e.nativeEvent as PointerEvent).shiftKey);
         }}
         className={cn("absolute top-2 left-2", {
           "opacity-100! pointer-events-auto!": selected,
@@ -84,10 +78,7 @@ function PhotoActionCopyLink({
   className?: string;
   photo: Photo;
 }) {
-  function copy(photo: Photo) {
-    navigator.clipboard.writeText(photo.url);
-    toast.success("Copied to clipboard");
-  }
+  const operations = usePhotoOperations(photo);
   return (
     <Button
       aria-label="Copy link"
@@ -96,7 +87,7 @@ function PhotoActionCopyLink({
       className={className}
       onClick={(e) => {
         e.stopPropagation();
-        copy(photo);
+        operations.copyUrl();
       }}
     >
       <McCopy />

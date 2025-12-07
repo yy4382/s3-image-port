@@ -5,6 +5,7 @@ import { Copy, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { getTokenPreview } from "@/lib/encryption/sync-token";
 import { cn } from "@/lib/utils";
+import { useCopy } from "@/lib/hooks/use-copy";
 
 interface TokenDisplayProps {
   token: string;
@@ -23,9 +24,10 @@ export function TokenDisplay({
 }: TokenDisplayProps) {
   const [showFullToken, setShowFullToken] = useState(defaultShowFull);
   const [copied, setCopied] = useState(false);
+  const { copyAsync } = useCopy();
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(token);
+    await copyAsync(token);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

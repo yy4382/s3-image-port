@@ -1,5 +1,5 @@
 import { useAtom, useSetAtom } from "jotai";
-import { resetGalleryStateAtom } from "../../gallery/use-photo-list";
+import { resetGalleryStateAtom } from "../../gallery/hooks/use-photo-list";
 import type { Options } from "../settings-store";
 import { optionsSchema, profilesAtom } from "../settings-store";
 import { migrateFromV1 } from "../schema/migrations/v1-v3";

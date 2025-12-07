@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Check, ChevronsUpDown, XIcon } from "lucide-react";
-import { availablePrefixesAtom } from "../use-photo-list";
-import { type DisplayOptions } from "../use-display-control";
+import { availablePrefixesAtom } from "../hooks/use-photo-list";
+import { type DisplayOptions } from "../hooks/use-display-control";
 import { DateRangePickerPopover } from "./DateRangePickerPopover";
 import { useAtomValue } from "jotai";
 import { useState } from "react";

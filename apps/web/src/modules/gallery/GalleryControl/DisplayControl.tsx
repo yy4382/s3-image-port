@@ -1,15 +1,13 @@
 "use client";
 
-import { useAtom, useSetAtom } from "jotai";
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import {
   displayOptionsToSearchParams,
   displayOptionsAtom,
-  displayOptionsSchema,
   searchParamsToDisplayOptions,
-  type DisplayOptions,
-} from "../use-display-control";
-import { currentPageAtom } from "../use-photo-list";
+} from "../hooks/use-display-control";
+import { currentPageAtom } from "../hooks/use-photo-list";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -24,53 +22,52 @@ import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
 import { useTranslations } from "use-intl";
 import { getRouteApi } from "@tanstack/react-router";
+import equal from "fast-deep-equal";
 
 const route = getRouteApi("/$locale/_root-layout/gallery");
 
-function useSearchDisplayOptions() {
+function useSyncDisplayAtomToSearchParams() {
   const navigate = route.useNavigate();
-  const searchParams = route.useSearch();
-
   const setCurrentPage = useSetAtom(currentPageAtom);
-  const [displayOptions, setDisplayOptions] = useAtom(displayOptionsAtom);
 
-  const handleUpdate = (
-    update:
-      | Partial<DisplayOptions>
-      | ((prev: DisplayOptions) => Partial<DisplayOptions>),
-  ) => {
-    let newSearchOptions: Partial<DisplayOptions>;
-    if (typeof update === "function") {
-      newSearchOptions = update(displayOptionsSchema.parse(displayOptions));
-    } else {
-      newSearchOptions = update;
-    }
-    const newSearchParams = displayOptionsToSearchParams({
-      ...displayOptions,
-      ...newSearchOptions,
-    });
-    startTransition(() => {
-      setCurrentPage(1);
-      navigate({
-        to: ".",
-        search: newSearchParams,
-      });
-    });
-  };
-
+  const displayOptions = useAtomValue(displayOptionsAtom);
+  const lastDisplayOptionsRef = useRef<typeof displayOptions>(displayOptions);
   useEffect(() => {
-    const parsedSearchParams = searchParamsToDisplayOptions(searchParams);
-    setDisplayOptions(parsedSearchParams);
-  }, [setDisplayOptions, searchParams]);
+    const lastDisplayOptions = lastDisplayOptionsRef.current;
+    if (!equal(lastDisplayOptions, displayOptions)) {
+      const search = displayOptionsToSearchParams(displayOptions);
+      startTransition(() => {
+        setCurrentPage(1);
+        navigate({ to: ".", search: search });
+      });
+    }
+    lastDisplayOptionsRef.current = displayOptions;
+  }, [displayOptions, navigate, setCurrentPage]);
+}
 
-  return {
-    search: displayOptions,
-    handleUpdate,
-  };
+function useSyncSearchParamsToDisplayAtom() {
+  const searchParams = route.useSearch();
+  const setDisplayOptions = useSetAtom(displayOptionsAtom);
+  const setCurrentPage = useSetAtom(currentPageAtom);
+  const lastSearchParamsRef = useRef<typeof searchParams | null>(null);
+  useEffect(() => {
+    const lastSearchParams = lastSearchParamsRef.current;
+    if (!equal(lastSearchParams, searchParams)) {
+      setCurrentPage(1);
+      setDisplayOptions(searchParamsToDisplayOptions(searchParams));
+    }
+    lastSearchParamsRef.current = searchParams;
+  }, [searchParams, setDisplayOptions, setCurrentPage]);
+}
+
+function useSyncDisplayAtomAndSearch() {
+  useSyncSearchParamsToDisplayAtom();
+  useSyncDisplayAtomToSearchParams();
 }
 
 export function DisplayControl() {
-  const { search, handleUpdate } = useSearchDisplayOptions();
+  const [search, handleUpdate] = useAtom(displayOptionsAtom);
+  useSyncDisplayAtomAndSearch();
   const t = useTranslations("gallery.filter");
 
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
@@ -90,9 +87,9 @@ export function DisplayControl() {
     <div className="flex items-center gap-2">
       <Input
         placeholder={t("searchPlaceholder")}
-        className="flex-grow max-w-72"
+        className="grow max-w-72"
         onChange={(e) => {
-          handleUpdate({ searchTerm: e.target.value });
+          handleUpdate((prev) => ({ ...prev, searchTerm: e.target.value }));
         }}
         value={search.searchTerm}
       />
@@ -111,7 +108,9 @@ export function DisplayControl() {
         <PopoverContent className="w-100">
           <FilterPopoverContent
             currentDisplayOptions={search}
-            handleUpdate={handleUpdate}
+            handleUpdate={(update) =>
+              handleUpdate((prev) => ({ ...prev, ...update }))
+            }
             setFilterPopoverOpen={setFilterPopoverOpen}
           />
         </PopoverContent>
@@ -126,7 +125,9 @@ export function DisplayControl() {
         <PopoverContent className="w-80">
           <SortPopoverContent
             currentDisplayOptions={search}
-            handleUpdate={handleUpdate}
+            handleUpdate={(update) =>
+              handleUpdate((prev) => ({ ...prev, ...update }))
+            }
             isSearchActive={isSearchActive}
             setSortPopoverOpen={setSortPopoverOpen}
           />

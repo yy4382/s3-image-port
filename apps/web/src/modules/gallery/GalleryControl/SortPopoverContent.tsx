@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { XIcon } from "lucide-react";
-import type { DisplayOptions } from "../use-display-control";
+import type { DisplayOptions } from "../hooks/use-display-control";
 import { useTranslations } from "use-intl";
 
 interface SortPopoverContentProps {

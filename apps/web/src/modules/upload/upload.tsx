@@ -47,7 +47,7 @@ import {
 import key2Url from "@/lib/utils/key2Url";
 import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
-import { setGalleryDirtyAtom } from "../gallery/use-photo-list";
+import { setGalleryDirtyAtom } from "../gallery/hooks/use-photo-list";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
@@ -60,6 +60,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCopy } from "@/lib/hooks/use-copy";
 
 type UploadObject = {
   file: File;
@@ -574,14 +575,7 @@ function CopyButton({ file }: { file: UploadObject }) {
   const key = file.key.toString();
   const url = key2Url(key, s3Settings!);
   const markdown = `![${key}](${url})`;
-  const copy = (text: string) => {
-    try {
-      navigator.clipboard.writeText(text);
-      toast.success(t("urlCopied"));
-    } catch {
-      toast.error(t("copyFailed"));
-    }
-  };
+  const { copy } = useCopy();
 
   return (
     <DropdownMenu>
@@ -594,10 +588,10 @@ function CopyButton({ file }: { file: UploadObject }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
-        <DropdownMenuItem onClick={() => copy(url)}>
+        <DropdownMenuItem onClick={() => copy(url, "URL")}>
           {t("copyUrl")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => copy(markdown)}>
+        <DropdownMenuItem onClick={() => copy(markdown, "Markdown")}>
           {t("copyMarkdown")}
         </DropdownMenuItem>
       </DropdownMenuContent>

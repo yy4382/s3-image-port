@@ -207,6 +207,7 @@ function SyncActions() {
       if (result.config) {
         setSyncConfig(result.config);
       }
+      toast.success(t("toasts.pullSuccess"));
     } catch (error) {
       toast.error(t("toasts.errors.pullFailed"));
       console.error("Failed to fetch remote profile", error);

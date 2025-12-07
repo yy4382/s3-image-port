@@ -8,12 +8,12 @@ import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/photo-img";
 import { Button } from "@/components/ui/button";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
-import { photosAtomReadOnly } from "../gallery/use-photo-list";
-import { toast } from "sonner";
-import { useDeletePhotos } from "../gallery/use-delete";
+import { photosAtomReadOnly } from "../gallery/hooks/use-photo-list";
 import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
+import { usePhotoOperations } from "../gallery/hooks/photo";
+import { Photo } from "@/lib/utils/ImageS3Client";
 
 const route = getRouteApi("/$locale/photo");
 
@@ -32,12 +32,39 @@ function PhotoModalContent({ path }: { path: string }) {
     }
     return key2Url(path, s3Options);
   }, [path, s3Options]);
+  const navigate = route.useNavigate();
+  const navigateBack = () => {
+    navigate({
+      to: "/$locale/gallery",
+      params: (prev) => ({ locale: prev.locale }),
+      search: (prev) => JSON.parse(prev.galleryState ?? "{}"),
+    });
+  };
+
+  const photos = useAtomValue(photosAtomReadOnly);
+  const photo = useMemo(() => {
+    return photos.find((photo) => photo.Key === path);
+  }, [photos, path]);
+
+  if (!photo) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-screen dark relative bg-background">
+        <div className="text-white text-2xl font-bold">Photo not found</div>
+        <div className="text-white text-sm">Key: {path}</div>
+        <div className="flex gap-2">
+          <Button size="icon" variant="ghost" onClick={navigateBack}>
+            Go back to gallery
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen dark relative bg-background">
       <div className="absolute top-0 left-0 right-0 z-20">
         <div className="absolute top-0 left-0 right-0 -bottom-2 bg-gradient-to-bottom z-10" />
-        <PhotoModalToolbar path={path} />
+        <PhotoModalToolbar photo={photo} />
       </div>
       {url && (
         <div className="absolute inset-0">
@@ -53,13 +80,13 @@ function PhotoModalContent({ path }: { path: string }) {
   );
 }
 
-function PhotoModalToolbar({ path }: { path: string }) {
+function PhotoModalToolbar({ photo }: { photo: Photo }) {
   const navigate = route.useNavigate();
   const search = route.useSearch();
-  const photos = useAtomValue(photosAtomReadOnly);
-  const s3Options = useAtomValue(validS3SettingsAtom);
   const locale = useLocale();
   const [dropdownOpened, setDropdownOpened] = useState(false);
+
+  const operations = usePhotoOperations(photo);
 
   const handleBack = useCallback(() => {
     navigate({
@@ -92,35 +119,8 @@ function PhotoModalToolbar({ path }: { path: string }) {
     };
   }, [handleBack]);
 
-  const photo = useMemo(() => {
-    return photos.find((photo) => photo.Key === path);
-  }, [photos, path]);
-
-  const handleCopy = () => {
-    if (!s3Options) {
-      toast.error("Please set S3 options first");
-      return;
-    }
-    if (!photo) {
-      toast.error("Photo metadata not found");
-      return;
-    }
-    try {
-      navigator.clipboard.writeText(photo.url);
-      toast.success("Copied to clipboard");
-    } catch {
-      toast.error("Failed to copy to clipboard");
-    }
-  };
-
-  const deletePhotos = useDeletePhotos();
-
   const handleDelete = async () => {
-    if (!photo) {
-      toast.error("Photo metadata not found");
-      return;
-    }
-    await deletePhotos(photo.Key);
+    await operations.delete();
     handleBack();
   };
 
@@ -136,10 +136,10 @@ function PhotoModalToolbar({ path }: { path: string }) {
         </Button>
       </div>
       <div className="flex gap-2 items-center">
-        <Button size="icon" variant="ghost" onClick={handleCopy}>
+        <Button size="icon" variant="ghost" onClick={operations.copyUrl}>
           <CopyIcon />
         </Button>
-        <DeleteSecondConfirm deleteFn={handleDelete} itemNames={[path]}>
+        <DeleteSecondConfirm deleteFn={handleDelete} itemNames={[photo.Key]}>
           <Button size="icon" variant="ghost">
             <Trash2Icon />
           </Button>

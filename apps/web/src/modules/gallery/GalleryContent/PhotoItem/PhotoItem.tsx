@@ -7,7 +7,7 @@ import key2Url from "@/lib/utils/key2Url";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
-import { selectedPhotosAtom } from "../../use-select";
+import { selectedPhotosAtom } from "../../hooks/use-select";
 import { motion } from "motion/react";
 import { useHover } from "@uidotdev/usehooks";
 import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";

@@ -43,6 +43,7 @@ import {
 } from "./profiles-utils";
 import { profilesAtom } from "../settings-store";
 import { SyncSettings } from "../sync/components/sync-settings";
+import { useCopy } from "@/lib/hooks/use-copy";
 
 type ProfileItemProps = {
   name: string;
@@ -64,18 +65,11 @@ function ProfileItem({
   onDelete,
 }: ProfileItemProps) {
   const t = useTranslations("settings.profiles");
-
+  const { copy } = useCopy();
   const handleExport = () => {
     const profileData = profile;
     const profileJson = JSON.stringify({ name, data: profileData }, null, 2);
-    navigator.clipboard
-      .writeText(profileJson)
-      .then(() => {
-        toast.success(`Profile "${name}" exported to clipboard.`);
-      })
-      .catch(() => {
-        toast.error("Failed to export profile to clipboard.");
-      });
+    copy(profileJson, `Profile "${name}"`);
   };
 
   return (

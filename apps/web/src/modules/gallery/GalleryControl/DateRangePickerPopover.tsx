@@ -13,7 +13,7 @@ import {
   getTimeRange,
   timeRangesGetter,
   type DisplayOptions,
-} from "../use-display-control";
+} from "../hooks/use-display-control";
 import { useTranslations } from "use-intl";
 
 const TIME_RANGES = timeRangesGetter();

@@ -10,33 +10,18 @@ export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());
 export const toggleSelectedAtom = atom(
   null,
   (get, set, key: string, check: boolean | "toggle", shift: boolean) => {
-    if (check === "toggle") {
-      const oldSet = get(selectedPhotosAtom);
-      let newSet = new Set(oldSet);
-      if (oldSet.has(key)) {
-        newSet.delete(key);
-      } else {
-        if (shift) {
-          newSet = getShiftSelected(get(filteredPhotosAtom), newSet, key);
-        } else {
-          newSet.add(key);
-        }
-      }
-      set(selectedPhotosAtom, newSet);
+    const oldSet = get(selectedPhotosAtom);
+    let newSet = new Set(oldSet);
+    if ((check === "toggle" && oldSet.has(key)) || check === false) {
+      newSet.delete(key);
     } else {
-      const oldSet = get(selectedPhotosAtom);
-      let newSet = new Set(oldSet);
-      if (check) {
-        if (shift) {
-          newSet = getShiftSelected(get(filteredPhotosAtom), newSet, key);
-        } else {
-          newSet.add(key);
-        }
+      if (shift) {
+        newSet = getShiftSelected(get(filteredPhotosAtom), newSet, key);
       } else {
-        newSet.delete(key);
+        newSet.add(key);
       }
-      set(selectedPhotosAtom, newSet);
     }
+    set(selectedPhotosAtom, newSet);
   },
 );
 

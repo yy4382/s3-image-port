@@ -7,7 +7,7 @@ import { atomWithStorage } from "jotai/utils";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { validS3SettingsAtom } from "../settings/settings-store";
+import { validS3SettingsAtom } from "../../settings/settings-store";
 import { resetNaturalSizesAtom } from "./use-calculate-layout";
 import {
   displayOptionsAtom,

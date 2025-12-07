@@ -4,7 +4,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { useFetchPhotoList } from "./use-photo-list";
+import { useFetchPhotoList, setGalleryDirtyAtom } from "./use-photo-list";
 import { selectedPhotosAtom } from "./use-select";
 
 export function useDeletePhotos() {
@@ -12,6 +12,7 @@ export function useDeletePhotos() {
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const { fetchPhotoList } = useFetchPhotoList();
   const t = useTranslations("gallery.control");
+  const setGalleryDirty = useSetAtom(setGalleryDirtyAtom);
 
   const handleDelete = useCallback(
     async (photos: string[] | string) => {
@@ -49,11 +50,12 @@ export function useDeletePhotos() {
           return newSet;
         });
 
+        setGalleryDirty();
         // fetch the photo list again
         await fetchPhotoList();
       }
     },
-    [s3Settings, fetchPhotoList, t, setSelectedPhotos],
+    [s3Settings, fetchPhotoList, t, setSelectedPhotos, setGalleryDirty],
   );
 
   return handleDelete;

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   DEFAULT_IMAGE_SIZE,
   setNaturalSizesAtom,
-} from "../../use-calculate-layout";
+} from "../../hooks/use-calculate-layout";
 
 /**
  * <img> wrapper for displaying the photo image.

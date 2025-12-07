@@ -334,9 +334,7 @@
           "failed": "下载照片失败",
           "noBody": "下载照片失败"
         },
-        "copyMarkdown": "复制 M↓",
-        "copyFailed": "复制失败",
-        "markdownCopied": "已复制 Markdown 链接"
+        "copyMarkdown": "复制 M↓"
       }
     }
   },
@@ -357,16 +355,22 @@
       "copy": "复制",
       "copyUrl": "复制 URL",
       "copyMarkdown": "复制 Markdown",
-      "urlCopied": "链接已复制到剪贴板",
       "compressed": "已压缩",
       "recompress": "重新压缩",
       "compressing": "压缩中...",
-      "copyFailed": "复制失败",
       "keyWillBe": "名称将会是：",
       "upload": "上传"
     },
     "alerts": {
       "s3NotConfigured": "S3 设置未配置"
+    }
+  },
+  "common": {
+    "copy": {
+      "copyFailed": "复制{desc}失败",
+      "copied": "已将{desc}复制到剪贴板",
+      "copiedNoDesc": "已复制",
+      "copyFailedNoDesc": "复制失败"
     }
   }
 }

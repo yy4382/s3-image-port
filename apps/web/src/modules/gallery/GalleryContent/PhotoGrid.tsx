@@ -5,27 +5,28 @@ import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
-import {} from "../use-photo-list";
+import {} from "../hooks/use-photo-list";
 import {
   currentPageAtom,
   filteredPhotosCountAtom,
   PER_PAGE,
   useFetchPhotoList,
   showingPhotosAtom,
-} from "../use-photo-list";
-import { containerWidthAtom, photoSizeAtom } from "../use-calculate-layout";
+} from "../hooks/use-photo-list";
+import {
+  containerWidthAtom,
+  photoSizeAtom,
+} from "../hooks/use-calculate-layout";
 import { PhotoItem } from "./PhotoItem/PhotoItem";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
-import { selectedPhotosAtom } from "../use-select";
+import { selectedPhotosAtom } from "../hooks/use-select";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);
-  const [page, setPage] = useAtom(currentPageAtom);
   const photoSize = useAtomValue(photoSizeAtom);
   const setContainerWidth = useSetAtom(containerWidthAtom);
   const containerRef = useRef<HTMLDivElement>(null);
-  const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
 
   useEffect(() => {
@@ -88,14 +89,7 @@ export function PhotoGrid() {
               />
             ))}
           </div>
-          <PaginationWithLogic
-            page={page}
-            totalCount={filteredPhotoCount}
-            pageSize={PER_PAGE}
-            onPageChange={(p) => {
-              setPage(p);
-            }}
-          />
+          <GalleryPagination />
         </div>
       ) : (
         <PhotoGridEmpty />
@@ -127,5 +121,21 @@ function PhotoGridEmpty() {
         {t("loadPhotos")}
       </Button>
     </div>
+  );
+}
+
+function GalleryPagination() {
+  const [page, setPage] = useAtom(currentPageAtom);
+  const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
+
+  return (
+    <PaginationWithLogic
+      page={page}
+      totalCount={filteredPhotoCount}
+      pageSize={PER_PAGE}
+      onPageChange={(p) => {
+        setPage(p);
+      }}
+    />
   );
 }

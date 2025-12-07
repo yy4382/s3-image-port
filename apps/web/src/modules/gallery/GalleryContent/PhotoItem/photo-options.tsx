@@ -28,15 +28,12 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useState } from "react";
 import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
 import McKey2Line from "~icons/mingcute/key-2-line.jsx";
 import McTimeLine from "~icons/mingcute/time-line.jsx";
-import { useDeletePhotos } from "../../use-delete";
-import { useDownloadPhoto } from "../../use-download";
-import { useRenamePhoto } from "../../use-rename";
 import { useTranslations } from "use-intl";
-import { toast } from "sonner";
+import { usePhotoOperations } from "../../hooks/photo";
 
 export function PhotoOptions({
   photo,
@@ -56,44 +53,27 @@ export function PhotoOptions({
   onAfterRename?: (newKey: string) => void;
 }) {
   const t = useTranslations("gallery.item.options");
-  const deletePhotos = useDeletePhotos();
-  const downloadPhoto = useDownloadPhoto();
-  const renamePhoto = useRenamePhoto();
+  const operations = usePhotoOperations(photo);
 
-  const deleteFn = useCallback(async () => {
-    await deletePhotos(photo.Key);
+  const deleteFn = async () => {
+    await operations.delete();
     onAfterDelete?.();
-  }, [deletePhotos, photo.Key, onAfterDelete]);
+  };
 
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newKey, setNewKey] = useState(photo.Key);
   const [isRenaming, setIsRenaming] = useState(false);
 
-  const handleRename = useCallback(async () => {
+  const handleRename = async () => {
     setIsRenaming(true);
-    const result = await renamePhoto(photo.Key, newKey);
+    const result = await operations.rename(newKey);
     setIsRenaming(false);
 
     if (result.success) {
       setShowRenameModal(false);
       setOpened(false);
       onAfterRename?.(newKey);
-    }
-    // Don't close modal on error - let user fix the input
-  }, [renamePhoto, photo.Key, newKey, setOpened, onAfterRename]);
-
-  const handleDownload = useCallback(async () => {
-    await downloadPhoto(photo.Key);
-  }, [downloadPhoto, photo.Key]);
-
-  const handleCopyMarkdown = () => {
-    const markdown = `![${photo.Key}](${photo.url})`;
-    try {
-      navigator.clipboard.writeText(markdown);
-      toast.success(t("markdownCopied"));
-    } catch {
-      toast.error(t("copyFailed"));
     }
   };
 
@@ -139,10 +119,10 @@ export function PhotoOptions({
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
-          <DropdownMenuItem onClick={handleCopyMarkdown}>
+          <DropdownMenuItem onClick={operations.copyMarkdown}>
             <CopyIcon /> {t("copyMarkdown")}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDownload}>
+          <DropdownMenuItem onClick={operations.download}>
             <DownloadIcon /> {t("download")}
           </DropdownMenuItem>
           <DropdownMenuItem
