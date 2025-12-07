@@ -4,7 +4,7 @@ import { useAtomValue } from "jotai";
 import { useLocale } from "use-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
-import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/PhotoItem";
+import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/photo-img";
 import { Button } from "@/components/ui/button";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";

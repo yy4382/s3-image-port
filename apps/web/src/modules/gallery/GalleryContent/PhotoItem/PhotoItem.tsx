@@ -4,13 +4,9 @@ import { cn } from "@/lib/utils";
 import type { Photo } from "@/lib/utils/ImageS3Client";
 import ImageS3Client from "@/lib/utils/ImageS3Client";
 import key2Url from "@/lib/utils/key2Url";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAtomValue } from "jotai";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
-import {
-  DEFAULT_IMAGE_SIZE,
-  setNaturalSizesAtom,
-} from "../../use-calculate-layout";
 import { selectedPhotosAtom } from "../../use-select";
 import { motion } from "motion/react";
 import { useHover } from "@uidotdev/usehooks";
@@ -18,6 +14,7 @@ import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import { useLocale } from "use-intl";
 import { PhotoItemOverlay } from "./photo-item-overlay";
+import { PhotoImg } from "./photo-img";
 
 export function PhotoItem({
   photo,
@@ -43,7 +40,7 @@ function PhotoDisplay({
 }) {
   const s3Key = photo.Key;
   const s3Settings = useAtomValue(validS3SettingsAtom);
-  const [wrapperRef, hovering] = useHover();
+  const [ref, hovering] = useHover();
 
   const [loadingState, setLoadingState] = useState<
     "loading" | "loaded" | "error"
@@ -54,24 +51,11 @@ function PhotoDisplay({
     return allSelected.has(photo.Key);
   }, [allSelected, photo.Key]);
 
-  const router = useRouter();
-  const locale = useLocale();
-  const search = route.useSearch();
-  const galleryState = JSON.stringify(search);
-  const delayedHoverCb = useCallback(() => {
-    console.debug("prefetching page for", photo.Key);
-    router.preloadRoute({
-      to: "/$locale/photo",
-      params: { locale },
-      search: { imagePath: photo.Key, galleryState },
-    });
-  }, [router, photo.Key, galleryState, locale]);
-
-  useDelayedHover(hovering, 200, delayedHoverCb);
+  usePrefetchPhotoPage(photo, hovering);
 
   return (
     <motion.div
-      ref={wrapperRef}
+      ref={ref}
       className="overflow-hidden group absolute"
       style={{
         width: size.width,
@@ -110,54 +94,24 @@ function PhotoDisplay({
 }
 
 /**
- * Display the photo image, handle the loading state, and cache the natural size.
+ * Prefetch the photo page when the photo is hovered for some time.
+ * @param photo - The photo to prefetch.
+ * @param hovering - Whether the photo is hovered.
  */
-export function PhotoImg({
-  s3Key,
-  url,
-  setLoadingState,
-  ...props
-}: {
-  s3Key: string;
-  url: string;
-  setLoadingState: (state: "loading" | "loaded" | "error") => void;
-} & React.ComponentProps<"img">) {
-  const imgRef = useRef<HTMLImageElement>(null);
-  const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
+function usePrefetchPhotoPage(photo: Photo, hovering: boolean) {
+  const router = useRouter();
+  const locale = useLocale();
+  const galleryState = JSON.stringify(route.useSearch());
 
-  const handleLoad = useCallback(() => {
-    if (!imgRef.current) return;
-    const { naturalWidth, naturalHeight } = imgRef.current;
-    if (naturalWidth === 0 || naturalHeight === 0) {
-      return;
-    }
+  const delayedHoverCb = useCallback(() => {
+    router.preloadRoute({
+      to: "/$locale/photo",
+      params: { locale },
+      search: { imagePath: photo.Key, galleryState },
+    });
+  }, [router, photo.Key, galleryState, locale]);
 
-    setNaturalSizes([s3Key, [naturalWidth, naturalHeight]]);
-    setLoadingState("loaded");
-  }, [s3Key, setNaturalSizes, setLoadingState]);
-
-  const handleError = useCallback(() => {
-    setNaturalSizes([s3Key, DEFAULT_IMAGE_SIZE]);
-    setLoadingState("error");
-  }, [s3Key, setNaturalSizes, setLoadingState]);
-
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      handleLoad();
-    }
-  }, [handleLoad]);
-
-  return (
-    <img
-      {...props}
-      className={cn("select-none", props.className)}
-      ref={imgRef}
-      src={url}
-      alt={s3Key}
-      onLoad={handleLoad}
-      onError={handleError}
-    />
-  );
+  useDelayedHover(hovering, 200, delayedHoverCb);
 }
 
 function PhotoDisplayError({ s3Key }: { s3Key: string }) {
