@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { showingPhotosAtom } from "./use-photo-list";
-import { naturalSizesAtom } from "@/stores/atoms/gallery";
-export { setNaturalSizesAtom } from "@/stores/atoms/gallery";
+import { naturalSizesAtom } from "@/stores/atoms/photo-size";
+export { setNaturalSizesAtom } from "@/stores/atoms/photo-size";
 
 export const containerWidthAtom = atom(600);
 export const DEFAULT_IMAGE_SIZE: [number, number] = [384, 208];
@@ -27,7 +27,7 @@ export const photoSizeAtom = atom<
   }[]
 >((get) => {
   const originalSizes = get(showingPhotosAtom).map((photo) => {
-    const size = get(naturalSizesAtom).get(photo.Key);
+    const size = get(naturalSizesAtom)[0].get(photo.Key);
     if (size) {
       const ratio = size[0] / size[1];
       return [DEFAULT_IMAGE_SIZE[1] * ratio, DEFAULT_IMAGE_SIZE[1]] as [

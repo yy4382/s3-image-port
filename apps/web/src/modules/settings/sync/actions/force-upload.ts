@@ -2,7 +2,7 @@ import { z } from "zod";
 import { SetStateAction } from "jotai";
 import { settingsForSyncSchema } from "@/stores/schemas/settings";
 import { syncStateSchema } from "../sync-store";
-import deepEqual from "deep-equal";
+import deepEqual from "fast-deep-equal";
 import {
   uploadProfiles,
   fetchRemoteProfiles,
