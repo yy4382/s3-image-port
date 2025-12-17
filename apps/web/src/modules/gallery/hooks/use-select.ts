@@ -1,4 +1,4 @@
-import { Photo } from "@/lib/utils/ImageS3Client";
+import { Photo } from "@/lib/s3/image-s3-client";
 import { enableMapSet, produce } from "immer";
 import { atom } from "jotai";
 import { filteredPhotosAtom } from "./use-photo-list";

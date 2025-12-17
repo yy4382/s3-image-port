@@ -1,5 +1,5 @@
 "use client";
-import key2Url from "@/lib/utils/key2Url";
+import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
 import { useLocale } from "use-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -13,7 +13,7 @@ import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options"
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
 import { usePhotoOperations } from "../gallery/hooks/photo";
-import { Photo } from "@/lib/utils/ImageS3Client";
+import { Photo } from "@/lib/s3/image-s3-client";
 
 const route = getRouteApi("/$locale/photo");
 
@@ -30,7 +30,7 @@ function PhotoModalContent({ path }: { path: string }) {
     if (!s3Options) {
       return undefined;
     }
-    return key2Url(path, s3Options);
+    return s3Key2Url(path, s3Options);
   }, [path, s3Options]);
   const navigate = route.useNavigate();
   const navigateBack = () => {

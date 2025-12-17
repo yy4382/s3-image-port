@@ -10,7 +10,7 @@ import {
 } from "@aws-sdk/client-s3";
 import type { S3Options } from "@/modules/settings/settings-store";
 import mime from "mime";
-import key2Url from "./key2Url";
+import { s3Key2Url } from "./s3-key";
 
 export type Photo = {
   Key: string;
@@ -18,6 +18,12 @@ export type Photo = {
   url: string;
 };
 
+/**
+ * A client for the S3 API.
+ *
+ * The creation overhead of the class is ignorable, so we can create one from
+ * settings every time we need it.
+ */
 class ImageS3Client {
   client: S3Client;
   bucket: string;
@@ -156,7 +162,7 @@ class ImageS3Client {
       return {
         Key: photo.Key,
         LastModified: photo.LastModified?.toISOString(),
-        url: key2Url(photo.Key!, this.config),
+        url: s3Key2Url(photo.Key!, this.config),
       } as Photo;
     }).filter((photo) => !photo.Key.endsWith("/"));
     return {

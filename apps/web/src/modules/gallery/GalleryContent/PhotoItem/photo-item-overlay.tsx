@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/lib/utils/ImageS3Client";
+import type { Photo } from "@/lib/s3/image-s3-client";
 import { getRouteApi } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useCallback, useMemo, useState } from "react";

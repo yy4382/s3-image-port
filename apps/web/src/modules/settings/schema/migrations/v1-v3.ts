@@ -1,6 +1,6 @@
 import { z } from "zod";
 import * as v3Schema from "../v3";
-import { defaultKeyTemplate } from "@/lib/utils/generateKey";
+import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 
 type Options = z.infer<typeof v3Schema.optionsSchemaForLoad>;
 export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {

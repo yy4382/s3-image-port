@@ -1,5 +1,5 @@
-import type { Photo } from "@/lib/utils/ImageS3Client";
-import ImageS3Client from "@/lib/utils/ImageS3Client";
+import type { Photo } from "@/lib/s3/image-s3-client";
+import ImageS3Client from "@/lib/s3/image-s3-client";
 import { compareAsc, compareDesc, isAfter, isBefore } from "date-fns";
 import Fuse from "fuse.js";
 import { atom, useAtomValue, useSetAtom } from "jotai";

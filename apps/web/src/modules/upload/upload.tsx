@@ -5,13 +5,13 @@ import { KeyTemplateConsumerInput } from "../settings/upload/key-template/consum
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { defaultKeyTemplate, S3Key } from "@/lib/utils/generateKey";
+import { defaultKeyTemplate, S3KeyMetadata } from "@/lib/s3/s3-key";
 import {
   isSupportedFileType,
   processFile,
   type CompressOption,
 } from "@/lib/utils/imageCompress";
-import ImageS3Client from "@/lib/utils/ImageS3Client";
+import ImageS3Client from "@/lib/s3/image-s3-client";
 import { ClientOnly } from "@tanstack/react-router";
 import {
   atom,
@@ -44,7 +44,7 @@ import {
   type S3Options,
   uploadSettingsAtom,
 } from "../settings/settings-store";
-import key2Url from "@/lib/utils/key2Url";
+import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 import { setGalleryDirtyAtom } from "../gallery/hooks/use-photo-list";
@@ -65,7 +65,7 @@ import { useCopy } from "@/lib/hooks/use-copy";
 type UploadObject = {
   file: File;
   processedFile: File | null;
-  key: S3Key;
+  key: S3KeyMetadata;
   compressOption: CompressOption | null;
   status: "pending" | "processing" | "processed" | "uploading" | "uploaded";
   id: string;
@@ -82,7 +82,7 @@ const appendFileAtom = atom(null, (get, set, newFiles: File[]) => {
       ({
         file,
         processedFile: null,
-        key: S3Key.create(
+        key: S3KeyMetadata.create(
           file,
           uploadSettings?.keyTemplate ?? defaultKeyTemplate,
           ulid,
@@ -131,7 +131,7 @@ const processAtom = atom(
       set(atom, (prev) => ({
         ...prev,
         processedFile: processed,
-        key: S3Key.updateFile(processed, prev.key),
+        key: S3KeyMetadata.updateFile(processed, prev.key),
         status: "processed",
       }));
     } catch (error) {
@@ -212,7 +212,7 @@ function useFileAtomOperations(atom: PrimitiveAtom<UploadObject>) {
     (template: string) => {
       setFile((prev) => ({
         ...prev,
-        key: S3Key.updateTemplate(template, prev.key),
+        key: S3KeyMetadata.updateTemplate(template, prev.key),
       }));
     },
     [setFile],
@@ -572,10 +572,31 @@ function FilePreviewProcess({
 function CopyButton({ file }: { file: UploadObject }) {
   const t = useTranslations("upload.fileList");
   const s3Settings = useAtomValue(validS3SettingsAtom);
-  const key = file.key.toString();
-  const url = key2Url(key, s3Settings!);
-  const markdown = `![${key}](${url})`;
   const { copy } = useCopy();
+
+  if (!s3Settings) {
+    // actually should not happen, cause the button is only shown when a upload is successful
+    // thus the s3 settings should be valid
+    // however the user may change the s3 settings after the upload, so we need to handle this case
+    return (
+      <Button variant="outline" aria-label="Open menu" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            toast.error("Copy failed: S3 settings are not valid");
+          }}
+        >
+          <span className="sr-only">{t("copy")}</span>
+          <McCopy />
+        </Button>
+      </Button>
+    );
+  }
+
+  const key = file.key.toString();
+  const url = s3Key2Url(key, s3Settings);
+  const markdown = `![${key}](${url})`;
 
   return (
     <DropdownMenu>

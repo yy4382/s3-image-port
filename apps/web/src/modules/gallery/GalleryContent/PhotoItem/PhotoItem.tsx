@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/lib/utils/ImageS3Client";
-import ImageS3Client from "@/lib/utils/ImageS3Client";
-import key2Url from "@/lib/utils/key2Url";
+import type { Photo } from "@/lib/s3/image-s3-client";
+import ImageS3Client from "@/lib/s3/image-s3-client";
+import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
@@ -75,7 +75,7 @@ function PhotoDisplay({
             "scale-90 rounded-lg": selected,
           })}
           s3Key={s3Key}
-          url={key2Url(s3Key, s3Settings)}
+          url={s3Key2Url(s3Key, s3Settings)}
           setLoadingState={setLoadingState}
           width={size.width}
           height={size.height}
