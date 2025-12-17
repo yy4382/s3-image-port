@@ -1,16 +1,13 @@
-import { Photo } from "@/lib/s3/image-s3-client";
-import { useTranslations } from "use-intl/react";
+import type { Photo } from "@/stores/schemas/photo";
 import { useDeletePhotos } from "./use-delete";
 import { useDownloadPhoto } from "./use-download";
 import { useRenamePhoto } from "./use-rename";
 import { useCallback } from "react";
-import { toast } from "sonner";
 import { toggleSelectedAtom } from "./use-select";
 import { useSetAtom } from "jotai";
 import { useCopy } from "@/lib/hooks/use-copy";
 
 export function usePhotoOperations(photo: Photo) {
-  const t = useTranslations("gallery.item.options");
   const deletePhotos = useDeletePhotos();
   const downloadPhoto = useDownloadPhoto();
   const renamePhoto = useRenamePhoto();

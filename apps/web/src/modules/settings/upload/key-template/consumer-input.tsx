@@ -6,8 +6,8 @@ import { Autocomplete } from "@base-ui-components/react/autocomplete";
 import {
   KeyTemplateFieldInputProps,
   useKeyTemplateValidation,
+  type KeyTemplatePreset,
 } from "./field-validate";
-import { KeyTemplatePreset } from "../../settings-store";
 import {
   Field,
   FieldDescription,

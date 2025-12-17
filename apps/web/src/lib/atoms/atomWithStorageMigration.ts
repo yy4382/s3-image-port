@@ -86,5 +86,13 @@ export function atomWithStorageMigration<K extends z4.$ZodObject>(
       set(baseAtom, { version, data: nextValue });
     },
   );
-  return { valueAtom: anAtom, migrateRawData: getValue };
+  return {
+    valueAtom: anAtom,
+    /**
+     * Transform a "maybe corrupted" value (typically from storage) into a "expected schema value", applying migrations and possible fixes.
+     *
+     * The input value is expected to be a "expected schema value" wrapped with version number, but also accept "corrupted" data.
+     */
+    migrateRawData: getValue,
+  };
 }

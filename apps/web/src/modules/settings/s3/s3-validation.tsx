@@ -11,7 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { s3SettingsAtom, s3SettingsSchema } from "../settings-store";
+import { s3SettingsAtom } from "@/stores/atoms/settings";
+import { optionsSchema } from "@/stores/schemas/settings";
 import {
   Loader2,
   CheckCircle,
@@ -219,7 +220,7 @@ export function S3Validation() {
   const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"];
 
   // 检查schema是否有效
-  const isSchemaValid = s3SettingsSchema.safeParse(s3Settings).success;
+  const isSchemaValid = optionsSchema.shape.s3.safeParse(s3Settings).success;
 
   async function validate() {
     setValidationStatus({ status: "testing" });

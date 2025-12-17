@@ -9,18 +9,18 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format, startOfDay, endOfDay, subMonths } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import {
-  getTimeRange,
-  timeRangesGetter,
-  type DisplayOptions,
-} from "../hooks/use-display-control";
+import { getTimeRange } from "../hooks/use-display-control";
 import { useTranslations } from "use-intl";
+import {
+  timeRangesGetter,
+  GalleryFilterOptions,
+} from "@/stores/schemas/gallery/filter";
 
 const TIME_RANGES = timeRangesGetter();
 
 interface DateRangePickerPopoverProps {
-  currentDisplayOptions: DisplayOptions;
-  handleUpdate: (update: Partial<DisplayOptions>) => void;
+  currentDisplayOptions: GalleryFilterOptions;
+  handleUpdate: (update: Partial<GalleryFilterOptions>) => void;
 }
 
 export function DateRangePickerPopover({

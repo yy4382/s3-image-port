@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ulid, type ULIDFactory } from "ulid";
 import mime from "mime";
-import { S3Options } from "@/modules/settings/settings-store";
+import type { S3Options } from "@/stores/schemas/settings";
 
 const _availablePlaceholders = [
   "year",

@@ -3,7 +3,7 @@ import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
 import { useLocale } from "use-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { validS3SettingsAtom } from "@/modules/settings/settings-store";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/photo-img";
 import { Button } from "@/components/ui/button";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
@@ -13,7 +13,7 @@ import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options"
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
 import { usePhotoOperations } from "../gallery/hooks/photo";
-import { Photo } from "@/lib/s3/image-s3-client";
+import type { Photo } from "@/stores/schemas/photo";
 
 const route = getRouteApi("/$locale/photo");
 
@@ -25,13 +25,13 @@ export default function PhotoModal() {
 }
 
 function PhotoModalContent({ path }: { path: string }) {
-  const s3Options = useAtomValue(validS3SettingsAtom);
+  const s3Settings = useAtomValue(validS3SettingsAtom);
   const url = useMemo(() => {
-    if (!s3Options) {
+    if (!s3Settings) {
       return undefined;
     }
-    return s3Key2Url(path, s3Options);
-  }, [path, s3Options]);
+    return s3Key2Url(path, s3Settings);
+  }, [path, s3Settings]);
   const navigate = route.useNavigate();
   const navigateBack = () => {
     navigate({

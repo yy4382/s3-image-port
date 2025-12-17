@@ -1,5 +1,5 @@
 import { focusAtom } from "jotai-optics";
-import { KeyTemplatePreset, uploadSettingsAtom } from "../../settings-store";
+import { uploadSettingsAtom } from "@/stores/atoms/settings";
 import { splitAtom } from "jotai/utils";
 import {
   Field,
@@ -9,7 +9,10 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import { useKeyTemplateValidation } from "./field-validate";
+import {
+  useKeyTemplateValidation,
+  type KeyTemplatePreset,
+} from "./field-validate";
 import {
   atom,
   PrimitiveAtom,

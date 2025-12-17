@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from "use-intl";
 import { ExternalLink } from "lucide-react";
-import { gallerySettingsAtom } from "../settings-store";
+import { gallerySettingsAtom } from "@/stores/atoms/settings";
 import { focusAtom } from "jotai-optics";
 import {
   Field,

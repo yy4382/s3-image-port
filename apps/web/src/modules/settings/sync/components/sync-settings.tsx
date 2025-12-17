@@ -39,7 +39,7 @@ import { forcePull } from "../actions/force-pull";
 import { deleteRemoteSync } from "../actions/delete";
 import { format } from "date-fns";
 import { ConfirmDeleteDialog } from "./confirm-dialogs/confirm-delete-dialog";
-import { settingsForSyncAtom } from "../../settings-store";
+import { settingsForSyncAtom } from "@/stores/atoms/settings";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";

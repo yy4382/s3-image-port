@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  galleryDirtyStatusAtom,
-  useFetchPhotoList,
-} from "./hooks/use-photo-list";
+import { useFetchPhotoList } from "./hooks/use-photo-list";
 import { PhotoGrid } from "./GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
 import { ClientOnly } from "@tanstack/react-router";
@@ -11,8 +8,9 @@ import { useEffect } from "react";
 import {
   gallerySettingsAtom,
   validS3SettingsAtom,
-} from "../settings/settings-store";
+} from "@/stores/atoms/settings";
 import { atom, useAtomValue } from "jotai";
+import { galleryDirtyStatusAtom } from "@/stores/atoms/gallery";
 
 const shouldRunAutoRefreshAtom = atom((get) => {
   if (get(galleryDirtyStatusAtom)) {

@@ -1,6 +1,6 @@
 import { encrypt, decrypt, deriveAuthToken } from "@/lib/encryption/crypto";
-import { settingsForSyncSchema } from "../settings-store";
-import { settingsForSyncFromUnknown } from "../settings-store";
+import { settingsForSyncSchema } from "@/stores/schemas/settings";
+import { settingsForSyncFromUnknown } from "@/stores/atoms/settings";
 import { z } from "zod";
 import { client } from "@/lib/orpc/client";
 import { InferClientErrors, ORPCError, safe } from "@orpc/client";

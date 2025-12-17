@@ -2,7 +2,7 @@
 
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
 import { useAtom } from "jotai";
-import { uploadSettingsAtom } from "../settings-store";
+import { uploadSettingsAtom } from "@/stores/atoms/settings";
 import { focusAtom } from "jotai-optics";
 import { useTranslations } from "use-intl";
 import { ExternalLink } from "lucide-react";

@@ -4,10 +4,9 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import {
   displayOptionsToSearchParams,
-  displayOptionsAtom,
   searchParamsToDisplayOptions,
 } from "../hooks/use-display-control";
-import { currentPageAtom } from "../hooks/use-photo-list";
+import { currentPageAtom, displayOptionsAtom } from "@/stores/atoms/gallery";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";

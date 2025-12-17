@@ -1,6 +1,13 @@
 import { useCallback, useState } from "react";
 import { useTranslations } from "use-intl";
-import { keyTemplateSchema } from ".";
+import { optionsSchema } from "@/stores/schemas/settings";
+import { z } from "zod";
+
+const keyTemplateSchema = optionsSchema.shape.upload.shape.keyTemplate;
+
+export type KeyTemplatePreset = NonNullable<
+  z.infer<typeof optionsSchema.shape.upload.shape.keyTemplatePresets>
+>[number];
 
 export type KeyTemplateFieldInputProps = {
   value: string;

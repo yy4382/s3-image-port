@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Profiles } from "./profiles";
-import { getDefaultOptions, Options, optionsAtom } from "../settings-store";
+import { optionsAtom } from "@/stores/atoms/settings";
+import { getDefaultOptions, optionsSchema } from "@/stores/schemas/settings";
 import { useAtom, useAtomValue } from "jotai";
 import { produce } from "immer";
 import { renderHook } from "vitest-browser-react";
 import { render } from "@/../test/utils/render-browser";
 import { commands } from "vitest/browser";
-import { profilesAtom } from "../settings-store";
+import { profilesAtom } from "@/stores/atoms/settings";
+import { z } from "zod";
+
+type Options = z.infer<typeof optionsSchema>;
 
 vi.mock(
   import("@/modules/settings/sync/components/sync-settings"),

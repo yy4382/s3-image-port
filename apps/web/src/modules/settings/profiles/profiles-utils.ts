@@ -1,8 +1,8 @@
 import { useAtom, useSetAtom } from "jotai";
-import { resetGalleryStateAtom } from "../../gallery/hooks/use-photo-list";
-import type { Options } from "../settings-store";
-import { optionsSchema, profilesAtom } from "../settings-store";
-import { migrateFromV1 } from "../schema/migrations/v1-v3";
+import { resetGalleryStateAtom } from "@/stores/atoms/gallery";
+import { profilesAtom } from "@/stores/atoms/settings";
+import { migrateFromV1 } from "@/stores/schemas/settings/migrations/v1-v3";
+import { optionsSchema } from "@/stores/schemas/settings";
 import { toast } from "sonner";
 import { useCallback } from "react";
 import { useTranslations } from "use-intl";
@@ -140,7 +140,7 @@ export const useDeleteProfile = () => {
 
 export function parseProfile(
   profileJson: string,
-): { name: string; data: Options } | Error {
+): { name: string; data: z.infer<typeof optionsSchema> } | Error {
   let jsonParsed: Record<string, unknown>;
   try {
     jsonParsed = JSON.parse(profileJson);
@@ -166,7 +166,7 @@ export function useImportProfile() {
   const t = useTranslations("settings.profiles.errors");
   const [profileList, setProfileList] = useAtom(profilesAtom);
   const importProfile = useCallback(
-    (newProfile: { name: string; data: Options }) => {
+    (newProfile: { name: string; data: z.infer<typeof optionsSchema> }) => {
       try {
         const data = newProfile.data;
         const name = newProfile.name;

@@ -5,9 +5,7 @@ import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
-import {} from "../hooks/use-photo-list";
 import {
-  currentPageAtom,
   filteredPhotosCountAtom,
   PER_PAGE,
   useFetchPhotoList,
@@ -20,7 +18,7 @@ import {
 import { PhotoItem } from "./PhotoItem/PhotoItem";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
-import { selectedPhotosAtom } from "../hooks/use-select";
+import { selectedPhotosAtom, currentPageAtom } from "@/stores/atoms/gallery";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);

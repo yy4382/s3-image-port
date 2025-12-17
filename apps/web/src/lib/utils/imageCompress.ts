@@ -1,26 +1,10 @@
 import mime from "mime";
 import { z } from "zod/v4";
+import { optionsSchema } from "@/stores/schemas/settings";
 
-export const compressOptionSchema = z.union([
-  z.object({
-    type: z.literal("avif"),
-    quality: z.number().min(0).max(100),
-  }),
-  z.object({
-    type: z.literal("jpeg"),
-    quality: z.number().min(0).max(100),
-  }),
-  z.object({
-    type: z.literal("webp"),
-    quality: z.number().min(0).max(100),
-  }),
-  z.object({
-    type: z.literal("png"),
-  }),
-]);
-
-export type CompressOption = z.infer<typeof compressOptionSchema>;
-
+export type CompressOption = NonNullable<
+  z.infer<typeof optionsSchema.shape.upload.shape.compressionOption>
+>;
 type OutputTypes = CompressOption["type"];
 
 const SUPPORTED_INPUT_MIME = {

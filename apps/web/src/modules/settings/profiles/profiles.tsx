@@ -17,7 +17,6 @@ import McDownload from "~icons/mingcute/download-2-line.jsx";
 import McUpload from "~icons/mingcute/upload-2-line.jsx";
 import McClipboard from "~icons/mingcute/clipboard-line.jsx";
 import McFile from "~icons/mingcute/file-upload-line.jsx";
-import type { Options as Profile } from "../settings-store";
 import { toast } from "sonner";
 import { useRef, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
@@ -41,13 +40,15 @@ import {
   useLoadProfile,
   useRenameProfile,
 } from "./profiles-utils";
-import { profilesAtom } from "../settings-store";
+import { profilesAtom } from "@/stores/atoms/settings";
 import { SyncSettings } from "../sync/components/sync-settings";
 import { useCopy } from "@/lib/hooks/use-copy";
+import { z } from "zod";
+import { optionsSchema } from "@/stores/schemas/settings";
 
 type ProfileItemProps = {
   name: string;
-  profile: Profile;
+  profile: z.infer<typeof optionsSchema>;
   isCurrent: boolean;
   onRename: (oldName: string, newName: string) => void;
   onDuplicate: (name: string, newName: string) => void;

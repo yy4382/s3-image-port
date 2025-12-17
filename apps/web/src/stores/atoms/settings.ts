@@ -1,47 +1,26 @@
-import {
-  atomWithStorageMigration,
-  zodWithVersion,
-} from "@/lib/atoms/atomWithStorageMigration";
-import { focusAtom } from "jotai-optics";
+import { atomWithStorageMigration } from "@/lib/atoms/atomWithStorageMigration";
 import { z } from "zod";
 import { atom, SetStateAction } from "jotai";
-import * as v3Schema from "./schema/v3";
 import { enableMapSet, produce } from "immer";
 import {
   migrateV2ToV3,
   migrateV2ToV3OnUnmount,
-} from "./schema/migrations/v2-v3";
+} from "../schemas/settings/migrations/v2-v3";
+import {
+  SETTINGS_STORE_VERSION,
+  storedSettingsSchema,
+  getDefaultStoredSettings,
+  settingsForSyncSchema,
+  optionsSchema,
+  profilesSchemaForLoad,
+} from "../schemas/settings";
+import { focusAtom } from "jotai-optics";
 
 enableMapSet();
 
-const {
-  s3SettingsSchema,
-  uploadSettingsSchema,
-  optionsSchema,
-  profilesSchemaForLoad,
-  getDefaultOptions,
-  getDefaultProfiles,
-} = v3Schema;
-
-export {
-  s3SettingsSchema,
-  uploadSettingsSchema,
-  optionsSchema,
-  getDefaultOptions,
-  getDefaultProfiles,
-};
-
-export type S3Options = z.infer<typeof s3SettingsSchema>;
-
-export type KeyTemplatePreset = NonNullable<
-  z.infer<typeof uploadSettingsSchema.shape.keyTemplatePresets>
->[number];
-
-export type Options = z.infer<typeof optionsSchema>;
-
 const SETTINGS_STORE_KEY = "s3ip:profiles-list";
-const SETTINGS_STORE_VERSION = 3;
 
+// MARK: Storage atom
 const {
   valueAtom: settingsStoreAtom,
   migrateRawData: migrateSettingsStoreRawData,
@@ -49,13 +28,13 @@ const {
   SETTINGS_STORE_KEY,
   {
     initialFn: migrateV2ToV3,
-    schema: profilesSchemaForLoad,
+    schema: storedSettingsSchema,
     version: SETTINGS_STORE_VERSION,
     migrate: (stored, oldVersionNumber) => {
       console.error(
         `Should not have any migration for now, but got ${oldVersionNumber}, stored: ${JSON.stringify(stored)}`,
       );
-      return getDefaultProfiles();
+      return getDefaultStoredSettings();
     },
   },
   {},
@@ -66,11 +45,10 @@ settingsStoreAtom.onMount = () => {
   };
 };
 
-export const settingsForSyncSchema = zodWithVersion(
-  profilesSchemaForLoad.omit({ current: true }),
-);
-export const settingsIntoSyncFormat = (
-  settings: z.infer<typeof profilesSchemaForLoad>,
+// MARK: Derived atoms
+
+export const storedSettingsIntoSyncFormat = (
+  settings: z.infer<typeof storedSettingsSchema>,
 ) => {
   const { current: _, ...rest } = settings;
   return {
@@ -78,13 +56,19 @@ export const settingsIntoSyncFormat = (
     data: rest,
   };
 };
+/**
+ * Input: Expect to be "storedSettings" with version number wrapped. Also accept "corrupted" or "outdated" data.
+ *
+ * Output: the {@link settingsForSyncSchema} value, after applying migrations and possible fixes.
+ */
 export function settingsForSyncFromUnknown(rawData: unknown) {
-  return settingsIntoSyncFormat(migrateSettingsStoreRawData(rawData));
+  return storedSettingsIntoSyncFormat(migrateSettingsStoreRawData(rawData));
 }
-export const settingsForSyncAtom = atom(
+
+const settingsForSyncAtom = atom(
   (get) => {
     const settings = get(settingsStoreAtom);
-    return settingsIntoSyncFormat(settings);
+    return storedSettingsIntoSyncFormat(settings);
   },
   (_get, set, data: SetStateAction<z.infer<typeof settingsForSyncSchema>>) => {
     set(settingsStoreAtom, (prev) => {
@@ -92,7 +76,7 @@ export const settingsForSyncAtom = atom(
       const currentName = prev.list[currentIndex][0];
       function getNewData() {
         if (typeof data === "function") {
-          const result = data(settingsIntoSyncFormat(prev));
+          const result = data(storedSettingsIntoSyncFormat(prev));
           return result.data;
         }
         return data.data;
@@ -119,7 +103,7 @@ export const settingsForSyncAtom = atom(
   },
 );
 
-export const profilesAtom = atom(
+const profilesAtom = atom(
   (get) => {
     return get(settingsStoreAtom);
   },
@@ -128,13 +112,13 @@ export const profilesAtom = atom(
   },
 );
 
-export const optionsAtom = atom(
+const optionsAtom = atom(
   (get) => {
     const profiles = get(profilesAtom);
     const profile = profiles.list.at(profiles.current) ?? profiles.list[0];
     return profile[1];
   },
-  (get, set, update: SetStateAction<Options>) => {
+  (get, set, update: SetStateAction<z.infer<typeof optionsSchema>>) => {
     const profiles = get(profilesAtom);
     const newProfiles = produce(profiles, (draft) => {
       const oldOptions = draft.list[draft.current][1];
@@ -146,23 +130,29 @@ export const optionsAtom = atom(
   },
 );
 
-export const s3SettingsAtom = focusAtom(optionsAtom, (optic) =>
-  optic.prop("s3"),
+const s3SettingsAtom = focusAtom(optionsAtom, (optic) => optic.prop("s3"));
+const gallerySettingsAtom = focusAtom(optionsAtom, (optic) =>
+  optic.prop("gallery"),
 );
-
-export const uploadSettingsAtom = focusAtom(optionsAtom, (optic) =>
+const uploadSettingsAtom = focusAtom(optionsAtom, (optic) =>
   optic.prop("upload"),
 );
 
-export const gallerySettingsAtom = focusAtom(optionsAtom, (optic) =>
-  optic.prop("gallery"),
-);
-
-export const validS3SettingsAtom = atom((get) => {
+const validS3SettingsAtom = atom((get) => {
   const settings = get(s3SettingsAtom);
-  const result = s3SettingsSchema.safeParse(settings);
+  const result = optionsSchema.shape.s3.safeParse(settings);
   if (result.success) {
     return result.data;
   }
   return undefined;
 });
+
+export {
+  profilesAtom,
+  settingsForSyncAtom,
+  optionsAtom,
+  s3SettingsAtom,
+  gallerySettingsAtom,
+  uploadSettingsAtom,
+  validS3SettingsAtom,
+};

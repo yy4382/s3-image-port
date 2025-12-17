@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import { SYNC_TOKEN_STORAGE_KEY } from "@/lib/encryption/sync-token";
-import { settingsForSyncSchema } from "../settings-store";
+import { settingsForSyncSchema } from "@/stores/schemas/settings";
 
 // Sync configuration stored in localStorage
 export const syncStateSchema = z.object({

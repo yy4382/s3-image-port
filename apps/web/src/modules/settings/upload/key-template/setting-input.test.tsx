@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 import { renderHook } from "vitest-browser-react";
 import { useAtom } from "jotai";
-import { uploadSettingsAtom } from "../../settings-store";
+import { uploadSettingsAtom } from "@/stores/atoms/settings";
 
 vi.mock(import("@tanstack/react-router"), async (importOriginal) => {
   const original = await importOriginal();

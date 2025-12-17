@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { SetStateAction } from "jotai";
-import { settingsForSyncSchema } from "../../settings-store";
+import { settingsForSyncSchema } from "@/stores/schemas/settings";
 import { syncStateSchema } from "../sync-store";
 import { fetchRemoteProfiles } from "../sync-api-client";
 

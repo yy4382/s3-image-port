@@ -1,28 +1,21 @@
-import type { Photo } from "@/lib/s3/image-s3-client";
+import type { Photo } from "@/stores/schemas/photo";
 import ImageS3Client from "@/lib/s3/image-s3-client";
 import { compareAsc, compareDesc, isAfter, isBefore } from "date-fns";
 import Fuse from "fuse.js";
 import { atom, useAtomValue, useSetAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { validS3SettingsAtom } from "../../settings/settings-store";
-import { resetNaturalSizesAtom } from "./use-calculate-layout";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
+import { getTimeRange } from "./use-display-control";
 import {
+  currentPageAtom,
+  photosAtom,
   displayOptionsAtom,
-  displayOptionsDefault,
-  getTimeRange,
-} from "./use-display-control";
-import { selectedPhotosAtom } from "./use-select";
+  galleryDirtyStatusAtom,
+} from "@/stores/atoms/gallery";
 
-const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
 export const photosAtomReadOnly = atom((get) => get(photosAtom));
-
-export const galleryDirtyStatusAtom = atom(false);
-export const setGalleryDirtyAtom = atom(null, (_, set) => {
-  set(galleryDirtyStatusAtom, true);
-});
 
 export const availablePrefixesAtom = atom<
   { name: string; hierarchy: number }[]
@@ -99,7 +92,6 @@ export const filteredPhotosCountAtom = atom((get) => {
 });
 
 export const PER_PAGE = 20;
-export const currentPageAtom = atom(1);
 
 export const showingPhotosAtom = atom<Photo[]>((get) => {
   const start = (get(currentPageAtom) - 1) * PER_PAGE;
@@ -158,13 +150,3 @@ export const useFetchPhotoList = () => {
 
   return { fetchPhotoList, status, isLoading };
 };
-
-// used when changing profiles
-export const resetGalleryStateAtom = atom(null, (_get, set) => {
-  set(photosAtom, []);
-  set(selectedPhotosAtom, new Set<string>());
-  set(displayOptionsAtom, displayOptionsDefault); // Reset display options
-  set(currentPageAtom, 1);
-  set(resetNaturalSizesAtom);
-  set(galleryDirtyStatusAtom, true); // gallery is always dirty after reset to trigger a refresh
-});

@@ -1,6 +1,6 @@
 import { encryptedDataSchema } from "@/lib/encryption/types";
 import { z } from "zod";
-import { settingsForSyncSchema } from "../settings-store";
+import { settingsForSyncSchema } from "@/stores/schemas/settings";
 
 const settingsRecordSchemaBase = z.object({
   version: z.number().int(),
