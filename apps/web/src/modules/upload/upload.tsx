@@ -41,13 +41,13 @@ import McUpload2 from "~icons/mingcute/upload-2-line";
 import McCopy from "~icons/mingcute/copy-2-line";
 import {
   validS3SettingsAtom,
-  type S3Options,
   uploadSettingsAtom,
-} from "../settings/settings-store";
+} from "@/stores/atoms/settings";
+import { type S3Options } from "@/stores/schemas/settings";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useTranslations } from "use-intl";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
-import { setGalleryDirtyAtom } from "../gallery/hooks/use-photo-list";
+import { setGalleryDirtyAtom } from "@/stores/atoms/gallery";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";

@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/lib/s3/image-s3-client";
+import type { Photo } from "@/stores/schemas/photo";
 import ImageS3Client from "@/lib/s3/image-s3-client";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { validS3SettingsAtom } from "@/modules/settings/settings-store";
-import { selectedPhotosAtom } from "../../hooks/use-select";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
+import { selectedPhotosAtom } from "@/stores/atoms/gallery";
 import { motion } from "motion/react";
 import { useHover } from "@uidotdev/usehooks";
 import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";

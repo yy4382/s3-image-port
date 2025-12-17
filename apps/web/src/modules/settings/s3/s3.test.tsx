@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "@/../test/utils/render-with-providers";
 import { fireEvent, screen } from "@testing-library/react";
 import { useAtomValue } from "jotai";
-import { s3SettingsAtom } from "../settings-store";
+import { s3SettingsAtom } from "@/stores/atoms/settings";
 import { ReactNode } from "react";
 
 vi.mock(import("@tanstack/react-router"), async (importOriginal) => {

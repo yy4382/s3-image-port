@@ -1,5 +1,5 @@
 import ImageS3Client from "@/lib/s3/image-s3-client";
-import { validS3SettingsAtom } from "@/modules/settings/settings-store";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { useAtomValue } from "jotai";
 import { useCallback } from "react";
 import { toast } from "sonner";

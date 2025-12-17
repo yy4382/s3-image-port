@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAtom, useAtomValue } from "jotai";
 import { useFetchPhotoList } from "../hooks/use-photo-list";
-import { validS3SettingsAtom } from "@/modules/settings/settings-store";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import McCheckbox from "~icons/mingcute/checkbox-line.jsx";
 import McDelete from "~icons/mingcute/delete-3-line.jsx";
 import McRefresh from "~icons/mingcute/refresh-2-line.jsx";
@@ -11,7 +11,7 @@ import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { cn } from "@/lib/utils";
 import { useDeletePhotos } from "../hooks/use-delete";
-import { selectedPhotosAtom } from "../hooks/use-select";
+import { selectedPhotosAtom } from "@/stores/atoms/gallery";
 
 export function GalleryControl() {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);

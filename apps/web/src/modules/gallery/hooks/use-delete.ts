@@ -1,11 +1,14 @@
 import ImageS3Client from "@/lib/s3/image-s3-client";
-import { validS3SettingsAtom } from "@/modules/settings/settings-store";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { useFetchPhotoList, setGalleryDirtyAtom } from "./use-photo-list";
-import { selectedPhotosAtom } from "./use-select";
+import { useFetchPhotoList } from "./use-photo-list";
+import {
+  setGalleryDirtyAtom,
+  selectedPhotosAtom,
+} from "@/stores/atoms/gallery";
 
 export function useDeletePhotos() {
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);

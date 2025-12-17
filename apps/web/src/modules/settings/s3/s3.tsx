@@ -1,7 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "use-intl";
-import { s3SettingsAtom, s3SettingsSchema } from "../settings-store";
+import { s3SettingsAtom } from "@/stores/atoms/settings";
+import { optionsSchema } from "@/stores/schemas/settings";
 import { S3Validation } from "./s3-validation";
 import { ExternalLink } from "lucide-react";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -25,7 +26,7 @@ function S3SettingsTsForm() {
   const form = useAppForm({
     defaultValues,
     validators: {
-      onChange: s3SettingsSchema,
+      onChange: optionsSchema.shape.s3,
     },
     listeners: {
       onChange: ({ formApi }) => {

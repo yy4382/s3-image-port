@@ -3,13 +3,11 @@ import { sync, UserConfirmations } from "./sync";
 import { sha256 } from "@/lib/utils/hash";
 import { deriveAuthToken, encrypt } from "@/lib/encryption/crypto";
 import { produce } from "immer";
-import {
-  settingsIntoSyncFormat,
-  getDefaultProfiles,
-} from "../../settings-store";
+import { getDefaultProfiles } from "@/stores/schemas/settings";
+import { storedSettingsIntoSyncFormat } from "@/stores/atoms/settings";
 import { z } from "zod";
 import { settingsRecordEncryptedSchema } from "../types";
-import { profilesSchemaForLoad } from "../../schema/v3";
+import { profilesSchemaForLoad } from "@/stores/schemas/settings/v3";
 
 const mocks = vi.hoisted(() => {
   import.meta.env.VITEST = true;
@@ -107,7 +105,7 @@ async function setupDb({
   data: z.infer<typeof profilesSchemaForLoad>;
 }) {
   const key = `profile:sync:${testAuthHash}`;
-  const unencrypted = settingsIntoSyncFormat(data);
+  const unencrypted = storedSettingsIntoSyncFormat(data);
   const encrypted = await encrypt(JSON.stringify(unencrypted), TEST_TOKEN);
   mocks.mockDb.set(
     key,
@@ -121,7 +119,7 @@ async function setupDb({
   return { unencrypted, encrypted };
 }
 function getDefaultSyncStore() {
-  return settingsIntoSyncFormat(getDefaultProfiles());
+  return storedSettingsIntoSyncFormat(getDefaultProfiles());
 }
 
 beforeEach(() => {

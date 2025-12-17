@@ -1,15 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import {
-  getDefaultOptions,
-  optionsAtom,
-  profilesAtom,
-  settingsForSyncAtom,
-} from "./settings-store";
+import { optionsAtom, profilesAtom, settingsForSyncAtom } from "./settings";
 import { renderHook } from "vitest-browser-react";
 import { Provider, useAtom } from "jotai";
-import * as v3Schema from "./schema/v3";
+import * as v3Schema from "../schemas/settings/v3";
 import { produce } from "immer";
-import { migrateFromV1 } from "./schema/migrations/v1-v3";
+import { migrateFromV1 } from "../schemas/settings/migrations/v1-v3";
+import { getDefaultOptions } from "../schemas/settings";
 
 beforeEach(() => {
   localStorage.clear();

@@ -1,11 +1,10 @@
-import { Photo } from "@/lib/s3/image-s3-client";
+import type { Photo } from "@/stores/schemas/photo";
 import { enableMapSet, produce } from "immer";
 import { atom } from "jotai";
 import { filteredPhotosAtom } from "./use-photo-list";
+import { selectedPhotosAtom } from "@/stores/atoms/gallery";
 
 enableMapSet();
-
-export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());
 
 export const toggleSelectedAtom = atom(
   null,

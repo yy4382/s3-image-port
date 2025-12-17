@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { settingsForSyncSchema } from "../../settings-store";
+import { settingsForSyncSchema } from "@/stores/schemas/settings";
 import { useTranslations } from "use-intl";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";

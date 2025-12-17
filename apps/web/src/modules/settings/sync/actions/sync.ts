@@ -1,7 +1,5 @@
-import {
-  settingsForSyncAtom,
-  settingsForSyncSchema,
-} from "../../settings-store";
+import { settingsForSyncAtom } from "@/stores/atoms/settings";
+import { settingsForSyncSchema } from "@/stores/schemas/settings";
 import { z } from "zod";
 import { atom, SetStateAction } from "jotai";
 import {

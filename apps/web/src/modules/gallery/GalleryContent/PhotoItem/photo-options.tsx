@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import type { Photo } from "@/lib/s3/image-s3-client";
+import type { Photo } from "@/stores/schemas/photo";
 import { format } from "date-fns";
 import {
   CopyIcon,

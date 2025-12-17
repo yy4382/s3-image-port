@@ -8,15 +8,10 @@ import {
   GetBucketCorsCommand,
   CopyObjectCommand,
 } from "@aws-sdk/client-s3";
-import type { S3Options } from "@/modules/settings/settings-store";
+import type { S3Options } from "@/stores/schemas/settings";
 import mime from "mime";
 import { s3Key2Url } from "./s3-key";
-
-export type Photo = {
-  Key: string;
-  LastModified: string;
-  url: string;
-};
+import type { Photo } from "@/stores/schemas/photo";
 
 /**
  * A client for the S3 API.

@@ -1,6 +1,4 @@
-import { compressOptionSchema } from "@/lib/utils/imageCompress";
 import { z } from "zod";
-import { keyTemplateSchema } from "../upload/key-template";
 import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 
 export const getDefaultOptions = (): z.infer<typeof optionsSchema> => {
@@ -25,7 +23,7 @@ export const getDefaultOptions = (): z.infer<typeof optionsSchema> => {
   };
 };
 
-export const s3SettingsSchema = z.object({
+const s3SettingsSchema = z.object({
   endpoint: z.url(),
   bucket: z.string().min(1, "Cannot be empty"),
   region: z.string().min(1, "Cannot be empty"),
@@ -35,7 +33,7 @@ export const s3SettingsSchema = z.object({
   pubUrl: z.url(),
 });
 
-export const s3SettingsSchemaForLoad = z.object({
+const s3SettingsSchemaForLoad = z.object({
   endpoint: z.string().catch(""),
   bucket: z.string().catch(""),
   region: z.string().catch(""),
@@ -45,7 +43,26 @@ export const s3SettingsSchemaForLoad = z.object({
   pubUrl: z.string().catch(""),
 });
 
-export const uploadSettingsSchema = z.object({
+const compressOptionSchema = z.union([
+  z.object({
+    type: z.literal("avif"),
+    quality: z.number().min(0).max(100),
+  }),
+  z.object({
+    type: z.literal("jpeg"),
+    quality: z.number().min(0).max(100),
+  }),
+  z.object({
+    type: z.literal("webp"),
+    quality: z.number().min(0).max(100),
+  }),
+  z.object({
+    type: z.literal("png"),
+  }),
+]);
+const keyTemplateSchema = z.string().min(1, "Key template cannot be empty");
+
+const uploadSettingsSchema = z.object({
   keyTemplate: keyTemplateSchema,
   keyTemplatePresets: z
     .array(z.object({ key: z.string(), value: z.string() }))
@@ -53,7 +70,7 @@ export const uploadSettingsSchema = z.object({
   compressionOption: compressOptionSchema.nullable(),
 });
 
-export const uploadSettingsSchemaForLoad = z.object({
+const uploadSettingsSchemaForLoad = z.object({
   keyTemplate: keyTemplateSchema.catch(defaultKeyTemplate),
   keyTemplatePresets: z
     .array(z.object({ key: z.string(), value: z.string() }))
@@ -61,11 +78,11 @@ export const uploadSettingsSchemaForLoad = z.object({
   compressionOption: compressOptionSchema.nullable().catch(null),
 });
 
-export const gallerySettingsSchema = z.object({
+const gallerySettingsSchema = z.object({
   autoRefresh: z.boolean(),
 });
 
-export const gallerySettingsSchemaForLoad = z.object({
+const gallerySettingsSchemaForLoad = z.object({
   autoRefresh: z.boolean().catch(true),
 });
 
