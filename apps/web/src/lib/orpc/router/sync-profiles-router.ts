@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { encryptedDataSchema } from "../encryption/types";
-import { sha256 } from "../utils/hash";
+import { encryptedDataSchema } from "@/lib/encryption/types";
+import { sha256 } from "@/lib/utils/hash";
 import {
   settingsRecordEncryptedSchema,
   settingsResponseSchema,
   userAgentResponseSchema,
 } from "@/modules/settings/sync/types";
 import { baseOs } from "./base-router";
-import { settingsStoreClient } from "../redis/settings-client";
+import { settingsStoreClient } from "@/lib/redis/settings-client";
 import { UAParser } from "ua-parser-js";
-import { uploadRateLimitByIp, uploadRateLimitByToken } from "./rate-limit";
+import { uploadRateLimitByIp, uploadRateLimitByToken } from "../rate-limit";
 
 const MAX_PAYLOAD_SIZE = 1024 * 1024; // 1MB
 
@@ -200,11 +200,9 @@ const deleteProfile = baseOs
     return { success: true };
   });
 
-export const router = {
-  profiles: {
-    fetch: fetchProfiles,
-    fetchMetadata: fetchMetadata,
-    upload: uploadProfiles,
-    delete: deleteProfile,
-  },
+export const profilesRouter = {
+  fetch: fetchProfiles,
+  fetchMetadata: fetchMetadata,
+  upload: uploadProfiles,
+  delete: deleteProfile,
 };
