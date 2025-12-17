@@ -286,10 +286,8 @@ function CopyButton({ file }: { file: PendingUpload }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" aria-label="Open menu" size="icon">
-          <Button variant="ghost" size="icon">
-            <span className="sr-only">{t("copy")}</span>
-            <McCopy />
-          </Button>
+          <span className="sr-only">{t("copy")}</span>
+          <McCopy />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
