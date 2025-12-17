@@ -1,4 +1,4 @@
-import { Photo } from "@/lib/utils/ImageS3Client";
+import { Photo } from "@/lib/s3/image-s3-client";
 import { useTranslations } from "use-intl/react";
 import { useDeletePhotos } from "./use-delete";
 import { useDownloadPhoto } from "./use-download";

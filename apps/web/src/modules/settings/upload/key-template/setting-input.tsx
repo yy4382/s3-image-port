@@ -19,7 +19,7 @@ import {
 } from "jotai";
 import { ComponentPropsWithoutRef, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { defaultKeyTemplate } from "@/lib/utils/generateKey";
+import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import {

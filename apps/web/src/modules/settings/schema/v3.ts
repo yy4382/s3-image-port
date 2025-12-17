@@ -1,7 +1,7 @@
 import { compressOptionSchema } from "@/lib/utils/imageCompress";
 import { z } from "zod";
 import { keyTemplateSchema } from "../upload/key-template";
-import { defaultKeyTemplate } from "@/lib/utils/generateKey";
+import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 
 export const getDefaultOptions = (): z.infer<typeof optionsSchema> => {
   return {

@@ -1,4 +1,4 @@
-import ImageS3Client from "@/lib/utils/ImageS3Client";
+import ImageS3Client from "@/lib/s3/image-s3-client";
 import { validS3SettingsAtom } from "@/modules/settings/settings-store";
 import { useAtomValue } from "jotai";
 import { useCallback } from "react";

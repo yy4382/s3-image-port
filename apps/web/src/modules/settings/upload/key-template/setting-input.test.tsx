@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest";
 import { render } from "@/../test/utils/render-browser";
 import { KeyTemplateSettingsInput } from "./setting-input";
 import { ReactNode } from "react";
-import { defaultKeyTemplate } from "@/lib/utils/generateKey";
+import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 import { renderHook } from "vitest-browser-react";
 import { useAtom } from "jotai";
 import { uploadSettingsAtom } from "../../settings-store";

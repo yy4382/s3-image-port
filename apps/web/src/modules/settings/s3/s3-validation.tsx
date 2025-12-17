@@ -1,6 +1,6 @@
 "use client";
 
-import { getAllowedMethods, testS3Settings } from "@/lib/utils/testS3Settings";
+import { getAllowedMethods, testS3Settings } from "@/lib/s3/test-s3-settings";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
