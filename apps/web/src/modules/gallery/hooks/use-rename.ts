@@ -50,7 +50,7 @@ export function useRenamePhoto() {
         });
 
         // Fetch the photo list again to reflect the change
-        await fetchPhotoList(false);
+        await fetchPhotoList({ toastLevel: "error" });
 
         return { success: true };
       } catch (error: unknown) {
@@ -64,7 +64,7 @@ export function useRenamePhoto() {
           }
           if (error.message.includes("failed to delete old key")) {
             toast.warning(t("partialSuccess"));
-            await fetchPhotoList(false);
+            await fetchPhotoList({ toastLevel: "error" });
             return { success: false, error: "partialSuccess" };
           }
         }

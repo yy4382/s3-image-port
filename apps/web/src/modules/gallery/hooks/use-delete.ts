@@ -5,17 +5,13 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { useFetchPhotoList } from "./use-photo-list";
-import {
-  setGalleryDirtyAtom,
-  selectedPhotosAtom,
-} from "@/stores/atoms/gallery";
+import { selectedPhotosAtom } from "@/stores/atoms/gallery";
 
 export function useDeletePhotos() {
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const { fetchPhotoList } = useFetchPhotoList();
   const t = useTranslations("gallery.control");
-  const setGalleryDirty = useSetAtom(setGalleryDirtyAtom);
 
   const handleDelete = useCallback(
     async (photos: string[] | string) => {
@@ -53,12 +49,11 @@ export function useDeletePhotos() {
           return newSet;
         });
 
-        setGalleryDirty();
         // fetch the photo list again
-        await fetchPhotoList();
+        await fetchPhotoList({ toastLevel: "error" });
       }
     },
-    [s3Settings, fetchPhotoList, t, setSelectedPhotos, setGalleryDirty],
+    [s3Settings, fetchPhotoList, t, setSelectedPhotos],
   );
 
   return handleDelete;
