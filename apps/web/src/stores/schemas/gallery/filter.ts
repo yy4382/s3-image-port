@@ -52,11 +52,3 @@ export const galleryFilterSchema = z.object({
 });
 
 export type GalleryFilterOptions = z.infer<typeof galleryFilterSchema>;
-
-export const galleryFilterSearchParamsSchema = z.object({
-  searchTerm: z.string().optional().catch(undefined),
-  prefix: z.string().optional().catch(undefined),
-  dateRangeType: z.string().optional().catch(undefined),
-  sortBy: z.string().optional().catch(undefined),
-  sortOrder: z.string().optional().catch(undefined),
-});

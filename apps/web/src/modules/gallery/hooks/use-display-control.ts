@@ -2,23 +2,32 @@ import { endOfDay, format, parse, startOfDay, sub } from "date-fns";
 import { z } from "zod";
 import deepEqual from "deep-equal";
 import {
-  type GalleryFilterOptions as DisplayOptions,
-  galleryFilterSearchParamsSchema as displayOptionsSearchSchema,
-  galleryFilterSchema as displayOptionsSchema,
-  galleryFilterDefault as OptDefault,
+  type GalleryFilterOptions,
+  galleryFilterSchema,
+  galleryFilterDefault,
   timeRangesGetter,
 } from "@/stores/schemas/gallery/filter";
 
-export function displayOptionsToSearchParams(options: DisplayOptions) {
-  const params: z.infer<typeof displayOptionsSearchSchema> = {};
+export const galleryFilterSearchParamsSchema = z.object({
+  searchTerm: z.string().optional().catch(undefined),
+  prefix: z.string().optional().catch(undefined),
+  dateRangeType: z.string().optional().catch(undefined),
+  sortBy: z.string().optional().catch(undefined),
+  sortOrder: z.string().optional().catch(undefined),
+});
+
+export function galleryFilterOptionsToSearchParams(
+  options: GalleryFilterOptions,
+): z.infer<typeof galleryFilterSearchParamsSchema> {
+  const params: z.infer<typeof galleryFilterSearchParamsSchema> = {};
   const { searchTerm, prefix, dateRangeType, sortBy, sortOrder } = options;
-  if (searchTerm !== OptDefault.searchTerm) {
+  if (searchTerm !== galleryFilterDefault.searchTerm) {
     params.searchTerm = searchTerm;
   }
-  if (prefix !== OptDefault.prefix) {
+  if (prefix !== galleryFilterDefault.prefix) {
     params.prefix = prefix;
   }
-  if (!deepEqual(dateRangeType, OptDefault.dateRangeType)) {
+  if (!deepEqual(dateRangeType, galleryFilterDefault.dateRangeType)) {
     if (typeof dateRangeType === "string") {
       params.dateRangeType = dateRangeType;
     } else {
@@ -28,18 +37,18 @@ export function displayOptionsToSearchParams(options: DisplayOptions) {
       params.dateRangeType = JSON.stringify(stored);
     }
   }
-  if (sortBy !== OptDefault.sortBy) {
+  if (sortBy !== galleryFilterDefault.sortBy) {
     params.sortBy = sortBy;
   }
-  if (sortOrder !== OptDefault.sortOrder) {
+  if (sortOrder !== galleryFilterDefault.sortOrder) {
     params.sortOrder = sortOrder;
   }
   return params;
 }
 
-export function searchParamsToDisplayOptions(
-  params: z.infer<typeof displayOptionsSearchSchema>,
-) {
+export function galleryFilterOptionsFromSearchParams(
+  params: z.infer<typeof galleryFilterSearchParamsSchema>,
+): GalleryFilterOptions {
   const {
     searchTerm,
     prefix,
@@ -48,14 +57,14 @@ export function searchParamsToDisplayOptions(
     sortOrder,
   } = params;
 
-  let dateRangeType: DisplayOptions["dateRangeType"];
+  let dateRangeType: GalleryFilterOptions["dateRangeType"];
   if (dateRangeTypeRaw) {
     if (
       timeRangesGetter()
         .map((r) => r.type as string)
         .includes(dateRangeTypeRaw)
     ) {
-      dateRangeType = dateRangeTypeRaw as DisplayOptions["dateRangeType"];
+      dateRangeType = dateRangeTypeRaw as GalleryFilterOptions["dateRangeType"];
     } else {
       try {
         const parsed = z
@@ -72,7 +81,7 @@ export function searchParamsToDisplayOptions(
   } else {
     dateRangeType = [null, null];
   }
-  return displayOptionsSchema.parse({
+  return galleryFilterSchema.parse({
     searchTerm,
     prefix,
     dateRangeType,
@@ -81,8 +90,11 @@ export function searchParamsToDisplayOptions(
   });
 }
 
+/**
+ * Transform a date range type (e.g. "7d") to a date range [from, to]
+ */
 export function getTimeRange(
-  type: DisplayOptions["dateRangeType"],
+  type: GalleryFilterOptions["dateRangeType"],
 ): [Date | null, Date | null] {
   if (Array.isArray(type)) {
     return type;
