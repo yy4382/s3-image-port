@@ -3,8 +3,8 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import {
-  displayOptionsToSearchParams,
-  searchParamsToDisplayOptions,
+  galleryFilterOptionsToSearchParams,
+  galleryFilterOptionsFromSearchParams,
 } from "../hooks/use-display-control";
 import { currentPageAtom, displayOptionsAtom } from "@/stores/atoms/gallery";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ function useSyncDisplayAtomToSearchParams() {
   useEffect(() => {
     const lastDisplayOptions = lastDisplayOptionsRef.current;
     if (!equal(lastDisplayOptions, displayOptions)) {
-      const search = displayOptionsToSearchParams(displayOptions);
+      const search = galleryFilterOptionsToSearchParams(displayOptions);
       startTransition(() => {
         setCurrentPage(1);
         navigate({ to: ".", search: search });
@@ -53,7 +53,7 @@ function useSyncSearchParamsToDisplayAtom() {
     const lastSearchParams = lastSearchParamsRef.current;
     if (!equal(lastSearchParams, searchParams)) {
       setCurrentPage(1);
-      setDisplayOptions(searchParamsToDisplayOptions(searchParams));
+      setDisplayOptions(galleryFilterOptionsFromSearchParams(searchParams));
     }
     lastSearchParamsRef.current = searchParams;
   }, [searchParams, setDisplayOptions, setCurrentPage]);
