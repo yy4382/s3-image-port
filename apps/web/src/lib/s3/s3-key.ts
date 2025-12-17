@@ -46,15 +46,16 @@ export class S3KeyMetadata {
   }
   static create(file: File, template: string, ulidGenerator?: ULIDFactory) {
     const generatedUlid = ulidGenerator ? ulidGenerator() : ulid();
+    const date = new Date();
     const data: Record<AvailablePlaceholders, string> = {
-      year: format(new Date(), "yyyy"),
-      month: format(new Date(), "MM"),
-      day: format(new Date(), "dd"),
+      year: format(date, "yyyy"),
+      month: format(date, "MM"),
+      day: format(date, "dd"),
       filename: file.name.split(".").shift() || "",
       ext: mime.getExtension(file.type) ?? file.name.split(".").pop() ?? "",
       "ulid-dayslice": `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
       random: `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
-      timestamp: new Date().getTime().toString(),
+      timestamp: date.getTime().toString(),
       ulid: generatedUlid,
     };
     return new S3KeyMetadata(template, data);
