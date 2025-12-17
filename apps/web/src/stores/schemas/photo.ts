@@ -6,8 +6,4 @@ export const photoSchema = z.object({
   url: z.string(),
 });
 
-export type Photo = {
-  Key: string;
-  LastModified: string;
-  url: string;
-};
+export type Photo = z.infer<typeof photoSchema>;
