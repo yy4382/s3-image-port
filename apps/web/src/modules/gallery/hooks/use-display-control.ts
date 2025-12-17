@@ -1,6 +1,6 @@
 import { endOfDay, format, parse, startOfDay, sub } from "date-fns";
 import { z } from "zod";
-import deepEqual from "deep-equal";
+import deepEqual from "fast-deep-equal";
 import {
   type GalleryFilterOptions,
   galleryFilterSchema,

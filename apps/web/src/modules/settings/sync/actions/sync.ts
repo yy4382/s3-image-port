@@ -8,7 +8,7 @@ import {
   syncStateSchema,
   syncTokenAtom,
 } from "../sync-store";
-import deepEqual from "deep-equal";
+import deepEqual from "fast-deep-equal";
 import { settingsRecordSchema } from "../types";
 import {
   uploadProfiles,

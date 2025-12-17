@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import deepEqual from "deep-equal";
+import deepEqual from "fast-deep-equal";
 
 export function SettingsViewer(props: {
   localData: z.infer<typeof settingsForSyncSchema.shape.data>;
