@@ -108,9 +108,15 @@ export const useFetchPhotoList = () => {
   const [status, setStatus] = useState<"idle" | "loading">("idle");
 
   const fetchPhotoList = useCallback(
-    async (showToast = true) => {
+    async (
+      {
+        toastLevel = "info",
+      }: {
+        toastLevel: "info" | "error" | "silent";
+      } = { toastLevel: "info" },
+    ) => {
       if (!s3Settings) {
-        if (showToast) {
+        if (toastLevel !== "silent") {
           toast.error(t("s3SettingsNotFound"));
         }
         console.error("S3 settings not found");
@@ -122,7 +128,7 @@ export const useFetchPhotoList = () => {
         photos = await new ImageS3Client(s3Settings).list();
         setGalleryDirty(false);
       } catch (error) {
-        if (showToast) {
+        if (toastLevel !== "silent") {
           toast.error(t("failedToFetchPhotos"));
         }
         console.error("Failed to fetch photos", error);
@@ -131,13 +137,13 @@ export const useFetchPhotoList = () => {
         setStatus("idle");
       }
       if (photos) {
-        if (showToast) {
+        if (toastLevel !== "silent" && toastLevel !== "error") {
           toast.message(t("fetchedPhotos"));
         }
         console.log("Fetched photos", photos.length);
         setPhotos(photos);
       } else {
-        if (showToast) {
+        if (toastLevel !== "silent") {
           toast.error(t("failedToFetchPhotos"));
         }
         console.error("Failed to fetch photos");

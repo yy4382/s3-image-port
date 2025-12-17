@@ -33,7 +33,7 @@ export function Gallery() {
 
   useEffect(() => {
     if (shouldRunAutoRefresh) {
-      fetchPhotoList(false);
+      fetchPhotoList({ toastLevel: "silent" });
     }
   }, [shouldRunAutoRefresh, fetchPhotoList]);
 
