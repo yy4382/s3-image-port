@@ -222,24 +222,7 @@ describe("Profile import export", { retry: 5 }, () => {
     await navigator.clipboard.writeText(
       JSON.stringify({
         name: "Default1",
-        data: {
-          s3: {
-            endpoint: "https://example.com",
-            bucket: "test",
-            region: "us-east-1",
-            accKeyId: "test",
-            secretAccKey: "test",
-            forcePathStyle: false,
-            pubUrl: "https://example.com",
-          },
-          upload: {
-            keyTemplate: "test",
-            compressionOption: null,
-          },
-          gallery: {
-            autoRefresh: true,
-          },
-        } satisfies Options,
+        data: getDefaultOptions(),
       }),
     );
     const importButton = screen.getByRole("button", { name: "Import Profile" });
