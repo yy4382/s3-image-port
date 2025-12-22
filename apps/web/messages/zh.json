@@ -262,7 +262,8 @@
     },
     "grid": {
       "noPhotosFound": "未找到照片",
-      "loadPhotos": "加载照片"
+      "loadPhotos": "加载照片",
+      "includePathTip": "您仅列出路径 <mono>{path}</mono> 下的照片，因为您已设置了包含路径过滤器。这可能是为什么未找到照片。如果这不正确，请在<link>S3 设置</link>中更新。"
     },
     "filter": {
       "filterOptions": "过滤选项",

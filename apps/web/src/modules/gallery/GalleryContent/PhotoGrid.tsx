@@ -19,6 +19,8 @@ import { PhotoItem } from "./PhotoItem/PhotoItem";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 import { selectedPhotosAtom, currentPageAtom } from "@/stores/atoms/gallery";
+import { s3SettingsAtom } from "@/stores/atoms/settings";
+import { Link } from "@tanstack/react-router";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);
@@ -99,6 +101,9 @@ export function PhotoGrid() {
 function PhotoGridEmpty() {
   const t = useTranslations("gallery.grid");
   const { fetchPhotoList, isLoading } = useFetchPhotoList();
+  const s3Settings = useAtomValue(s3SettingsAtom);
+  const hasIncludePath = s3Settings.includePath.length > 0;
+
   return (
     <div className="flex flex-col items-center justify-center w-full h-64 p-8 bg-muted/20 rounded-lg border border-dashed border-muted-foreground/30">
       <div className="flex flex-col items-center gap-2 mb-4">
@@ -108,6 +113,24 @@ function PhotoGridEmpty() {
         <p className="text-lg text-muted-foreground text-center">
           {t("noPhotosFound")}
         </p>
+        {hasIncludePath && (
+          <p className="text-sm text-muted-foreground/80 text-center max-w-md">
+            {t.rich("includePathTip", {
+              path: s3Settings.includePath,
+              mono: (chunks) => <span className="font-mono">{chunks}</span>,
+              link: (chunks) => (
+                <Link
+                  from="/$locale/gallery"
+                  to="/$locale/settings/s3"
+                  params={(prev) => ({ locale: prev.locale })}
+                  className="underline underline-offset-2 hover:text-primary"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        )}
       </div>
       <Button
         variant="outline"
