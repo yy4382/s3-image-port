@@ -159,6 +159,7 @@
           "payloadTooLarge": "Local profile is too large to upload",
           "conflict": "Conflict when uploading local profile, might be uploading from other device at the same time. Please sync again",
           "tooManyRequests": "Too many requests when uploading local profile. Try again in about {seconds} seconds.",
+          "serviceUnavailable": "Profile sync service is temporarily unavailable. Please try again later.",
           "uploadFailed": "Failed to upload local profile",
           "pullFailed": "Failed to fetch remote profile"
         }

@@ -1,12 +1,20 @@
 import Redis from "ioredis";
 
+enum RedisAvailability {
+  UNKNOWN = "UNKNOWN",
+  AVAILABLE = "AVAILABLE",
+  UNAVAILABLE = "UNAVAILABLE",
+}
+
 let redis: Redis | null = null;
+let redisAvailability: RedisAvailability = RedisAvailability.UNKNOWN;
+let startupLoggedOnce = false;
 
 /**
  * Get or create a Redis client instance
- * Uses connection pooling and automatically handles reconnection
+ * Returns null if Redis is not configured or unavailable
  */
-export function getRedisClient(): Redis {
+export function getRedisClient(): Redis | null {
   if (redis) {
     return redis;
   }
@@ -14,9 +22,18 @@ export function getRedisClient(): Redis {
   const redisUrl = process.env.REDIS_URL;
 
   if (!redisUrl) {
-    throw new Error(
-      "REDIS_URL environment variable is not set. Please configure Redis connection.",
-    );
+    // Mark as unavailable and log once
+    redisAvailability = RedisAvailability.UNAVAILABLE;
+    if (!startupLoggedOnce) {
+      console.warn(
+        "[Redis] REDIS_URL not configured. Profile sync feature is disabled.",
+      );
+      console.warn(
+        "[Redis] Set REDIS_URL environment variable to enable profile sync.",
+      );
+      startupLoggedOnce = true;
+    }
+    return null;
   }
 
   redis = new Redis(redisUrl, {
@@ -33,11 +50,24 @@ export function getRedisClient(): Redis {
   });
 
   redis.on("error", (err) => {
-    console.error("Redis Client Error:", err);
+    // Only log when transitioning from AVAILABLE to UNAVAILABLE
+    if (redisAvailability === RedisAvailability.AVAILABLE) {
+      console.error("[Redis] Connection lost:", err.message);
+      console.error(
+        "[Redis] Profile sync endpoints will return 503 until connection is restored.",
+      );
+      redisAvailability = RedisAvailability.UNAVAILABLE;
+    }
   });
 
   redis.on("connect", () => {
-    console.log("Redis Client Connected");
+    // Log restoration if we were previously unavailable
+    if (redisAvailability === RedisAvailability.UNAVAILABLE) {
+      console.log("[Redis] Connection restored. Profile sync is operational.");
+    } else {
+      console.log("[Redis] Connected successfully.");
+    }
+    redisAvailability = RedisAvailability.AVAILABLE;
   });
 
   return redis;

@@ -2,6 +2,7 @@ import { settingsRecordEncryptedSchema } from "@/modules/settings/sync/types";
 import Redis from "ioredis";
 import { z } from "zod";
 import { getRedisClient } from "./client";
+import { RedisUnavailableError } from "./errors";
 import { PROFILE_TTL_SECONDS } from "./ttl-config";
 
 export interface SettingsStoreClient {
@@ -31,6 +32,13 @@ class SettingsStoreClientRedis implements SettingsStoreClient {
     if (!this.redis) {
       this.redis = getRedisClient();
     }
+
+    if (!this.redis) {
+      throw new RedisUnavailableError(
+        "Redis backend is not available. Profile sync requires Redis to be configured.",
+      );
+    }
+
     return this.redis;
   }
 

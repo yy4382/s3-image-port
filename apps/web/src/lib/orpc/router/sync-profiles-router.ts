@@ -6,7 +6,7 @@ import {
   settingsResponseSchema,
   userAgentResponseSchema,
 } from "@/modules/settings/sync/types";
-import { baseOs } from "./base-router";
+import { baseOs, withRedisCheck } from "./base-router";
 import { settingsStoreClient } from "@/lib/redis/settings-client";
 import { UAParser } from "ua-parser-js";
 import { uploadRateLimitByIp, uploadRateLimitByToken } from "../rate-limit";
@@ -33,6 +33,7 @@ function transformUserAgent(
 }
 
 const fetchProfiles = baseOs
+  .use(withRedisCheck)
   .errors({
     // using BAD_REQUEST instead of NOT_FOUND because nitro erases all header and body
     // in 404 responses
@@ -62,6 +63,7 @@ const fetchProfiles = baseOs
   });
 
 const fetchMetadata = baseOs
+  .use(withRedisCheck)
   .errors({
     // using BAD_REQUEST instead of NOT_FOUND because nitro erases all header and body
     // in 404 responses
@@ -90,6 +92,7 @@ const fetchMetadata = baseOs
   });
 
 const uploadProfiles = baseOs
+  .use(withRedisCheck)
   .errors({
     PAYLOAD_TOO_LARGE: {
       message: "Payload too large, max 1MB",
@@ -177,6 +180,7 @@ const uploadProfiles = baseOs
   });
 
 const deleteProfile = baseOs
+  .use(withRedisCheck)
   .errors({
     BAD_REQUEST: {
       data: z.object({

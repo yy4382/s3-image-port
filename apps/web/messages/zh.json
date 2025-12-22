@@ -159,6 +159,7 @@
           "payloadTooLarge": "本地配置太大，无法上传",
           "conflict": "上传配置时发生冲突，可能同时有其他设备在上传。请重新同步",
           "tooManyRequests": "上传请求过于频繁。请在大约 {seconds} 秒后重试。",
+          "serviceUnavailable": "配置同步服务暂时不可用。请稍后重试。",
           "uploadFailed": "上传配置失败",
           "pullFailed": "拉取配置失败"
         }

@@ -76,6 +76,10 @@ export function useToastUploadProfileError() {
         toast.error(t("toasts.errors.tooManyRequests", { seconds }));
         return;
       }
+      case "SERVICE_UNAVAILABLE": {
+        toast.error(t("toasts.errors.serviceUnavailable"));
+        return;
+      }
       default: {
         assertUnreachable(cause);
       }

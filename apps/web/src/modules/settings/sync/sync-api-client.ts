@@ -106,6 +106,9 @@ export async function uploadProfiles(
         //     ? Math.max(0, error.data.reset - Date.now())
         //     : undefined;
       }
+      case "SERVICE_UNAVAILABLE": {
+        return { success: false, error };
+      }
       default: {
         assertUnreachable(error);
       }
@@ -145,6 +148,9 @@ export async function fetchRemoteProfiles(
         }
         throw new Error(error.message);
       }
+      case "SERVICE_UNAVAILABLE": {
+        throw new Error("Profile sync service is temporarily unavailable");
+      }
     }
   } else if (error) {
     throw error;
@@ -175,6 +181,9 @@ export async function fetchMetadata(
           return null;
         }
         throw new Error(error.message);
+      }
+      case "SERVICE_UNAVAILABLE": {
+        throw new Error("Profile sync service is temporarily unavailable");
       }
     }
   } else if (error) {

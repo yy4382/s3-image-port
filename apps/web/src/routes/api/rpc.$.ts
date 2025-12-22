@@ -9,6 +9,14 @@ import { RatelimitHandlerPlugin } from "@orpc/experimental-ratelimit";
 const handler = new RPCHandler(router, {
   interceptors: [
     onError((error) => {
+      // Don't log SERVICE_UNAVAILABLE errors (expected operational errors)
+      if (
+        error instanceof ORPCError &&
+        error.code === "SERVICE_UNAVAILABLE" &&
+        error.data?.service === "redis"
+      ) {
+        return;
+      }
       console.error(error);
     }),
   ],

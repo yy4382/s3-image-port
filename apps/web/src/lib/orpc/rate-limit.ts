@@ -56,6 +56,12 @@ function createHybridLimiter(options: HybridLimiterOptions): Ratelimiter {
 
   try {
     const redis = getRedisClient();
+
+    if (!redis) {
+      logRedisUnavailable(new Error("Redis client not available"));
+      return memoryLimiter;
+    }
+
     const redisLimiter = new RedisRatelimiter({
       eval: redis.eval.bind(redis),
       prefix: options.prefix,
