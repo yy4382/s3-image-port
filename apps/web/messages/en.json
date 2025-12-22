@@ -262,7 +262,8 @@
     },
     "grid": {
       "noPhotosFound": "No photos found",
-      "loadPhotos": "Load Photos"
+      "loadPhotos": "Load Photos",
+      "includePathTip": "You are only listing photos from path <mono>{path}</mono> since you have set an include path filter. This might be why no photos are found. If this is incorrect, please update it in the <link>S3 settings</link>."
     },
     "filter": {
       "filterOptions": "Filter Options",
