@@ -11,6 +11,7 @@ export const getDefaultOptions = (): z.infer<typeof optionsSchema> => {
       secretAccKey: "",
       forcePathStyle: false,
       pubUrl: "",
+      includePath: "",
     },
     upload: {
       keyTemplate: defaultKeyTemplate,
@@ -31,6 +32,7 @@ const s3SettingsSchema = z.object({
   secretAccKey: z.string().min(1, "Cannot be empty"),
   forcePathStyle: z.boolean(),
   pubUrl: z.url(),
+  includePath: z.string(),
 });
 
 const s3SettingsSchemaForLoad = z.object({
@@ -41,6 +43,7 @@ const s3SettingsSchemaForLoad = z.object({
   secretAccKey: z.string().catch(""),
   forcePathStyle: z.boolean().catch(false),
   pubUrl: z.string().catch(""),
+  includePath: z.string().catch(""),
 });
 
 const compressOptionSchema = z.union([

@@ -26,6 +26,21 @@ For example, if an image's path in the bucket is `i/2024/05/29/name.jpg`, and yo
 
 If you directly use the "public bucket" feature of some S3-compatible services, the same principle applies. For example, for Cloudflare R2, it should look like `https://pub-<bunch-of-characters>.r2.dev`. For Tencent Cloud COS, it should look like `https://<BucketName-APPID>.cos.<Region>.myqcloud.com`
 
+### Include Path [#include-path]
+
+Optional path prefix to filter which objects are listed from your S3 bucket. This is useful when your bucket contains non-image objects or when you want to organize images in specific paths.
+
+When you specify an include path (e.g., `i/`), only objects starting with that prefix will be fetched from S3. This filtering happens at the API level, reducing data transfer and improving performance.
+
+**Examples:**
+
+- Leave empty to list all objects in the bucket
+- `i/` - only list objects starting with "i/"
+- `images/` - only list objects starting with "images/"
+- `2024/photos/` - only list objects starting with "2024/photos/"
+
+**Note:** This setting filters objects when they are fetched from S3. Changing this value will automatically refresh the gallery to show only the filtered objects.
+
 ## Upload Settings [#upload-settings]
 
 ### Key Template [#key-template]
