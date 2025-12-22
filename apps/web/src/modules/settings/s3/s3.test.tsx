@@ -323,4 +323,52 @@ describe("S3Settings", () => {
       expect(getConfigInAtom().pubUrl).toEqual("not a valid url");
     });
   });
+
+  describe("include path", () => {
+    it("defaults to empty string", () => {
+      render(
+        <>
+          <S3Settings />
+          <S3SettingsString />
+        </>,
+      );
+      expect(
+        screen.getByLabelText("Include Path").getAttribute("value"),
+      ).toEqual("");
+      expect(getConfigInAtom().includePath).toEqual("");
+    });
+    it("can be set", () => {
+      render(
+        <>
+          <S3Settings />
+          <S3SettingsString />
+        </>,
+      );
+      const input = screen.getByLabelText("Include Path");
+      fireEvent.change(input, { target: { value: "i/" } });
+      expect(input.getAttribute("value")).toEqual("i/");
+      expect(getConfigInAtom().includePath).toEqual("i/");
+    });
+    it("can be set to various path prefixes", () => {
+      render(
+        <>
+          <S3Settings />
+          <S3SettingsString />
+        </>,
+      );
+      const input = screen.getByLabelText("Include Path");
+
+      fireEvent.change(input, { target: { value: "images/" } });
+      expect(input.getAttribute("value")).toEqual("images/");
+      expect(getConfigInAtom().includePath).toEqual("images/");
+
+      fireEvent.change(input, { target: { value: "2024/photos/" } });
+      expect(input.getAttribute("value")).toEqual("2024/photos/");
+      expect(getConfigInAtom().includePath).toEqual("2024/photos/");
+
+      fireEvent.change(input, { target: { value: "" } });
+      expect(input.getAttribute("value")).toEqual("");
+      expect(getConfigInAtom().includePath).toEqual("");
+    });
+  });
 });
