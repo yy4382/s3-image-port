@@ -18,11 +18,13 @@ import { ClientOnly, Link } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppForm } from "@/components/misc/field/field-context";
 import { startTransition } from "react";
+import { setGalleryDirtyAtom } from "@/stores/atoms/gallery";
 
 function S3SettingsTsForm() {
   const t = useTranslations("settings.s3Settings");
   const defaultValues = useAtomValue(s3SettingsAtom);
   const setValues = useSetAtom(s3SettingsAtom);
+  const setGalleryDirty = useSetAtom(setGalleryDirtyAtom);
   const form = useAppForm({
     defaultValues,
     validators: {
@@ -30,8 +32,15 @@ function S3SettingsTsForm() {
     },
     listeners: {
       onChange: ({ formApi }) => {
+        const newValues = formApi.state.values;
         startTransition(() => {
-          setValues(formApi.state.values);
+          setValues((prev) => {
+            // if includePath changes, set gallery dirty to trigger a refresh
+            if (newValues.includePath !== prev.includePath) {
+              setGalleryDirty();
+            }
+            return newValues;
+          });
         });
       },
     },
@@ -145,6 +154,15 @@ function S3SettingsTsForm() {
                   </Link>
                 ),
               })}
+            />
+          )}
+        />
+        <form.AppField
+          name="includePath"
+          children={(field) => (
+            <field.TextField
+              label={t("includePath")}
+              description={t("includePathDesc")}
             />
           )}
         />

@@ -57,7 +57,9 @@
       "pathStyle": "Use Path Style API",
       "pathStyleDesc": "Force using the deprecated <more>path style API</more>.",
       "publicUrl": "Public URL",
-      "publicUrlDesc": "The access url for the public bucket. <mono>public-url/object-path</mono> should be able to access the object in bucket. Learn more at <more>docs</more>."
+      "publicUrlDesc": "The access url for the public bucket. <mono>public-url/object-path</mono> should be able to access the object in bucket. Learn more at <more>docs</more>.",
+      "includePath": "Include Path",
+      "includePathDesc": "Optional path prefix to filter objects (e.g., \"i/\" to only list objects starting with \"i/\"). Leave empty to list all objects."
     },
     "s3Validation": {
       "status": {

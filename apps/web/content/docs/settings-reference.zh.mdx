@@ -24,7 +24,22 @@ title: 设置参考
 
 例如，一张图片在储存桶中的路径是 `i/2024/05/29/name.jpg`，而你可以通过 `https://i.yfi.moe/i/2024/05/29/name.jpg` 这个链接直接（不需要验证地）访问到它，那么 `https://i.yfi.moe/` 就是你需要填写的 Public URL.
 
-如果你直接使用了某些 S3 兼容服务的“公开储存桶”功能，也是同理。例如，对于 Cloudflare R2，它应该形如 `https://pub-<一堆字符>.r2.dev`。对于腾讯云 COS，应该形如 `https://<BucketName-APPID>.cos.<Region>.myqcloud.com`
+如果你直接使用了某些 S3 兼容服务的"公开储存桶"功能，也是同理。例如，对于 Cloudflare R2，它应该形如 `https://pub-<一堆字符>.r2.dev`。对于腾讯云 COS，应该形如 `https://<BucketName-APPID>.cos.<Region>.myqcloud.com`
+
+### 包含路径 [#include-path]
+
+可选的路径前缀，用于过滤从 S3 储存桶中列出的对象。当储存桶包含非图片对象或需要在特定路径下组织图片时非常有用。
+
+当你指定包含路径（例如 `i/`）时，只会从 S3 获取以该前缀开头的对象。此过滤发生在 API 级别，可减少数据传输并提高性能。
+
+**示例：**
+
+- 留空以列出储存桶中的所有对象
+- `i/` - 仅列出以 "i/" 开头的对象
+- `images/` - 仅列出以 "images/" 开头的对象
+- `2024/photos/` - 仅列出以 "2024/photos/" 开头的对象
+
+**注意：** 此设置会在从 S3 获取对象时进行过滤。更改此值将自动刷新画廊以仅显示过滤后的对象。
 
 ## 上传设置 [#upload-settings]
 

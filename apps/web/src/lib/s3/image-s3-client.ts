@@ -131,6 +131,7 @@ class ImageS3Client {
     const command = new ListObjectsV2Command({
       Bucket: this.bucket,
       ContinuationToken: NextContinuationToken,
+      ...(this.config.includePath && { Prefix: this.config.includePath }),
     });
     const response = await this.client.send(command);
 
