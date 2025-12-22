@@ -32,15 +32,9 @@ function S3SettingsTsForm() {
     },
     listeners: {
       onChange: ({ formApi }) => {
-        const newValues = formApi.state.values;
         startTransition(() => {
-          setValues((prev) => {
-            // if includePath changes, set gallery dirty to trigger a refresh
-            if (newValues.includePath !== prev.includePath) {
-              setGalleryDirty();
-            }
-            return newValues;
-          });
+          setValues(formApi.state.values);
+          setGalleryDirty(); // All changes to s3 settings should trigger a gallery refresh
         });
       },
     },
