@@ -36,6 +36,7 @@ jobs:
         run: |
           pnpm exec prettier --check .
           cd apps/web
+          pnpm exec vite build --config vite.ci.config.ts
           pnpm run lint
           pnpm exec tsc --noEmit
 
@@ -63,6 +64,7 @@ jobs:
       - name: Test
         run: |
           cd apps/web
+          pnpm exec vite build --config vite.ci.config.ts
           pnpm run test
 
   # test-build-docker:
