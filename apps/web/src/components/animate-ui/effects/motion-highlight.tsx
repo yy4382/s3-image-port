@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/preserve-manual-memoization, react-x/no-clone-element */
-"use no memo";
 
 import * as React from "react";
 import { AnimatePresence, Transition, motion } from "motion/react";
