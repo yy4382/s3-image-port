@@ -16,7 +16,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import { NumberField } from "@base-ui-components/react/number-field";
+import { NumberField } from "@base-ui/react/number-field";
 import { MoveHorizontalIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

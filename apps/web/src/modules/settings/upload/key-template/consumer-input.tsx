@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 import { ChevronDownIcon } from "lucide-react";
-import { Autocomplete } from "@base-ui-components/react/autocomplete";
+import { Autocomplete } from "@base-ui/react/autocomplete";
 import {
   KeyTemplateFieldInputProps,
   useKeyTemplateValidation,
