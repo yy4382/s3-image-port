@@ -43,6 +43,7 @@ export function migrateFromV1(v1ProfileRaw: unknown): Options | Error {
       secretAccKey: String(oldS3Settings?.secretAccKey ?? ""),
       forcePathStyle: Boolean(oldS3Settings?.forcePathStyle ?? false),
       pubUrl: String(oldS3Settings?.pubUrl ?? ""),
+      includePath: String(oldS3Settings?.includePath ?? ""),
     },
     upload: {
       keyTemplate: String(oldAppSettings?.keyTemplate || defaultKeyTemplate),

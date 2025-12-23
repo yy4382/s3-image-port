@@ -34,9 +34,10 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm prettier --check .
+          pnpm exec prettier --check .
           cd apps/web
-          pnpm lint
+          pnpm run lint
+          pnpm exec tsc --noEmit
 
   test:
     runs-on: ubuntu-latest

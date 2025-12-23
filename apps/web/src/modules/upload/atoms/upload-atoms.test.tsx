@@ -60,6 +60,7 @@ const mockS3Settings: S3Options = {
   secretAccKey: "test-secret",
   forcePathStyle: false,
   pubUrl: "https://cdn.example.com",
+  includePath: "",
 };
 
 function createTestFile(name: string, type = "image/jpeg"): File {
