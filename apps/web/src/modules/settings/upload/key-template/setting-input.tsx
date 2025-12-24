@@ -190,15 +190,17 @@ function PresetList() {
             </TableCell>
             <TableCell className="text-right">
               <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    aria-label="System preset actions"
-                  >
-                    <MoreHorizontalIcon />
-                  </Button>
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="System preset actions"
+                    >
+                      <MoreHorizontalIcon />
+                    </Button>
+                  }
+                />
                 <DropdownMenuContent>
                   <DropdownMenuGroup>
                     <DropdownMenuItem
@@ -291,11 +293,13 @@ function PresetItem({
           </Button>
         ) : (
           <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon-sm">
-                <MoreHorizontalIcon />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" size="icon-sm">
+                  <MoreHorizontalIcon />
+                </Button>
+              }
+            />
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => setIsEditing(true)}>

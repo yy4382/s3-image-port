@@ -94,15 +94,17 @@ function ProfileItem({
 
       <div className="flex flex-wrap gap-2 mt-4">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="flex-1 min-w-[calc(50%-0.25rem)]"
-            >
-              <McPencil className="h-5 w-5 mr-1" />
-              {t("rename")}
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="outline"
+                className="flex-1 min-w-[calc(50%-0.25rem)]"
+              >
+                <McPencil className="h-5 w-5 mr-1" />
+                {t("rename")}
+              </Button>
+            }
+          />
           <DropdownMenuContent>
             <form
               className="flex gap-2 p-2"
@@ -165,14 +167,16 @@ function DeleteProfileConfirm({ deleteFn }: { deleteFn: () => void }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="destructive"
-          className="flex-1 min-w-[calc(50%-0.25rem)]"
-        >
-          {t("delete")}
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button
+            variant="destructive"
+            className="flex-1 min-w-[calc(50%-0.25rem)]"
+          >
+            {t("delete")}
+          </Button>
+        }
+      />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Confirm</DialogTitle>
@@ -255,12 +259,14 @@ function ProfileImporter() {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button>
-            <McDownload className="h-5 w-5 mr-1" />
-            <span className="select-none">{t("importProfile")}</span>
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button>
+              <McDownload className="h-5 w-5 mr-1" />
+              <span className="select-none">{t("importProfile")}</span>
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{t("importOptions")}</DropdownMenuLabel>
           <DropdownMenuSeparator />

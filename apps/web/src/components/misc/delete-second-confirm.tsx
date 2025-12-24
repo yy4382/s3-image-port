@@ -8,21 +8,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { ComponentPropsWithRef, useState } from "react";
 
 export function DeleteSecondConfirm({
   deleteFn,
-  children,
+  triggerRender,
   itemNames,
 }: {
   deleteFn: () => void;
   itemNames: string[];
-  children: React.ReactNode;
+  triggerRender: ComponentPropsWithRef<typeof DialogTrigger>["render"];
 }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={triggerRender} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Confirm</DialogTitle>

@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/animate-ui/radix/switch";
+import { Switch } from "@/components/animate-ui/components/base/switch";
 import type { CompressOption } from "@/lib/utils/imageCompress"; // Adjust the import path as needed
 import { useTranslations } from "use-intl";
 import {
@@ -100,12 +100,16 @@ const ImageCompressOptions: React.FC<ImageProcessOptionsProps> = ({
           </FieldLabel>
           <Select
             value={currentType}
-            onValueChange={(newVal: CompressOption["type"]) =>
-              handleTypeChange(newVal)
+            onValueChange={(newVal) => {
+              if (!newVal) return;
+              handleTypeChange(newVal);
+            }}
+            itemToStringLabel={(item) =>
+              item.toUpperCase() ?? t("selectFormat")
             }
           >
             <SelectTrigger id="image-type-select">
-              <SelectValue placeholder={t("selectFormat")} />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="avif">AVIF</SelectItem>

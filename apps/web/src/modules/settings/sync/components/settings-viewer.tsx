@@ -3,7 +3,7 @@ import { settingsForSyncSchema } from "@/stores/schemas/settings";
 import { useTranslations } from "use-intl";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { MinusIcon, PlusIcon, ChevronDownIcon } from "lucide-react";
+import { MinusIcon, PlusIcon, ChevronRightIcon } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -55,12 +55,12 @@ function ProfileItem(props: ProfileItemProps) {
 
   return (
     <Collapsible className="rounded-lg border bg-muted/30 p-4">
-      <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 [&[data-state=open]>svg]:rotate-180">
+      <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 [&[data-state=open]>svg]:rotate-180 group">
         <div className="flex items-center gap-2">
           {name}
           <StatusBadge {...props} />
         </div>
-        <ChevronDownIcon className="h-4 w-4 transition-transform duration-200" />
+        <ChevronRightIcon className="h-4 w-4 transition-transform duration-200 group-data-panel-open:rotate-90" />
       </CollapsibleTrigger>
 
       <CollapsibleContent className="space-y-4 mt-4">
@@ -101,6 +101,11 @@ function ProfileItem(props: ProfileItemProps) {
               label={t("s3Settings.publicUrl")}
               localValue={localProfile?.s3.pubUrl}
               remoteValue={remoteProfile?.s3.pubUrl}
+            />
+            <ItemDiffViewer
+              label={t("s3Settings.includePath")}
+              localValue={localProfile?.s3.includePath}
+              remoteValue={remoteProfile?.s3.includePath}
             />
           </div>
         </div>

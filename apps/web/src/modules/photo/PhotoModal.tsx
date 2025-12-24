@@ -139,18 +139,22 @@ function PhotoModalToolbar({ photo }: { photo: Photo }) {
         <Button size="icon" variant="ghost" onClick={operations.copyUrl}>
           <CopyIcon />
         </Button>
-        <DeleteSecondConfirm deleteFn={handleDelete} itemNames={[photo.Key]}>
-          <Button size="icon" variant="ghost">
-            <Trash2Icon />
-          </Button>
-        </DeleteSecondConfirm>
+        <DeleteSecondConfirm
+          deleteFn={handleDelete}
+          itemNames={[photo.Key]}
+          triggerRender={
+            <Button size="icon" variant="ghost">
+              <Trash2Icon />
+            </Button>
+          }
+        />
         <PhotoOptions
           photo={photo}
           opened={dropdownOpened}
           setOpened={setDropdownOpened}
           onAfterDelete={handleBack}
           onAfterRename={handleAfterRename}
-          trigger={
+          triggerRender={
             <Button size="icon" variant="ghost">
               <CircleEllipsisIcon />
             </Button>

@@ -28,7 +28,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { ComponentPropsWithRef, useState } from "react";
 import MingcuteInformationLine from "~icons/mingcute/information-line.jsx";
 import McKey2Line from "~icons/mingcute/key-2-line.jsx";
 import McTimeLine from "~icons/mingcute/time-line.jsx";
@@ -39,7 +39,7 @@ export function PhotoOptions({
   photo,
   opened,
   setOpened,
-  trigger,
+  triggerRender,
   onOpen,
   onAfterDelete,
   onAfterRename,
@@ -47,7 +47,7 @@ export function PhotoOptions({
   photo: Photo;
   opened: boolean;
   setOpened: (opened: boolean) => void;
-  trigger?: ReactNode;
+  triggerRender?: ComponentPropsWithRef<typeof DropdownMenuTrigger>["render"];
   onOpen?: () => void;
   onAfterDelete?: () => void;
   onAfterRename?: (newKey: string) => void;
@@ -80,13 +80,15 @@ export function PhotoOptions({
   return (
     <>
       <DropdownMenu open={opened} onOpenChange={setOpened} modal={false}>
-        <DropdownMenuTrigger asChild>
-          {trigger ?? (
-            <Button variant={"secondary"} size="icon-sm">
-              <MoreHorizontalIcon />
-            </Button>
-          )}
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            triggerRender ?? (
+              <Button variant={"secondary"} size="icon-sm">
+                <MoreHorizontalIcon />
+              </Button>
+            )
+          }
+        />
         <DropdownMenuContent>
           {onOpen && (
             <DropdownMenuItem onClick={onOpen}>

@@ -10,7 +10,7 @@ import {
   FieldDescription,
   FieldLabel,
 } from "@/components/ui/field";
-import { Switch } from "@/components/animate-ui/radix/switch";
+import { Switch } from "@/components/animate-ui/components/base/switch";
 import { useAtom } from "jotai";
 import { Link } from "@tanstack/react-router";
 

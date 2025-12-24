@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/animate-ui/components/base/switch";
 import { XIcon } from "lucide-react";
 import { GalleryFilterOptions as DisplayOptions } from "@/stores/schemas/gallery/filter";
 import { useTranslations } from "use-intl";
@@ -49,13 +49,19 @@ export function SortPopoverContent({
         <p className="text-xs text-muted-foreground">{t("sortProperty")}</p>
         <Select
           value={currentDisplayOptions.sortBy}
-          onValueChange={(value: "key" | "date") =>
-            handleUpdate({ sortBy: value })
-          }
+          onValueChange={(value) => {
+            if (!value) return;
+            handleUpdate({ sortBy: value });
+          }}
           disabled={isSearchActive}
+          itemToStringLabel={(item) => {
+            if (item === "date") return t("date");
+            if (item === "key") return t("name");
+            return t("selectProperty");
+          }}
         >
           <SelectTrigger id="sort-by" disabled={isSearchActive}>
-            <SelectValue placeholder={t("selectProperty")} />
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="date">{t("date")}</SelectItem>
@@ -63,9 +69,9 @@ export function SortPopoverContent({
           </SelectContent>
         </Select>
       </div>
-      <div className="grid gap-2">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="grid gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="sort-order">{t("sortOrder")}</Label>
             <p className="text-xs text-muted-foreground">
               {t("sortOrderDesc")}

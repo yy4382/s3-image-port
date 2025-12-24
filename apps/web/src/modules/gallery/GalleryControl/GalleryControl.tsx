@@ -43,11 +43,12 @@ export function GalleryControl() {
             <DeleteSecondConfirm
               deleteFn={() => handleDelete(Array.from(selectedPhotos))}
               itemNames={Array.from(selectedPhotos)}
-            >
-              <Button variant={"destructive"}>
-                <McDelete /> {selectedPhotos.size}
-              </Button>
-            </DeleteSecondConfirm>
+              triggerRender={
+                <Button variant={"destructive"}>
+                  <McDelete /> {selectedPhotos.size}
+                </Button>
+              }
+            />
           </>
         )}
       </div>

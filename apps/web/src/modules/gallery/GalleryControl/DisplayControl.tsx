@@ -97,7 +97,7 @@ export function DisplayControl() {
           <NotificationBadge
             label={filterActiveCount}
             show={filterActiveCount > 0}
-            variant={"destructive"}
+            variant={"destructiveBackground"}
           >
             <div className={buttonVariants({ size: "icon" })}>
               <FilterIcon className="h-4 w-4" />
@@ -116,11 +116,13 @@ export function DisplayControl() {
       </Popover>
 
       <Popover open={sortPopoverOpen} onOpenChange={setSortPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="icon">
-            <ArrowUpDownIcon className="h-4 w-4" />
-          </Button>
-        </PopoverTrigger>
+        <PopoverTrigger
+          render={
+            <Button variant="outline" size="icon">
+              <ArrowUpDownIcon className="h-4 w-4" />
+            </Button>
+          }
+        />
         <PopoverContent className="w-80">
           <SortPopoverContent
             currentDisplayOptions={search}

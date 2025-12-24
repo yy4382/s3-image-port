@@ -102,15 +102,17 @@ export function DateRangePickerPopover({
       open={datePickerPopoverOpen}
       onOpenChange={setDatePickerPopoverOpen}
     >
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full justify-start text-left font-normal"
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {getDateRangeButtonLabel()}
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            className="w-full justify-start text-left font-normal"
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {getDateRangeButtonLabel()}
+          </Button>
+        }
+      />
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex flex-col md:flex-row">
           <div className="flex flex-col space-y-1 border-r p-2">

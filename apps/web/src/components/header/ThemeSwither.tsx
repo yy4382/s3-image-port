@@ -77,12 +77,14 @@ export function ThemeSwitcher() {
         </div>
         <div className="md:hidden">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost">
-                <ThemeSwitcherButton />
-                <span className="sr-only">{t("toggleTheme")}</span>
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button size="icon" variant="ghost">
+                  <ThemeSwitcherButton />
+                  <span className="sr-only">{t("toggleTheme")}</span>
+                </Button>
+              }
+            />
             <DropdownMenuContent className="w-fit bg-transparent  min-w-fit p-0">
               <ThemeSwitcherContent />
             </DropdownMenuContent>

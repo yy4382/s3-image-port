@@ -1,6 +1,6 @@
 "use client";
 
-import { Switch } from "@/components/animate-ui/radix/switch";
+import { Switch } from "@/components/animate-ui/components/base/switch";
 import { Button } from "@/components/ui/button";
 import {
   CardAction,
@@ -272,11 +272,13 @@ function SyncActions() {
         </div>
 
         <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" disabled={isSyncPending}>
-              <MoreVertical />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="outline" size="icon" disabled={isSyncPending}>
+                <MoreVertical />
+              </Button>
+            }
+          />
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleForceUpload}>
               <Upload />

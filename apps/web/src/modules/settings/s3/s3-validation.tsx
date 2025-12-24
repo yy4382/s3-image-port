@@ -270,15 +270,17 @@ export function S3Validation() {
 
           {showDetails && (
             <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                >
-                  <Info className="h-3 w-3" />
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                  >
+                    <Info className="h-3 w-3" />
+                  </Button>
+                }
+              />
               <UIDialogContent className="max-w-sm">
                 <DialogHeader>
                   <DialogTitle className="text-base">

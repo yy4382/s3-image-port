@@ -13,7 +13,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Switch } from "@/components/animate-ui/radix/switch";
+import { Switch } from "@/components/animate-ui/components/base/switch";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppForm } from "@/components/misc/field/field-context";

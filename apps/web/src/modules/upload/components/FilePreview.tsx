@@ -228,25 +228,35 @@ function FilePreviewProcess({
 
   return (
     <div className="flex gap-1">
-      <Badge variant="outline" className="text-xs whitespace-nowrap h-6">
+      <Badge
+        variant="outline"
+        className="text-xs whitespace-nowrap h-6 rounded-md"
+      >
         {shownBadge}
       </Badge>
       {file.supportProcess &&
         file.compressOption !== null &&
         (file.status === "pending" || file.status === "processed") && (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Badge className="size-6 px-0 py-0" asChild>
-                <button
-                  onClick={process}
-                  aria-label={
-                    file.status === "pending" ? t("process") : t("recompress")
+            <TooltipTrigger
+              render={
+                <Badge
+                  className="size-6 px-0 py-0 rounded-md"
+                  render={
+                    <button
+                      onClick={process}
+                      aria-label={
+                        file.status === "pending"
+                          ? t("process")
+                          : t("recompress")
+                      }
+                    >
+                      <RefreshCw className="size-5" />
+                    </button>
                   }
-                >
-                  <RefreshCw className="size-5" />
-                </button>
-              </Badge>
-            </TooltipTrigger>
+                />
+              }
+            />
             <TooltipContent>
               {file.status === "pending" ? t("process") : t("recompress")}
             </TooltipContent>
@@ -284,12 +294,14 @@ function CopyButton({ file }: { file: PendingUpload }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" aria-label="Open menu" size="icon">
-          <span className="sr-only">{t("copy")}</span>
-          <McCopy />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="outline" aria-label="Open menu" size="icon">
+            <span className="sr-only">{t("copy")}</span>
+            <McCopy />
+          </Button>
+        }
+      />
       <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuItem onClick={() => copy(url, "URL")}>
           {t("copyUrl")}

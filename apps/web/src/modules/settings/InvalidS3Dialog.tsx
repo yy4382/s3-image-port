@@ -15,7 +15,7 @@ export function InvalidS3Dialog() {
   const locale = useLocale();
   return (
     <Dialog open={true}>
-      <DialogContent showClose={false}>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t("s3ConfigTitle")}</DialogTitle>
         </DialogHeader>
