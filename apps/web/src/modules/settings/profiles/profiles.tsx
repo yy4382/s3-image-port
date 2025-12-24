@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -268,20 +269,22 @@ function ProfileImporter() {
           }
         />
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>{t("importOptions")}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleClipboardImport}>
-            <McClipboard className="h-5 w-5 mr-2" />
-            {t("importFromClipboard")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-            <McFile className="h-5 w-5 mr-2" />
-            {t("importFromFile")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleV1ClipboardImport}>
-            <McClipboard className="h-5 w-5 mr-2" />
-            {t("importFromV1Clipboard")}
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{t("importOptions")}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleClipboardImport}>
+              <McClipboard className="h-5 w-5 mr-2" />
+              {t("importFromClipboard")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+              <McFile className="h-5 w-5 mr-2" />
+              {t("importFromFile")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleV1ClipboardImport}>
+              <McClipboard className="h-5 w-5 mr-2" />
+              {t("importFromV1Clipboard")}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
       <input

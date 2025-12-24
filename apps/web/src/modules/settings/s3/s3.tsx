@@ -116,7 +116,7 @@ function S3SettingsTsForm() {
                 </FieldContent>
                 <Switch
                   id="s3-path-style"
-                  name={t("pathStyle")}
+                  aria-label={t("pathStyle")}
                   checked={field.state.value}
                   onCheckedChange={field.handleChange}
                   aria-invalid={isInvalid}

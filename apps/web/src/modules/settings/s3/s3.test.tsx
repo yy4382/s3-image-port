@@ -259,7 +259,7 @@ describe("S3Settings", () => {
       const switchElement = screen.getByRole("switch", {
         name: "Use Path Style API",
       });
-      expect(switchElement.getAttribute("data-state")).toEqual("unchecked");
+      expect(switchElement.getAttribute("data-unchecked")).toEqual("");
       expect(getConfigInAtom().forcePathStyle).toEqual(false);
     });
     it("can be toggled", () => {
@@ -273,11 +273,11 @@ describe("S3Settings", () => {
         name: "Use Path Style API",
       });
       fireEvent.click(switchElement);
-      expect(switchElement.getAttribute("data-state")).toEqual("checked");
+      expect(switchElement.getAttribute("data-checked")).toEqual("");
       expect(getConfigInAtom().forcePathStyle).toEqual(true);
 
       fireEvent.click(switchElement);
-      expect(switchElement.getAttribute("data-state")).toEqual("unchecked");
+      expect(switchElement.getAttribute("data-unchecked")).toEqual("");
       expect(getConfigInAtom().forcePathStyle).toEqual(false);
     });
   });
