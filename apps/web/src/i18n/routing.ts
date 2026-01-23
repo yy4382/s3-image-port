@@ -6,10 +6,9 @@ export const routing = {
   defaultLocale: "en",
 } as const;
 
-export const localeLocalNames: Record<
-  (typeof routing.locales)[number],
-  string
-> = {
+export type LocaleType = (typeof routing.locales)[number];
+
+export const localeLocalNames: Record<LocaleType, string> = {
   en: "English",
   zh: "中文",
 } as const;
