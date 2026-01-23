@@ -118,7 +118,12 @@ function ProfileItem({
                 }
               }}
             >
-              <Input defaultValue={name} name="input" className="w-40" />
+              <Input
+                defaultValue={name}
+                name="input"
+                className="w-40"
+                onKeyDown={(e) => e.stopPropagation()}
+              />
               <Button type="submit" size="sm">
                 {t("update")}
               </Button>
