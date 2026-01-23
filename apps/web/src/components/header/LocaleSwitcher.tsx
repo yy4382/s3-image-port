@@ -1,6 +1,11 @@
 "use client";
 
+import { ClientOnly, useNavigate } from "@tanstack/react-router";
+import { CheckIcon, Globe } from "lucide-react";
+import { useEffect } from "react";
 import { useLocale } from "use-intl";
+import { localeLocalNames } from "@/i18n/routing";
+import { persistLocale } from "@/lib/locale";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -8,9 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { CheckIcon, Globe } from "lucide-react";
-import { localeLocalNames } from "@/i18n/routing";
-import { useNavigate, ClientOnly } from "@tanstack/react-router";
 
 function LocaleSwitcherWrapper() {
   return (
@@ -38,6 +40,10 @@ function LocaleSwitcher() {
     { value: "en", label: localeLocalNames.en },
     { value: "zh", label: localeLocalNames.zh },
   ];
+
+  useEffect(() => {
+    persistLocale(locale);
+  }, [locale]);
 
   return (
     <DropdownMenu>
