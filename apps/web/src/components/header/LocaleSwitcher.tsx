@@ -2,7 +2,6 @@
 
 import { ClientOnly, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, Globe } from "lucide-react";
-import { useEffect } from "react";
 import { useLocale } from "use-intl";
 import { localeLocalNames } from "@/i18n/routing";
 import { persistLocale } from "@/lib/locale";
@@ -28,6 +27,7 @@ function LocaleSwitcher() {
   const navigate = useNavigate();
 
   const handleLocaleChange = (newLocale: string) => {
+    persistLocale(newLocale);
     navigate({
       to: ".",
       reloadDocument: true,
@@ -40,10 +40,6 @@ function LocaleSwitcher() {
     { value: "en", label: localeLocalNames.en },
     { value: "zh", label: localeLocalNames.zh },
   ];
-
-  useEffect(() => {
-    persistLocale(locale);
-  }, [locale]);
 
   return (
     <DropdownMenu>
