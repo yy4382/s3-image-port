@@ -1,4 +1,10 @@
 {
+  "migrationBanner": {
+    "message": "S3 Image Port v2 已上线，访问",
+    "guide": "使用，点击查看",
+    "guideLink": "迁移指南",
+    "dismiss": "关闭横幅"
+  },
   "a11y": {
     "nav": {
       "logo": "S3 图片管家的 Logo",

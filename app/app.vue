@@ -8,6 +8,7 @@
   ></div>
   <ClientOnly>
     <div class="min-h-screen flex flex-col dark:bg-surface-800 gap-4">
+      <MigrationBanner />
       <NavMenu />
       <NuxtPage
         class="flex-grow"
