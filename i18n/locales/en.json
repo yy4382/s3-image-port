@@ -1,4 +1,10 @@
 {
+  "migrationBanner": {
+    "message": "S3 Image Port v2 is now available at",
+    "guide": "— check out the",
+    "guideLink": "migration guide",
+    "dismiss": "Dismiss banner"
+  },
   "a11y": {
     "nav": {
       "logo": "Logo of S3 Image Port",
