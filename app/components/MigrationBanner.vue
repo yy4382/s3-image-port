@@ -13,7 +13,7 @@
         >imageport.app</ULink>
         {{ $t("migrationBanner.guide") }}
         <ULink
-          to="https://docs.imageport.app/docs/migrate-from-v1"
+          to="https://imageport.app/zh/docs/migrate-from-v1"
           target="_blank"
           class="font-semibold underline hover:opacity-80"
         >{{ $t("migrationBanner.guideLink") }}</ULink>
