@@ -7,13 +7,13 @@
       <p class="text-sm text-primary-800 dark:text-primary-200 flex-1 text-center">
         {{ $t("migrationBanner.message") }}
         <ULink
-          href="https://imageport.app"
+          to="https://imageport.app"
           target="_blank"
           class="font-semibold underline hover:opacity-80"
         >imageport.app</ULink>
         {{ $t("migrationBanner.guide") }}
         <ULink
-          href="https://docs.imageport.app/docs/migrate-from-v1"
+          to="https://docs.imageport.app/docs/migrate-from-v1"
           target="_blank"
           class="font-semibold underline hover:opacity-80"
         >{{ $t("migrationBanner.guideLink") }}</ULink>
