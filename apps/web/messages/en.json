@@ -256,6 +256,9 @@
       "deleteSuccess": "Deleted photos",
       "deleteFailed": "Failed to delete photos"
     },
+    "pagination": {
+      "itemsPerPage": "Per page"
+    },
     "store": {
       "s3SettingsNotFound": "S3 settings not found",
       "failedToFetchPhotos": "Failed to fetch photos",

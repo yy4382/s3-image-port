@@ -256,6 +256,9 @@
       "deleteSuccess": "已删除照片",
       "deleteFailed": "删除照片失败"
     },
+    "pagination": {
+      "itemsPerPage": "每页"
+    },
     "store": {
       "s3SettingsNotFound": "未找到 S3 设置",
       "failedToFetchPhotos": "获取照片失败",

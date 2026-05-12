@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { PaginationWithLogic } from "@/components/ui/paginationLogic";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { startTransition } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import McEmptyBox from "~icons/mingcute/empty-box-line.jsx";
 import {
   filteredPhotosCountAtom,
-  PER_PAGE,
   useFetchPhotoList,
   showingPhotosAtom,
 } from "../hooks/use-photo-list";
@@ -18,9 +18,16 @@ import {
 import { PhotoItem } from "./PhotoItem/PhotoItem";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
-import { selectedPhotosAtom, currentPageAtom } from "@/stores/atoms/gallery";
+import {
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZE_OPTIONS,
+  selectedPhotosAtom,
+  currentPageAtom,
+  pageSizeAtom,
+  type GalleryPageSize,
+} from "@/stores/atoms/gallery";
 import { s3SettingsAtom } from "@/stores/atoms/settings";
-import { Link } from "@tanstack/react-router";
+import { Link, getRouteApi } from "@tanstack/react-router";
 
 export function PhotoGrid() {
   const photos = useAtomValue(showingPhotosAtom);
@@ -145,15 +152,41 @@ function PhotoGridEmpty() {
   );
 }
 
+const route = getRouteApi("/$locale/_root-layout/gallery");
+
 function GalleryPagination() {
   const [page, setPage] = useAtom(currentPageAtom);
+  const [pageSize, setPageSize] = useAtom(pageSizeAtom);
   const filteredPhotoCount = useAtomValue(filteredPhotosCountAtom);
+  const navigate = route.useNavigate();
+  const t = useTranslations("gallery.pagination");
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    const pageSizeValue = newPageSize as GalleryPageSize;
+    setPageSize(pageSizeValue);
+    setPage(1);
+    startTransition(() => {
+      navigate({
+        to: ".",
+        search: (prev) => ({
+          ...prev,
+          pageSize:
+            pageSizeValue === DEFAULT_PAGE_SIZE ? undefined : pageSizeValue,
+        }),
+      });
+    });
+  };
 
   return (
     <PaginationWithLogic
       page={page}
       totalCount={filteredPhotoCount}
-      pageSize={PER_PAGE}
+      pageSize={pageSize}
+      pageSizeSelectOptions={{
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
+        label: t("itemsPerPage"),
+        onPageSizeChange: handlePageSizeChange,
+      }}
       onPageChange={(p) => {
         setPage(p);
       }}
