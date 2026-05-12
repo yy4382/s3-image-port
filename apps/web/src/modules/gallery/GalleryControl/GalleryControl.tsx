@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAtom, useAtomValue } from "jotai";
 import {
+  filteredPhotosAtom,
   showingPhotosAtom,
   useFetchPhotoList,
 } from "../hooks/use-photo-list";
@@ -15,13 +16,17 @@ import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { cn } from "@/lib/utils";
 import { useDeletePhotos } from "../hooks/use-delete";
 import { selectedPhotosAtom } from "@/stores/atoms/gallery";
+import { CopyIcon } from "lucide-react";
+import { useCopy } from "@/lib/hooks/use-copy";
 
 export function GalleryControl() {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
   const showingPhotos = useAtomValue(showingPhotosAtom);
+  const filteredPhotos = useAtomValue(filteredPhotosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const handleDelete = useDeletePhotos();
   const { fetchPhotoList, isLoading } = useFetchPhotoList();
+  const { copy } = useCopy();
 
   const selectCurrentPage = () => {
     setSelectedPhotos((prev) => {
@@ -31,6 +36,13 @@ export function GalleryControl() {
       }
       return newSet;
     });
+  };
+
+  const copySelectedUrls = () => {
+    const urls = filteredPhotos
+      .filter((photo) => selectedPhotos.has(photo.Key))
+      .map((photo) => photo.url);
+    copy(urls.join("\n"));
   };
 
   return (
@@ -60,6 +72,12 @@ export function GalleryControl() {
               }}
             >
               <McCheckbox /> {selectedPhotos.size}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={copySelectedUrls}
+            >
+              <CopyIcon /> {selectedPhotos.size}
             </Button>
             <DeleteSecondConfirm
               deleteFn={() => handleDelete(Array.from(selectedPhotos))}
