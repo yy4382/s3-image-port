@@ -7,28 +7,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "../ui/button";
-import { ComponentPropsWithRef, useState } from "react";
+import { useState, type ComponentPropsWithRef, type ReactNode } from "react";
+import { useTranslations } from "use-intl";
 
 export function DeleteSecondConfirm({
   deleteFn,
   triggerRender,
+  triggerTooltip,
   itemNames,
 }: {
   deleteFn: () => void;
   itemNames: string[];
   triggerRender: ComponentPropsWithRef<typeof DialogTrigger>["render"];
+  triggerTooltip?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("gallery.control.deleteConfirm");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={triggerRender} />
+      {triggerTooltip ? (
+        <Tooltip>
+          <TooltipTrigger render={<DialogTrigger render={triggerRender} />} />
+          <TooltipContent>{triggerTooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <DialogTrigger render={triggerRender} />
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Confirm</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete these items?
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <ul className="list-disc list-inside max-h-[300px] overflow-y-auto">
           {itemNames.map((name) => (
@@ -37,7 +51,7 @@ export function DeleteSecondConfirm({
         </ul>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             onClick={() => {
@@ -45,7 +59,7 @@ export function DeleteSecondConfirm({
               setOpen(false);
             }}
           >
-            Delete
+            {t("delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

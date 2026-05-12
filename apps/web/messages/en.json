@@ -254,7 +254,19 @@
       "s3SettingsNotFound": "S3 settings not found",
       "requestingDelete": "Requested delete...",
       "deleteSuccess": "Deleted photos",
-      "deleteFailed": "Failed to delete photos"
+      "deleteFailed": "Failed to delete photos",
+      "refresh": "Refresh",
+      "selectCurrentPage": "Select current page. Shortcut: Ctrl+A",
+      "clearSelection": "Clear selection",
+      "copySelectedUrls": "Copy selected URLs",
+      "deleteSelected": "Delete selected",
+      "selectedUrls": "selected URLs",
+      "deleteConfirm": {
+        "title": "Delete confirm",
+        "description": "Are you sure you want to delete these items?",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      }
     },
     "pagination": {
       "itemsPerPage": "Per page"
@@ -281,7 +293,10 @@
       "searchPrefix": "Search prefix...",
       "noPrefixFound": "No prefix found.",
       "search": "Search",
-      "searchPlaceholder": "Search by image name..."
+      "searchPlaceholder": "Search by image name...",
+      "close": "Close",
+      "clearPrefix": "Clear prefix",
+      "clearPrefixSearch": "Clear prefix search"
     },
     "sort": {
       "sortOptions": "Sort Options",
@@ -294,7 +309,8 @@
       "name": "Name (Path)",
       "sortOrder": "Sort Order",
       "sortOrderDesc": "Show results in ascending or descending order.",
-      "sortOrderToggle": "Sort order toggle"
+      "sortOrderToggle": "Sort order toggle",
+      "close": "Close"
     },
     "date": {
       "all": "All",
@@ -309,6 +325,9 @@
       "options": {
         "open": "Open",
         "info": "Info",
+        "more": "More actions",
+        "backToGallery": "Back to gallery",
+        "copyUrl": "Copy URL",
         "download": "Download",
         "rename": "Rename",
         "delete": "Delete",

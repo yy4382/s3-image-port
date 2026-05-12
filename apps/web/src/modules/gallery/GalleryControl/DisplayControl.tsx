@@ -6,7 +6,12 @@ import {
   galleryFilterOptionsToSearchParams,
   galleryFilterOptionsFromSearchParams,
 } from "../hooks/use-display-control";
-import { currentPageAtom, displayOptionsAtom } from "@/stores/atoms/gallery";
+import {
+  DEFAULT_PAGE_SIZE,
+  currentPageAtom,
+  displayOptionsAtom,
+  pageSizeAtom,
+} from "@/stores/atoms/gallery";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,6 +20,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { FilterIcon, ArrowUpDownIcon } from "lucide-react";
 import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
@@ -30,33 +40,36 @@ function useSyncDisplayAtomToSearchParams() {
   const setCurrentPage = useSetAtom(currentPageAtom);
 
   const displayOptions = useAtomValue(displayOptionsAtom);
+  const pageSize = useAtomValue(pageSizeAtom);
   const lastDisplayOptionsRef = useRef<typeof displayOptions>(displayOptions);
   useEffect(() => {
     const lastDisplayOptions = lastDisplayOptionsRef.current;
     if (!equal(lastDisplayOptions, displayOptions)) {
-      const search = galleryFilterOptionsToSearchParams(displayOptions);
+      const search = galleryFilterOptionsToSearchParams(displayOptions, pageSize);
       startTransition(() => {
         setCurrentPage(1);
         navigate({ to: ".", search: search });
       });
     }
     lastDisplayOptionsRef.current = displayOptions;
-  }, [displayOptions, navigate, setCurrentPage]);
+  }, [displayOptions, navigate, pageSize, setCurrentPage]);
 }
 
 function useSyncSearchParamsToDisplayAtom() {
   const searchParams = route.useSearch();
   const setDisplayOptions = useSetAtom(displayOptionsAtom);
   const setCurrentPage = useSetAtom(currentPageAtom);
+  const setPageSize = useSetAtom(pageSizeAtom);
   const lastSearchParamsRef = useRef<typeof searchParams | null>(null);
   useEffect(() => {
     const lastSearchParams = lastSearchParamsRef.current;
     if (!equal(lastSearchParams, searchParams)) {
       setCurrentPage(1);
       setDisplayOptions(galleryFilterOptionsFromSearchParams(searchParams));
+      setPageSize(searchParams.pageSize ?? DEFAULT_PAGE_SIZE);
     }
     lastSearchParamsRef.current = searchParams;
-  }, [searchParams, setDisplayOptions, setCurrentPage]);
+  }, [searchParams, setDisplayOptions, setCurrentPage, setPageSize]);
 }
 
 function useSyncDisplayAtomAndSearch() {
@@ -67,7 +80,8 @@ function useSyncDisplayAtomAndSearch() {
 export function DisplayControl() {
   const [search, handleUpdate] = useAtom(displayOptionsAtom);
   useSyncDisplayAtomAndSearch();
-  const t = useTranslations("gallery.filter");
+  const tFilter = useTranslations("gallery.filter");
+  const tSort = useTranslations("gallery.sort");
 
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
   const [sortPopoverOpen, setSortPopoverOpen] = useState(false);
@@ -85,7 +99,7 @@ export function DisplayControl() {
   return (
     <div className="flex items-center gap-2">
       <Input
-        placeholder={t("searchPlaceholder")}
+        placeholder={tFilter("searchPlaceholder")}
         className="grow max-w-72"
         onChange={(e) => {
           handleUpdate((prev) => ({ ...prev, searchTerm: e.target.value }));
@@ -93,17 +107,24 @@ export function DisplayControl() {
         value={search.searchTerm}
       />
       <Popover open={filterPopoverOpen} onOpenChange={setFilterPopoverOpen}>
-        <PopoverTrigger>
-          <NotificationBadge
-            label={filterActiveCount}
-            show={filterActiveCount > 0}
-            variant={"destructiveBackground"}
-          >
-            <div className={buttonVariants({ size: "icon" })}>
-              <FilterIcon className="h-4 w-4" />
-            </div>
-          </NotificationBadge>
-        </PopoverTrigger>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <PopoverTrigger>
+              <NotificationBadge
+                label={filterActiveCount}
+                show={filterActiveCount > 0}
+                variant={"destructiveBackground"}
+              >
+                <div className={buttonVariants({ size: "icon" })}>
+                  <FilterIcon className="h-4 w-4" />
+                </div>
+              </NotificationBadge>
+              </PopoverTrigger>
+            }
+          />
+          <TooltipContent>{tFilter("filterOptions")}</TooltipContent>
+        </Tooltip>
         <PopoverContent className="w-100">
           <FilterPopoverContent
             currentDisplayOptions={search}
@@ -116,13 +137,24 @@ export function DisplayControl() {
       </Popover>
 
       <Popover open={sortPopoverOpen} onOpenChange={setSortPopoverOpen}>
-        <PopoverTrigger
-          render={
-            <Button variant="outline" size="icon">
-              <ArrowUpDownIcon className="h-4 w-4" />
-            </Button>
-          }
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <PopoverTrigger
+                render={
+                  <Button
+                    aria-label={tSort("sortOptions")}
+                    variant="outline"
+                    size="icon"
+                  >
+                    <ArrowUpDownIcon className="h-4 w-4" />
+                  </Button>
+                }
+              />
+            }
+          />
+          <TooltipContent>{tSort("sortOptions")}</TooltipContent>
+        </Tooltip>
         <PopoverContent className="w-80">
           <SortPopoverContent
             currentDisplayOptions={search}

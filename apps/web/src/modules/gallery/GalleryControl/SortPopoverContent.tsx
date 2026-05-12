@@ -11,6 +11,11 @@ import { Switch } from "@/components/animate-ui/components/base/switch";
 import { XIcon } from "lucide-react";
 import { GalleryFilterOptions as DisplayOptions } from "@/stores/schemas/gallery/filter";
 import { useTranslations } from "use-intl";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SortPopoverContentProps {
   currentDisplayOptions: DisplayOptions;
@@ -32,13 +37,21 @@ export function SortPopoverContent({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h4 className="font-medium leading-none">{t("sortOptions")}</h4>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSortPopoverOpen(false)}
-          >
-            <XIcon className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label={t("close")}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSortPopoverOpen(false)}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              }
+            />
+            <TooltipContent>{t("close")}</TooltipContent>
+          </Tooltip>
         </div>
         <p className="text-sm text-muted-foreground">
           {isSearchActive ? t("sortActiveMessage") : t("sortInactiveMessage")}
