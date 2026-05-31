@@ -24,6 +24,16 @@ const _availablePlaceholders = [
 
 type AvailablePlaceholders = (typeof _availablePlaceholders)[number];
 
+/**
+ * A file's own extension (lowercased), or `""` when it has none. A leading dot
+ * (dotfile) or a name without a dot counts as having no extension.
+ */
+function extFromFileName(name: string): string {
+  const dotIdx = name.lastIndexOf(".");
+  if (dotIdx <= 0) return "";
+  return name.slice(dotIdx + 1).toLowerCase();
+}
+
 export const defaultKeyTemplate =
   "i/{{year}}/{{month}}/{{day}}/{{ulid-dayslice}}.{{ext}}";
 
@@ -52,7 +62,10 @@ export class S3KeyMetadata {
       month: format(date, "MM"),
       day: format(date, "dd"),
       filename: file.name.split(".").shift() || "",
-      ext: mime.getExtension(file.type) ?? file.name.split(".").pop() ?? "",
+      // Prefer the file's own extension (e.g. keep `.mov` instead of mapping
+      // `video/quicktime` to `qt`); fall back to the MIME type when the name
+      // has none.
+      ext: extFromFileName(file.name) || mime.getExtension(file.type) || "",
       "ulid-dayslice": `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
       random: `${generatedUlid.slice(4, 10).toLowerCase()}-${generatedUlid.slice(-4).toLowerCase()}`,
       timestamp: date.getTime().toString(),
