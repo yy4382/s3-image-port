@@ -254,7 +254,19 @@
       "s3SettingsNotFound": "未找到 S3 设置",
       "requestingDelete": "正在请求删除...",
       "deleteSuccess": "已删除照片",
-      "deleteFailed": "删除照片失败"
+      "deleteFailed": "删除照片失败",
+      "refresh": "刷新",
+      "selectCurrentPage": "全选当前页。快捷键：Ctrl+A",
+      "clearSelection": "取消选择",
+      "copySelectedUrls": "复制所选 URL",
+      "deleteSelected": "删除所选",
+      "selectedUrls": "所选 URL",
+      "deleteConfirm": {
+        "title": "删除确认",
+        "description": "确定要删除这些项目吗？",
+        "cancel": "取消",
+        "delete": "删除"
+      }
     },
     "store": {
       "s3SettingsNotFound": "未找到 S3 设置",
@@ -278,7 +290,10 @@
       "searchPrefix": "搜索前缀...",
       "noPrefixFound": "未找到前缀。",
       "search": "搜索",
-      "searchPlaceholder": "按图片名称搜索..."
+      "searchPlaceholder": "按图片名称搜索...",
+      "close": "关闭",
+      "clearPrefix": "清除前缀",
+      "clearPrefixSearch": "清除前缀搜索"
     },
     "sort": {
       "sortOptions": "排序选项",
@@ -291,7 +306,8 @@
       "name": "名称 (路径)",
       "sortOrder": "升降序",
       "sortOrderDesc": "以升序或降序显示结果。",
-      "sortOrderToggle": "排序顺序切换"
+      "sortOrderToggle": "排序顺序切换",
+      "close": "关闭"
     },
     "date": {
       "all": "所有",
@@ -338,8 +354,14 @@
           "failed": "下载照片失败",
           "noBody": "下载照片失败"
         },
-        "copyMarkdown": "复制 M↓"
+        "copyMarkdown": "复制 M↓",
+        "more": "更多操作",
+        "backToGallery": "返回图库",
+        "copyUrl": "复制 URL"
       }
+    },
+    "pagination": {
+      "itemsPerPage": "每页"
     }
   },
   "theme": {

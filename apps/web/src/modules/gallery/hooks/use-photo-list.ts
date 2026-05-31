@@ -10,6 +10,7 @@ import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { getTimeRange } from "./use-display-control";
 import {
   currentPageAtom,
+  pageSizeAtom,
   photosAtom,
   displayOptionsAtom,
   galleryDirtyStatusAtom,
@@ -91,11 +92,10 @@ export const filteredPhotosCountAtom = atom((get) => {
   return get(filteredPhotosAtom).length;
 });
 
-export const PER_PAGE = 20;
-
 export const showingPhotosAtom = atom<Photo[]>((get) => {
-  const start = (get(currentPageAtom) - 1) * PER_PAGE;
-  const end = start + PER_PAGE;
+  const pageSize = get(pageSizeAtom);
+  const start = (get(currentPageAtom) - 1) * pageSize;
+  const end = start + pageSize;
   return get(filteredPhotosAtom).slice(start, end);
 });
 

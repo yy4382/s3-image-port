@@ -1,11 +1,16 @@
 "use client";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
-import { useLocale } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { PhotoImg } from "@/modules/gallery/GalleryContent/PhotoItem/photo-img";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
 import { photosAtomReadOnly } from "../gallery/hooks/use-photo-list";
@@ -84,6 +89,7 @@ function PhotoModalToolbar({ photo }: { photo: Photo }) {
   const navigate = route.useNavigate();
   const search = route.useSearch();
   const locale = useLocale();
+  const t = useTranslations("gallery.item.options");
   const [dropdownOpened, setDropdownOpened] = useState(false);
 
   const operations = usePhotoOperations(photo);
@@ -131,19 +137,44 @@ function PhotoModalToolbar({ photo }: { photo: Photo }) {
   return (
     <div className="flex justify-between items-center text-white p-2 relative z-20">
       <div className="">
-        <Button size="icon" variant="ghost" onClick={handleBack}>
-          <McArrowLeft />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label={t("backToGallery")}
+                size="icon"
+                variant="ghost"
+                onClick={handleBack}
+              >
+                <McArrowLeft />
+              </Button>
+            }
+          />
+          <TooltipContent>{t("backToGallery")}</TooltipContent>
+        </Tooltip>
       </div>
       <div className="flex gap-2 items-center">
-        <Button size="icon" variant="ghost" onClick={operations.copyUrl}>
-          <CopyIcon />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label={t("copyUrl")}
+                size="icon"
+                variant="ghost"
+                onClick={operations.copyUrl}
+              >
+                <CopyIcon />
+              </Button>
+            }
+          />
+          <TooltipContent>{t("copyUrl")}</TooltipContent>
+        </Tooltip>
         <DeleteSecondConfirm
           deleteFn={handleDelete}
           itemNames={[photo.Key]}
+          triggerTooltip={t("delete")}
           triggerRender={
-            <Button size="icon" variant="ghost">
+            <Button aria-label={t("delete")} size="icon" variant="ghost">
               <Trash2Icon />
             </Button>
           }
@@ -154,8 +185,9 @@ function PhotoModalToolbar({ photo }: { photo: Photo }) {
           setOpened={setDropdownOpened}
           onAfterDelete={handleBack}
           onAfterRename={handleAfterRename}
+          triggerTooltip={t("more")}
           triggerRender={
-            <Button size="icon" variant="ghost">
+            <Button aria-label={t("more")} size="icon" variant="ghost">
               <CircleEllipsisIcon />
             </Button>
           }

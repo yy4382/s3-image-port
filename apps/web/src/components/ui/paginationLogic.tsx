@@ -11,12 +11,24 @@ import {
 // import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "./button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 export interface PaginationWithLinksProps {
   // pageSizeSelectOptions?: {
   //   pageSizeSearchParam?: string;
   //   pageSizeOptions: number[];
   // };
+  pageSizeSelectOptions?: {
+    pageSizeOptions: readonly number[];
+    label: string;
+    onPageSizeChange: (pageSize: number) => void;
+  };
   totalCount: number;
   pageSize: number;
   page: number;
@@ -38,6 +50,7 @@ export interface PaginationWithLinksProps {
  */
 export function PaginationWithLogic({
   // pageSizeSelectOptions,
+  pageSizeSelectOptions,
   pageSize,
   totalCount,
   page,
@@ -155,6 +168,16 @@ export function PaginationWithLogic({
           />
         </div>
       )} */}
+      {pageSizeSelectOptions && (
+        <div className="flex items-center gap-2 md:flex-1">
+          <SelectRowsPerPage
+            options={pageSizeSelectOptions.pageSizeOptions}
+            label={pageSizeSelectOptions.label}
+            setPageSize={pageSizeSelectOptions.onPageSizeChange}
+            pageSize={pageSize}
+          />
+        </div>
+      )}
       <Pagination>
         <PaginationContent className="max-sm:gap-0">
           <PaginationItem>
@@ -242,3 +265,39 @@ function PaginationLink({
 //     </div>
 //   );
 // }
+
+function SelectRowsPerPage({
+  options,
+  label,
+  setPageSize,
+  pageSize,
+}: {
+  options: readonly number[];
+  label: string;
+  setPageSize: (newSize: number) => void;
+  pageSize: number;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="whitespace-nowrap text-sm text-muted-foreground">
+        {label}
+      </span>
+      <Select
+        value={String(pageSize)}
+        onValueChange={(value) => setPageSize(Number(value))}
+        itemToStringLabel={(item) => String(item ?? pageSize)}
+      >
+        <SelectTrigger size="sm">
+          <SelectValue>{String(pageSize)}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={String(option)}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}

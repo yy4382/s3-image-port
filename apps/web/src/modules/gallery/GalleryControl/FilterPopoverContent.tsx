@@ -14,6 +14,11 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useMemo } from "react";
 
 interface FilterPopoverContentProps {
@@ -34,13 +39,21 @@ export function FilterPopoverContent({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h4 className="font-medium leading-none">{t("filterOptions")}</h4>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setFilterPopoverOpen(false)}
-          >
-            <XIcon className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label={t("close")}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFilterPopoverOpen(false)}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              }
+            />
+            <TooltipContent>{t("close")}</TooltipContent>
+          </Tooltip>
         </div>
         <p className="text-sm text-muted-foreground">{t("filterByProperty")}</p>
       </div>
@@ -151,12 +164,21 @@ function PrefixSelector({
                 <Combobox.Input render={<InputGroupInput />} />
 
                 <InputGroupAddon align="inline-end">
-                  <Combobox.Clear
-                    data-slot="combobox-clear"
-                    render={<InputGroupButton variant="ghost" size="icon-xs" />}
-                  >
-                    <XIcon className="pointer-events-none" />
-                  </Combobox.Clear>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Combobox.Clear
+                          data-slot="combobox-clear"
+                          render={
+                            <InputGroupButton variant="ghost" size="icon-xs" />
+                          }
+                        >
+                          <XIcon className="pointer-events-none" />
+                        </Combobox.Clear>
+                      }
+                    />
+                    <TooltipContent>{t("clearPrefixSearch")}</TooltipContent>
+                  </Tooltip>
                 </InputGroupAddon>
               </InputGroup>
               <Combobox.Empty className="text-muted-foreground hidden w-full justify-center py-2 text-center text-sm group-data-empty/combobox-content:flex">
@@ -189,14 +211,22 @@ function PrefixSelector({
           </Combobox.Positioner>
         </Combobox.Portal>
       </Combobox.Root>
-      <Button
-        variant="outline"
-        size="icon"
-        disabled={currentPrefix === null}
-        onClick={() => handleUpdate({ prefix: undefined })}
-      >
-        <XIcon className="size-5" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              aria-label={t("clearPrefix")}
+              variant="outline"
+              size="icon"
+              disabled={currentPrefix === null}
+              onClick={() => handleUpdate({ prefix: undefined })}
+            >
+              <XIcon className="size-5" />
+            </Button>
+          }
+        />
+        <TooltipContent>{t("clearPrefix")}</TooltipContent>
+      </Tooltip>
     </div>
   );
 }

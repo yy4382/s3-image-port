@@ -1,10 +1,16 @@
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/stores/schemas/photo";
 import { getRouteApi } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
 import { useLocale } from "use-intl";
+import { useTranslations } from "use-intl";
 import McCheckFill from "~icons/mingcute/checkbox-fill";
 import McCopy from "~icons/mingcute/copy-2-line.jsx";
 import { PhotoOptions } from "./photo-options";
@@ -79,19 +85,27 @@ function PhotoActionCopyLink({
   photo: Photo;
 }) {
   const operations = usePhotoOperations(photo);
+  const t = useTranslations("gallery.item.options");
   return (
-    <Button
-      aria-label="Copy link"
-      variant="secondary"
-      size="icon-sm"
-      className={className}
-      onClick={(e) => {
-        e.stopPropagation();
-        operations.copyUrl();
-      }}
-    >
-      <McCopy />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            aria-label={t("copyUrl")}
+            variant="secondary"
+            size="icon-sm"
+            className={className}
+            onClick={(e) => {
+              e.stopPropagation();
+              operations.copyUrl();
+            }}
+          >
+            <McCopy />
+          </Button>
+        }
+      />
+      <TooltipContent>{t("copyUrl")}</TooltipContent>
+    </Tooltip>
   );
 }
 

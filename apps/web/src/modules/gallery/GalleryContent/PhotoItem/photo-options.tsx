@@ -18,6 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Photo } from "@/stores/schemas/photo";
 import { format } from "date-fns";
 import {
@@ -43,11 +48,13 @@ export function PhotoOptions({
   onOpen,
   onAfterDelete,
   onAfterRename,
+  triggerTooltip,
 }: {
   photo: Photo;
   opened: boolean;
   setOpened: (opened: boolean) => void;
   triggerRender?: ComponentPropsWithRef<typeof DropdownMenuTrigger>["render"];
+  triggerTooltip?: string;
   onOpen?: () => void;
   onAfterDelete?: () => void;
   onAfterRename?: (newKey: string) => void;
@@ -80,15 +87,26 @@ export function PhotoOptions({
   return (
     <>
       <DropdownMenu open={opened} onOpenChange={setOpened} modal={false}>
-        <DropdownMenuTrigger
-          render={
-            triggerRender ?? (
-              <Button variant={"secondary"} size="icon-sm">
-                <MoreHorizontalIcon />
-              </Button>
-            )
-          }
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  triggerRender ?? (
+                    <Button
+                      aria-label={triggerTooltip ?? t("more")}
+                      variant={"secondary"}
+                      size="icon-sm"
+                    >
+                      <MoreHorizontalIcon />
+                    </Button>
+                  )
+                }
+              />
+            }
+          />
+          <TooltipContent>{triggerTooltip ?? t("more")}</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent>
           {onOpen && (
             <DropdownMenuItem onClick={onOpen}>
