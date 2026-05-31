@@ -9,4 +9,6 @@ export type PendingUpload = {
   status: "pending" | "processing" | "processed" | "uploading" | "uploaded";
   id: string;
   supportProcess: boolean;
+  livePhotoStillUploadId?: string;
+  livePhotoMotionUploadId?: string;
 };

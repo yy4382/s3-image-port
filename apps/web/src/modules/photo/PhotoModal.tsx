@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/tooltip";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
-import { photosAtomReadOnly } from "../gallery/hooks/use-photo-list";
+import {
+  photosAtomReadOnly,
+  useLivePhotoVideo,
+} from "../gallery/hooks/use-photo-list";
+import { useDisplayableImage } from "@/lib/heic/use-displayable-image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LivePhotoPlayer } from "./live-photo-player";
 import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
@@ -37,6 +43,18 @@ function PhotoModalContent({ path }: { path: string }) {
     }
     return s3Key2Url(path, s3Settings);
   }, [path, s3Settings]);
+  const livePhotoVideo = useLivePhotoVideo(path);
+  const videoUrl = useMemo(() => {
+    if (!s3Settings || !livePhotoVideo) {
+      return undefined;
+    }
+    return s3Key2Url(livePhotoVideo.Key, s3Settings);
+  }, [livePhotoVideo, s3Settings]);
+  // LivePhotosKit needs a still the browser can decode, so convert a HEIC still
+  // to JPEG first. Only resolved for Live Photos; plain photos use PhotoImg,
+  // which does its own conversion.
+  const { src: livePhotoStillSrc, status: livePhotoStillStatus } =
+    useDisplayableImage(videoUrl ? url : undefined);
   const navigate = route.useNavigate();
   const navigateBack = () => {
     navigate({
@@ -73,12 +91,26 @@ function PhotoModalContent({ path }: { path: string }) {
       </div>
       {url && (
         <div className="absolute inset-0">
-          <PhotoImg
-            url={url}
-            s3Key={path}
-            setLoadingState={() => {}}
-            className="size-full object-contain"
-          />
+          {videoUrl && livePhotoStillStatus !== "error" ? (
+            livePhotoStillSrc ? (
+              <LivePhotoPlayer
+                key={livePhotoStillSrc}
+                photoSrc={livePhotoStillSrc}
+                videoSrc={videoUrl}
+                alt={path}
+                className="size-full"
+              />
+            ) : (
+              <Skeleton className="size-full" />
+            )
+          ) : (
+            <PhotoImg
+              url={url}
+              s3Key={path}
+              setLoadingState={() => {}}
+              className="size-full object-contain"
+            />
+          )}
         </div>
       )}
     </div>
