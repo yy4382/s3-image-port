@@ -319,6 +319,7 @@
       "selectDate": "选择日期"
     },
     "item": {
+      "livePhoto": "实况",
       "options": {
         "open": "打开",
         "info": "信息",

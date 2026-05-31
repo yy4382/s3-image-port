@@ -1,5 +1,6 @@
 import type { Photo } from "@/stores/schemas/photo";
 import ImageS3Client from "@/lib/s3/image-s3-client";
+import { pairLivePhotos } from "@/lib/live-photo/live-photo";
 import { compareAsc, compareDesc, isAfter, isBefore } from "date-fns";
 import Fuse from "fuse.js";
 import { atom, useAtomValue, useSetAtom } from "jotai";
@@ -18,10 +19,32 @@ import {
 
 export const photosAtomReadOnly = atom((get) => get(photosAtom));
 
+/**
+ * Pairs Live Photo stills with their motion videos. Derived once from the raw
+ * photo list so the grid can hide bare `.mov` objects and surface them through
+ * their still image instead.
+ */
+export const livePhotoPairingAtom = atom((get) =>
+  pairLivePhotos(get(photosAtomReadOnly)),
+);
+
+/** Raw photos minus the motion videos that belong to a paired Live Photo. */
+export const displayPhotosAtom = atom(
+  (get) => get(livePhotoPairingAtom).displayPhotos,
+);
+
+/**
+ * Returns the paired motion video for a still image key, or `undefined` when
+ * the image is not a Live Photo.
+ */
+export function useLivePhotoVideo(imageKey: string): Photo | undefined {
+  return useAtomValue(livePhotoPairingAtom).videoByImageKey.get(imageKey);
+}
+
 export const availablePrefixesAtom = atom<
   { name: string; hierarchy: number }[]
 >((get) => {
-  const photos = get(photosAtomReadOnly);
+  const photos = get(displayPhotosAtom);
   const prefixes = new Set(
     photos.flatMap((photo) => {
       const parts = photo.Key.split("/");
@@ -39,7 +62,7 @@ export const availablePrefixesAtom = atom<
 });
 
 export const filteredPhotosAtom = atom<Photo[]>((get) => {
-  const photos = get(photosAtomReadOnly);
+  const photos = get(displayPhotosAtom);
   const displayOptions = get(displayOptionsAtom);
 
   const searchedPhotos = displayOptions.searchTerm

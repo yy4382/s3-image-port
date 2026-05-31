@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { toast } from "sonner";
 
 import { defaultKeyTemplate, S3KeyMetadata } from "@/lib/s3/s3-key";
+import { planLivePhotoUpload, splitKeyExt } from "@/lib/live-photo/live-photo";
 import { isSupportedFileType, processFile } from "@/lib/utils/imageCompress";
 import ImageS3Client from "@/lib/s3/image-s3-client";
 import { uploadSettingsAtom } from "@/stores/atoms/settings";
@@ -16,25 +17,65 @@ export const fileListAtom = atom<PendingUpload[]>([]);
 
 export const appendFilesAtom = atom(null, (get, set, newFiles: File[]) => {
   const uploadSettings = get(uploadSettingsAtom);
+  const template = uploadSettings?.keyTemplate ?? defaultKeyTemplate;
   const ulid = monotonicFactory();
-  const uploadObjects = newFiles.map(
-    (file) =>
-      ({
-        file,
-        processedFile: null,
-        key: S3KeyMetadata.create(
-          file,
-          uploadSettings?.keyTemplate ?? defaultKeyTemplate,
-          ulid,
-        ),
-        compressOption: uploadSettings?.compressionOption ?? null,
-        id: uuid(),
-        status: "pending",
-        supportProcess: isSupportedFileType(file),
-      }) satisfies PendingUpload,
-  );
+  const ids = newFiles.map(() => uuid());
+
+  // Detect Live Photo pairs (still + .mov) within this batch so the motion
+  // video can share its still's key base and pair again once listed.
+  const roles = planLivePhotoUpload(newFiles);
+  const motionIdByStillIndex = new Map<number, string>();
+  roles.forEach((role, i) => {
+    if (role.type === "motion") {
+      motionIdByStillIndex.set(role.stillIndex, ids[i]);
+    }
+  });
+  const keys = new Array<S3KeyMetadata>(newFiles.length);
+  // First pass: stills and standalone files each get a fresh key.
+  newFiles.forEach((file, i) => {
+    if (roles[i].type === "motion") return;
+    keys[i] = S3KeyMetadata.create(file, template, ulid);
+  });
+  // Second pass: motion videos reuse their still's key base, swapping the ext.
+  newFiles.forEach((file, i) => {
+    const role = roles[i];
+    if (role.type !== "motion") return;
+    const videoExt = splitKeyExt(file.name).ext || "mov";
+    keys[i] = S3KeyMetadata.withExt(keys[role.stillIndex], videoExt);
+  });
+
+  const uploadObjects = newFiles.map((file, i) => {
+    const supportProcess = isSupportedFileType(file);
+    return {
+      file,
+      processedFile: null,
+      key: keys[i],
+      compressOption: supportProcess
+        ? (uploadSettings?.compressionOption ?? null)
+        : null,
+      id: ids[i],
+      status: "pending",
+      supportProcess,
+      ...(roles[i].type === "still" && {
+        livePhotoMotionUploadId: motionIdByStillIndex.get(i),
+      }),
+      ...(roles[i].type === "motion" && {
+        livePhotoStillUploadId: ids[roles[i].stillIndex],
+      }),
+    } satisfies PendingUpload;
+  });
   set(fileListAtom, [...get(fileListAtom), ...uploadObjects]);
 });
+
+function motionExtForUpload(file: PendingUpload): string {
+  return (
+    splitKeyExt(file.file.name).ext || splitKeyExt(file.key.toString()).ext
+  );
+}
+
+function keyForLivePhotoMotion(file: PendingUpload, still: PendingUpload) {
+  return S3KeyMetadata.withExt(still.key, motionExtForUpload(file) || "mov");
+}
 
 export const clearUploadedFilesAtom = atom(
   (get) => {
@@ -54,7 +95,11 @@ export const processFileAtom = atom(
   null,
   async (get, set, atom: PrimitiveAtom<PendingUpload>) => {
     const initFile = get(atom);
-    if (!initFile.compressOption || !isSupportedFileType(initFile.file)) {
+    if (
+      !initFile.compressOption ||
+      !isSupportedFileType(initFile.file) ||
+      initFile.processedFile
+    ) {
       return;
     }
     set(atom, (prev) => ({
@@ -68,12 +113,26 @@ export const processFileAtom = atom(
         file.compressOption!,
         () => {},
       );
-      set(atom, (prev) => ({
-        ...prev,
-        processedFile: processed,
-        key: S3KeyMetadata.updateFile(processed, prev.key),
-        status: "processed",
-      }));
+      let updatedStill: PendingUpload | undefined;
+      set(atom, (prev) => {
+        updatedStill = {
+          ...prev,
+          processedFile: processed,
+          key: S3KeyMetadata.updateFile(processed, prev.key),
+          status: "processed",
+        };
+        return updatedStill;
+      });
+      if (updatedStill?.livePhotoMotionUploadId) {
+        const still = updatedStill;
+        set(fileListAtom, (prev) =>
+          prev.map((file) =>
+            file.livePhotoStillUploadId === still.id
+              ? { ...file, key: keyForLivePhotoMotion(file, still) }
+              : file,
+          ),
+        );
+      }
     } catch (error) {
       toast.error(`Processing failed for ${get(atom).file.name}`);
       console.error("Processing failed", error);
@@ -94,8 +153,22 @@ export const uploadFileAtom = atom(
     atom: PrimitiveAtom<PendingUpload>,
     s3Settings: S3Options,
   ) => {
+    let file = get(atom);
+    if (file.livePhotoStillUploadId) {
+      const stillAtom = get(fileAtomAtoms).find(
+        (candidate) => get(candidate).id === file.livePhotoStillUploadId,
+      );
+      if (stillAtom) {
+        await set(processFileAtom, stillAtom);
+        const still = get(stillAtom);
+        set(atom, (prev) => ({
+          ...prev,
+          key: keyForLivePhotoMotion(prev, still),
+        }));
+      }
+    }
     await set(processFileAtom, atom);
-    const file = get(atom);
+    file = get(atom);
     const processedFile = file.processedFile ?? file.file;
     set(atom, (prev) => ({
       ...prev,

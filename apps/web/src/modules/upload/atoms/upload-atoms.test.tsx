@@ -51,6 +51,7 @@ import {
   uploadAllFilesAtom,
 } from "./upload-atoms";
 import type { S3Options } from "@/stores/schemas/settings";
+import { uploadSettingsAtom } from "@/stores/atoms/settings";
 
 const mockS3Settings: S3Options = {
   endpoint: "https://s3.example.com",
@@ -154,6 +155,52 @@ describe("upload-atoms", () => {
 
       expect(result.current.fileList[0].key).toBeDefined();
       expect(result.current.fileList[0].key.toString()).toContain("jpg");
+    });
+
+    test("gives a Live Photo still and its .mov a shared key base", async () => {
+      const { result, act } = await renderHook(
+        () => ({
+          fileList: useAtomValue(fileListAtom),
+          appendFiles: useSetAtom(appendFilesAtom),
+        }),
+        { wrapper: Provider },
+      );
+
+      await act(() => {
+        result.current.appendFiles([
+          createTestFile("IMG_0001.jpg", "image/jpeg"),
+          createTestFile("IMG_0001.mov", "video/quicktime"),
+        ]);
+      });
+
+      const [stillKey, motionKey] = result.current.fileList.map((f) =>
+        f.key.toString(),
+      );
+      // Same base, differing only by extension -> they pair again on listing.
+      expect(stillKey.replace(/\.[^.]+$/, "")).toBe(
+        motionKey.replace(/\.[^.]+$/, ""),
+      );
+      expect(stillKey.endsWith(".jpg")).toBe(true);
+      expect(motionKey.endsWith(".mov")).toBe(true);
+    });
+
+    test("does not compress or process non-image files", async () => {
+      const { result, act } = await renderHook(
+        () => ({
+          fileList: useAtomValue(fileListAtom),
+          appendFiles: useSetAtom(appendFilesAtom),
+        }),
+        { wrapper: Provider },
+      );
+
+      await act(() => {
+        result.current.appendFiles([
+          createTestFile("clip.mov", "video/quicktime"),
+        ]);
+      });
+
+      expect(result.current.fileList[0].supportProcess).toBe(false);
+      expect(result.current.fileList[0].compressOption).toBeNull();
     });
   });
 
@@ -443,6 +490,49 @@ describe("upload-atoms", () => {
 
       expect(mocks.processFileFn).toHaveBeenCalled();
       expect(result.current.fileList[0].status).toBe("uploaded");
+    });
+
+    test("keeps a processed Live Photo still and motion upload on the same final key base", async () => {
+      const store = createStore();
+      store.set(uploadSettingsAtom, {
+        keyTemplate: "{{filename}}.{{ext}}",
+        keyTemplatePresets: [],
+        compressionOption: { type: "jpeg", quality: 80 },
+      });
+
+      const { result, act } = await renderHook(
+        () => ({
+          appendFiles: useSetAtom(appendFilesAtom),
+          uploadAll: useSetAtom(uploadAllFilesAtom),
+        }),
+        {
+          wrapper: ({ children }) => (
+            <Provider store={store}>{children}</Provider>
+          ),
+        },
+      );
+
+      await act(() => {
+        result.current.appendFiles([
+          createTestFile("IMG_0001.jpg", "image/jpeg"),
+          createTestFile("IMG_0001.mov", "video/quicktime"),
+        ]);
+      });
+
+      await act(async () => {
+        await result.current.uploadAll(mockS3Settings);
+      });
+
+      const uploadedKeys = mocks.uploadFn.mock.calls.map(([, key]) => key);
+      const stillKey = uploadedKeys.find((key) => key.endsWith(".jpg"));
+      const motionKey = uploadedKeys.find((key) => key.endsWith(".mov"));
+
+      expect(stillKey).toBeDefined();
+      expect(motionKey).toBeDefined();
+      expect(stillKey!.replace(/\.[^.]+$/, "")).toBe(
+        motionKey!.replace(/\.[^.]+$/, ""),
+      );
+      expect(stillKey).toContain("processed-IMG_0001");
     });
 
     test("handles upload errors and resets status", async () => {

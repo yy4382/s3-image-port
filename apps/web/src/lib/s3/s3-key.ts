@@ -70,6 +70,16 @@ export class S3KeyMetadata {
   static updateTemplate(template: string, prev: S3KeyMetadata) {
     return new S3KeyMetadata(template, prev.data);
   }
+  /**
+   * Derive a sibling key that shares everything with `prev` except the extension.
+   *
+   * Used to pair an Apple Live Photo's motion file with its still image: the
+   * resulting key only differs by extension (e.g. `…/abc.jpg` -> `…/abc.mov`),
+   * so the two objects share the same base and can be paired again on listing.
+   */
+  static withExt(prev: S3KeyMetadata, ext: string) {
+    return new S3KeyMetadata(prev.template, { ...prev.data, ext });
+  }
   toString() {
     return this.template.replace(
       /{{(.*?)}}/g,
