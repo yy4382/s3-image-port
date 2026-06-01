@@ -322,6 +322,7 @@
       "selectDate": "Select date"
     },
     "item": {
+      "livePhoto": "Live",
       "options": {
         "open": "Open",
         "info": "Info",
