@@ -53,6 +53,42 @@ function isStillImageKey(key: string): boolean {
   return (STILL_IMAGE_EXTENSIONS as readonly string[]).includes(ext);
 }
 
+/** How a file/key participates in a Live Photo: still image, motion video, or neither. */
+type ComponentKind = "image" | "video" | "other";
+
+/**
+ * Group items by their shared base, splitting each base's members into stills
+ * and motion videos. This is the common core of both listing-side and
+ * upload-side pairing — callers decide how to derive a base and classify an
+ * item, and what to do with a base that has both components.
+ */
+function groupComponentsByBase<T>(
+  items: T[],
+  baseOf: (item: T) => string,
+  kindOf: (item: T) => ComponentKind,
+): Map<string, { images: T[]; videos: T[] }> {
+  const byBase = new Map<string, { images: T[]; videos: T[] }>();
+  for (const item of items) {
+    const kind = kindOf(item);
+    if (kind === "other") continue;
+    const base = baseOf(item);
+    let entry = byBase.get(base);
+    if (!entry) {
+      entry = { images: [], videos: [] };
+      byBase.set(base, entry);
+    }
+    (kind === "video" ? entry.videos : entry.images).push(item);
+  }
+  return byBase;
+}
+
+/** Classify a stored key as a Live Photo still, motion video, or neither. */
+function keyComponentKind(key: string): ComponentKind {
+  if (isLivePhotoVideoKey(key)) return "video";
+  if (isStillImageKey(key)) return "image";
+  return "other";
+}
+
 export type LivePhotoPairing = {
   /**
    * Photos to actually render in the grid. The motion `.mov` of a paired Live
@@ -79,20 +115,11 @@ const EMPTY_PAIRING: LivePhotoPairing = {
 export function pairLivePhotos(photos: Photo[]): LivePhotoPairing {
   if (photos.length === 0) return EMPTY_PAIRING;
 
-  const byBase = new Map<string, { images: Photo[]; videos: Photo[] }>();
-  for (const photo of photos) {
-    const { base } = splitKeyExt(photo.Key);
-    let entry = byBase.get(base);
-    if (!entry) {
-      entry = { images: [], videos: [] };
-      byBase.set(base, entry);
-    }
-    if (isLivePhotoVideoKey(photo.Key)) {
-      entry.videos.push(photo);
-    } else if (isStillImageKey(photo.Key)) {
-      entry.images.push(photo);
-    }
-  }
+  const byBase = groupComponentsByBase(
+    photos,
+    (photo) => splitKeyExt(photo.Key).base,
+    (photo) => keyComponentKind(photo.Key),
+  );
 
   const videoByImageKey = new Map<string, Photo>();
   const pairedVideoKeys = new Set<string>();
@@ -159,26 +186,18 @@ export type UploadRole =
  * Returns one {@link UploadRole} per input file, in the same order.
  */
 export function planLivePhotoUpload(files: UploadFile[]): UploadRole[] {
-  const byBase = new Map<string, { still: number[]; motion: number[] }>();
-  files.forEach((file, index) => {
-    const kind = classifyUploadKind(file);
-    if (kind === "other") return;
-    const base = uploadBaseName(file.name);
-    let entry = byBase.get(base);
-    if (!entry) {
-      entry = { still: [], motion: [] };
-      byBase.set(base, entry);
-    }
-    if (kind === "video") entry.motion.push(index);
-    else entry.still.push(index);
-  });
+  const byBase = groupComponentsByBase(
+    files.map((file, index) => ({ file, index })),
+    ({ file }) => uploadBaseName(file.name),
+    ({ file }) => classifyUploadKind(file),
+  );
 
   const roles: UploadRole[] = files.map(() => ({ type: "single" }));
-  for (const { still, motion } of byBase.values()) {
-    if (still.length === 0 || motion.length === 0) continue;
-    const stillIndex = still[0];
+  for (const { images, videos } of byBase.values()) {
+    if (images.length === 0 || videos.length === 0) continue;
+    const stillIndex = images[0].index;
     roles[stillIndex] = { type: "still" };
-    roles[motion[0]] = { type: "motion", stillIndex };
+    roles[videos[0].index] = { type: "motion", stillIndex };
   }
   return roles;
 }
