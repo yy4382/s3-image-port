@@ -15,9 +15,7 @@ import {
 
 const pageSizeSchema = z.coerce
   .number()
-  .refine((value): value is GalleryPageSize =>
-    PAGE_SIZE_OPTIONS.includes(value as GalleryPageSize),
-  )
+  .pipe(z.literal(PAGE_SIZE_OPTIONS))
   .optional()
   .catch(undefined);
 

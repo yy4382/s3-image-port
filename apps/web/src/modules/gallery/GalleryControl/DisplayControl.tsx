@@ -45,7 +45,10 @@ function useSyncDisplayAtomToSearchParams() {
   useEffect(() => {
     const lastDisplayOptions = lastDisplayOptionsRef.current;
     if (!equal(lastDisplayOptions, displayOptions)) {
-      const search = galleryFilterOptionsToSearchParams(displayOptions, pageSize);
+      const search = galleryFilterOptionsToSearchParams(
+        displayOptions,
+        pageSize,
+      );
       startTransition(() => {
         setCurrentPage(1);
         navigate({ to: ".", search: search });
@@ -111,15 +114,15 @@ export function DisplayControl() {
           <TooltipTrigger
             render={
               <PopoverTrigger>
-              <NotificationBadge
-                label={filterActiveCount}
-                show={filterActiveCount > 0}
-                variant={"destructiveBackground"}
-              >
-                <div className={buttonVariants({ size: "icon" })}>
-                  <FilterIcon className="h-4 w-4" />
-                </div>
-              </NotificationBadge>
+                <NotificationBadge
+                  label={filterActiveCount}
+                  show={filterActiveCount > 0}
+                  variant={"destructiveBackground"}
+                >
+                  <div className={buttonVariants({ size: "icon" })}>
+                    <FilterIcon className="h-4 w-4" />
+                  </div>
+                </NotificationBadge>
               </PopoverTrigger>
             }
           />
