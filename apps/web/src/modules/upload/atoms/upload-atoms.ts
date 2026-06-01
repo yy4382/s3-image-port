@@ -40,8 +40,7 @@ export const appendFilesAtom = atom(null, (get, set, newFiles: File[]) => {
   newFiles.forEach((file, i) => {
     const role = roles[i];
     if (role.type !== "motion") return;
-    const videoExt = splitKeyExt(file.name).ext || "mov";
-    keys[i] = S3KeyMetadata.withExt(keys[role.stillIndex], videoExt);
+    keys[i] = livePhotoMotionKey(keys[role.stillIndex], file.name);
   });
 
   const uploadObjects = newFiles.map((file, i) => {
@@ -67,14 +66,22 @@ export const appendFilesAtom = atom(null, (get, set, newFiles: File[]) => {
   set(fileListAtom, [...get(fileListAtom), ...uploadObjects]);
 });
 
-function motionExtForUpload(file: PendingUpload): string {
-  return (
-    splitKeyExt(file.file.name).ext || splitKeyExt(file.key.toString()).ext
-  );
-}
-
-function keyForLivePhotoMotion(file: PendingUpload, still: PendingUpload) {
-  return S3KeyMetadata.withExt(still.key, motionExtForUpload(file) || "mov");
+/**
+ * Key for a Live Photo's motion video: the still's key with the motion file's
+ * own extension swapped in, falling back to the extension the motion key already
+ * carries, then `mov`. This keeps the still and motion sharing a base so they
+ * pair again once listed.
+ */
+function livePhotoMotionKey(
+  stillKey: S3KeyMetadata,
+  motionName: string,
+  currentMotionKey?: string,
+): S3KeyMetadata {
+  const ext =
+    splitKeyExt(motionName).ext ||
+    (currentMotionKey ? splitKeyExt(currentMotionKey).ext : "") ||
+    "mov";
+  return S3KeyMetadata.withExt(stillKey, ext);
 }
 
 export const clearUploadedFilesAtom = atom(
@@ -128,7 +135,14 @@ export const processFileAtom = atom(
         set(fileListAtom, (prev) =>
           prev.map((file) =>
             file.livePhotoStillUploadId === still.id
-              ? { ...file, key: keyForLivePhotoMotion(file, still) }
+              ? {
+                  ...file,
+                  key: livePhotoMotionKey(
+                    still.key,
+                    file.file.name,
+                    file.key.toString(),
+                  ),
+                }
               : file,
           ),
         );
@@ -163,7 +177,11 @@ export const uploadFileAtom = atom(
         const still = get(stillAtom);
         set(atom, (prev) => ({
           ...prev,
-          key: keyForLivePhotoMotion(prev, still),
+          key: livePhotoMotionKey(
+            still.key,
+            prev.file.name,
+            prev.key.toString(),
+          ),
         }));
       }
     }
