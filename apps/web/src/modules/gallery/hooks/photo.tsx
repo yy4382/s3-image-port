@@ -1,4 +1,4 @@
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import { useDeletePhotos } from "./use-delete";
 import { useDownloadPhoto } from "./use-download";
 import { useRenamePhoto } from "./use-rename";
@@ -7,31 +7,31 @@ import { toggleSelectedAtom } from "./use-select";
 import { useSetAtom } from "jotai";
 import { useCopy } from "@/lib/hooks/use-copy";
 
-export function usePhotoOperations(photo: Photo) {
+export function usePhotoOperations(photo: StoredImage) {
   const deletePhotos = useDeletePhotos();
   const downloadPhoto = useDownloadPhoto();
   const renamePhoto = useRenamePhoto();
   const toggleSelected = useSetAtom(toggleSelectedAtom);
 
   const deleteFn = useCallback(async () => {
-    await deletePhotos(photo.Key);
-  }, [deletePhotos, photo.Key]);
+    await deletePhotos(photo.key);
+  }, [deletePhotos, photo.key]);
 
   const handleRename = useCallback(
     async (newKey: string) => {
-      return await renamePhoto(photo.Key, newKey);
+      return await renamePhoto(photo.key, newKey);
     },
-    [renamePhoto, photo.Key],
+    [renamePhoto, photo.key],
   );
 
   const handleDownload = useCallback(async () => {
-    await downloadPhoto(photo.Key);
-  }, [downloadPhoto, photo.Key]);
+    await downloadPhoto(photo.key);
+  }, [downloadPhoto, photo.key]);
 
   const { copy } = useCopy();
 
   const handleCopyMarkdown = () => {
-    const markdown = `![${photo.Key}](${photo.url})`;
+    const markdown = `![${photo.key}](${photo.url})`;
     copy(markdown, "Markdown link");
   };
   const handleCopyUrl = () => {
@@ -39,9 +39,9 @@ export function usePhotoOperations(photo: Photo) {
   };
   const handleToggleSelected = useCallback(
     (check: boolean | "toggle", shift: boolean) => {
-      toggleSelected(photo.Key, check, shift);
+      toggleSelected(photo.key, check, shift);
     },
-    [toggleSelected, photo.Key],
+    [toggleSelected, photo.key],
   );
 
   return {

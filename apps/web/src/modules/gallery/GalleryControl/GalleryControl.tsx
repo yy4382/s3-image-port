@@ -39,7 +39,7 @@ export function GalleryControl() {
     setSelectedPhotos((prev) => {
       const newSet = new Set(prev);
       for (const photo of showingPhotos) {
-        newSet.add(photo.Key);
+        newSet.add(photo.key);
       }
       return newSet;
     });
@@ -47,7 +47,7 @@ export function GalleryControl() {
 
   const copySelectedUrls = () => {
     const urls = filteredPhotos
-      .filter((photo) => selectedPhotos.has(photo.Key))
+      .filter((photo) => selectedPhotos.has(photo.key))
       .map((photo) => photo.url);
     copy(urls.join("\n"), t("selectedUrls"));
   };

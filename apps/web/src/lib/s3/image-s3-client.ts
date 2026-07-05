@@ -11,7 +11,12 @@ import {
 import type { S3Options } from "@/stores/schemas/settings";
 import mime from "mime";
 import { s3Key2Url } from "./s3-key";
-import type { Photo } from "@/stores/schemas/photo";
+
+export type ListedS3ImageObject = {
+  Key: string;
+  LastModified?: string;
+  url: string;
+};
 
 /**
  * A client for the S3 API.
@@ -46,7 +51,7 @@ class ImageS3Client {
    * @param key The key to use in S3
    * @returns The response from the S3 upload operation
    */
-  async upload(file: File | string, key: string) {
+  async upload(file: File | Blob | string, key: string) {
     const mimeType = ImageS3Client.calculateMIME(file, key);
 
     const command = new PutObjectCommand({
@@ -95,10 +100,13 @@ class ImageS3Client {
     return response;
   }
 
-  async list(onlyOnce = false, maxAttempts = 200): Promise<Photo[]> {
+  async list(
+    onlyOnce = false,
+    maxAttempts = 200,
+  ): Promise<ListedS3ImageObject[]> {
     const fetchAllContents = async (
       nextToken?: string,
-      acc = [] as Photo[],
+      acc = [] as ListedS3ImageObject[],
       attempts = 0,
     ) => {
       if (attempts >= maxAttempts) {
@@ -124,7 +132,7 @@ class ImageS3Client {
   }
 
   async listOnce(NextContinuationToken?: string): Promise<{
-    contents: Photo[];
+    contents: ListedS3ImageObject[];
     IsTruncated: boolean | undefined;
     NextContinuationToken: string | undefined;
   }> {
@@ -159,7 +167,7 @@ class ImageS3Client {
         Key: photo.Key,
         LastModified: photo.LastModified?.toISOString(),
         url: s3Key2Url(photo.Key!, this.config),
-      } as Photo;
+      } as ListedS3ImageObject;
     }).filter((photo) => !photo.Key.endsWith("/"));
     return {
       contents,

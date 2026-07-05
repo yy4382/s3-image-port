@@ -1,4 +1,4 @@
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import { enableMapSet, produce } from "immer";
 import { atom } from "jotai";
 import { filteredPhotosAtom } from "./use-photo-list";
@@ -25,7 +25,7 @@ export const toggleSelectedAtom = atom(
 );
 
 const getShiftSelected = (
-  photoList: readonly Photo[],
+  photoList: readonly StoredImage[],
   currentSelected: Set<string>,
   key: string,
 ) => {
@@ -33,8 +33,8 @@ const getShiftSelected = (
   if (!lastSelected) {
     return new Set([key]);
   }
-  const lastSelectedIndex = photoList.findIndex((p) => p.Key === lastSelected);
-  const currentSelectingIndex = photoList.findIndex((p) => p.Key === key);
+  const lastSelectedIndex = photoList.findIndex((p) => p.key === lastSelected);
+  const currentSelectingIndex = photoList.findIndex((p) => p.key === key);
   if (lastSelectedIndex === -1 || currentSelectingIndex === -1) {
     return currentSelected;
   }
@@ -42,7 +42,7 @@ const getShiftSelected = (
   const endIndex = Math.max(lastSelectedIndex, currentSelectingIndex);
   const newSet = produce(currentSelected, (draft) => {
     for (let i = startIndex; i <= endIndex; i++) {
-      draft.add(photoList[i].Key);
+      draft.add(photoList[i].key);
     }
   });
   return newSet;

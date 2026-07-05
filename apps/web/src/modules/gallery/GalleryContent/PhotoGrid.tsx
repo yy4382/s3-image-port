@@ -66,7 +66,7 @@ export function PhotoGrid() {
           setSelectedPhotos((prev) => {
             const newSet = new Set(prev);
             for (const photo of photos) {
-              newSet.add(photo.Key);
+              newSet.add(photo.key);
             }
             return newSet;
           });
@@ -89,7 +89,7 @@ export function PhotoGrid() {
           >
             {photos.map((photo, i) => (
               <PhotoItem
-                key={photo.Key}
+                key={photo.key}
                 photo={photo}
                 size={photoSize[i].size}
                 position={photoSize[i].position}

@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { Photo } from "../schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import { atomWithStorage } from "jotai/utils";
 import {
   galleryFilterDefault,
@@ -7,7 +7,10 @@ import {
 } from "../schemas/gallery/filter";
 import { clearNaturalSizeCacheAtom } from "./photo-size";
 
-export const photosAtom = atomWithStorage<Photo[]>("s3ip:gallery:photos", []);
+export const photosAtom = atomWithStorage<StoredImage[]>(
+  "s3ip:gallery:photos",
+  [],
+);
 export const selectedPhotosAtom = atom<Set<string>>(new Set<string>());
 export const displayOptionsAtom =
   atom<GalleryFilterOptions>(galleryFilterDefault);

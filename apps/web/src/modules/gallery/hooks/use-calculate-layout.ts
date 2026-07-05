@@ -27,7 +27,7 @@ export const photoSizeAtom = atom<
   }[]
 >((get) => {
   const originalSizes = get(showingPhotosAtom).map((photo) => {
-    const size = get(naturalSizesAtom)[0].get(photo.Key);
+    const size = get(naturalSizesAtom)[0].get(photo.key);
     if (size) {
       const ratio = size[0] / size[1];
       return [DEFAULT_IMAGE_SIZE[1] * ratio, DEFAULT_IMAGE_SIZE[1]] as [

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import ImageS3Client from "@/lib/s3/image-s3-client";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
@@ -21,7 +21,7 @@ export function PhotoItem({
   size,
   position,
 }: {
-  photo: Photo;
+  photo: StoredImage;
   size: { width: number; height: number };
   position: { x: number; y: number };
 }) {
@@ -34,11 +34,11 @@ function PhotoDisplay({
   size,
   position,
 }: {
-  photo: Photo;
+  photo: StoredImage;
   size: { width: number; height: number };
   position: { x: number; y: number };
 }) {
-  const s3Key = photo.Key;
+  const s3Key = photo.key;
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const [ref, hovering] = useHover();
 
@@ -48,8 +48,8 @@ function PhotoDisplay({
 
   const allSelected = useAtomValue(selectedPhotosAtom);
   const selected = useMemo(() => {
-    return allSelected.has(photo.Key);
-  }, [allSelected, photo.Key]);
+    return allSelected.has(photo.key);
+  }, [allSelected, photo.key]);
 
   usePrefetchPhotoPage(photo, hovering);
 
@@ -98,7 +98,7 @@ function PhotoDisplay({
  * @param photo - The photo to prefetch.
  * @param hovering - Whether the photo is hovered.
  */
-function usePrefetchPhotoPage(photo: Photo, hovering: boolean) {
+function usePrefetchPhotoPage(photo: StoredImage, hovering: boolean) {
   const router = useRouter();
   const locale = useLocale();
   const galleryState = JSON.stringify(route.useSearch());
@@ -107,9 +107,9 @@ function usePrefetchPhotoPage(photo: Photo, hovering: boolean) {
     router.preloadRoute({
       to: "/$locale/photo",
       params: { locale },
-      search: { imagePath: photo.Key, galleryState },
+      search: { imagePath: photo.key, galleryState },
     });
-  }, [router, photo.Key, galleryState, locale]);
+  }, [router, photo.key, galleryState, locale]);
 
   useDelayedHover(hovering, 200, delayedHoverCb);
 }

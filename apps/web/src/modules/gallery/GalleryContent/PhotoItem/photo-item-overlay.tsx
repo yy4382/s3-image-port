@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import { getRouteApi } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
@@ -17,7 +17,7 @@ import { PhotoOptions } from "./photo-options";
 import { usePhotoOperations } from "../../hooks/photo";
 
 type PhotoItemOverlayProps = {
-  photo: Photo;
+  photo: StoredImage;
   selected: boolean;
   hovering: boolean;
 };
@@ -28,7 +28,7 @@ export function PhotoItemOverlay({
   hovering,
 }: PhotoItemOverlayProps) {
   const { toggleSelected } = usePhotoOperations(photo);
-  const onOpenModal = useOpenModal(photo.Key);
+  const onOpenModal = useOpenModal(photo.key);
   const [infoDropdownOpened, setInfoDropdownOpened] = useState(false);
 
   const showOverlay = useMemo(() => {
@@ -82,7 +82,7 @@ function PhotoActionCopyLink({
   photo,
 }: {
   className?: string;
-  photo: Photo;
+  photo: StoredImage;
 }) {
   const operations = usePhotoOperations(photo);
   const t = useTranslations("gallery.item.options");

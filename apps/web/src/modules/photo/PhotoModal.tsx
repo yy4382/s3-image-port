@@ -18,7 +18,7 @@ import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options"
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
 import { usePhotoOperations } from "../gallery/hooks/photo";
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 
 const route = getRouteApi("/$locale/photo");
 
@@ -48,7 +48,7 @@ function PhotoModalContent({ path }: { path: string }) {
 
   const photos = useAtomValue(photosAtomReadOnly);
   const photo = useMemo(() => {
-    return photos.find((photo) => photo.Key === path);
+    return photos.find((photo) => photo.key === path);
   }, [photos, path]);
 
   if (!photo) {
@@ -85,7 +85,7 @@ function PhotoModalContent({ path }: { path: string }) {
   );
 }
 
-function PhotoModalToolbar({ photo }: { photo: Photo }) {
+function PhotoModalToolbar({ photo }: { photo: StoredImage }) {
   const navigate = route.useNavigate();
   const search = route.useSearch();
   const locale = useLocale();
@@ -171,7 +171,7 @@ function PhotoModalToolbar({ photo }: { photo: Photo }) {
         </Tooltip>
         <DeleteSecondConfirm
           deleteFn={handleDelete}
-          itemNames={[photo.Key]}
+          itemNames={[photo.key]}
           triggerTooltip={t("delete")}
           triggerRender={
             <Button aria-label={t("delete")} size="icon" variant="ghost">

@@ -23,7 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import { format } from "date-fns";
 import {
   CopyIcon,
@@ -50,7 +50,7 @@ export function PhotoOptions({
   onAfterRename,
   triggerTooltip,
 }: {
-  photo: Photo;
+  photo: StoredImage;
   opened: boolean;
   setOpened: (opened: boolean) => void;
   triggerRender?: ComponentPropsWithRef<typeof DropdownMenuTrigger>["render"];
@@ -69,8 +69,11 @@ export function PhotoOptions({
 
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
-  const [newKey, setNewKey] = useState(photo.Key);
+  const [newKey, setNewKey] = useState(photo.key);
   const [isRenaming, setIsRenaming] = useState(false);
+  const lastModified = photo.lastModified
+    ? format(new Date(photo.lastModified), "yyyy-MM-dd HH:mm:ss")
+    : "";
 
   const handleRename = async () => {
     setIsRenaming(true);
@@ -122,17 +125,12 @@ export function PhotoOptions({
                 <div className="flex flex-col space-y-1 shrink basis-0 grow min-w-0 p-2">
                   <div className="text-sm items-center inline-flex">
                     <McTimeLine className="shrink-0 mr-2" />
-                    <span className="truncate block">
-                      {format(
-                        new Date(photo.LastModified),
-                        "yyyy-MM-dd HH:mm:ss",
-                      )}
-                    </span>
+                    <span className="truncate block">{lastModified}</span>
                   </div>
                   <div className="text-sm items-center inline-flex">
                     <McKey2Line className="shrink-0 mr-2" />
-                    <span title={photo.Key} className="truncate block">
-                      {photo.Key}
+                    <span title={photo.key} className="truncate block">
+                      {photo.key}
                     </span>
                   </div>
                 </div>
@@ -147,7 +145,7 @@ export function PhotoOptions({
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              setNewKey(photo.Key);
+              setNewKey(photo.key);
               setShowRenameModal(true);
             }}
           >
@@ -172,7 +170,7 @@ export function PhotoOptions({
             <div className="flex flex-col gap-2">
               <label htmlFor="newKey" className="text-sm font-medium">
                 {t("renameModal.currentLabel")}{" "}
-                <span className="font-mono text-xs">{photo.Key}</span>
+                <span className="font-mono text-xs">{photo.key}</span>
               </label>
               <Input
                 id="newKey"
@@ -216,7 +214,7 @@ export function PhotoOptions({
             </DialogDescription>
           </DialogHeader>
           <ul className="list-disc list-inside max-h-[300px] overflow-y-auto">
-            <li>{photo.Key}</li>
+            <li>{photo.key}</li>
           </ul>
           <DialogFooter>
             <Button

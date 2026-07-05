@@ -1,5 +1,9 @@
-import type { Photo } from "@/stores/schemas/photo";
-import ImageS3Client from "@/lib/s3/image-s3-client";
+import {
+  createImageStorage,
+  createS3ImageStorageAdapter,
+  type ImageStorage,
+  type StoredImage,
+} from "@/modules/image-storage";
 import { compareAsc, compareDesc, isAfter, isBefore } from "date-fns";
 import Fuse from "fuse.js";
 import { atom, useAtomValue, useSetAtom } from "jotai";
@@ -7,6 +11,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { validS3SettingsAtom } from "@/stores/atoms/settings";
+import type { S3Options } from "@/stores/schemas/settings";
 import { getTimeRange } from "./use-display-control";
 import {
   currentPageAtom,
@@ -24,7 +29,7 @@ export const availablePrefixesAtom = atom<
   const photos = get(photosAtomReadOnly);
   const prefixes = new Set(
     photos.flatMap((photo) => {
-      const parts = photo.Key.split("/");
+      const parts = photo.key.split("/");
       return parts
         .slice(0, -1)
         .map((_, index) => parts.slice(0, index + 1).join("/"));
@@ -38,13 +43,13 @@ export const availablePrefixesAtom = atom<
     .sort((a, b) => a.name.localeCompare(b.name));
 });
 
-export const filteredPhotosAtom = atom<Photo[]>((get) => {
+export const filteredPhotosAtom = atom<StoredImage[]>((get) => {
   const photos = get(photosAtomReadOnly);
   const displayOptions = get(displayOptionsAtom);
 
   const searchedPhotos = displayOptions.searchTerm
     ? new Fuse(photos, {
-        keys: ["Key"],
+        keys: ["key"],
         threshold: 0.3,
       })
         .search(displayOptions.searchTerm)
@@ -55,18 +60,18 @@ export const filteredPhotosAtom = atom<Photo[]>((get) => {
     .filter((photo) => {
       if (
         displayOptions.prefix !== undefined &&
-        !photo.Key.startsWith(displayOptions.prefix)
+        !photo.key.startsWith(displayOptions.prefix)
       ) {
         return false;
       }
-      if (displayOptions.prefix === "" && photo.Key.includes("/")) {
+      if (displayOptions.prefix === "" && photo.key.includes("/")) {
         return false;
       }
       const [from, to] = getTimeRange(displayOptions.dateRangeType);
-      if (from && isBefore(photo.LastModified, from)) {
+      if (from && (!photo.lastModified || isBefore(photo.lastModified, from))) {
         return false;
       }
-      if (to && isAfter(photo.LastModified, to)) {
+      if (to && (!photo.lastModified || isAfter(photo.lastModified, to))) {
         return false;
       }
       return true;
@@ -77,12 +82,12 @@ export const filteredPhotosAtom = atom<Photo[]>((get) => {
       }
       if (displayOptions.sortBy === "key") {
         return displayOptions.sortOrder === "asc"
-          ? a.Key.localeCompare(b.Key)
-          : b.Key.localeCompare(a.Key);
+          ? a.key.localeCompare(b.key)
+          : b.key.localeCompare(a.key);
       } else {
         return displayOptions.sortOrder === "asc"
-          ? compareAsc(a.LastModified, b.LastModified)
-          : compareDesc(a.LastModified, b.LastModified);
+          ? compareAsc(a.lastModified ?? "", b.lastModified ?? "")
+          : compareDesc(a.lastModified ?? "", b.lastModified ?? "");
       }
     });
   return displayedPhotos;
@@ -92,14 +97,21 @@ export const filteredPhotosCountAtom = atom((get) => {
   return get(filteredPhotosAtom).length;
 });
 
-export const showingPhotosAtom = atom<Photo[]>((get) => {
+export const showingPhotosAtom = atom<StoredImage[]>((get) => {
   const pageSize = get(pageSizeAtom);
   const start = (get(currentPageAtom) - 1) * pageSize;
   const end = start + pageSize;
   return get(filteredPhotosAtom).slice(start, end);
 });
 
-export const useFetchPhotoList = () => {
+type CreateGalleryImageStorage = (settings: S3Options) => ImageStorage;
+
+const createGalleryImageStorage: CreateGalleryImageStorage = (settings) =>
+  createImageStorage(createS3ImageStorageAdapter(settings));
+
+export const useFetchPhotoList = (
+  createStorage: CreateGalleryImageStorage = createGalleryImageStorage,
+) => {
   const setPhotos = useSetAtom(photosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("gallery.store");
@@ -122,10 +134,19 @@ export const useFetchPhotoList = () => {
         console.error("S3 settings not found");
         return;
       }
-      let photos: Photo[];
+      let photos: StoredImage[];
       try {
         setStatus("loading");
-        photos = await new ImageS3Client(s3Settings).list();
+        const storage = createStorage(s3Settings);
+        const result = await storage.listStoredImages();
+        if (!result.ok) {
+          if (toastLevel !== "silent") {
+            toast.error(t("failedToFetchPhotos"));
+          }
+          console.error("Failed to fetch photos", result.error);
+          return;
+        }
+        photos = result.value;
         setGalleryDirty(false);
       } catch (error) {
         if (toastLevel !== "silent") {
@@ -149,7 +170,7 @@ export const useFetchPhotoList = () => {
         console.error("Failed to fetch photos");
       }
     },
-    [s3Settings, setPhotos, t, setGalleryDirty],
+    [s3Settings, setPhotos, t, setGalleryDirty, createStorage],
   );
 
   const isLoading = status === "loading";
