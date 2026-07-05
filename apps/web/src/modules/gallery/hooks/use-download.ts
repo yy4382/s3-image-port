@@ -1,11 +1,16 @@
-import ImageS3Client from "@/lib/s3/image-s3-client";
+import {
+  createS3ImageStorage,
+  type CreateImageStorageFromSettings,
+} from "@/modules/image-storage";
 import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { useAtomValue } from "jotai";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 
-export function useDownloadPhoto() {
+export function useDownloadPhoto(
+  createStorage: CreateImageStorageFromSettings = createS3ImageStorage,
+) {
   const s3Options = useAtomValue(validS3SettingsAtom);
   const tControl = useTranslations("gallery.control");
   const t = useTranslations("gallery.item.options.downloadMessages");
@@ -18,16 +23,13 @@ export function useDownloadPhoto() {
       }
 
       try {
-        const res = await new ImageS3Client(s3Options).get(key);
-        if (!res.Body) {
-          toast.error(t("noBody"));
-          return { success: false, error: "noBody" };
+        const result = await createStorage(s3Options).downloadStoredImage(key);
+        if (!result.ok) {
+          toast.error(t("failed"));
+          return { success: false, error: result.error.reason };
         }
 
-        // @ts-expect-error - ArrayBuffer vs ArrayBufferLike error
-        const blob = new Blob([await res.Body.transformToByteArray()]);
-
-        const url = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(result.value.body);
         const a = document.createElement("a");
         a.href = url;
         a.download = key;
@@ -42,7 +44,7 @@ export function useDownloadPhoto() {
         return { success: false, error: "unknown" };
       }
     },
-    [s3Options, t, tControl],
+    [s3Options, t, tControl, createStorage],
   );
 
   return handleDownload;

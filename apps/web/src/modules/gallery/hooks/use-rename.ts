@@ -1,4 +1,7 @@
-import ImageS3Client from "@/lib/s3/image-s3-client";
+import {
+  createS3ImageStorage,
+  type CreateImageStorageFromSettings,
+} from "@/modules/image-storage";
 import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
@@ -7,10 +10,12 @@ import { useTranslations } from "use-intl";
 import { useFetchPhotoList } from "./use-photo-list";
 import { selectedPhotosAtom } from "@/stores/atoms/gallery";
 
-export function useRenamePhoto() {
+export function useRenamePhoto(
+  createStorage: CreateImageStorageFromSettings = createS3ImageStorage,
+) {
   const setSelectedPhotos = useSetAtom(selectedPhotosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);
-  const { fetchPhotoList } = useFetchPhotoList();
+  const { fetchPhotoList } = useFetchPhotoList(createStorage);
   const tControl = useTranslations("gallery.control");
   const t = useTranslations("gallery.item.options.renameMessages");
 
@@ -35,7 +40,26 @@ export function useRenamePhoto() {
       try {
         toast.message(t("requesting"));
 
-        await new ImageS3Client(s3Settings).rename(oldKey, newKey, force);
+        const result = await createStorage(s3Settings).renameStoredImage({
+          oldKey,
+          newKey,
+          overwrite: force,
+        });
+        if (!result.ok) {
+          console.error("Failed to rename photo", result.error);
+          switch (result.error.reason) {
+            case "already-exists":
+              toast.error(t("objectExists"));
+              return { success: false, error: "already-exists" };
+            case "partial-rename":
+              toast.warning(t("partialSuccess"));
+              await fetchPhotoList({ toastLevel: "error" });
+              return { success: false, error: "partial-rename" };
+            default:
+              toast.error(t("failed"));
+              return { success: false, error: result.error.reason };
+          }
+        }
 
         toast.success(t("success"));
 
@@ -56,24 +80,11 @@ export function useRenamePhoto() {
       } catch (error: unknown) {
         console.error("Failed to rename photo", error);
 
-        // Parse specific error messages
-        if (error instanceof Error) {
-          if (error.message.includes("Object already exists")) {
-            toast.error(t("objectExists"));
-            return { success: false, error: "objectExists" };
-          }
-          if (error.message.includes("failed to delete old key")) {
-            toast.warning(t("partialSuccess"));
-            await fetchPhotoList({ toastLevel: "error" });
-            return { success: false, error: "partialSuccess" };
-          }
-        }
-
         toast.error(t("failed"));
         return { success: false, error: "unknown" };
       }
     },
-    [s3Settings, fetchPhotoList, t, tControl, setSelectedPhotos],
+    [s3Settings, fetchPhotoList, t, tControl, setSelectedPhotos, createStorage],
   );
 
   return handleRename;

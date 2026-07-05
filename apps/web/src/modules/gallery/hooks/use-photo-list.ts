@@ -1,7 +1,6 @@
 import {
-  createImageStorage,
-  createS3ImageStorageAdapter,
-  type ImageStorage,
+  createS3ImageStorage,
+  type CreateImageStorageFromSettings,
   type StoredImage,
 } from "@/modules/image-storage";
 import { compareAsc, compareDesc, isAfter, isBefore } from "date-fns";
@@ -11,7 +10,6 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { validS3SettingsAtom } from "@/stores/atoms/settings";
-import type { S3Options } from "@/stores/schemas/settings";
 import { getTimeRange } from "./use-display-control";
 import {
   currentPageAtom,
@@ -104,13 +102,8 @@ export const showingPhotosAtom = atom<StoredImage[]>((get) => {
   return get(filteredPhotosAtom).slice(start, end);
 });
 
-type CreateGalleryImageStorage = (settings: S3Options) => ImageStorage;
-
-const createGalleryImageStorage: CreateGalleryImageStorage = (settings) =>
-  createImageStorage(createS3ImageStorageAdapter(settings));
-
 export const useFetchPhotoList = (
-  createStorage: CreateGalleryImageStorage = createGalleryImageStorage,
+  createStorage: CreateImageStorageFromSettings = createS3ImageStorage,
 ) => {
   const setPhotos = useSetAtom(photosAtom);
   const s3Settings = useAtomValue(validS3SettingsAtom);

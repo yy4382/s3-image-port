@@ -5,11 +5,17 @@ import { createS3ImageStorageAdapter } from "./s3";
 
 const mocks = vi.hoisted(() => ({
   listFn: vi.fn(),
+  deleteFn: vi.fn(),
+  renameFn: vi.fn(),
+  getFn: vi.fn(),
 }));
 
 vi.mock("@/lib/s3/image-s3-client", () => ({
   default: class MockImageS3Client {
     list = mocks.listFn;
+    delete = mocks.deleteFn;
+    rename = mocks.renameFn;
+    get = mocks.getFn;
   },
 }));
 
@@ -63,6 +69,127 @@ describe("S3 image storage adapter", () => {
         reason: "unknown",
         message: "network unavailable",
       },
+    });
+  });
+
+  it("maps failed S3 delete to typed storage failures with the failing key", async () => {
+    mocks.deleteFn.mockRejectedValueOnce(
+      Object.assign(new Error("missing"), {
+        name: "NoSuchKey",
+        $metadata: { httpStatusCode: 404 },
+      }),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).deleteStoredImages([
+        "i/missing.webp",
+      ]),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "not-found", key: "i/missing.webp" },
+    });
+  });
+
+  it("maps S3 access denial to typed storage failures", async () => {
+    mocks.deleteFn.mockRejectedValueOnce(
+      Object.assign(new Error("forbidden"), {
+        name: "AccessDenied",
+        $metadata: { httpStatusCode: 403 },
+      }),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).deleteStoredImages([
+        "i/forbidden.webp",
+      ]),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "access-denied" },
+    });
+  });
+
+  it("maps S3 rename conflicts and partial rename failures to typed outcomes", async () => {
+    mocks.renameFn.mockRejectedValueOnce(
+      new Error("Object already exists at key"),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).renameStoredImage({
+        oldKey: "i/source.webp",
+        newKey: "i/existing.webp",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "already-exists", key: "i/existing.webp" },
+    });
+
+    mocks.renameFn.mockRejectedValueOnce(
+      new Error("Renamed to i/new.webp but failed to delete old key i/source.webp"),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).renameStoredImage({
+        oldKey: "i/source.webp",
+        newKey: "i/new.webp",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        reason: "partial-rename",
+        copiedKey: "i/new.webp",
+        failedDeleteKey: "i/source.webp",
+      },
+    });
+  });
+
+  it("maps unknown S3 rename failures to typed unknown failures", async () => {
+    mocks.renameFn.mockRejectedValueOnce(new Error("rename failed"));
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).renameStoredImage({
+        oldKey: "i/source.webp",
+        newKey: "i/new.webp",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "unknown", message: "rename failed" },
+    });
+  });
+
+  it("converts S3 download bodies to browser blobs", async () => {
+    mocks.getFn.mockResolvedValueOnce({
+      Body: {
+        transformToByteArray: async () => new TextEncoder().encode("image bytes"),
+      },
+    });
+
+    const result =
+      await createS3ImageStorageAdapter(s3Settings).downloadStoredImage(
+        "i/source.webp",
+      );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.key).toBe("i/source.webp");
+      await expect(result.value.body.text()).resolves.toBe("image bytes");
+    }
+  });
+
+  it("maps failed S3 downloads to typed storage failures", async () => {
+    mocks.getFn.mockRejectedValueOnce(
+      Object.assign(new Error("missing"), {
+        name: "NoSuchKey",
+        $metadata: { httpStatusCode: 404 },
+      }),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).downloadStoredImage(
+        "i/missing.webp",
+      ),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "not-found", key: "i/missing.webp" },
     });
   });
 });

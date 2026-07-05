@@ -12,7 +12,19 @@ import {
   requiredStorageAccessMethods,
   storageAccessMethodSchema,
 } from "../schema";
-import type { ImageStorageAdapter } from "../storage";
+import {
+  createImageStorage,
+  type ImageStorage,
+  type ImageStorageAdapter,
+} from "../storage";
+
+export type CreateImageStorageFromSettings = (
+  settings: S3Options,
+) => ImageStorage;
+
+export function createS3ImageStorage(settings: S3Options): ImageStorage {
+  return createImageStorage(createS3ImageStorageAdapter(settings));
+}
 
 export function createS3ImageStorageAdapter(
   settings: S3Options,
@@ -53,7 +65,27 @@ export function createS3ImageStorageAdapter(
     },
     async deleteStoredImages(keys) {
       try {
-        await Promise.all(keys.map((key) => client.delete(key)));
+        const results = await Promise.all(
+          keys.map(async (key) => {
+            try {
+              await client.delete(key);
+              return { ok: true as const };
+            } catch (error) {
+              return {
+                ok: false as const,
+                error: toStorageFailure(error, key),
+              };
+            }
+          }),
+        );
+        for (const result of results) {
+          if (!result.ok) {
+            return {
+              ok: false,
+              error: result.error,
+            };
+          }
+        }
         return {
           ok: true,
           value: {
