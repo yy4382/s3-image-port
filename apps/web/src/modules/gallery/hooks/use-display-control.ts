@@ -9,15 +9,13 @@ import {
 } from "@/stores/schemas/gallery/filter";
 import {
   DEFAULT_PAGE_SIZE,
-  PAGE_SIZE_OPTIONS,
+  isGalleryPageSize,
   type GalleryPageSize,
 } from "@/stores/atoms/gallery";
 
 const pageSizeSchema = z.coerce
   .number()
-  .refine((value): value is GalleryPageSize =>
-    PAGE_SIZE_OPTIONS.includes(value as GalleryPageSize),
-  )
+  .refine((value): value is GalleryPageSize => isGalleryPageSize(value))
   .optional()
   .catch(undefined);
 

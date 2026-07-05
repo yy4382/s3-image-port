@@ -18,254 +18,111 @@ export type ListedS3ImageObject = {
   url: string;
 };
 
-/**
- * Internal client for the S3-backed image storage adapter.
- *
- * The creation overhead of the class is ignorable, so we can create one from
- * settings every time we need it.
- */
 class ImageS3Client {
-  client: S3Client;
-  bucket: string;
-  config: S3Options;
+  private readonly client: S3Client;
+  private readonly bucket: string;
+  private readonly settings: S3Options;
 
-  constructor(s3Settings: S3Options) {
-    this.config = s3Settings;
+  constructor(settings: S3Options) {
+    this.settings = settings;
     this.client = new S3Client({
-      region: s3Settings.region,
-      forcePathStyle: s3Settings.forcePathStyle,
+      region: settings.region,
+      forcePathStyle: settings.forcePathStyle,
       credentials: {
-        accessKeyId: s3Settings.accKeyId,
-        secretAccessKey: s3Settings.secretAccKey,
+        accessKeyId: settings.accKeyId,
+        secretAccessKey: settings.secretAccKey,
       },
-      endpoint: s3Settings.endpoint,
+      endpoint: settings.endpoint,
       // TODO: Remove workaround once https://github.com/aws/aws-sdk-js-v3/issues/6834 is fixed.
       requestChecksumCalculation: "WHEN_REQUIRED",
     });
-    this.bucket = s3Settings.bucket;
+    this.bucket = settings.bucket;
   }
 
-  /**
-   *
-   * @param file The (processed) file to upload
-   * @param key The key to use in S3
-   * @returns The response from the S3 upload operation
-   */
   async upload(file: File | Blob | string, key: string) {
-    const mimeType = ImageS3Client.calculateMIME(file, key);
-
-    const command = new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-      Body: file,
-      ContentType: mimeType,
-    });
-    const response = await this.client.send(command);
-    // If the HTTP status code is not 200, throw an error
-    const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300) {
-      throw new Error(`List operation get http code: ${httpStatusCode}`);
-    }
-
+    const response = await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: file,
+        ContentType: contentTypeForBody(file, key),
+      }),
+    );
+    assertSuccessfulResponse("Upload", response.$metadata.httpStatusCode);
     return response;
   }
 
   async get(key: string) {
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
-    const response = await this.client.send(command);
-    // If the HTTP status code is not 200, throw an error
-    const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300) {
-      throw new Error(`Get operation get http code: ${httpStatusCode}`);
-    }
-
+    const response = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      }),
+    );
+    assertSuccessfulResponse("Get", response.$metadata.httpStatusCode);
     return response;
   }
 
   async head(key: string) {
-    const command = new HeadObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
-    const response = await this.client.send(command);
-    // If the HTTP status code is not 200, throw an error
-    const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300) {
-      throw new Error(`Head operation get http code: ${httpStatusCode}`);
-    }
-
+    const response = await this.client.send(
+      new HeadObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      }),
+    );
+    assertSuccessfulResponse("Head", response.$metadata.httpStatusCode);
     return response;
   }
 
-  async list(
-    onlyOnce = false,
-    maxAttempts = 200,
-  ): Promise<ListedS3ImageObject[]> {
-    const fetchAllContents = async (
-      nextToken?: string,
-      acc = [] as ListedS3ImageObject[],
-      attempts = 0,
-    ) => {
-      if (attempts >= maxAttempts) {
-        // hit max attempts, return the accumulated contents
-        return acc;
+  async list(maxPages = 200): Promise<ListedS3ImageObject[]> {
+    const contents: ListedS3ImageObject[] = [];
+    let nextToken: string | undefined;
+
+    for (let pageCount = 0; pageCount < maxPages; pageCount++) {
+      const page = await this.listPage(nextToken);
+      contents.push(...page.contents);
+
+      if (!page.isTruncated) {
+        return contents;
       }
 
-      const response = await this.listOnce(nextToken);
-      const newContents = [...acc, ...response.contents];
-
-      if (!response.IsTruncated || onlyOnce) {
-        return newContents;
-      }
-
-      return fetchAllContents(
-        response.NextContinuationToken,
-        newContents,
-        attempts + 1,
-      );
-    };
-
-    return fetchAllContents();
-  }
-
-  async listOnce(NextContinuationToken?: string): Promise<{
-    contents: ListedS3ImageObject[];
-    IsTruncated: boolean | undefined;
-    NextContinuationToken: string | undefined;
-  }> {
-    const command = new ListObjectsV2Command({
-      Bucket: this.bucket,
-      ContinuationToken: NextContinuationToken,
-      ...(this.config.includePath && { Prefix: this.config.includePath }),
-    });
-    const response = await this.client.send(command);
-
-    // If the HTTP status code is not 200, throw an error
-    const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300) {
-      throw new Error(`List operation get http code: ${httpStatusCode}`);
+      nextToken = page.nextContinuationToken;
     }
 
-    // if bucket is empty, return empty array
-    if (!response.Contents) {
-      if (response.KeyCount !== 0) {
-        console.warn("Bucket is not empty but no contents returned", response);
-      }
-
-      return {
-        contents: [],
-        IsTruncated: false,
-        NextContinuationToken: undefined,
-      };
-    }
-
-    const contents = response.Contents.map((photo) => {
-      return {
-        Key: photo.Key,
-        LastModified: photo.LastModified?.toISOString(),
-        url: s3Key2Url(photo.Key!, this.config),
-      } as ListedS3ImageObject;
-    }).filter((photo) => !photo.Key.endsWith("/"));
-    return {
-      contents,
-      IsTruncated: response.IsTruncated,
-      NextContinuationToken: response.NextContinuationToken,
-    };
+    return contents;
   }
 
   async delete(key: string) {
-    const command = new DeleteObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
-    const response = await this.client.send(command);
-    // If the HTTP status code is not 200, throw an error
-    const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300) {
-      throw new Error(`Delete operation get http code: ${httpStatusCode}`);
-    }
-
+    const response = await this.client.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      }),
+    );
+    assertSuccessfulResponse("Delete", response.$metadata.httpStatusCode);
     return response;
   }
 
-  /**
-   * Renames an object by copying it to a new key and deleting the old one.
-   * This is the most ACID approach possible with S3 (server-side copy, no data transfer).
-   *
-   * IMPORTANT: Race condition exists - another process could create an object at newKey
-   * between the existence check and the copy operation. This is a limitation of S3's API.
-   *
-   * Notes:
-   * - There's a brief window between copy and delete where both objects exist
-   * - Checks if newKey already exists to prevent accidental data loss
-   * - Use force=true to intentionally overwrite an existing object at newKey
-   *
-   * @param oldKey The current key of the object
-   * @param newKey The new key for the object
-   * @param force If true, allows overwriting an existing object at newKey (default: false)
-   * @returns The response from the copy operation
-   * @throws Error if newKey already exists and force=false
-   */
-  async rename(oldKey: string, newKey: string, force = false) {
-    // Step 1: Check if newKey already exists (to prevent data loss)
-    if (!force) {
-      try {
-        await this.head(newKey);
-        // If head succeeds, object exists at newKey
-        throw new Error(
-          `Object already exists at key "${newKey}". Use force=true to overwrite, or choose a different key.`,
-        );
-      } catch (error: unknown) {
-        // If head fails with 404/NotFound, the key doesn't exist (safe to proceed)
-        // If it's our custom error about existing object, re-throw it
-        if (
-          error instanceof Error &&
-          error.message?.includes("Object already exists")
-        ) {
-          throw error;
-        }
-        // Other errors (404, NotFound) mean object doesn't exist - continue
-        const awsError = error as {
-          $metadata?: { httpStatusCode?: number };
-          name?: string;
-        };
-        if (
-          awsError.$metadata?.httpStatusCode !== 404 &&
-          awsError.name !== "NotFound"
-        ) {
-          // Unexpected error during head operation
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          throw new Error(
-            `Failed to check if ${newKey} exists: ${errorMessage}`,
-          );
-        }
-      }
+  async rename(oldKey: string, newKey: string, overwrite = false) {
+    if (!overwrite) {
+      await this.assertMissing(newKey);
     }
 
-    // Step 2: Copy the object to the new key (server-side, preserves metadata)
-    const copyCommand = new CopyObjectCommand({
-      Bucket: this.bucket,
-      CopySource: `${this.bucket}/${oldKey}`,
-      Key: newKey,
-    });
-    const copyResponse = await this.client.send(copyCommand);
+    const copyResponse = await this.client.send(
+      new CopyObjectCommand({
+        Bucket: this.bucket,
+        CopySource: `${this.bucket}/${oldKey}`,
+        Key: newKey,
+      }),
+    );
+    assertSuccessfulResponse(
+      "Rename copy",
+      copyResponse.$metadata.httpStatusCode,
+    );
 
-    // Check if copy was successful
-    const copyStatusCode = copyResponse.$metadata.httpStatusCode!;
-    if (copyStatusCode >= 300) {
-      throw new Error(`Rename copy operation get http code: ${copyStatusCode}`);
-    }
-
-    // Step 3: Delete the old object
     try {
       await this.delete(oldKey);
     } catch (error) {
-      // Copy succeeded but delete failed - log warning but don't throw
-      // This leaves both objects in the bucket, which is safer than losing data
       console.error(
         `Rename: Copy succeeded but delete of old key failed for ${oldKey}`,
         error,
@@ -279,38 +136,124 @@ class ImageS3Client {
   }
 
   async getCors() {
-    const command = new GetBucketCorsCommand({
-      Bucket: this.bucket,
-    });
-    const response = await this.client.send(command);
-    // If the HTTP status code is not 200, throw an error
-    const httpStatusCode = response.$metadata.httpStatusCode!;
-    if (httpStatusCode >= 300) {
-      throw new Error(`GetCors operation get http code: ${httpStatusCode}`);
-    }
+    const response = await this.client.send(
+      new GetBucketCorsCommand({
+        Bucket: this.bucket,
+      }),
+    );
+    assertSuccessfulResponse("GetCors", response.$metadata.httpStatusCode);
     return response;
   }
 
-  private static calculateMIME(file: File | Blob | string, key: string) {
-    const defaultMIME = "application/octet-stream";
-    const keyExt = key.split(".").pop();
+  private async listPage(nextContinuationToken?: string): Promise<{
+    contents: ListedS3ImageObject[];
+    isTruncated: boolean | undefined;
+    nextContinuationToken: string | undefined;
+  }> {
+    const response = await this.client.send(
+      new ListObjectsV2Command({
+        Bucket: this.bucket,
+        ContinuationToken: nextContinuationToken,
+        ...(this.settings.includePath && { Prefix: this.settings.includePath }),
+      }),
+    );
+    assertSuccessfulResponse("List", response.$metadata.httpStatusCode);
 
-    switch (true) {
-      case file instanceof String:
-        return "text/plain";
-      case file instanceof File || file instanceof Blob:
-        if (file.type) {
-          return file.type;
-        } else if (keyExt) {
-          return mime.getType(keyExt) ?? defaultMIME;
-        } else {
-          console.error("Unexpected file type", key);
-          return defaultMIME;
-        }
-      default:
-        return defaultMIME;
+    if (!response.Contents) {
+      if (response.KeyCount !== 0) {
+        console.warn("Bucket is not empty but no contents returned", response);
+      }
+
+      return {
+        contents: [],
+        isTruncated: false,
+        nextContinuationToken: undefined,
+      };
     }
+
+    const contents = response.Contents.flatMap((object) => {
+      if (!object.Key || object.Key.endsWith("/")) {
+        return [];
+      }
+
+      return {
+        Key: object.Key,
+        LastModified: object.LastModified?.toISOString(),
+        url: s3Key2Url(object.Key, this.settings),
+      };
+    });
+
+    return {
+      contents,
+      isTruncated: response.IsTruncated,
+      nextContinuationToken: response.NextContinuationToken,
+    };
   }
+
+  private async assertMissing(key: string) {
+    try {
+      await this.head(key);
+    } catch (error: unknown) {
+      if (isMissingObjectError(error)) {
+        return;
+      }
+      throw new Error(`Failed to check if ${key} exists: ${errorMessage(error)}`);
+    }
+
+    throw new Error(
+      `Object already exists at key "${key}". Use force=true to overwrite, or choose a different key.`,
+    );
+  }
+}
+
+function assertSuccessfulResponse(
+  operation: string,
+  httpStatusCode: number | undefined,
+) {
+  if (httpStatusCode !== undefined && httpStatusCode >= 300) {
+    throw new Error(`${operation} operation returned HTTP ${httpStatusCode}`);
+  }
+}
+
+function contentTypeForBody(file: File | Blob | string, key: string) {
+  if (typeof file === "string") {
+    return "text/plain";
+  }
+
+  if (file.type) {
+    return file.type;
+  }
+
+  const keyExt = key.split(".").pop();
+  return keyExt
+    ? (mime.getType(keyExt) ?? "application/octet-stream")
+    : "application/octet-stream";
+}
+
+function isMissingObjectError(error: unknown) {
+  const awsError = toAwsError(error);
+  return (
+    awsError.$metadata?.httpStatusCode === 404 ||
+    awsError.name === "NotFound" ||
+    awsError.name === "NoSuchKey"
+  );
+}
+
+function toAwsError(error: unknown): {
+  $metadata?: { httpStatusCode?: number };
+  name?: string;
+} {
+  if (typeof error === "object" && error !== null) {
+    return error as {
+      $metadata?: { httpStatusCode?: number };
+      name?: string;
+    };
+  }
+  return {};
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
 }
 
 export default ImageS3Client;

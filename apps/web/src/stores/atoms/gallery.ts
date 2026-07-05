@@ -20,6 +20,16 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
 export type GalleryPageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 export const pageSizeAtom = atom<GalleryPageSize>(DEFAULT_PAGE_SIZE);
 
+export function isGalleryPageSize(value: number): value is GalleryPageSize {
+  return PAGE_SIZE_OPTIONS.includes(value as GalleryPageSize);
+}
+
+export function toGalleryPageSize(value: number | undefined): GalleryPageSize {
+  return value !== undefined && isGalleryPageSize(value)
+    ? value
+    : DEFAULT_PAGE_SIZE;
+}
+
 export const galleryDirtyStatusAtom = atom(false);
 export const setGalleryDirtyAtom = atom(null, (_, set) => {
   set(galleryDirtyStatusAtom, true);

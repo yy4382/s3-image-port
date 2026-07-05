@@ -7,10 +7,10 @@ import {
   galleryFilterOptionsFromSearchParams,
 } from "../hooks/use-display-control";
 import {
-  DEFAULT_PAGE_SIZE,
   currentPageAtom,
   displayOptionsAtom,
   pageSizeAtom,
+  toGalleryPageSize,
 } from "@/stores/atoms/gallery";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,7 @@ function useSyncSearchParamsToDisplayAtom() {
     if (!equal(lastSearchParams, searchParams)) {
       setCurrentPage(1);
       setDisplayOptions(galleryFilterOptionsFromSearchParams(searchParams));
-      setPageSize(searchParams.pageSize ?? DEFAULT_PAGE_SIZE);
+      setPageSize(toGalleryPageSize(searchParams.pageSize));
     }
     lastSearchParamsRef.current = searchParams;
   }, [searchParams, setDisplayOptions, setCurrentPage, setPageSize]);

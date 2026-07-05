@@ -24,7 +24,7 @@ import {
   selectedPhotosAtom,
   currentPageAtom,
   pageSizeAtom,
-  type GalleryPageSize,
+  toGalleryPageSize,
 } from "@/stores/atoms/gallery";
 import { s3SettingsAtom } from "@/stores/atoms/settings";
 import { Link, getRouteApi } from "@tanstack/react-router";
@@ -162,7 +162,7 @@ function GalleryPagination() {
   const t = useTranslations("gallery.pagination");
 
   const handlePageSizeChange = (newPageSize: number) => {
-    const pageSizeValue = newPageSize as GalleryPageSize;
+    const pageSizeValue = toGalleryPageSize(newPageSize);
     setPageSize(pageSizeValue);
     setPage(1);
     startTransition(() => {
