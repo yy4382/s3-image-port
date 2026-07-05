@@ -177,11 +177,15 @@ export function createS3ImageStorageAdapter(
         };
       }
     },
-    async checkAccess() {
+    async checkAccess(input) {
       try {
         const response = await client.getCors();
         const allowedMethods = toAllowedStorageMethods(
-          response.CORSRules?.flatMap((rule) => rule.AllowedMethods ?? []) ??
+          response.CORSRules?.flatMap((rule) =>
+            corsRuleMatchesAccessCheck(rule, input.origin)
+              ? (rule.AllowedMethods ?? [])
+              : [],
+          ) ??
             [],
         );
         const missingMethods = requiredStorageAccessMethods.filter(
@@ -289,6 +293,20 @@ function toAllowedStorageMethods(methods: readonly string[]) {
     }
   }
   return [...allowedMethods];
+}
+
+function corsRuleMatchesAccessCheck(
+  rule: {
+    AllowedOrigins?: readonly string[];
+    AllowedHeaders?: readonly string[];
+  },
+  origin: string,
+) {
+  return (
+    (rule.AllowedOrigins?.includes(origin) ||
+      rule.AllowedOrigins?.includes("*")) &&
+    rule.AllowedHeaders?.includes("*")
+  );
 }
 
 async function toBlob(body: unknown): Promise<Blob> {

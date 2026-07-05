@@ -1,61 +1,53 @@
 import type { S3Options } from "@/stores/schemas/settings";
-import ImageS3Client from "./image-s3-client";
+import {
+  createS3ImageStorage,
+  type CreateImageStorageFromSettings,
+} from "@/modules/image-storage";
 
-const ALL_METHODS = ["GET", "HEAD", "PUT", "POST", "DELETE"] as const;
-
-/**
- * Get the allowed methods for the current origin
- *
- * @param settings - S3 settings
- * @param currentOrigin - Current origin
- * @returns null if the request failed, otherwise the allowed methods
- */
 export async function getAllowedMethods(
   settings: S3Options,
   currentOrigin: string,
+  createStorage: CreateImageStorageFromSettings = createS3ImageStorage,
 ) {
-  let corsResp;
-  try {
-    corsResp = await new ImageS3Client(settings).getCors();
-  } catch {
-    return null;
+  const result = await createStorage(settings).checkAccess({
+    origin: currentOrigin,
+  });
+  if (result.ok) {
+    return result.value.allowedMethods;
   }
-  const cors = corsResp.CORSRules;
-  if (!cors) {
-    return [];
+  if (result.error.reason === "cors-incomplete") {
+    return result.error.allowedMethods;
   }
-  const allowedMethods = cors.reduce((acc, rule) => {
-    if (
-      (rule.AllowedOrigins?.includes(currentOrigin) ||
-        rule.AllowedOrigins?.includes("*")) &&
-      rule.AllowedHeaders?.includes("*")
-    ) {
-      acc.push(...(rule.AllowedMethods ?? []));
-    }
-    return acc;
-  }, [] as string[]);
-  return Array.from(new Set(allowedMethods));
+  return null;
 }
 
 export async function testS3Settings(
   settings: S3Options,
   currentOrigin: string,
+  createStorage: CreateImageStorageFromSettings = createS3ImageStorage,
 ) {
-  const allowedMethods = await getAllowedMethods(settings, currentOrigin);
-  if (allowedMethods === null) {
+  const result = await createStorage(settings).checkAccess({
+    origin: currentOrigin,
+  });
+
+  if (result.ok) {
     return {
-      valid: false,
-      type: "no-result",
-    };
+      valid: true,
+      allowedMethods: result.value.allowedMethods,
+    } as const;
   }
-  if (ALL_METHODS.some((m) => !allowedMethods.includes(m))) {
+
+  if (result.error.reason === "cors-incomplete") {
     return {
       valid: false,
       type: "no-allowed-methods",
-      allowedMethods,
-    };
+      allowedMethods: result.error.allowedMethods,
+      missingMethods: result.error.missingMethods,
+    } as const;
   }
+
   return {
-    valid: true,
-  };
+    valid: false,
+    type: "no-result",
+  } as const;
 }

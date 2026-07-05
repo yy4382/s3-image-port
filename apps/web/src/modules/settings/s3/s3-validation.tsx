@@ -1,6 +1,6 @@
 "use client";
 
-import { getAllowedMethods, testS3Settings } from "@/lib/s3/test-s3-settings";
+import { testS3Settings } from "@/lib/s3/test-s3-settings";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -100,7 +100,7 @@ function DialogContent({
   validationStatus: ValidationStatus;
 }) {
   const t = useTranslations("settings.s3Validation");
-  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"];
+  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"] as const;
 
   if (validationStatus.status === "failed") {
     return (
@@ -217,7 +217,7 @@ export function S3Validation() {
     status: "idle",
   });
 
-  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"];
+  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"] as const;
 
   // 检查schema是否有效
   const isSchemaValid = optionsSchema.shape.s3.safeParse(s3Settings).success;
@@ -233,23 +233,18 @@ export function S3Validation() {
           setValidationStatus({ status: "failed" });
         } else if (result.type === "no-allowed-methods") {
           const allowedMethods = result.allowedMethods || [];
-          const missingMethods = requiredMethods.filter(
-            (method) => !allowedMethods.includes(method),
-          );
           setValidationStatus({
             status: "cors-incomplete",
             allowedMethods,
-            missingMethods,
+            missingMethods:
+              result.missingMethods ??
+              requiredMethods.filter((method) => !allowedMethods.includes(method)),
           });
         }
       } else {
-        const allowedMethods = await getAllowedMethods(
-          s3Settings,
-          window.location.origin,
-        );
         setValidationStatus({
           status: "success",
-          allowedMethods: allowedMethods || requiredMethods,
+          allowedMethods: result.allowedMethods || requiredMethods,
         });
       }
     } catch {

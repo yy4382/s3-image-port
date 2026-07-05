@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   deleteFn: vi.fn(),
   renameFn: vi.fn(),
   getFn: vi.fn(),
+  getCorsFn: vi.fn(),
 }));
 
 vi.mock("@/lib/s3/image-s3-client", () => ({
@@ -18,6 +19,7 @@ vi.mock("@/lib/s3/image-s3-client", () => ({
     delete = mocks.deleteFn;
     rename = mocks.renameFn;
     get = mocks.getFn;
+    getCors = mocks.getCorsFn;
   },
 }));
 
@@ -231,6 +233,137 @@ describe("S3 image storage adapter", () => {
     ).resolves.toEqual({
       ok: false,
       error: { reason: "not-found", key: "i/missing.webp" },
+    });
+  });
+
+  it("reports valid access when CORS allows required methods for the current origin and wildcard headers", async () => {
+    mocks.getCorsFn.mockResolvedValueOnce({
+      CORSRules: [
+        {
+          AllowedOrigins: ["https://app.example.com"],
+          AllowedHeaders: ["*"],
+          AllowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+        },
+      ],
+    });
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).checkAccess({
+        origin: "https://app.example.com",
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      value: {
+        allowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+      },
+    });
+  });
+
+  it("reports incomplete CORS when no CORS rules are returned", async () => {
+    mocks.getCorsFn.mockResolvedValueOnce({});
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).checkAccess({
+        origin: "https://app.example.com",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        reason: "cors-incomplete",
+        allowedMethods: [],
+        missingMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+      },
+    });
+  });
+
+  it("preserves allowed and missing methods for incomplete CORS permissions", async () => {
+    mocks.getCorsFn.mockResolvedValueOnce({
+      CORSRules: [
+        {
+          AllowedOrigins: ["https://app.example.com"],
+          AllowedHeaders: ["*"],
+          AllowedMethods: ["GET", "HEAD"],
+        },
+      ],
+    });
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).checkAccess({
+        origin: "https://app.example.com",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        reason: "cors-incomplete",
+        allowedMethods: ["GET", "HEAD"],
+        missingMethods: ["PUT", "POST", "DELETE"],
+      },
+    });
+  });
+
+  it("accepts wildcard CORS origins", async () => {
+    mocks.getCorsFn.mockResolvedValueOnce({
+      CORSRules: [
+        {
+          AllowedOrigins: ["*"],
+          AllowedHeaders: ["*"],
+          AllowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+        },
+      ],
+    });
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).checkAccess({
+        origin: "https://app.example.com",
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      value: {
+        allowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+      },
+    });
+  });
+
+  it("requires wildcard CORS headers before accepting allowed methods", async () => {
+    mocks.getCorsFn.mockResolvedValueOnce({
+      CORSRules: [
+        {
+          AllowedOrigins: ["https://app.example.com"],
+          AllowedHeaders: ["Content-Type"],
+          AllowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+        },
+      ],
+    });
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).checkAccess({
+        origin: "https://app.example.com",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        reason: "cors-incomplete",
+        allowedMethods: [],
+        missingMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+      },
+    });
+  });
+
+  it("maps failed access validation to typed access failures", async () => {
+    mocks.getCorsFn.mockRejectedValueOnce(
+      Object.assign(new Error("forbidden"), {
+        name: "AccessDenied",
+        $metadata: { httpStatusCode: 403 },
+      }),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).checkAccess({
+        origin: "https://app.example.com",
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "access-denied" },
     });
   });
 });
