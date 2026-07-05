@@ -6,13 +6,22 @@ import { toast } from "sonner";
 
 import { defaultKeyTemplate, S3KeyMetadata } from "@/lib/s3/s3-key";
 import { isSupportedFileType, processFile } from "@/lib/utils/imageCompress";
-import ImageS3Client from "@/lib/s3/image-s3-client";
+import {
+  createS3ImageStorage,
+  type CreateImageStorageFromSettings,
+  type ImageStorageFailure,
+} from "@/modules/image-storage";
 import { uploadSettingsAtom } from "@/stores/atoms/settings";
 import { setGalleryDirtyAtom } from "@/stores/atoms/gallery";
 import type { S3Options } from "@/stores/schemas/settings";
 import type { PendingUpload } from "../types";
 
 export const fileListAtom = atom<PendingUpload[]>([]);
+export const uploadStorageAtom = atom<{
+  createStorage: CreateImageStorageFromSettings;
+}>({
+  createStorage: createS3ImageStorage,
+});
 
 export const appendFilesAtom = atom(null, (get, set, newFiles: File[]) => {
   const uploadSettings = get(uploadSettingsAtom);
@@ -101,23 +110,41 @@ export const uploadFileAtom = atom(
       ...prev,
       status: "uploading",
     }));
+    let outcome:
+      | { success: true }
+      | { success: false; error: ImageStorageFailure["reason"] };
     try {
-      await new ImageS3Client(s3Settings).upload(
-        processedFile,
-        file.key.toString(),
-      );
-      set(atom, (prev) => ({
-        ...prev,
-        status: "uploaded",
-      }));
-      set(setGalleryDirtyAtom);
+      const result = await get(uploadStorageAtom)
+        .createStorage(s3Settings)
+        .putStoredImage({
+          key: file.key.toString(),
+          body: processedFile,
+          contentType: processedFile.type || undefined,
+        });
+      if (result.ok) {
+        set(atom, (prev) => ({
+          ...prev,
+          status: "uploaded",
+        }));
+        set(setGalleryDirtyAtom);
+        outcome = { success: true };
+      } else {
+        console.error("Upload failed", result.error);
+        set(atom, (prev) => ({
+          ...prev,
+          status: "pending",
+        }));
+        outcome = { success: false, error: result.error.reason };
+      }
     } catch (error) {
       console.error("Upload failed", error);
       set(atom, (prev) => ({
         ...prev,
         status: "pending",
       }));
+      outcome = { success: false, error: "unknown" };
     }
+    return outcome;
   },
 );
 

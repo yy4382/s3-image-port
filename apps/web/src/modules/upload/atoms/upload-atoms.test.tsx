@@ -4,25 +4,23 @@ import { renderHook } from "vitest-browser-react";
 import { Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { createStore } from "jotai";
 import type { PendingUpload } from "../types";
-import type ImageS3Client from "@/lib/s3/image-s3-client";
+import { S3KeyMetadata } from "@/lib/s3/s3-key";
+import {
+  createImageStorage,
+  type ImageStorage,
+  type PutStoredImageInput,
+} from "@/modules/image-storage";
+import { createMemoryImageStorageAdapter } from "@/modules/image-storage/adapters/memory";
 
 const mocks = vi.hoisted(() => {
   return {
-    uploadFn: vi.fn().mockResolvedValue({ $metadata: { httpStatusCode: 200 } }),
+    putStoredImageFn: vi.fn(),
     processFileFn: vi.fn().mockImplementation((file: File) => {
       const processed = new File([file], `processed-${file.name}`, {
         type: file.type,
       });
       return Promise.resolve(processed);
     }),
-  };
-});
-
-vi.mock(import("@/lib/s3/image-s3-client"), () => {
-  return {
-    default: class MockImageS3Client {
-      upload = mocks.uploadFn;
-    } as unknown as typeof ImageS3Client,
   };
 });
 
@@ -49,8 +47,10 @@ import {
   processFileAtom,
   uploadFileAtom,
   uploadAllFilesAtom,
+  uploadStorageAtom,
 } from "./upload-atoms";
 import type { S3Options } from "@/stores/schemas/settings";
+import { galleryDirtyStatusAtom } from "@/stores/atoms/gallery";
 
 const mockS3Settings: S3Options = {
   endpoint: "https://s3.example.com",
@@ -69,6 +69,7 @@ function createTestFile(name: string, type = "image/jpeg"): File {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.putStoredImageFn.mockResolvedValue(undefined);
   localStorage.clear();
 });
 
@@ -372,6 +373,10 @@ describe("upload-atoms", () => {
   describe("uploadFileAtom", () => {
     test("uploads file and sets status to uploaded", async () => {
       const store = createStore();
+      const storage = createRecordingStorage();
+      store.set(uploadStorageAtom, {
+        createStorage: () => storage,
+      });
       const testFile: PendingUpload = {
         file: createTestFile("test.jpg"),
         processedFile: null,
@@ -388,6 +393,7 @@ describe("upload-atoms", () => {
           fileAtoms: useAtomValue(fileAtomAtoms),
           upload: useSetAtom(uploadFileAtom),
           fileList: useAtomValue(fileListAtom),
+          galleryDirty: useAtomValue(galleryDirtyStatusAtom),
         }),
         {
           wrapper: ({ children }) => (
@@ -403,18 +409,29 @@ describe("upload-atoms", () => {
       });
 
       expect(result.current.fileList[0].status).toBe("uploaded");
-      expect(mocks.uploadFn).toHaveBeenCalledWith(
-        expect.any(File),
-        "test/test.jpg",
-      );
+      expect(mocks.putStoredImageFn).toHaveBeenCalledWith({
+        key: "test/test.jpg",
+        body: expect.any(File),
+        contentType: "image/jpeg",
+      });
+      expect(result.current.galleryDirty).toBe(true);
     });
 
     test("processes file before upload if compressOption is set", async () => {
       const store = createStore();
+      const storage = createRecordingStorage();
+      store.set(uploadStorageAtom, {
+        createStorage: () => storage,
+      });
+      const file = createTestFile("test.jpg");
       const testFile: PendingUpload = {
-        file: createTestFile("test.jpg"),
+        file,
         processedFile: null,
-        key: { toString: () => "test/test.jpg", template: "" } as any,
+        key: S3KeyMetadata.create(
+          file,
+          "{{filename}}.{{ext}}",
+          () => "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        ),
         compressOption: { maxSize: 1024 } as any,
         status: "pending",
         id: "1",
@@ -442,13 +459,23 @@ describe("upload-atoms", () => {
       });
 
       expect(mocks.processFileFn).toHaveBeenCalled();
+      expect(mocks.putStoredImageFn).toHaveBeenCalledWith({
+        key: "processed-test.jpg.jpg",
+        body: expect.any(File),
+        contentType: "image/jpeg",
+      });
+      expect(mocks.putStoredImageFn.mock.calls[0][0].body.name).toBe(
+        "processed-test.jpg",
+      );
       expect(result.current.fileList[0].status).toBe("uploaded");
     });
 
     test("handles upload errors and resets status", async () => {
-      mocks.uploadFn.mockRejectedValueOnce(new Error("Upload failed"));
-
       const store = createStore();
+      const storage = createFailingUploadStorage();
+      store.set(uploadStorageAtom, {
+        createStorage: () => storage,
+      });
       const testFile: PendingUpload = {
         file: createTestFile("test.jpg"),
         processedFile: null,
@@ -475,10 +502,15 @@ describe("upload-atoms", () => {
 
       const fileAtom = result.current.fileAtoms[0];
 
+      let uploadResult: Awaited<ReturnType<(typeof result.current)["upload"]>>;
       await act(async () => {
-        await result.current.upload(fileAtom, mockS3Settings);
+        uploadResult = await result.current.upload(fileAtom, mockS3Settings);
       });
 
+      expect(uploadResult!).toEqual({
+        success: false,
+        error: "access-denied",
+      });
       expect(result.current.fileList[0].status).toBe("pending");
     });
   });
@@ -486,6 +518,10 @@ describe("upload-atoms", () => {
   describe("uploadAllFilesAtom", () => {
     test("uploads all files", async () => {
       const store = createStore();
+      const storage = createRecordingStorage();
+      store.set(uploadStorageAtom, {
+        createStorage: () => storage,
+      });
       store.set(fileListAtom, [
         {
           file: createTestFile("test1.jpg"),
@@ -525,7 +561,31 @@ describe("upload-atoms", () => {
 
       expect(result.current.fileList[0].status).toBe("uploaded");
       expect(result.current.fileList[1].status).toBe("uploaded");
-      expect(mocks.uploadFn).toHaveBeenCalledTimes(2);
+      expect(mocks.putStoredImageFn).toHaveBeenCalledTimes(2);
     });
   });
 });
+
+function createRecordingStorage(): ImageStorage {
+  const adapter = createMemoryImageStorageAdapter({
+    publicBaseUrl: "https://cdn.example.com",
+  });
+  return createImageStorage({
+    ...adapter,
+    async putStoredImage(input: PutStoredImageInput) {
+      mocks.putStoredImageFn(input);
+      return adapter.putStoredImage(input);
+    },
+  });
+}
+
+function createFailingUploadStorage(): ImageStorage {
+  const storage = createRecordingStorage();
+  return {
+    ...storage,
+    async putStoredImage(input) {
+      mocks.putStoredImageFn(input);
+      return { ok: false, error: { reason: "access-denied" } };
+    },
+  };
+}

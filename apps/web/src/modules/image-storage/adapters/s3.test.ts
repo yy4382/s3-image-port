@@ -5,6 +5,7 @@ import { createS3ImageStorageAdapter } from "./s3";
 
 const mocks = vi.hoisted(() => ({
   listFn: vi.fn(),
+  uploadFn: vi.fn(),
   deleteFn: vi.fn(),
   renameFn: vi.fn(),
   getFn: vi.fn(),
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/s3/image-s3-client", () => ({
   default: class MockImageS3Client {
     list = mocks.listFn;
+    upload = mocks.uploadFn;
     delete = mocks.deleteFn;
     rename = mocks.renameFn;
     get = mocks.getFn;
@@ -69,6 +71,45 @@ describe("S3 image storage adapter", () => {
         reason: "unknown",
         message: "network unavailable",
       },
+    });
+  });
+
+  it("maps S3 upload success to a StoredImage value", async () => {
+    mocks.uploadFn.mockResolvedValueOnce({
+      $metadata: { httpStatusCode: 200 },
+    });
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).putStoredImage({
+        key: "i/uploaded.webp",
+        body: new Blob(["image bytes"], { type: "image/webp" }),
+        contentType: "image/webp",
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      value: {
+        key: "i/uploaded.webp",
+        url: "https://cdn.example.com/i/uploaded.webp",
+      },
+    });
+  });
+
+  it("maps failed S3 uploads to typed storage failures", async () => {
+    mocks.uploadFn.mockRejectedValueOnce(
+      Object.assign(new Error("forbidden"), {
+        name: "AccessDenied",
+        $metadata: { httpStatusCode: 403 },
+      }),
+    );
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).putStoredImage({
+        key: "i/forbidden.webp",
+        body: new Blob(["image bytes"], { type: "image/webp" }),
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: { reason: "access-denied" },
     });
   });
 

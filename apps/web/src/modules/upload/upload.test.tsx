@@ -3,26 +3,26 @@ import { render } from "@/../test/utils/render-browser";
 import { renderHook } from "vitest-browser-react";
 import { useAtom, useSetAtom } from "jotai";
 import { Upload } from "./upload";
-import { fileListAtom, appendFilesAtom } from "./atoms/upload-atoms";
+import {
+  fileListAtom,
+  appendFilesAtom,
+  uploadStorageAtom,
+} from "./atoms/upload-atoms";
 import { profilesAtom } from "@/stores/atoms/settings";
 import { getDefaultOptions } from "@/stores/schemas/settings";
 import { produce } from "immer";
-import type ImageS3Client from "@/lib/s3/image-s3-client";
+import {
+  createImageStorage,
+  type PutStoredImageInput,
+} from "@/modules/image-storage";
+import { createMemoryImageStorageAdapter } from "@/modules/image-storage/adapters/memory";
 
 const mocks = vi.hoisted(() => {
   return {
-    uploadFn: vi.fn().mockResolvedValue({ $metadata: { httpStatusCode: 200 } }),
+    putStoredImageFn: vi.fn(),
     processFileFn: vi.fn().mockImplementation((file: File) => {
       return Promise.resolve(file);
     }),
-  };
-});
-
-vi.mock(import("@/lib/s3/image-s3-client"), () => {
-  return {
-    default: class MockImageS3Client {
-      upload = mocks.uploadFn;
-    } as unknown as typeof ImageS3Client,
   };
 });
 
@@ -68,6 +68,23 @@ async function setupValidS3Settings() {
   });
 }
 
+async function setupUploadStorage() {
+  const adapter = createMemoryImageStorageAdapter({
+    publicBaseUrl: "https://cdn.example.com",
+  });
+  const storage = createImageStorage({
+    ...adapter,
+    async putStoredImage(input: PutStoredImageInput) {
+      mocks.putStoredImageFn(input);
+      return adapter.putStoredImage(input);
+    },
+  });
+  const { result } = await renderHook(() => useSetAtom(uploadStorageAtom));
+  result.current({
+    createStorage: () => storage,
+  });
+}
+
 async function clearFileList() {
   const { result } = await renderHook(() => useAtom(fileListAtom));
   result.current[1]([]);
@@ -77,6 +94,7 @@ beforeEach(async () => {
   vi.clearAllMocks();
   localStorage.clear();
   await clearFileList();
+  await setupUploadStorage();
 });
 
 describe("Upload Component", () => {
@@ -148,7 +166,7 @@ describe("Upload Component", () => {
       // Wait for upload to complete
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(mocks.uploadFn).toHaveBeenCalled();
+      expect(mocks.putStoredImageFn).toHaveBeenCalled();
     });
   });
 
