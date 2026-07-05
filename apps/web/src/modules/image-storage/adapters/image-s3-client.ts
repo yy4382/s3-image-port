@@ -10,7 +10,7 @@ import {
 } from "@aws-sdk/client-s3";
 import type { S3Options } from "@/stores/schemas/settings";
 import mime from "mime";
-import { s3Key2Url } from "./s3-key";
+import { s3Key2Url } from "@/lib/s3/s3-key";
 
 export type ListedS3ImageObject = {
   Key: string;
@@ -19,7 +19,7 @@ export type ListedS3ImageObject = {
 };
 
 /**
- * A client for the S3 API.
+ * Internal client for the S3-backed image storage adapter.
  *
  * The creation overhead of the class is ignorable, so we can create one from
  * settings every time we need it.

@@ -1,6 +1,6 @@
 import ImageS3Client, {
   type ListedS3ImageObject,
-} from "@/lib/s3/image-s3-client";
+} from "./image-s3-client";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import type { S3Options } from "@/stores/schemas/settings";
 import type {

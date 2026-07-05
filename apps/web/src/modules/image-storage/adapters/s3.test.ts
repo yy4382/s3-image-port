@@ -9,16 +9,18 @@ const mocks = vi.hoisted(() => ({
   deleteFn: vi.fn(),
   renameFn: vi.fn(),
   getFn: vi.fn(),
+  headFn: vi.fn(),
   getCorsFn: vi.fn(),
 }));
 
-vi.mock("@/lib/s3/image-s3-client", () => ({
+vi.mock("./image-s3-client", () => ({
   default: class MockImageS3Client {
     list = mocks.listFn;
     upload = mocks.uploadFn;
     delete = mocks.deleteFn;
     rename = mocks.renameFn;
     get = mocks.getFn;
+    head = mocks.headFn;
     getCors = mocks.getCorsFn;
   },
 }));
@@ -233,6 +235,26 @@ describe("S3 image storage adapter", () => {
     ).resolves.toEqual({
       ok: false,
       error: { reason: "not-found", key: "i/missing.webp" },
+    });
+  });
+
+  it("maps S3 object probes to stored image metadata", async () => {
+    mocks.headFn.mockResolvedValueOnce({
+      LastModified: new Date("2026-07-06T10:00:00.000Z"),
+      ContentType: "image/webp",
+      ContentLength: 1234,
+    });
+
+    await expect(
+      createS3ImageStorageAdapter(s3Settings).probeStoredImage("i/source.webp"),
+    ).resolves.toEqual({
+      ok: true,
+      value: {
+        key: "i/source.webp",
+        lastModified: "2026-07-06T10:00:00.000Z",
+        contentType: "image/webp",
+        size: 1234,
+      },
     });
   });
 

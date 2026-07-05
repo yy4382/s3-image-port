@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { StoredImage } from "@/modules/image-storage";
-import ImageS3Client from "@/lib/s3/image-s3-client";
+import { createS3ImageStorage, type StoredImage } from "@/modules/image-storage";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -120,9 +119,10 @@ function PhotoDisplayError({ s3Key }: { s3Key: string }) {
 
   const handleRefresh = useCallback(() => {
     if (!s3Settings) return;
-    const resp = new ImageS3Client(s3Settings).head(s3Key);
-    resp.then((res) => {
-      setMime(res.ContentType ?? undefined);
+    createS3ImageStorage(s3Settings).probeStoredImage(s3Key).then((result) => {
+      if (result.ok) {
+        setMime(result.value.contentType);
+      }
     });
   }, [s3Key, s3Settings]);
 

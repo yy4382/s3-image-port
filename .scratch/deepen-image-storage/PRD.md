@@ -1,6 +1,6 @@
 # PRD: Deepen Image Storage
 
-Status: ready-for-human
+Status: implemented
 
 ## Problem Statement
 
@@ -71,4 +71,4 @@ The storage seam covers stored-image operations only. Gallery catalog behavior s
 
 ## Further Notes
 
-This PRD is for a manual implementation. The local issues under this effort are marked `ready-for-human` to reflect that the user will implement the work by hand.
+Implementation was completed on `codex/deepen-image-storage` across the local issue slices. The image storage module now owns the stored-image contract, typed Zod result schemas, the in-memory adapter, and the S3-compatible adapter. Upload, gallery listing, delete, rename, download, metadata probe, and access validation now cross the image storage seam instead of constructing the old provider client directly.
