@@ -566,9 +566,7 @@ describe("upload-atoms", () => {
 });
 
 function createRecordingStorage(): ImageStorage {
-  const adapter = createMemoryImageStorageAdapter({
-    publicBaseUrl: "https://cdn.example.com",
-  });
+  const adapter = createMemoryImageStorageAdapter();
   return {
     ...adapter,
     async putStoredImage(input: PutStoredImageInput) {

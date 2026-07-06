@@ -14,7 +14,6 @@ export const requiredStorageAccessMethods = storageAccessMethodSchema.options;
 
 export const storedImageSchema = z.object({
   key: storageKeySchema,
-  url: z.url(),
   lastModified: z.string().optional(),
 });
 

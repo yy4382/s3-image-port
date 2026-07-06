@@ -24,6 +24,7 @@ import { selectedPhotosAtom } from "@/stores/atoms/gallery";
 import { CopyIcon } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { useCopy } from "@/lib/hooks/use-copy";
+import { s3Key2Url } from "@/lib/s3/s3-key";
 
 export function GalleryControl() {
   const [selectedPhotos, setSelectedPhotos] = useAtom(selectedPhotosAtom);
@@ -46,9 +47,11 @@ export function GalleryControl() {
   };
 
   const copySelectedUrls = () => {
+    if (!s3Settings) return;
+
     const urls = filteredPhotos
       .filter((photo) => selectedPhotos.has(photo.key))
-      .map((photo) => photo.url);
+      .map((photo) => s3Key2Url(photo.key, s3Settings));
     copy(urls.join("\n"), t("selectedUrls"));
   };
 

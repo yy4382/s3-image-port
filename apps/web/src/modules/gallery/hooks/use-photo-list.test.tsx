@@ -47,22 +47,18 @@ const validS3Settings: S3Options = {
 const storedImages: StoredImage[] = [
   {
     key: "i/2026/january/alpha.webp",
-    url: "https://cdn.example.com/i/2026/january/alpha.webp",
     lastModified: "2026-01-05T10:00:00.000Z",
   },
   {
     key: "i/2026/january/cat.webp",
-    url: "https://cdn.example.com/i/2026/january/cat.webp",
     lastModified: "2026-01-03T10:00:00.000Z",
   },
   {
     key: "i/2026/february/beta.webp",
-    url: "https://cdn.example.com/i/2026/february/beta.webp",
     lastModified: "2026-02-05T10:00:00.000Z",
   },
   {
     key: "root.webp",
-    url: "https://cdn.example.com/root.webp",
     lastModified: "2026-01-10T10:00:00.000Z",
   },
 ];
@@ -112,7 +108,6 @@ describe("gallery stored image listing", () => {
       photosAtom,
       Array.from({ length: 21 }, (_, index) => ({
         key: `root-${String(index).padStart(2, "0")}.webp`,
-        url: `https://cdn.example.com/root-${String(index).padStart(2, "0")}.webp`,
         lastModified: "2026-01-01T00:00:00.000Z",
       })),
     );
@@ -137,7 +132,6 @@ describe("gallery stored image listing", () => {
         {
           key: "i/2026/january/alpha.webp",
           lastModified: "2026-01-05T10:00:00.000Z",
-          url: "https://cdn.example.com/i/2026/january/alpha.webp",
         },
       ],
     });
@@ -176,9 +170,11 @@ describe("gallery stored image listing", () => {
       {
         key: "i/2026/january/alpha.webp",
         lastModified: "2026-01-05T10:00:00.000Z",
-        url: "https://cdn.example.com/i/2026/january/alpha.webp",
       },
     ]);
+    const cachedPhotos = localStorage.getItem("s3ip:gallery:photos");
+    expect(cachedPhotos).toContain("i/2026/january/alpha.webp");
+    expect(cachedPhotos).not.toContain("cdn.example.com");
     expect(result.current.isDirty).toBe(false);
   });
 });

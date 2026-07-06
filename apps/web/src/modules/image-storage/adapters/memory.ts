@@ -15,19 +15,15 @@ type StoredImageRecord = {
 export type MemoryImageStorageAdapterOptions = {
   images?: readonly StoredImage[];
   bodies?: Readonly<Record<string, StoredImageBody>>;
-  publicBaseUrl?: string;
   now?: () => Date;
   allowedMethods?: readonly StorageAccessMethod[];
   accessDenied?: boolean;
 };
 
-const defaultPublicBaseUrl = "https://memory.image-storage.local";
-
 export function createMemoryImageStorageAdapter(
   options: MemoryImageStorageAdapterOptions = {},
 ): ImageStorage {
   const now = options.now ?? (() => new Date());
-  const publicBaseUrl = options.publicBaseUrl ?? defaultPublicBaseUrl;
   const records = new Map<string, StoredImageRecord>();
 
   for (const image of options.images ?? []) {
@@ -51,7 +47,6 @@ export function createMemoryImageStorageAdapter(
       const body = toBlob(input.body, input.contentType);
       const image: StoredImage = {
         key: input.key,
-        url: storedImageUrl(publicBaseUrl, input.key),
         lastModified: now().toISOString(),
       };
       records.set(input.key, {
@@ -88,7 +83,6 @@ export function createMemoryImageStorageAdapter(
         image: {
           ...existing.image,
           key: input.newKey,
-          url: storedImageUrl(publicBaseUrl, input.newKey),
           lastModified: now().toISOString(),
         },
       });
@@ -150,10 +144,6 @@ function toBlob(body: StoredImageBody, contentType: string | undefined): Blob {
   return new Blob([body], {
     type: contentType ?? "application/octet-stream",
   });
-}
-
-function storedImageUrl(publicBaseUrl: string, key: string) {
-  return `${publicBaseUrl.replace(/\/+$/, "")}/${key.replace(/^\/+/, "")}`;
 }
 
 function storedImageMetadata(record: StoredImageRecord): StoredImageMetadata {

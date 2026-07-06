@@ -69,9 +69,7 @@ async function setupValidS3Settings() {
 }
 
 async function setupUploadStorage() {
-  const adapter = createMemoryImageStorageAdapter({
-    publicBaseUrl: "https://cdn.example.com",
-  });
+  const adapter = createMemoryImageStorageAdapter();
   const storage: ImageStorage = {
     ...adapter,
     async putStoredImage(input: PutStoredImageInput) {

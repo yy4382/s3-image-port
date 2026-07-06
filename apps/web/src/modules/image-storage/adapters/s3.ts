@@ -1,7 +1,6 @@
 import ImageS3Client, {
   type ListedS3ImageObject,
 } from "./image-s3-client";
-import { s3Key2Url } from "@/lib/s3/s3-key";
 import type { S3Options } from "@/stores/schemas/settings";
 import type {
   ImageStorageFailure,
@@ -27,7 +26,7 @@ export function createS3ImageStorage(settings: S3Options): ImageStorage {
         const listedImages = await client.list();
         return {
           ok: true,
-          value: listedImages.map((image) => toStoredImage(image, settings)),
+          value: listedImages.map(toStoredImage),
         };
       } catch (error) {
         return {
@@ -43,7 +42,6 @@ export function createS3ImageStorage(settings: S3Options): ImageStorage {
           ok: true,
           value: {
             key: input.key,
-            url: s3Key2Url(input.key, settings),
           },
         };
       } catch (error) {
@@ -204,14 +202,10 @@ export function createS3ImageStorage(settings: S3Options): ImageStorage {
   };
 }
 
-function toStoredImage(
-  image: ListedS3ImageObject,
-  settings: S3Options,
-): StoredImage {
+function toStoredImage(image: ListedS3ImageObject): StoredImage {
   return {
     key: image.Key,
     lastModified: image.LastModified,
-    url: image.url || s3Key2Url(image.Key, settings),
   };
 }
 

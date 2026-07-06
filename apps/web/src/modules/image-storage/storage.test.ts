@@ -8,7 +8,6 @@ describe("image storage", () => {
       images: [
         {
           key: "i/one.webp",
-          url: "https://cdn.example.com/i/one.webp",
           lastModified: "2026-07-06T10:00:00.000Z",
         },
       ],
@@ -19,7 +18,6 @@ describe("image storage", () => {
       value: [
         {
           key: "i/one.webp",
-          url: "https://cdn.example.com/i/one.webp",
           lastModified: "2026-07-06T10:00:00.000Z",
         },
       ],
@@ -29,7 +27,6 @@ describe("image storage", () => {
   it("stores, probes, and downloads a stored image", async () => {
     const storage = createMemoryImageStorageAdapter({
       now: () => new Date("2026-07-06T10:00:00.000Z"),
-      publicBaseUrl: "https://cdn.example.com",
     });
     const body = new Blob(["image bytes"], { type: "image/webp" });
 
@@ -39,7 +36,6 @@ describe("image storage", () => {
       ok: true,
       value: {
         key: "i/uploaded.webp",
-        url: "https://cdn.example.com/i/uploaded.webp",
         lastModified: "2026-07-06T10:00:00.000Z",
       },
     });
@@ -67,7 +63,6 @@ describe("image storage", () => {
       images: [
         {
           key: "i/existing.webp",
-          url: "https://cdn.example.com/i/existing.webp",
         },
       ],
     });
@@ -107,15 +102,12 @@ describe("image storage", () => {
 
   it("can explicitly overwrite during rename", async () => {
     const storage = createMemoryImageStorageAdapter({
-      publicBaseUrl: "https://cdn.example.com",
       images: [
         {
           key: "i/source.webp",
-          url: "https://cdn.example.com/i/source.webp",
         },
         {
           key: "i/target.webp",
-          url: "https://cdn.example.com/i/target.webp",
         },
       ],
     });

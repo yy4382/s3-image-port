@@ -48,13 +48,11 @@ const validS3Settings: S3Options = {
 
 const sourceImage: StoredImage = {
   key: "i/source.webp",
-  url: "https://cdn.example.com/i/source.webp",
   lastModified: "2026-07-06T10:00:00.000Z",
 };
 
 const targetImage: StoredImage = {
   key: "i/target.webp",
-  url: "https://cdn.example.com/i/target.webp",
   lastModified: "2026-07-06T11:00:00.000Z",
 };
 
@@ -326,7 +324,6 @@ describe("stored image gallery actions", () => {
 function createMemoryStorage(images: readonly StoredImage[] = []) {
   return createMemoryImageStorageAdapter({
     images,
-    publicBaseUrl: "https://cdn.example.com",
   });
 }
 

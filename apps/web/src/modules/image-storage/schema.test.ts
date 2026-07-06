@@ -10,13 +10,11 @@ describe("storedImageSchema", () => {
   it("parses stored image metadata", () => {
     const parsed = storedImageSchema.parse({
       key: "i/2026/07/example.webp",
-      url: "https://cdn.example.com/i/2026/07/example.webp",
       lastModified: "2026-07-06T10:00:00.000Z",
     });
 
     expect(parsed).toEqual({
       key: "i/2026/07/example.webp",
-      url: "https://cdn.example.com/i/2026/07/example.webp",
       lastModified: "2026-07-06T10:00:00.000Z",
     });
   });
@@ -24,7 +22,6 @@ describe("storedImageSchema", () => {
   it("rejects stored images without a storage key", () => {
     const result = storedImageSchema.safeParse({
       key: "",
-      url: "https://cdn.example.com/image.webp",
     });
 
     expect(result.success).toBe(false);
@@ -82,7 +79,6 @@ describe("storedImageListResultSchema", () => {
         value: [
           {
             key: "i/a.webp",
-            url: "https://cdn.example.com/i/a.webp",
           },
         ],
       }),
@@ -91,7 +87,6 @@ describe("storedImageListResultSchema", () => {
       value: [
         {
           key: "i/a.webp",
-          url: "https://cdn.example.com/i/a.webp",
         },
       ],
     });

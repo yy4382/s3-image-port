@@ -10,12 +10,10 @@ import {
 } from "@aws-sdk/client-s3";
 import type { S3Options } from "@/stores/schemas/settings";
 import mime from "mime";
-import { s3Key2Url } from "@/lib/s3/s3-key";
 
 export type ListedS3ImageObject = {
   Key: string;
   LastModified?: string;
-  url: string;
 };
 
 class ImageS3Client {
@@ -179,7 +177,6 @@ class ImageS3Client {
       return {
         Key: object.Key,
         LastModified: object.LastModified?.toISOString(),
-        url: s3Key2Url(object.Key, this.settings),
       };
     });
 

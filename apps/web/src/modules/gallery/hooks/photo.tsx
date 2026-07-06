@@ -4,14 +4,17 @@ import { useDownloadPhoto } from "./use-download";
 import { useRenamePhoto } from "./use-rename";
 import { useCallback } from "react";
 import { toggleSelectedAtom } from "./use-select";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCopy } from "@/lib/hooks/use-copy";
+import { s3Key2Url } from "@/lib/s3/s3-key";
+import { validS3SettingsAtom } from "@/stores/atoms/settings";
 
 export function usePhotoOperations(photo: StoredImage) {
   const deletePhotos = useDeletePhotos();
   const downloadPhoto = useDownloadPhoto();
   const renamePhoto = useRenamePhoto();
   const toggleSelected = useSetAtom(toggleSelectedAtom);
+  const s3Settings = useAtomValue(validS3SettingsAtom);
 
   const deleteFn = useCallback(async () => {
     await deletePhotos(photo.key);
@@ -31,11 +34,13 @@ export function usePhotoOperations(photo: StoredImage) {
   const { copy } = useCopy();
 
   const handleCopyMarkdown = () => {
-    const markdown = `![${photo.key}](${photo.url})`;
+    if (!s3Settings) return;
+    const markdown = `![${photo.key}](${s3Key2Url(photo.key, s3Settings)})`;
     copy(markdown, "Markdown link");
   };
   const handleCopyUrl = () => {
-    copy(photo.url, "URL");
+    if (!s3Settings) return;
+    copy(s3Key2Url(photo.key, s3Settings), "URL");
   };
   const handleToggleSelected = useCallback(
     (check: boolean | "toggle", shift: boolean) => {

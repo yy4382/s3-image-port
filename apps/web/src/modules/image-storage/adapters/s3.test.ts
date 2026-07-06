@@ -46,7 +46,6 @@ describe("S3 image storage adapter", () => {
       {
         Key: "i/one.webp",
         LastModified: "2026-07-06T10:00:00.000Z",
-        url: "https://cdn.example.com/i/one.webp",
       },
     ]);
 
@@ -58,7 +57,6 @@ describe("S3 image storage adapter", () => {
         {
           key: "i/one.webp",
           lastModified: "2026-07-06T10:00:00.000Z",
-          url: "https://cdn.example.com/i/one.webp",
         },
       ],
     });
@@ -93,7 +91,6 @@ describe("S3 image storage adapter", () => {
       ok: true,
       value: {
         key: "i/uploaded.webp",
-        url: "https://cdn.example.com/i/uploaded.webp",
       },
     });
   });
