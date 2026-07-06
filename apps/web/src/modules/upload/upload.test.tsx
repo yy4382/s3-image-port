@@ -1,21 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "@/../test/utils/render-browser";
 import { renderHook } from "vitest-browser-react";
-import { useAtom, useSetAtom } from "jotai";
-import { Upload } from "./upload";
-import {
-  fileListAtom,
-  appendFilesAtom,
-  uploadStorageAtom,
-} from "./atoms/upload-atoms";
-import { profilesAtom } from "@/stores/atoms/settings";
-import { getDefaultOptions } from "@/stores/schemas/settings";
-import { produce } from "immer";
+import { useAtom } from "jotai";
+import { useEffect } from "react";
+
 import {
   type ImageStorage,
   type PutStoredImageInput,
 } from "@/modules/image-storage";
 import { createMemoryImageStorageAdapter } from "@/modules/image-storage/adapters/memory";
+import { profilesAtom } from "@/stores/atoms/settings";
+import { getDefaultOptions } from "@/stores/schemas/settings";
+import { produce } from "immer";
+
+import { Upload, UploadContent } from "./upload";
+import {
+  UploadQueueProvider,
+  useAddFilesToUploadQueue,
+} from "./upload-queue-context";
+import type { UploadQueueEffects } from "./machines/upload-queue-machine";
 
 const mocks = vi.hoisted(() => {
   return {
@@ -23,14 +26,7 @@ const mocks = vi.hoisted(() => {
     processFileFn: vi.fn().mockImplementation((file: File) => {
       return Promise.resolve(file);
     }),
-  };
-});
-
-vi.mock(import("@/lib/utils/imageCompress"), async (importOriginal) => {
-  const original = await importOriginal();
-  return {
-    ...original,
-    processFile: mocks.processFileFn,
+    onUploadSucceededFn: vi.fn(),
   };
 });
 
@@ -68,47 +64,23 @@ async function setupValidS3Settings() {
   });
 }
 
-async function setupUploadStorage() {
-  const adapter = createMemoryImageStorageAdapter();
-  const storage: ImageStorage = {
-    ...adapter,
-    async putStoredImage(input: PutStoredImageInput) {
-      mocks.putStoredImageFn(input);
-      return adapter.putStoredImage(input);
-    },
-  };
-  const { result } = await renderHook(() => useSetAtom(uploadStorageAtom));
-  result.current({
-    createStorage: () => storage,
-  });
-}
-
-async function clearFileList() {
-  const { result } = await renderHook(() => useAtom(fileListAtom));
-  result.current[1]([]);
-}
-
-beforeEach(async () => {
+beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
-  await clearFileList();
-  await setupUploadStorage();
 });
 
 describe("Upload Component", () => {
   describe("rendering", () => {
     it("should render dropzone with drag text", async () => {
       await setupValidS3Settings();
-      const screen = await render(<Upload />);
-      // Using exact text from the translation
+      const screen = await render(<Upload effects={createUploadEffects()} />);
       const dropzone = screen.getByText("Drag & Drop files here");
       await expect.element(dropzone).toBeInTheDocument();
     });
 
     it("should render file list title", async () => {
       await setupValidS3Settings();
-      const screen = await render(<Upload />);
-      // The title contains "Files to upload"
+      const screen = await render(<Upload effects={createUploadEffects()} />);
       const title = screen.getByText("Files to upload");
       await expect.element(title).toBeInTheDocument();
     });
@@ -118,13 +90,10 @@ describe("Upload Component", () => {
     it("should display files after adding", async () => {
       await setupValidS3Settings();
 
-      // Add a file via the atom
-      const { result: appendResult } = await renderHook(() =>
-        useSetAtom(appendFilesAtom),
+      const screen = await render(
+        <UploadHarness files={[createTestFile("test-image.jpg")]} />,
       );
-      appendResult.current([createTestFile("test-image.jpg")]);
 
-      const screen = await render(<Upload />);
       await expect
         .element(screen.getByText("test-image.jpg"))
         .toBeInTheDocument();
@@ -133,12 +102,9 @@ describe("Upload Component", () => {
     it("should show upload all button when files exist", async () => {
       await setupValidS3Settings();
 
-      const { result: appendResult } = await renderHook(() =>
-        useSetAtom(appendFilesAtom),
+      const screen = await render(
+        <UploadHarness files={[createTestFile("test.jpg")]} />,
       );
-      appendResult.current([createTestFile("test.jpg")]);
-
-      const screen = await render(<Upload />);
       const uploadButton = screen.getByRole("button", { name: "Upload All" });
       await expect.element(uploadButton).toBeInTheDocument();
     });
@@ -148,20 +114,15 @@ describe("Upload Component", () => {
     it("should upload file when individual upload button is clicked", async () => {
       await setupValidS3Settings();
 
-      const { result: appendResult } = await renderHook(() =>
-        useSetAtom(appendFilesAtom),
+      const screen = await render(
+        <UploadHarness files={[createTestFile("test.jpg")]} />,
       );
-      appendResult.current([createTestFile("test.jpg")]);
 
-      const screen = await render(<Upload />);
-
-      // Click individual upload button (use first() to get the first non-Upload All button)
       const uploadButton = screen
         .getByRole("button", { name: "Upload" })
         .first();
       await uploadButton.click();
 
-      // Wait for upload to complete
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mocks.putStoredImageFn).toHaveBeenCalled();
@@ -172,12 +133,9 @@ describe("Upload Component", () => {
     it("should show edit button for each file", async () => {
       await setupValidS3Settings();
 
-      const { result: appendResult } = await renderHook(() =>
-        useSetAtom(appendFilesAtom),
+      const screen = await render(
+        <UploadHarness files={[createTestFile("test.jpg")]} />,
       );
-      appendResult.current([createTestFile("test.jpg")]);
-
-      const screen = await render(<Upload />);
       const editButton = screen.getByRole("button", { name: "Edit" }).first();
       await expect.element(editButton).toBeInTheDocument();
     });
@@ -185,12 +143,9 @@ describe("Upload Component", () => {
     it("should show remove button for each file", async () => {
       await setupValidS3Settings();
 
-      const { result: appendResult } = await renderHook(() =>
-        useSetAtom(appendFilesAtom),
+      const screen = await render(
+        <UploadHarness files={[createTestFile("test.jpg")]} />,
       );
-      appendResult.current([createTestFile("test.jpg")]);
-
-      const screen = await render(<Upload />);
       const removeButton = screen
         .getByRole("button", { name: "Remove" })
         .first();
@@ -200,19 +155,48 @@ describe("Upload Component", () => {
     it("should remove file when remove button is clicked", async () => {
       await setupValidS3Settings();
 
-      const { result: appendResult } = await renderHook(() =>
-        useSetAtom(appendFilesAtom),
+      const screen = await render(
+        <UploadHarness files={[createTestFile("test.jpg")]} />,
       );
-      appendResult.current([createTestFile("test.jpg")]);
-
-      const screen = await render(<Upload />);
       const removeButton = screen
         .getByRole("button", { name: "Remove" })
         .first();
       await removeButton.click();
 
-      // The file should be removed - count should be 0
       await expect.element(screen.getByText("(0)")).toBeInTheDocument();
     });
   });
 });
+
+function UploadHarness({ files }: { files: File[] }) {
+  return (
+    <UploadQueueProvider effects={createUploadEffects()}>
+      <AddFilesOnMount files={files} />
+      <UploadContent />
+    </UploadQueueProvider>
+  );
+}
+
+function AddFilesOnMount({ files }: { files: File[] }) {
+  const addFiles = useAddFilesToUploadQueue();
+  useEffect(() => {
+    addFiles(files);
+  }, [addFiles, files]);
+  return null;
+}
+
+function createUploadEffects(): Partial<UploadQueueEffects> {
+  const adapter = createMemoryImageStorageAdapter();
+  const storage: ImageStorage = {
+    ...adapter,
+    async putStoredImage(input: PutStoredImageInput) {
+      mocks.putStoredImageFn(input);
+      return adapter.putStoredImage(input);
+    },
+  };
+  return {
+    processFile: mocks.processFileFn,
+    createStorage: () => storage,
+    onUploadSucceeded: mocks.onUploadSucceededFn,
+  };
+}

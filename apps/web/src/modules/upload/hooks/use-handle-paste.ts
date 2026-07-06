@@ -1,13 +1,12 @@
-import { useSetAtom } from "jotai";
 import { useEffect, useEffectEvent } from "react";
 
-import { appendFilesAtom } from "../atoms/upload-atoms";
+import { useAddFilesToUploadQueue } from "../upload-queue-context";
 
 /**
  * Handle paste event to append files to the file list
  */
 export function useHandlePaste() {
-  const appendFiles = useSetAtom(appendFilesAtom);
+  const appendFiles = useAddFilesToUploadQueue();
 
   const handlePaste = useEffectEvent((event: ClipboardEvent) => {
     if (!event.clipboardData) return;

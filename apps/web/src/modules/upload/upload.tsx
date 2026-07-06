@@ -1,6 +1,6 @@
 "use client";
 
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { ClientOnly } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -11,18 +11,35 @@ import { validS3SettingsAtom } from "@/stores/atoms/settings";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 
 import {
-  fileAtomAtoms,
-  uploadAllFilesAtom,
-  clearUploadedFilesAtom,
-} from "./atoms/upload-atoms";
+  selectHasUploaded,
+  selectUploadActors,
+  type UploadQueueEffects,
+} from "./machines/upload-queue-machine";
+import {
+  UploadQueueProvider,
+  useUploadQueueActor,
+  useUploadQueueSelector,
+} from "./upload-queue-context";
 import { useHandlePaste } from "./hooks/use-handle-paste";
 import { DropZone } from "./components/DropZone";
 import { FilePreview } from "./components/FilePreview";
 
-export function Upload() {
-  const [fileAtoms, dispatch] = useAtom(fileAtomAtoms);
-  const triggerUpload = useSetAtom(uploadAllFilesAtom);
-  const [hasUploaded, removeUploaded] = useAtom(clearUploadedFilesAtom);
+export function Upload({
+  effects,
+}: {
+  effects?: Partial<UploadQueueEffects>;
+} = {}) {
+  return (
+    <UploadQueueProvider effects={effects}>
+      <UploadContent />
+    </UploadQueueProvider>
+  );
+}
+
+export function UploadContent() {
+  const uploadActors = useUploadQueueSelector(selectUploadActors);
+  const hasUploaded = useUploadQueueSelector(selectHasUploaded);
+  const uploadQueue = useUploadQueueActor();
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("upload");
 
@@ -40,26 +57,29 @@ export function Upload() {
 
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">
-          {t("fileList.title")} ({fileAtoms.length})
+          {t("fileList.title")} ({uploadActors.length})
         </h2>
         <div className="flex items-center space-x-2">
           {hasUploaded && (
             <Button
               variant="outline"
-              onClick={removeUploaded}
+              onClick={() => uploadQueue.send({ type: "uploaded.cleared" })}
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               {t("fileList.clearUploaded")}
             </Button>
           )}
-          {fileAtoms.length > 0 && (
+          {uploadActors.length > 0 && (
             <Button
               onClick={() => {
                 if (!s3Settings) {
                   toast.error(t("alerts.s3NotConfigured"));
                   return;
                 }
-                triggerUpload(s3Settings);
+                uploadQueue.send({
+                  type: "all.uploadRequested",
+                  s3Settings,
+                });
               }}
               size="lg"
               disabled={!s3Settings}
@@ -72,11 +92,16 @@ export function Upload() {
       </div>
 
       <div className="grid gap-2">
-        {fileAtoms.map((fileAtom) => (
+        {uploadActors.map((uploadActor) => (
           <FilePreview
-            fileAtom={fileAtom}
-            key={`${fileAtom}`}
-            remove={() => dispatch({ type: "remove", atom: fileAtom })}
+            uploadActor={uploadActor}
+            key={uploadActor.id}
+            remove={() =>
+              uploadQueue.send({
+                type: "upload.removed",
+                actorRef: uploadActor,
+              })
+            }
           />
         ))}
       </div>

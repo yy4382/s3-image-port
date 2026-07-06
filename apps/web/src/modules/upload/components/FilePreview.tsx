@@ -1,5 +1,6 @@
 import { startTransition, useEffect, useMemo, useState } from "react";
-import { useAtomValue, useSetAtom, type PrimitiveAtom } from "jotai";
+import { useAtomValue } from "jotai";
+import { useSelector } from "@xstate/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "use-intl";
 import { RefreshCw } from "lucide-react";
@@ -26,7 +27,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
-import { validS3SettingsAtom } from "@/stores/atoms/settings";
+import {
+  uploadSettingsAtom,
+  validS3SettingsAtom,
+} from "@/stores/atoms/settings";
 import { s3Key2Url } from "@/lib/s3/s3-key";
 import { useCopy } from "@/lib/hooks/use-copy";
 import { toast } from "sonner";
@@ -35,22 +39,19 @@ import { KeyTemplateConsumerInput } from "@/modules/settings/upload/key-template
 
 import type { PendingUpload } from "../types";
 import {
-  processFileAtom,
-  uploadFileAtom,
-  presetsAtom,
-} from "../atoms/upload-atoms";
-import { useFileAtomOperations } from "../hooks/use-file-operations";
+  selectPendingUpload,
+  type PendingUploadActorRef,
+} from "../machines/pending-upload-machine";
+import { usePendingUploadOperations } from "../hooks/use-pending-upload-operations";
 
 export function FilePreview({
-  fileAtom,
+  uploadActor,
   remove,
 }: {
-  fileAtom: PrimitiveAtom<PendingUpload>;
+  uploadActor: PendingUploadActorRef;
   remove: () => void;
 }) {
-  const upload = useSetAtom(uploadFileAtom);
-  const process = useSetAtom(processFileAtom);
-  const file = useAtomValue(fileAtom);
+  const file = useSelector(uploadActor, selectPendingUpload);
   const s3Settings = useAtomValue(validS3SettingsAtom);
   const t = useTranslations("upload.fileList");
 
@@ -65,7 +66,10 @@ export function FilePreview({
           <div className="font-medium truncate text-sm" title={file.file.name}>
             {file.file.name}
           </div>
-          <FilePreviewProcess file={file} process={() => process(fileAtom)} />
+          <FilePreviewProcess
+            file={file}
+            process={() => uploadActor.send({ type: "process.requested" })}
+          />
         </div>
 
         <div className="flex items-center space-x-1 self-end-safe sm:self-center">
@@ -82,7 +86,12 @@ export function FilePreview({
             <Button
               variant="outline"
               size="icon"
-              onClick={() => upload(fileAtom, s3Settings!)}
+              onClick={() =>
+                uploadActor.send({
+                  type: "upload.requested",
+                  s3Settings: s3Settings!,
+                })
+              }
               disabled={!s3Settings}
             >
               <span className="sr-only">{t("upload")}</span>
@@ -126,7 +135,7 @@ export function FilePreview({
               }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
             >
-              <FilePreviewEdit fileAtom={fileAtom} />
+              <FilePreviewEdit uploadActor={uploadActor} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -136,14 +145,14 @@ export function FilePreview({
 }
 
 function FilePreviewEdit({
-  fileAtom,
+  uploadActor,
 }: {
-  fileAtom: PrimitiveAtom<PendingUpload>;
+  uploadActor: PendingUploadActorRef;
 }) {
   const { file, updateProcessOption, updateTemplate } =
-    useFileAtomOperations(fileAtom);
+    usePendingUploadOperations(uploadActor);
   const t = useTranslations("upload.fileList");
-  const presets = useAtomValue(presetsAtom);
+  const presets = useAtomValue(uploadSettingsAtom).keyTemplatePresets || [];
   return (
     <div className="space-y-4 pb-2">
       <div>

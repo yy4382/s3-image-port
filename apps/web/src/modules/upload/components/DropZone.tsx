@@ -1,12 +1,11 @@
-import { useSetAtom } from "jotai";
 import { useDropzone } from "react-dropzone";
 import { useTranslations } from "use-intl";
 import McUpload from "~icons/mingcute/file-upload-line";
 
-import { appendFilesAtom } from "../atoms/upload-atoms";
+import { useAddFilesToUploadQueue } from "../upload-queue-context";
 
 export function DropZone() {
-  const appendFiles = useSetAtom(appendFilesAtom);
+  const appendFiles = useAddFilesToUploadQueue();
   const t = useTranslations("upload.dropzone");
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
