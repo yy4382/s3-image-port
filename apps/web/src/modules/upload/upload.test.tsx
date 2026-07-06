@@ -12,7 +12,7 @@ import { profilesAtom } from "@/stores/atoms/settings";
 import { getDefaultOptions } from "@/stores/schemas/settings";
 import { produce } from "immer";
 import {
-  createImageStorage,
+  type ImageStorage,
   type PutStoredImageInput,
 } from "@/modules/image-storage";
 import { createMemoryImageStorageAdapter } from "@/modules/image-storage/adapters/memory";
@@ -72,13 +72,13 @@ async function setupUploadStorage() {
   const adapter = createMemoryImageStorageAdapter({
     publicBaseUrl: "https://cdn.example.com",
   });
-  const storage = createImageStorage({
+  const storage: ImageStorage = {
     ...adapter,
     async putStoredImage(input: PutStoredImageInput) {
       mocks.putStoredImageFn(input);
       return adapter.putStoredImage(input);
     },
-  });
+  };
   const { result } = await renderHook(() => useSetAtom(uploadStorageAtom));
   result.current({
     createStorage: () => storage,

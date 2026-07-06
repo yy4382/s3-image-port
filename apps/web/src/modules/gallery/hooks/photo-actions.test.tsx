@@ -5,7 +5,6 @@ import { createStore } from "jotai";
 import type { ReactNode } from "react";
 
 import {
-  createImageStorage,
   type ImageStorage,
   type ImageStorageFailure,
   type StoredImage,
@@ -240,14 +239,12 @@ describe("stored image gallery actions", () => {
   });
 
   it("downloads browser-usable stored image data from image storage", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        images: [sourceImage],
-        bodies: {
-          [sourceImage.key]: new Blob(["image bytes"], { type: "image/webp" }),
-        },
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      images: [sourceImage],
+      bodies: {
+        [sourceImage.key]: new Blob(["image bytes"], { type: "image/webp" }),
+      },
+    });
     const store = createConfiguredStore();
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
@@ -327,12 +324,10 @@ describe("stored image gallery actions", () => {
 });
 
 function createMemoryStorage(images: readonly StoredImage[] = []) {
-  return createImageStorage(
-    createMemoryImageStorageAdapter({
-      images,
-      publicBaseUrl: "https://cdn.example.com",
-    }),
-  );
+  return createMemoryImageStorageAdapter({
+    images,
+    publicBaseUrl: "https://cdn.example.com",
+  });
 }
 
 function createConfiguredStore({

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import type { S3Options } from "@/stores/schemas/settings";
-import { createS3ImageStorageAdapter } from "./s3";
+import { createS3ImageStorage } from "./s3";
 
 const mocks = vi.hoisted(() => ({
   listFn: vi.fn(),
@@ -51,7 +51,7 @@ describe("S3 image storage adapter", () => {
     ]);
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).listStoredImages(),
+      createS3ImageStorage(s3Settings).listStoredImages(),
     ).resolves.toEqual({
       ok: true,
       value: [
@@ -68,7 +68,7 @@ describe("S3 image storage adapter", () => {
     mocks.listFn.mockRejectedValueOnce(new Error("network unavailable"));
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).listStoredImages(),
+      createS3ImageStorage(s3Settings).listStoredImages(),
     ).resolves.toEqual({
       ok: false,
       error: {
@@ -84,7 +84,7 @@ describe("S3 image storage adapter", () => {
     });
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).putStoredImage({
+      createS3ImageStorage(s3Settings).putStoredImage({
         key: "i/uploaded.webp",
         body: new Blob(["image bytes"], { type: "image/webp" }),
         contentType: "image/webp",
@@ -107,7 +107,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).putStoredImage({
+      createS3ImageStorage(s3Settings).putStoredImage({
         key: "i/forbidden.webp",
         body: new Blob(["image bytes"], { type: "image/webp" }),
       }),
@@ -126,7 +126,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).deleteStoredImages([
+      createS3ImageStorage(s3Settings).deleteStoredImages([
         "i/missing.webp",
       ]),
     ).resolves.toEqual({
@@ -144,7 +144,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).deleteStoredImages([
+      createS3ImageStorage(s3Settings).deleteStoredImages([
         "i/forbidden.webp",
       ]),
     ).resolves.toEqual({
@@ -159,7 +159,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).renameStoredImage({
+      createS3ImageStorage(s3Settings).renameStoredImage({
         oldKey: "i/source.webp",
         newKey: "i/existing.webp",
       }),
@@ -173,7 +173,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).renameStoredImage({
+      createS3ImageStorage(s3Settings).renameStoredImage({
         oldKey: "i/source.webp",
         newKey: "i/new.webp",
       }),
@@ -191,7 +191,7 @@ describe("S3 image storage adapter", () => {
     mocks.renameFn.mockRejectedValueOnce(new Error("rename failed"));
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).renameStoredImage({
+      createS3ImageStorage(s3Settings).renameStoredImage({
         oldKey: "i/source.webp",
         newKey: "i/new.webp",
       }),
@@ -209,7 +209,7 @@ describe("S3 image storage adapter", () => {
     });
 
     const result =
-      await createS3ImageStorageAdapter(s3Settings).downloadStoredImage(
+      await createS3ImageStorage(s3Settings).downloadStoredImage(
         "i/source.webp",
       );
 
@@ -229,7 +229,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).downloadStoredImage(
+      createS3ImageStorage(s3Settings).downloadStoredImage(
         "i/missing.webp",
       ),
     ).resolves.toEqual({
@@ -246,7 +246,7 @@ describe("S3 image storage adapter", () => {
     });
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).probeStoredImage("i/source.webp"),
+      createS3ImageStorage(s3Settings).probeStoredImage("i/source.webp"),
     ).resolves.toEqual({
       ok: true,
       value: {
@@ -270,7 +270,7 @@ describe("S3 image storage adapter", () => {
     });
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
@@ -285,7 +285,7 @@ describe("S3 image storage adapter", () => {
     mocks.getCorsFn.mockResolvedValueOnce({});
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
@@ -310,7 +310,7 @@ describe("S3 image storage adapter", () => {
     });
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
@@ -335,7 +335,7 @@ describe("S3 image storage adapter", () => {
     });
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
@@ -358,7 +358,7 @@ describe("S3 image storage adapter", () => {
     });
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
@@ -380,7 +380,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorageAdapter(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({

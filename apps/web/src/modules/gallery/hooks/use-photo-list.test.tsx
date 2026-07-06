@@ -5,7 +5,6 @@ import { createStore } from "jotai";
 import type { ReactNode } from "react";
 
 import type { StoredImage } from "@/modules/image-storage";
-import { createImageStorage } from "@/modules/image-storage";
 import { createMemoryImageStorageAdapter } from "@/modules/image-storage/adapters/memory";
 import {
   currentPageAtom,
@@ -133,17 +132,15 @@ describe("gallery stored image listing", () => {
   });
 
   it("refreshes gallery state with StoredImage values from image storage", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        images: [
-          {
-            key: "i/2026/january/alpha.webp",
-            lastModified: "2026-01-05T10:00:00.000Z",
-            url: "https://cdn.example.com/i/2026/january/alpha.webp",
-          },
-        ],
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      images: [
+        {
+          key: "i/2026/january/alpha.webp",
+          lastModified: "2026-01-05T10:00:00.000Z",
+          url: "https://cdn.example.com/i/2026/january/alpha.webp",
+        },
+      ],
+    });
     const store = createStore();
     store.set(profilesAtom, {
       list: [

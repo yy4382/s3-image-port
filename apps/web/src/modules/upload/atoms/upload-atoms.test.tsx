@@ -6,7 +6,6 @@ import { createStore } from "jotai";
 import type { PendingUpload } from "../types";
 import { S3KeyMetadata } from "@/lib/s3/s3-key";
 import {
-  createImageStorage,
   type ImageStorage,
   type PutStoredImageInput,
 } from "@/modules/image-storage";
@@ -570,13 +569,13 @@ function createRecordingStorage(): ImageStorage {
   const adapter = createMemoryImageStorageAdapter({
     publicBaseUrl: "https://cdn.example.com",
   });
-  return createImageStorage({
+  return {
     ...adapter,
     async putStoredImage(input: PutStoredImageInput) {
       mocks.putStoredImageFn(input);
       return adapter.putStoredImage(input);
     },
-  });
+  };
 }
 
 function createFailingUploadStorage(): ImageStorage {

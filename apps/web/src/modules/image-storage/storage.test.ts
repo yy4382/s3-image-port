@@ -1,21 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { createMemoryImageStorageAdapter } from "./adapters/memory";
-import { createImageStorage } from "./storage";
 
 describe("image storage", () => {
   it("lists stored images through the storage interface", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        images: [
-          {
-            key: "i/one.webp",
-            url: "https://cdn.example.com/i/one.webp",
-            lastModified: "2026-07-06T10:00:00.000Z",
-          },
-        ],
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      images: [
+        {
+          key: "i/one.webp",
+          url: "https://cdn.example.com/i/one.webp",
+          lastModified: "2026-07-06T10:00:00.000Z",
+        },
+      ],
+    });
 
     await expect(storage.listStoredImages()).resolves.toEqual({
       ok: true,
@@ -30,12 +27,10 @@ describe("image storage", () => {
   });
 
   it("stores, probes, and downloads a stored image", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        now: () => new Date("2026-07-06T10:00:00.000Z"),
-        publicBaseUrl: "https://cdn.example.com",
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      now: () => new Date("2026-07-06T10:00:00.000Z"),
+      publicBaseUrl: "https://cdn.example.com",
+    });
     const body = new Blob(["image bytes"], { type: "image/webp" });
 
     await expect(
@@ -68,16 +63,14 @@ describe("image storage", () => {
   });
 
   it("returns typed failures for missing and conflicting stored images", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        images: [
-          {
-            key: "i/existing.webp",
-            url: "https://cdn.example.com/i/existing.webp",
-          },
-        ],
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      images: [
+        {
+          key: "i/existing.webp",
+          url: "https://cdn.example.com/i/existing.webp",
+        },
+      ],
+    });
 
     await expect(
       storage.downloadStoredImage("i/missing.webp"),
@@ -113,21 +106,19 @@ describe("image storage", () => {
   });
 
   it("can explicitly overwrite during rename", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        publicBaseUrl: "https://cdn.example.com",
-        images: [
-          {
-            key: "i/source.webp",
-            url: "https://cdn.example.com/i/source.webp",
-          },
-          {
-            key: "i/target.webp",
-            url: "https://cdn.example.com/i/target.webp",
-          },
-        ],
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      publicBaseUrl: "https://cdn.example.com",
+      images: [
+        {
+          key: "i/source.webp",
+          url: "https://cdn.example.com/i/source.webp",
+        },
+        {
+          key: "i/target.webp",
+          url: "https://cdn.example.com/i/target.webp",
+        },
+      ],
+    });
 
     await expect(
       storage.renameStoredImage({
@@ -147,11 +138,9 @@ describe("image storage", () => {
   });
 
   it("reports access capability through typed results", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({
-        allowedMethods: ["GET", "HEAD"],
-      }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      allowedMethods: ["GET", "HEAD"],
+    });
 
     await expect(
       storage.checkAccess({ origin: "https://app.example.com" }),

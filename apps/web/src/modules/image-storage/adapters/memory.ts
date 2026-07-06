@@ -4,7 +4,7 @@ import type {
   StoredImageMetadata,
 } from "../schema";
 import { requiredStorageAccessMethods } from "../schema";
-import type { ImageStorageAdapter, StoredImageBody } from "../storage";
+import type { ImageStorage, StoredImageBody } from "../storage";
 
 type StoredImageRecord = {
   image: StoredImage;
@@ -25,7 +25,7 @@ const defaultPublicBaseUrl = "https://memory.image-storage.local";
 
 export function createMemoryImageStorageAdapter(
   options: MemoryImageStorageAdapterOptions = {},
-): ImageStorageAdapter {
+): ImageStorage {
   const now = options.now ?? (() => new Date());
   const publicBaseUrl = options.publicBaseUrl ?? defaultPublicBaseUrl;
   const records = new Map<string, StoredImageRecord>();

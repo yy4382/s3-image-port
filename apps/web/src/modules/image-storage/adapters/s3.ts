@@ -12,23 +12,13 @@ import {
   requiredStorageAccessMethods,
   storageAccessMethodSchema,
 } from "../schema";
-import {
-  createImageStorage,
-  type ImageStorage,
-  type ImageStorageAdapter,
-} from "../storage";
+import type { ImageStorage } from "../storage";
 
 export type CreateImageStorageFromSettings = (
   settings: S3Options,
 ) => ImageStorage;
 
 export function createS3ImageStorage(settings: S3Options): ImageStorage {
-  return createImageStorage(createS3ImageStorageAdapter(settings));
-}
-
-export function createS3ImageStorageAdapter(
-  settings: S3Options,
-): ImageStorageAdapter {
   const client = new ImageS3Client(settings);
 
   return {

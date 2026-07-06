@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { createImageStorage } from "@/modules/image-storage";
 import { createMemoryImageStorageAdapter } from "@/modules/image-storage/adapters/memory";
 import type { S3Options } from "@/stores/schemas/settings";
 import { testS3Settings } from "./test-s3-settings";
@@ -18,7 +17,7 @@ const s3Settings: S3Options = {
 
 describe("testS3Settings", () => {
   it("returns valid access with allowed methods from image storage", async () => {
-    const storage = createImageStorage(createMemoryImageStorageAdapter());
+    const storage = createMemoryImageStorageAdapter();
 
     await expect(
       testS3Settings(s3Settings, "https://app.example.com", () => storage),
@@ -29,9 +28,7 @@ describe("testS3Settings", () => {
   });
 
   it("maps failed access to the existing no-result validation state", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({ accessDenied: true }),
-    );
+    const storage = createMemoryImageStorageAdapter({ accessDenied: true });
 
     await expect(
       testS3Settings(s3Settings, "https://app.example.com", () => storage),
@@ -42,9 +39,9 @@ describe("testS3Settings", () => {
   });
 
   it("maps incomplete CORS permissions to the existing no-allowed-methods state", async () => {
-    const storage = createImageStorage(
-      createMemoryImageStorageAdapter({ allowedMethods: ["GET", "HEAD"] }),
-    );
+    const storage = createMemoryImageStorageAdapter({
+      allowedMethods: ["GET", "HEAD"],
+    });
 
     await expect(
       testS3Settings(s3Settings, "https://app.example.com", () => storage),

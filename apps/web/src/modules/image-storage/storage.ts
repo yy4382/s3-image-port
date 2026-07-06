@@ -39,9 +39,3 @@ export type ImageStorage = {
     input: CheckStorageAccessInput,
   ): Promise<ImageStorageAccessResult>;
 };
-
-export type ImageStorageAdapter = ImageStorage;
-
-export function createImageStorage(adapter: ImageStorageAdapter): ImageStorage {
-  return adapter;
-}
