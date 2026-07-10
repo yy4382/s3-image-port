@@ -43,6 +43,7 @@
     "ioredis": "^5.4.2",
     "jotai": "^2.15.2",
     "jotai-optics": "^0.4.0",
+    "jotai-xstate": "0.6.1",
     "lru-cache": "^11.2.4",
     "lucide-react": "^0.546.0",
     "mime": "^4.0.7",

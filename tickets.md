@@ -23,12 +23,12 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Establish the behavioral baseline and deterministic harness.
 
-- [ ] Add and pin `jotai-xstate` `0.6.1` without adding `@xstate/store` or `@xstate/store-react` or removing Jotai/Jotai optics.
-- [ ] Promote the isolated lifecycle evidence into repository tests covering vanilla reads, SSR, abandoned Suspense, StrictMode, remount, independent Jotai stores, manual start, external snapshot actors, deferred final release, and command-time store reads.
-- [ ] Prove zero actor starts during SSR/speculative render, one start through StrictMode replay, route-reader remount survival, and one stop on true final owned disposal.
-- [ ] Prove initialization getters are snapshots and current settings must be read from the Jotai store at IO start.
-- [ ] Land no dormant production actor, provider, lifecycle facade, or generic actor factory in this ticket.
-- [ ] Manifest, lockfile, and compatibility tests form one reversible unit.
+- [x] Add and pin `jotai-xstate` `0.6.1` without adding `@xstate/store` or `@xstate/store-react` or removing Jotai/Jotai optics.
+- [x] Promote the isolated lifecycle evidence into repository tests covering vanilla reads, SSR, abandoned Suspense, StrictMode, remount, independent Jotai stores, manual start, external snapshot actors, deferred final release, and command-time store reads.
+- [x] Prove zero actor starts during SSR/speculative render, one start through StrictMode replay, route-reader remount survival, and one stop on true final owned disposal.
+- [x] Prove initialization getters are snapshots and current settings must be read from the Jotai store at IO start.
+- [x] Land no dormant production actor, provider, lifecycle facade, or generic actor factory in this ticket.
+- [x] Manifest, lockfile, and compatibility tests form one reversible unit.
 
 ## Deepen settings in place
 
