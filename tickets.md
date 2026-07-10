@@ -10,12 +10,12 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** None — can start immediately.
 
-- [ ] Record the existing settings, profile/form, gallery, URL/modal, upload, sync, cache, and natural-size suite results from the untouched implementation base.
-- [ ] Preserve `main` behavior as the ordinary oracle while identifying the eight accepted corrections as intentional deviations rather than desirable base characterizations.
-- [ ] Add counted `createStorage` and per-operation adapters, deferred promises, controllable browser storage, stable IDs, StrictMode mounting, render/subscription counters, and observer/frame cleanup controls.
-- [ ] Controls distinguish local persistence writes from adapter construction and every remote method, support both completion orders, and remain unchanged after at least ten drained microtasks and relevant timers.
-- [ ] Tests and fixtures use domain language and inference-first TypeScript; production code imports no test harness or generic effect/runtime bag.
-- [ ] Existing production behavior and persisted data are unchanged.
+- [x] Record the existing settings, profile/form, gallery, URL/modal, upload, sync, cache, and natural-size suite results from the untouched implementation base.
+- [x] Preserve `main` behavior as the ordinary oracle while identifying the eight accepted corrections as intentional deviations rather than desirable base characterizations.
+- [x] Add counted `createStorage` and per-operation adapters, deferred promises, controllable browser storage, stable IDs, StrictMode mounting, render/subscription counters, and observer/frame cleanup controls.
+- [x] Controls distinguish local persistence writes from adapter construction and every remote method, support both completion orders, and remain unchanged after at least ten drained microtasks and relevant timers.
+- [x] Tests and fixtures use domain language and inference-first TypeScript; production code imports no test harness or generic effect/runtime bag.
+- [x] Existing production behavior and persisted data are unchanged.
 
 ## Pin and codify the Jotai-XState lifecycle contract
 
