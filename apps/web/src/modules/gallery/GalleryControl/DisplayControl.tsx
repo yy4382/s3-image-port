@@ -79,41 +79,33 @@ function useSyncDisplayAtomAndSearch() {
   const routeKey = JSON.stringify(normalizedRoute.search);
   const routeIsCanonical = deepEqual(searchParams, normalizedRoute.search);
   const catalogKey = JSON.stringify(catalogSearch);
-  const observedRouteKey = useRef<string | undefined>(undefined);
-  const observedLocationKey = useRef<string | undefined>(undefined);
-  const suppressedLocationKey = useRef<string | undefined>(undefined);
-  const hydratingRouteKey = useRef<string | undefined>(undefined);
-  const nextNavigationId = useRef(0);
-  const pendingOutbound = useRef<{ id: number; key: string } | undefined>(
-    undefined,
-  );
-  const invalidatedOutbound = useRef(
-    new Map<
+  const coordination = useRef({
+    observedRouteKey: undefined as string | undefined,
+    observedLocationKey: undefined as string | undefined,
+    suppressedLocationKey: undefined as string | undefined,
+    hydratingRouteKey: undefined as string | undefined,
+    nextNavigationId: 0,
+    pending: undefined as { id: number; key: string } | undefined,
+    desired: undefined as
+      | { search: typeof catalogSearch; key: string }
+      | undefined,
+    invalidated: new Map<
       number,
       {
+        id: number;
         key: string;
         staleLocationKey?: string;
         eligibleAfterLocationKey?: string;
       }
     >(),
-  );
+  });
 
   const navigateOutbound = useCallback(
     (search: typeof catalogSearch, key: string, replace = false) => {
-      if (pendingOutbound.current) {
-        invalidatedOutbound.current.set(pendingOutbound.current.id, {
-          key: pendingOutbound.current.key,
-        });
-      }
-      // Only in-flight, invalidated navigations are retained. The cap also keeps
-      // a navigation that never acknowledges from growing module-local state.
-      while (invalidatedOutbound.current.size > 16) {
-        invalidatedOutbound.current.delete(
-          invalidatedOutbound.current.keys().next().value!,
-        );
-      }
-      const id = ++nextNavigationId.current;
-      pendingOutbound.current = { id, key };
+      const sync = coordination.current;
+      const id = ++sync.nextNavigationId;
+      sync.pending = { id, key };
+      sync.desired = undefined;
       startTransition(() => {
         void navigate({
           to: ".",
@@ -129,100 +121,86 @@ function useSyncDisplayAtomAndSearch() {
     [navigate],
   );
 
+  // The committed route is authoritative. Hydration is marked in the shared
+  // record so the outbound effect does not echo these atom writes back.
   useEffect(() => {
+    const sync = coordination.current;
     if (
-      observedRouteKey.current === routeKey &&
-      observedLocationKey.current === routeLocationKey &&
-      suppressedLocationKey.current === routeLocationKey
+      sync.observedRouteKey === routeKey &&
+      sync.observedLocationKey === routeLocationKey
     ) {
       return;
     }
 
-    if (
-      observedRouteKey.current !== routeKey ||
-      observedLocationKey.current !== routeLocationKey
-    ) {
-      observedRouteKey.current = routeKey;
-      observedLocationKey.current = routeLocationKey;
-      suppressedLocationKey.current = undefined;
-      const pending = pendingOutbound.current;
+    sync.observedRouteKey = routeKey;
+    sync.observedLocationKey = routeLocationKey;
+    sync.suppressedLocationKey = undefined;
 
+    if (
+      sync.pending !== undefined &&
+      sync.pending.id === routeNavigationId &&
+      sync.pending.key === routeKey
+    ) {
+      sync.pending = undefined;
+      sync.hydratingRouteKey = undefined;
+      const desired = sync.desired;
+      sync.desired = undefined;
+      if (desired !== undefined && desired.key !== routeKey) {
+        navigateOutbound(desired.search, desired.key);
+      }
+      return;
+    }
+
+    const invalidated =
+      routeNavigationId === undefined
+        ? undefined
+        : sync.invalidated.get(routeNavigationId);
+    if (
+      routeNavigationId !== undefined &&
+      invalidated?.id === routeNavigationId &&
+      invalidated.key === routeKey
+    ) {
       if (
-        pending !== undefined &&
-        pending.id === routeNavigationId &&
-        pending.key === routeKey
+        invalidated.eligibleAfterLocationKey !== undefined &&
+        invalidated.staleLocationKey === routeLocationKey
       ) {
-        pendingOutbound.current = undefined;
-        hydratingRouteKey.current = undefined;
+        sync.invalidated.delete(routeNavigationId);
+      } else {
+        invalidated.staleLocationKey ??= routeLocationKey;
+        sync.suppressedLocationKey = routeLocationKey;
         return;
       }
+    }
 
-      if (routeNavigationId !== undefined) {
-        const invalidated = invalidatedOutbound.current.get(routeNavigationId);
-        if (invalidated?.key === routeKey) {
-          if (
-            invalidated.eligibleAfterLocationKey !== undefined &&
-            invalidated.staleLocationKey === routeLocationKey
-          ) {
-            invalidatedOutbound.current.delete(routeNavigationId);
-          } else {
-            invalidated.staleLocationKey ??= routeLocationKey;
-            suppressedLocationKey.current = routeLocationKey;
-            return;
-          }
-        }
+    if (sync.pending !== undefined) {
+      sync.invalidated.set(sync.pending.id, { ...sync.pending });
+      while (sync.invalidated.size > 16) {
+        sync.invalidated.delete(sync.invalidated.keys().next().value!);
       }
+      sync.pending = undefined;
+      sync.desired = undefined;
+    }
 
-      if (pendingOutbound.current) {
-        invalidatedOutbound.current.set(pendingOutbound.current.id, {
-          key: pendingOutbound.current.key,
-        });
-        pendingOutbound.current = undefined;
+    for (const stale of sync.invalidated.values()) {
+      if (stale.staleLocationKey !== undefined) {
+        stale.eligibleAfterLocationKey = routeLocationKey;
       }
+    }
 
-      for (const invalidated of invalidatedOutbound.current.values()) {
-        if (invalidated.staleLocationKey !== undefined) {
-          invalidated.eligibleAfterLocationKey = routeLocationKey;
-        }
-      }
-
-      hydratingRouteKey.current = routeKey;
-      if (catalogKey !== routeKey) {
-        setCurrentPage(1);
-        setDisplayOptions(normalizedRoute.filter);
-        setPageSize(normalizedRoute.pageSize);
-        return;
-      }
-
-      hydratingRouteKey.current = undefined;
-      if (!routeIsCanonical) {
-        navigateOutbound(normalizedRoute.search, routeKey, true);
-      }
+    sync.hydratingRouteKey = routeKey;
+    if (catalogKey !== routeKey) {
+      setCurrentPage(1);
+      setDisplayOptions(normalizedRoute.filter);
+      setPageSize(normalizedRoute.pageSize);
       return;
     }
 
-    if (hydratingRouteKey.current === routeKey) {
-      if (catalogKey !== routeKey) return;
-      hydratingRouteKey.current = undefined;
-      if (!routeIsCanonical) {
-        navigateOutbound(normalizedRoute.search, routeKey, true);
-      }
-      return;
+    sync.hydratingRouteKey = undefined;
+    if (!routeIsCanonical) {
+      navigateOutbound(normalizedRoute.search, routeKey, true);
     }
-
-    if (
-      catalogKey === routeKey ||
-      pendingOutbound.current?.key === catalogKey
-    ) {
-      return;
-    }
-
-    setCurrentPage(1);
-    navigateOutbound(catalogSearch, catalogKey);
   }, [
     catalogKey,
-    catalogSearch,
-    navigate,
     normalizedRoute.filter,
     normalizedRoute.pageSize,
     normalizedRoute.search,
@@ -234,6 +212,48 @@ function useSyncDisplayAtomAndSearch() {
     setCurrentPage,
     setDisplayOptions,
     setPageSize,
+  ]);
+
+  // Atom writes remain the caller interface. While one navigation is pending,
+  // further writes coalesce into the latest desired search.
+  useEffect(() => {
+    const sync = coordination.current;
+    if (sync.suppressedLocationKey === routeLocationKey) return;
+
+    if (sync.hydratingRouteKey === routeKey) {
+      if (catalogKey !== routeKey) return;
+      sync.hydratingRouteKey = undefined;
+      if (!routeIsCanonical && sync.pending === undefined) {
+        navigateOutbound(normalizedRoute.search, routeKey, true);
+      }
+      return;
+    }
+
+    if (sync.pending !== undefined) {
+      if (sync.pending.key !== catalogKey) {
+        sync.desired = { search: catalogSearch, key: catalogKey };
+      } else {
+        sync.desired = undefined;
+      }
+      return;
+    }
+
+    if (catalogKey === routeKey) {
+      sync.desired = undefined;
+      return;
+    }
+
+    setCurrentPage(1);
+    navigateOutbound(catalogSearch, catalogKey);
+  }, [
+    catalogKey,
+    catalogSearch,
+    navigateOutbound,
+    normalizedRoute.search,
+    routeIsCanonical,
+    routeKey,
+    routeLocationKey,
+    setCurrentPage,
   ]);
 }
 

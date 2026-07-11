@@ -211,6 +211,45 @@ describe("gallery URL edge", () => {
     expect(storage.create).not.toHaveBeenCalled();
   });
 
+  it("coalesces direct atom writes behind the pending navigation", async () => {
+    const store = createStore();
+    renderControl(store);
+    await settle();
+
+    act(() => {
+      store.set(imageCatalog.view.filter, (filter) => ({
+        ...filter,
+        searchTerm: "cats",
+      }));
+    });
+    await waitFor(() => expect(route.navigate).toHaveBeenCalledOnce());
+
+    act(() => store.set(imageCatalog.view.pageSize, 50));
+    await settle();
+    expect(route.navigate).toHaveBeenCalledOnce();
+
+    act(() =>
+      route.commit({ searchTerm: "cats" }, navigationId(0), "location-cats"),
+    );
+    await waitFor(() => expect(route.navigate).toHaveBeenCalledTimes(2));
+    expect(route.navigate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        to: ".",
+        search: { searchTerm: "cats", pageSize: 50 },
+      }),
+    );
+
+    act(() =>
+      route.commit(
+        { searchTerm: "cats", pageSize: 50 },
+        navigationId(1),
+        "location-cats-50",
+      ),
+    );
+    await settle();
+    expect(route.navigate).toHaveBeenCalledTimes(2);
+  });
+
   it("keeps repeated stale acknowledgements inert until an external location makes back authoritative", async () => {
     const store = createStore();
     const counts = observeView(store);
@@ -268,6 +307,68 @@ describe("gallery URL edge", () => {
 
     expect(route.navigate).toHaveBeenCalledOnce();
     expect(storage.create).not.toHaveBeenCalled();
+  });
+
+  it("keeps every invalidated acknowledgement behind the latest external location", async () => {
+    const store = createStore();
+    renderControl(store);
+    await settle();
+
+    act(() => {
+      store.set(imageCatalog.view.filter, (filter) => ({
+        ...filter,
+        searchTerm: "first-local",
+      }));
+    });
+    await waitFor(() => expect(route.navigate).toHaveBeenCalledOnce());
+    const firstNavigationId = navigationId(0);
+
+    act(() => route.commit({ prefix: "first-external/" }));
+    await waitFor(() =>
+      expect(store.get(imageCatalog.view.filter).prefix).toBe(
+        "first-external/",
+      ),
+    );
+
+    act(() => {
+      store.set(imageCatalog.view.filter, (filter) => ({
+        ...filter,
+        searchTerm: "second-local",
+      }));
+    });
+    await waitFor(() => expect(route.navigate).toHaveBeenCalledTimes(2));
+    const secondNavigationId = navigationId(1);
+
+    act(() => route.commit({ sortOrder: "asc" }, undefined, "external-B"));
+    await waitFor(() =>
+      expect(store.get(imageCatalog.view.filter).sortOrder).toBe("asc"),
+    );
+
+    act(() =>
+      route.commit(
+        { searchTerm: "first-local" },
+        firstNavigationId,
+        "stale-first",
+      ),
+    );
+    await settle();
+    expect(store.get(imageCatalog.view.filter)).toMatchObject({
+      searchTerm: "",
+      sortOrder: "asc",
+    });
+
+    act(() =>
+      route.commit(
+        { prefix: "first-external/", searchTerm: "second-local" },
+        secondNavigationId,
+        "stale-second",
+      ),
+    );
+    await settle();
+    expect(store.get(imageCatalog.view.filter)).toMatchObject({
+      searchTerm: "",
+      sortOrder: "asc",
+    });
   });
 
   it("hydrates distinct back/forward commits once and ignores search-key order", async () => {

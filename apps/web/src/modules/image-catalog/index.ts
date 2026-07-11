@@ -1,7 +1,7 @@
 import { compareAsc, compareDesc, isAfter, isBefore, sub } from "date-fns";
 import deepEqual from "fast-deep-equal";
 import Fuse from "fuse.js";
-import { atom } from "jotai";
+import { atom, type Getter, type Setter } from "jotai";
 import { selectAtom } from "jotai/utils";
 import { z } from "zod";
 
@@ -130,7 +130,6 @@ export function createImageCatalog({
         >["reason"];
         lastOutcome: CatalogRunResult | undefined;
       });
-  const reservationsAtom = atom<Set<string>>(new Set<string>());
   const nextOperationAtom = atom(0);
   const refreshAttemptAtom = atom(0);
 
@@ -164,20 +163,6 @@ export function createImageCatalog({
   const activeMutationsAtom = atom(
     new Map<
       number,
-      {
-        token: number;
-        promise: Promise<CatalogRunResult>;
-        cancel: () => void;
-        resolve: (value: CatalogRunResult) => void;
-        keys: readonly string[];
-        commandId?: string;
-        signature: string;
-      }
-    >(),
-  );
-  const activeCommandsAtom = atom(
-    new Map<
-      string,
       {
         token: number;
         promise: Promise<CatalogRunResult>;
@@ -344,9 +329,13 @@ export function createImageCatalog({
     atom((get) => {
       const keys = get(selectedKeysAtom);
       const currentPage = get(currentPageImagesAtom);
-      const reservations = get(reservationsAtom);
+      const activeMutations = get(activeMutationsAtom);
       const usable = get(targetUsableAtom);
-      const hasBusyKey = [...keys].some((key) => reservations.has(key));
+      const hasBusyKey = [...keys].some((key) =>
+        [...activeMutations.values()].some((mutation) =>
+          mutation.keys.includes(key),
+        ),
+      );
       return {
         keys,
         count: keys.size,
@@ -574,9 +563,7 @@ export function createImageCatalog({
     set(activeRefreshAtom, undefined);
     set(queuedRefreshAtom, undefined);
     set(activeMutationsAtom, new Map());
-    set(activeCommandsAtom, new Map());
     set(activeProbesAtom, new Map());
-    set(reservationsAtom, new Set<string>());
     set(scheduledReconciliationAtom, undefined);
     set(refreshAtom, () => ({
       status: "idle",
@@ -584,603 +571,586 @@ export function createImageCatalog({
     }));
   });
 
-  const run = atom(
-    null,
-    (
-      get,
-      set,
-      input: z.input<typeof catalogCommandSchema>,
-    ): Promise<CatalogRunResult> => {
-      set(ensureHydratedAtom);
-      const command = catalogCommandSchema.parse(input);
+  function currentContext(get: Getter) {
+    return get(operationContextAtom);
+  }
 
-      if (command.type === "refresh") return refresh(command);
-      if (command.type === "delete" || command.type === "rename") {
-        return mutate(command);
+  function isCurrent(
+    get: Getter,
+    started: { generation: number; revision: number; targetId: string },
+  ) {
+    const context = currentContext(get);
+    return (
+      context.status === "valid" &&
+      get(profileGenerationAtom) === started.generation &&
+      context.revision === started.revision &&
+      context.targetId === started.targetId
+    );
+  }
+
+  function preflight(get: Getter) {
+    const context = currentContext(get);
+    if (context.status === "invalid") {
+      return {
+        ok: false as const,
+        outcome: {
+          status: "invalid-settings" as const,
+          errors: context.errors,
+        },
+      };
+    }
+    const targetId = get(projectionMetaAtom).targetId;
+    if (targetId !== context.targetId) {
+      return {
+        ok: false as const,
+        outcome: { status: "target-mismatch" as const },
+      };
+    }
+    return {
+      ok: true as const,
+      context: {
+        settings: context.settings,
+        revision: context.revision,
+        targetId: context.targetId,
+        generation: get(profileGenerationAtom),
+      },
+    };
+  }
+
+  function refresh(
+    get: Getter,
+    set: Setter,
+    refreshCommand: Extract<
+      z.infer<typeof catalogCommandSchema>,
+      { type: "refresh" }
+    >,
+  ): Promise<CatalogRunResult> {
+    const context = currentContext(get);
+    if (context.status === "invalid") {
+      return Promise.resolve({
+        status: "invalid-settings" as const,
+        errors: context.errors,
+      });
+    }
+    const current = {
+      generation: get(profileGenerationAtom),
+      revision: context.revision,
+      targetId: context.targetId,
+    };
+    const active = get(activeRefreshAtom);
+    if (
+      active &&
+      active.generation === current.generation &&
+      active.revision === current.revision &&
+      active.targetId === current.targetId
+    ) {
+      if (
+        refreshCommand.intent === "foreground" &&
+        get(refreshAtom).status === "refreshing"
+      ) {
+        set(refreshAtom, (current) => ({
+          ...current,
+          status: "refreshing",
+          intent: "foreground",
+          reason: refreshCommand.reason,
+        }));
       }
-      return access(command);
-
-      function currentContext() {
-        return get(operationContextAtom);
-      }
-
-      function isCurrent(started: {
-        generation: number;
-        revision: number;
-        targetId: string;
-      }) {
-        const context = currentContext();
-        return (
-          context.status === "valid" &&
-          get(profileGenerationAtom) === started.generation &&
-          context.revision === started.revision &&
-          context.targetId === started.targetId
-        );
-      }
-
-      function preflight() {
-        const context = currentContext();
-        if (context.status === "invalid") {
-          return {
-            ok: false as const,
-            outcome: {
-              status: "invalid-settings" as const,
-              errors: context.errors,
-            },
-          };
-        }
-        const targetId = get(projectionMetaAtom).targetId;
-        if (targetId !== context.targetId) {
-          return {
-            ok: false as const,
-            outcome: { status: "target-mismatch" as const },
-          };
-        }
-        return {
-          ok: true as const,
-          context: {
-            settings: context.settings,
-            revision: context.revision,
-            targetId: context.targetId,
-            generation: get(profileGenerationAtom),
-          },
-        };
-      }
-
-      function refresh(
-        refreshCommand: Extract<
-          z.infer<typeof catalogCommandSchema>,
-          { type: "refresh" }
-        >,
-      ): Promise<CatalogRunResult> {
-        const context = currentContext();
-        if (context.status === "invalid") {
-          return Promise.resolve({
-            status: "invalid-settings" as const,
-            errors: context.errors,
-          });
-        }
-        const current = {
-          generation: get(profileGenerationAtom),
-          revision: context.revision,
-          targetId: context.targetId,
-        };
-        const active = get(activeRefreshAtom);
+      return active.promise;
+    }
+    if (active) {
+      const queued = get(queuedRefreshAtom);
+      if (
+        queued &&
+        queued.generation === current.generation &&
+        queued.revision === current.revision &&
+        queued.targetId === current.targetId
+      ) {
         if (
-          active &&
-          active.generation === current.generation &&
-          active.revision === current.revision &&
-          active.targetId === current.targetId
+          refreshCommand.intent === "foreground" &&
+          queued.command.intent === "background"
         ) {
-          if (
-            refreshCommand.intent === "foreground" &&
-            get(refreshAtom).status === "refreshing"
-          ) {
-            set(refreshAtom, (current) => ({
-              ...current,
-              status: "refreshing",
-              intent: "foreground",
-              reason: refreshCommand.reason,
-            }));
-          }
-          return active.promise;
-        }
-        if (active) {
-          const queued = get(queuedRefreshAtom);
-          if (
-            queued &&
-            queued.generation === current.generation &&
-            queued.revision === current.revision &&
-            queued.targetId === current.targetId
-          ) {
-            if (
-              refreshCommand.intent === "foreground" &&
-              queued.command.intent === "background"
-            ) {
-              set(queuedRefreshAtom, {
-                ...queued,
-                command: refreshCommand,
-              });
-            }
-            return queued.promise;
-          }
-          queued?.resolve({ status: "superseded" });
-          const deferred = createDeferred<CatalogRunResult>();
           set(queuedRefreshAtom, {
-            ...current,
-            promise: deferred.promise,
-            resolve: deferred.resolve,
+            ...queued,
             command: refreshCommand,
           });
-          return deferred.promise;
         }
-        const started = {
-          settings: context.settings,
-          ...current,
-        };
-        const listing = catalogKernel.beginListing(get(projectionAtom));
-        const deferred = createDeferred<CatalogRunResult>();
-        const record = {
-          promise: deferred.promise,
-          generation: started.generation,
-          revision: started.revision,
-          targetId: started.targetId,
-          cancel: () => deferred.resolve({ status: "superseded" }),
-          resolve: deferred.resolve,
-        };
-        const scheduledAtStart = get(scheduledReconciliationAtom);
-        if (
-          scheduledAtStart?.generation === started.generation &&
-          scheduledAtStart.revision === started.revision &&
-          scheduledAtStart.targetId === started.targetId
-        ) {
-          set(scheduledReconciliationAtom, undefined);
-        }
-        set(refreshAttemptAtom, (attempt) => attempt + 1);
-        set(activeRefreshAtom, record);
-        set(refreshAtom, (current) => ({
-          status: "refreshing",
-          intent: refreshCommand.intent,
-          reason: refreshCommand.reason,
-          lastOutcome: current.lastOutcome,
-        }));
+        return queued.promise;
+      }
+      queued?.resolve({ status: "superseded" });
+      const deferred = createDeferred<CatalogRunResult>();
+      set(queuedRefreshAtom, {
+        ...current,
+        promise: deferred.promise,
+        resolve: deferred.resolve,
+        command: refreshCommand,
+      });
+      return deferred.promise;
+    }
+    const started = {
+      settings: context.settings,
+      ...current,
+    };
+    const listing = catalogKernel.beginListing(get(projectionAtom));
+    const deferred = createDeferred<CatalogRunResult>();
+    const record = {
+      promise: deferred.promise,
+      generation: started.generation,
+      revision: started.revision,
+      targetId: started.targetId,
+      cancel: () => deferred.resolve({ status: "superseded" }),
+      resolve: deferred.resolve,
+    };
+    const scheduledAtStart = get(scheduledReconciliationAtom);
+    if (
+      scheduledAtStart?.generation === started.generation &&
+      scheduledAtStart.revision === started.revision &&
+      scheduledAtStart.targetId === started.targetId
+    ) {
+      set(scheduledReconciliationAtom, undefined);
+    }
+    set(refreshAttemptAtom, (attempt) => attempt + 1);
+    set(activeRefreshAtom, record);
+    set(refreshAtom, (current) => ({
+      status: "refreshing",
+      intent: refreshCommand.intent,
+      reason: refreshCommand.reason,
+      lastOutcome: current.lastOutcome,
+    }));
 
-        void execute();
-        return record.promise;
+    void execute();
+    return record.promise;
 
-        async function execute() {
-          let outcome: CatalogRunResult;
-          try {
-            const result = await createStorage(
-              started.settings,
-            ).listStoredImages();
-            if (get(activeRefreshAtom) !== record) return;
-            if (!isCurrent(started)) {
-              outcome = { status: "superseded" };
-            } else if (!result.ok) {
-              outcome = { status: "refresh-failed", error: result.error };
-            } else {
-              let projection = catalogKernel.reduce(get(projectionAtom), {
-                type: "listing-received",
-                listing,
-                images: result.value,
-              });
-              projection = catalogKernel.reduce(projection, {
-                type: "prune-journal",
-              });
-              const scheduledReconciliation = get(scheduledReconciliationAtom);
-              const requiresPostRefreshReconciliation =
-                scheduledReconciliation?.generation === started.generation &&
-                scheduledReconciliation.revision === started.revision &&
-                scheduledReconciliation.targetId === started.targetId;
-              set(projectionAtom, projection);
-              set(projectionMetaAtom, {
-                targetId: started.targetId,
-                stale: requiresPostRefreshReconciliation,
-              });
-              set(persistProjectionAtom, "persist");
-              outcome = { status: "refreshed", images: projection.images };
-            }
-          } catch (error) {
-            if (get(activeRefreshAtom) !== record) return;
-            outcome = isCurrent(started)
-              ? { status: "refresh-failed", error }
-              : { status: "superseded" };
-          }
-          finishRefresh(outcome);
-        }
-
-        function finishRefresh(outcome: CatalogRunResult) {
-          if (get(activeRefreshAtom) !== record) return;
-          set(activeRefreshAtom, undefined);
-          set(refreshAtom, {
-            status: "idle",
-            lastOutcome:
-              outcome.status === "superseded"
-                ? get(refreshAtom).lastOutcome
-                : outcome,
+    async function execute() {
+      let outcome: CatalogRunResult;
+      try {
+        const result = await createStorage(started.settings).listStoredImages();
+        if (get(activeRefreshAtom) !== record) return;
+        if (!isCurrent(get, started)) {
+          outcome = { status: "superseded" };
+        } else if (!result.ok) {
+          outcome = { status: "refresh-failed", error: result.error };
+        } else {
+          let projection = catalogKernel.reduce(get(projectionAtom), {
+            type: "listing-received",
+            listing,
+            images: result.value,
           });
-          record.cancel = () => {};
-          record.resolve(catalogRunResultSchema.parse(outcome));
-          const queued = get(queuedRefreshAtom);
-          if (queued) {
-            queueMicrotask(() => {
-              if (get(queuedRefreshAtom) !== queued) return;
-              set(queuedRefreshAtom, undefined);
-              const latest = currentContext();
-              if (
-                latest.status !== "valid" ||
-                get(profileGenerationAtom) !== queued.generation ||
-                latest.revision !== queued.revision ||
-                latest.targetId !== queued.targetId
-              ) {
-                queued.resolve({ status: "superseded" });
-                return;
-              }
-              if (
-                get(scheduledReconciliationAtom)?.generation ===
-                  queued.generation &&
-                get(scheduledReconciliationAtom)?.revision ===
-                  queued.revision &&
-                get(scheduledReconciliationAtom)?.targetId === queued.targetId
-              ) {
-                set(scheduledReconciliationAtom, undefined);
-              }
-              void refresh(queued.command).then(queued.resolve);
-            });
-          }
+          projection = catalogKernel.reduce(projection, {
+            type: "prune-journal",
+          });
           const scheduledReconciliation = get(scheduledReconciliationAtom);
+          const requiresPostRefreshReconciliation =
+            scheduledReconciliation?.generation === started.generation &&
+            scheduledReconciliation.revision === started.revision &&
+            scheduledReconciliation.targetId === started.targetId;
+          set(projectionAtom, projection);
+          set(projectionMetaAtom, {
+            targetId: started.targetId,
+            stale: requiresPostRefreshReconciliation,
+          });
+          set(persistProjectionAtom, "persist");
+          outcome = { status: "refreshed", images: projection.images };
+        }
+      } catch (error) {
+        if (get(activeRefreshAtom) !== record) return;
+        outcome = isCurrent(get, started)
+          ? { status: "refresh-failed", error }
+          : { status: "superseded" };
+      }
+      finishRefresh(outcome);
+    }
+
+    function finishRefresh(outcome: CatalogRunResult) {
+      if (get(activeRefreshAtom) !== record) return;
+      set(activeRefreshAtom, undefined);
+      set(refreshAtom, {
+        status: "idle",
+        lastOutcome:
+          outcome.status === "superseded"
+            ? get(refreshAtom).lastOutcome
+            : outcome,
+      });
+      record.cancel = () => {};
+      record.resolve(catalogRunResultSchema.parse(outcome));
+      const queued = get(queuedRefreshAtom);
+      if (queued) {
+        queueMicrotask(() => {
+          if (get(queuedRefreshAtom) !== queued) return;
+          set(queuedRefreshAtom, undefined);
+          const latest = currentContext(get);
           if (
-            scheduledReconciliation &&
-            get(profileGenerationAtom) === scheduledReconciliation.generation
+            latest.status !== "valid" ||
+            get(profileGenerationAtom) !== queued.generation ||
+            latest.revision !== queued.revision ||
+            latest.targetId !== queued.targetId
           ) {
-            queueMicrotask(() =>
-              set(flushReconciliationAtom, scheduledReconciliation),
+            queued.resolve({ status: "superseded" });
+            return;
+          }
+          if (
+            get(scheduledReconciliationAtom)?.generation ===
+              queued.generation &&
+            get(scheduledReconciliationAtom)?.revision === queued.revision &&
+            get(scheduledReconciliationAtom)?.targetId === queued.targetId
+          ) {
+            set(scheduledReconciliationAtom, undefined);
+          }
+          void refresh(get, set, queued.command).then(queued.resolve);
+        });
+      }
+      const scheduledReconciliation = get(scheduledReconciliationAtom);
+      if (
+        scheduledReconciliation &&
+        get(profileGenerationAtom) === scheduledReconciliation.generation
+      ) {
+        queueMicrotask(() =>
+          set(flushReconciliationAtom, scheduledReconciliation),
+        );
+      }
+    }
+  }
+
+  function mutate(
+    get: Getter,
+    set: Setter,
+    mutationCommand: Extract<
+      z.infer<typeof catalogCommandSchema>,
+      { type: "delete" | "rename" }
+    >,
+  ): Promise<CatalogRunResult> {
+    const keys =
+      mutationCommand.type === "delete"
+        ? [...new Set(mutationCommand.keys)].sort()
+        : [...new Set([mutationCommand.oldKey, mutationCommand.newKey])].sort();
+    const signature = JSON.stringify(
+      mutationCommand.type === "delete"
+        ? [mutationCommand.type, keys]
+        : [
+            mutationCommand.type,
+            mutationCommand.oldKey,
+            mutationCommand.newKey,
+            mutationCommand.overwrite ?? false,
+          ],
+    );
+    if (mutationCommand.commandId) {
+      const existing = [...get(activeMutationsAtom).values()].find(
+        (mutation) => mutation.commandId === mutationCommand.commandId,
+      );
+      if (existing) {
+        return existing.signature === signature
+          ? existing.promise
+          : Promise.resolve({
+              status: "command-id-conflict" as const,
+              commandId: mutationCommand.commandId,
+            });
+      }
+    }
+
+    const checked = preflight(get);
+    if (!checked.ok) return Promise.resolve(checked.outcome);
+    const context = checked.context;
+    const activeMutations = [...get(activeMutationsAtom).values()];
+    const conflicts = keys.filter((key) =>
+      activeMutations.some((mutation) => mutation.keys.includes(key)),
+    );
+    if (conflicts.length > 0) {
+      return Promise.resolve({
+        status: "keys-busy" as const,
+        keys: conflicts,
+      });
+    }
+
+    const token = get(nextOperationAtom) + 1;
+    set(nextOperationAtom, token);
+    const deferred = createDeferred<CatalogRunResult>();
+    const record = {
+      token,
+      promise: deferred.promise,
+      cancel: () => deferred.resolve({ status: "superseded" }),
+      resolve: deferred.resolve,
+      keys,
+      commandId: mutationCommand.commandId,
+      signature,
+    };
+    set(activeMutationsAtom, (current) => new Map(current).set(token, record));
+
+    void executeMutation();
+    return record.promise;
+
+    async function executeMutation() {
+      let outcome: CatalogRunResult;
+      try {
+        const storage = createStorage(context.settings);
+        if (mutationCommand.type === "delete") {
+          const result = await storage.deleteStoredImages(keys);
+          if (!get(activeMutationsAtom).has(token)) return;
+          if (!isCurrent(get, context)) {
+            outcome = { status: "superseded" };
+          } else if (result.ok) {
+            set(
+              projectionAtom,
+              catalogKernel.reduce(get(projectionAtom), {
+                type: "delete-confirmed",
+                operationId: `delete-${token}`,
+                deletedKeys: result.value.deletedKeys,
+              }),
             );
+            clearSelected(get, set, keys);
+            set(projectionMetaAtom, (current) => ({
+              ...current,
+              stale: true,
+            }));
+            set(persistProjectionAtom, "persist");
+            set(scheduleReconciliationAtom);
+            outcome = {
+              status: "deleted",
+              deletedKeys: result.value.deletedKeys,
+            };
+          } else {
+            clearSelected(get, set, keys);
+            set(projectionMetaAtom, (current) => ({
+              ...current,
+              stale: true,
+            }));
+            set(scheduleReconciliationAtom, "after-active-refresh");
+            outcome = { status: "delete-failed", error: result.error };
           }
+        } else {
+          const result = await storage.renameStoredImage({
+            oldKey: mutationCommand.oldKey,
+            newKey: mutationCommand.newKey,
+            overwrite: mutationCommand.overwrite,
+          });
+          if (!get(activeMutationsAtom).has(token)) return;
+          if (!isCurrent(get, context)) {
+            outcome = { status: "superseded" };
+          } else if (result.ok) {
+            const oldImage = get(imagesAtom).find(
+              (image) => image.key === mutationCommand.oldKey,
+            );
+            const newImage = {
+              ...oldImage,
+              key: result.value.newKey,
+            };
+            set(
+              projectionAtom,
+              catalogKernel.reduce(get(projectionAtom), {
+                type: "rename-confirmed",
+                operationId: `rename-${token}`,
+                oldKey: result.value.oldKey,
+                newImage,
+              }),
+            );
+            remapSelected(get, set, result.value.oldKey, result.value.newKey);
+            set(projectionMetaAtom, (current) => ({
+              ...current,
+              stale: true,
+            }));
+            set(persistProjectionAtom, "persist");
+            set(scheduleReconciliationAtom);
+            outcome = {
+              status: "renamed",
+              oldKey: result.value.oldKey,
+              newKey: result.value.newKey,
+            };
+          } else if (result.error.reason === "already-exists") {
+            outcome = { status: "already-exists", key: result.error.key };
+          } else if (result.error.reason === "partial-rename") {
+            set(projectionMetaAtom, (current) => ({
+              ...current,
+              stale: true,
+            }));
+            set(scheduleReconciliationAtom, "after-active-refresh");
+            outcome = {
+              status: "partial-rename",
+              copiedKey: result.error.copiedKey,
+              failedDeleteKey: result.error.failedDeleteKey,
+            };
+          } else {
+            set(projectionMetaAtom, (current) => ({
+              ...current,
+              stale: true,
+            }));
+            set(scheduleReconciliationAtom, "after-active-refresh");
+            outcome = { status: "rename-failed", error: result.error };
+          }
+        }
+      } catch (error) {
+        if (!get(activeMutationsAtom).has(token)) return;
+        if (!isCurrent(get, context)) {
+          outcome = { status: "superseded" };
+        } else if (mutationCommand.type === "delete") {
+          clearSelected(get, set, keys);
+          set(projectionMetaAtom, (current) => ({
+            ...current,
+            stale: true,
+          }));
+          set(scheduleReconciliationAtom, "after-active-refresh");
+          outcome = { status: "delete-failed", error };
+        } else {
+          set(projectionMetaAtom, (current) => ({
+            ...current,
+            stale: true,
+          }));
+          set(scheduleReconciliationAtom, "after-active-refresh");
+          outcome = { status: "rename-failed", error };
         }
       }
+      finishMutation(outcome);
+    }
 
-      function mutate(
-        mutationCommand: Extract<
-          z.infer<typeof catalogCommandSchema>,
-          { type: "delete" | "rename" }
-        >,
-      ): Promise<CatalogRunResult> {
-        const keys =
-          mutationCommand.type === "delete"
-            ? [...new Set(mutationCommand.keys)].sort()
-            : [
-                ...new Set([mutationCommand.oldKey, mutationCommand.newKey]),
-              ].sort();
-        const signature = JSON.stringify(
-          mutationCommand.type === "delete"
-            ? [mutationCommand.type, keys]
-            : [
-                mutationCommand.type,
-                mutationCommand.oldKey,
-                mutationCommand.newKey,
-                mutationCommand.overwrite ?? false,
-              ],
-        );
-        if (mutationCommand.commandId) {
-          const existing = get(activeCommandsAtom).get(
-            mutationCommand.commandId,
-          );
-          if (existing) {
-            return existing.signature === signature
-              ? existing.promise
-              : Promise.resolve({
-                  status: "command-id-conflict" as const,
-                  commandId: mutationCommand.commandId,
-                });
-          }
-        }
+    function finishMutation(outcome: CatalogRunResult) {
+      if (get(activeMutationsAtom).get(record.token) !== record) return;
+      set(activeMutationsAtom, (current) => {
+        const next = new Map(current);
+        next.delete(record.token);
+        return next;
+      });
+      record.resolve(catalogRunResultSchema.parse(outcome));
+    }
+  }
 
-        const checked = preflight();
-        if (!checked.ok) return Promise.resolve(checked.outcome);
-        const context = checked.context;
-        const conflicts = keys.filter((key) => get(reservationsAtom).has(key));
-        if (conflicts.length > 0) {
-          return Promise.resolve({
-            status: "keys-busy" as const,
-            keys: conflicts,
-          });
-        }
+  function access(
+    get: Getter,
+    set: Setter,
+    accessCommand: Extract<
+      z.infer<typeof catalogCommandSchema>,
+      { type: "access" }
+    >,
+  ): Promise<CatalogRunResult> {
+    const checked = preflight(get);
+    if (!checked.ok) return Promise.resolve(checked.outcome);
+    const context = checked.context;
+    const source = s3Key2Url(accessCommand.key, context.settings);
+    if (accessCommand.purpose === "url") {
+      return Promise.resolve({
+        status: "accessed" as const,
+        purpose: "url" as const,
+        value: source,
+      });
+    }
+    if (accessCommand.purpose === "markdown") {
+      return Promise.resolve({
+        status: "accessed" as const,
+        purpose: "markdown" as const,
+        value: `![${accessCommand.key}](${source})`,
+      });
+    }
+    if (accessCommand.purpose === "probe") {
+      const signature = JSON.stringify([
+        accessCommand.key,
+        context.generation,
+        context.revision,
+      ]);
+      const existing = get(activeProbesAtom).get(signature);
+      if (existing) return existing.promise;
+      const deferred = createDeferred<CatalogRunResult>();
+      const record = {
+        promise: deferred.promise,
+        cancel: () => deferred.resolve({ status: "superseded" }),
+        resolve: deferred.resolve,
+      };
+      set(activeProbesAtom, (current) =>
+        new Map(current).set(signature, record),
+      );
+      void executeProbe();
+      return record.promise;
 
-        const token = get(nextOperationAtom) + 1;
-        set(nextOperationAtom, token);
-        const deferred = createDeferred<CatalogRunResult>();
-        const record = {
-          token,
-          promise: deferred.promise,
-          cancel: () => deferred.resolve({ status: "superseded" }),
-          resolve: deferred.resolve,
-          keys,
-          commandId: mutationCommand.commandId,
-          signature,
-        };
-        set(reservationsAtom, (current) => new Set([...current, ...keys]));
-        set(activeMutationsAtom, (current) =>
-          new Map(current).set(token, record),
-        );
-        if (mutationCommand.commandId) {
-          set(activeCommandsAtom, (current) =>
-            new Map(current).set(mutationCommand.commandId!, record),
-          );
-        }
-
-        void executeMutation();
-        return record.promise;
-
-        async function executeMutation() {
-          let outcome: CatalogRunResult;
-          try {
-            const storage = createStorage(context.settings);
-            if (mutationCommand.type === "delete") {
-              const result = await storage.deleteStoredImages(keys);
-              if (!get(activeMutationsAtom).has(token)) return;
-              if (!isCurrent(context)) {
-                outcome = { status: "superseded" };
-              } else if (result.ok) {
-                set(
-                  projectionAtom,
-                  catalogKernel.reduce(get(projectionAtom), {
-                    type: "delete-confirmed",
-                    operationId: `delete-${token}`,
-                    deletedKeys: result.value.deletedKeys,
-                  }),
-                );
-                clearSelected(keys);
-                set(projectionMetaAtom, (current) => ({
-                  ...current,
-                  stale: true,
-                }));
-                set(persistProjectionAtom, "persist");
-                set(scheduleReconciliationAtom);
-                outcome = {
-                  status: "deleted",
-                  deletedKeys: result.value.deletedKeys,
-                };
-              } else {
-                clearSelected(keys);
-                set(projectionMetaAtom, (current) => ({
-                  ...current,
-                  stale: true,
-                }));
-                set(scheduleReconciliationAtom, "after-active-refresh");
-                outcome = { status: "delete-failed", error: result.error };
-              }
-            } else {
-              const result = await storage.renameStoredImage({
-                oldKey: mutationCommand.oldKey,
-                newKey: mutationCommand.newKey,
-                overwrite: mutationCommand.overwrite,
-              });
-              if (!get(activeMutationsAtom).has(token)) return;
-              if (!isCurrent(context)) {
-                outcome = { status: "superseded" };
-              } else if (result.ok) {
-                const oldImage = get(imagesAtom).find(
-                  (image) => image.key === mutationCommand.oldKey,
-                );
-                const newImage = {
-                  ...oldImage,
-                  key: result.value.newKey,
-                };
-                set(
-                  projectionAtom,
-                  catalogKernel.reduce(get(projectionAtom), {
-                    type: "rename-confirmed",
-                    operationId: `rename-${token}`,
-                    oldKey: result.value.oldKey,
-                    newImage,
-                  }),
-                );
-                remapSelected(result.value.oldKey, result.value.newKey);
-                set(projectionMetaAtom, (current) => ({
-                  ...current,
-                  stale: true,
-                }));
-                set(persistProjectionAtom, "persist");
-                set(scheduleReconciliationAtom);
-                outcome = {
-                  status: "renamed",
-                  oldKey: result.value.oldKey,
-                  newKey: result.value.newKey,
-                };
-              } else if (result.error.reason === "already-exists") {
-                outcome = { status: "already-exists", key: result.error.key };
-              } else if (result.error.reason === "partial-rename") {
-                set(projectionMetaAtom, (current) => ({
-                  ...current,
-                  stale: true,
-                }));
-                set(scheduleReconciliationAtom, "after-active-refresh");
-                outcome = {
-                  status: "partial-rename",
-                  copiedKey: result.error.copiedKey,
-                  failedDeleteKey: result.error.failedDeleteKey,
-                };
-              } else {
-                set(projectionMetaAtom, (current) => ({
-                  ...current,
-                  stale: true,
-                }));
-                set(scheduleReconciliationAtom, "after-active-refresh");
-                outcome = { status: "rename-failed", error: result.error };
-              }
-            }
-          } catch (error) {
-            if (!get(activeMutationsAtom).has(token)) return;
-            if (!isCurrent(context)) {
-              outcome = { status: "superseded" };
-            } else if (mutationCommand.type === "delete") {
-              clearSelected(keys);
-              set(projectionMetaAtom, (current) => ({
-                ...current,
-                stale: true,
-              }));
-              set(scheduleReconciliationAtom, "after-active-refresh");
-              outcome = { status: "delete-failed", error };
-            } else {
-              set(projectionMetaAtom, (current) => ({
-                ...current,
-                stale: true,
-              }));
-              set(scheduleReconciliationAtom, "after-active-refresh");
-              outcome = { status: "rename-failed", error };
-            }
-          }
-          finishMutation(outcome);
-        }
-
-        function finishMutation(outcome: CatalogRunResult) {
-          if (get(activeMutationsAtom).get(record.token) !== record) return;
-          set(activeMutationsAtom, (current) => {
-            const next = new Map(current);
-            next.delete(record.token);
-            return next;
-          });
-          if (record.commandId) {
-            set(activeCommandsAtom, (current) => {
-              if (current.get(record.commandId!) !== record) return current;
-              const next = new Map(current);
-              next.delete(record.commandId!);
-              return next;
-            });
-          }
-          set(reservationsAtom, (current) => {
-            const next = new Set(current);
-            for (const key of record.keys) next.delete(key);
-            return next;
-          });
-          record.resolve(catalogRunResultSchema.parse(outcome));
-        }
-      }
-
-      function access(
-        accessCommand: Extract<
-          z.infer<typeof catalogCommandSchema>,
-          { type: "access" }
-        >,
-      ): Promise<CatalogRunResult> {
-        const checked = preflight();
-        if (!checked.ok) return Promise.resolve(checked.outcome);
-        const context = checked.context;
-        const source = s3Key2Url(accessCommand.key, context.settings);
-        if (accessCommand.purpose === "url") {
-          return Promise.resolve({
-            status: "accessed" as const,
-            purpose: "url" as const,
-            value: source,
-          });
-        }
-        if (accessCommand.purpose === "markdown") {
-          return Promise.resolve({
-            status: "accessed" as const,
-            purpose: "markdown" as const,
-            value: `![${accessCommand.key}](${source})`,
-          });
-        }
-        if (accessCommand.purpose === "probe") {
-          const signature = JSON.stringify([
+      async function executeProbe() {
+        let outcome: CatalogRunResult;
+        try {
+          const result = await createStorage(context.settings).probeStoredImage(
             accessCommand.key,
-            context.generation,
-            context.revision,
-          ]);
-          const existing = get(activeProbesAtom).get(signature);
-          if (existing) return existing.promise;
-          const deferred = createDeferred<CatalogRunResult>();
-          const record = {
-            promise: deferred.promise,
-            cancel: () => deferred.resolve({ status: "superseded" }),
-            resolve: deferred.resolve,
-          };
-          set(activeProbesAtom, (current) =>
-            new Map(current).set(signature, record),
           );
-          void executeProbe();
-          return record.promise;
-
-          async function executeProbe() {
-            let outcome: CatalogRunResult;
-            try {
-              const result = await createStorage(
-                context.settings,
-              ).probeStoredImage(accessCommand.key);
-              if (get(activeProbesAtom).get(signature) !== record) return;
-              outcome = !isCurrent(context)
-                ? { status: "superseded" }
-                : result.ok
-                  ? {
-                      status: "accessed",
-                      purpose: "probe",
-                      value: result.value,
-                    }
-                  : {
-                      status: "access-failed",
-                      purpose: "probe",
-                      error: result.error,
-                    };
-            } catch (error) {
-              if (get(activeProbesAtom).get(signature) !== record) return;
-              outcome = isCurrent(context)
-                ? { status: "access-failed", purpose: "probe", error }
-                : { status: "superseded" };
-            }
-            set(activeProbesAtom, (current) => {
-              if (current.get(signature) !== record) return current;
-              const next = new Map(current);
-              next.delete(signature);
-              return next;
-            });
-            record.resolve(catalogRunResultSchema.parse(outcome));
-          }
-        }
-
-        return executeDownload();
-
-        async function executeDownload(): Promise<CatalogRunResult> {
-          try {
-            const result = await createStorage(
-              context.settings,
-            ).downloadStoredImage(accessCommand.key);
-            if (!isCurrent(context)) return { status: "superseded" };
-            return result.ok
+          if (get(activeProbesAtom).get(signature) !== record) return;
+          outcome = !isCurrent(get, context)
+            ? { status: "superseded" }
+            : result.ok
               ? {
                   status: "accessed",
-                  purpose: "download",
+                  purpose: "probe",
                   value: result.value,
                 }
               : {
                   status: "access-failed",
-                  purpose: "download",
+                  purpose: "probe",
                   error: result.error,
                 };
-          } catch (error) {
-            return isCurrent(context)
-              ? { status: "access-failed", purpose: "download", error }
-              : { status: "superseded" };
-          }
+        } catch (error) {
+          if (get(activeProbesAtom).get(signature) !== record) return;
+          outcome = isCurrent(get, context)
+            ? { status: "access-failed", purpose: "probe", error }
+            : { status: "superseded" };
         }
+        set(activeProbesAtom, (current) => {
+          if (current.get(signature) !== record) return current;
+          const next = new Map(current);
+          next.delete(signature);
+          return next;
+        });
+        record.resolve(catalogRunResultSchema.parse(outcome));
       }
+    }
 
-      function clearSelected(keys: readonly string[]) {
-        const current = get(selectedKeysAtom);
-        const next = new Set(current);
-        for (const key of keys) next.delete(key);
-        if (!setsEqual(current, next)) set(selectedKeysAtom, next);
-      }
+    return executeDownload();
 
-      function remapSelected(oldKey: string, newKey: string) {
-        const current = get(selectedKeysAtom);
-        if (!current.has(oldKey)) return;
-        const next = new Set(current);
-        next.delete(oldKey);
-        next.add(newKey);
-        set(selectedKeysAtom, next);
+    async function executeDownload(): Promise<CatalogRunResult> {
+      try {
+        const result = await createStorage(
+          context.settings,
+        ).downloadStoredImage(accessCommand.key);
+        if (!isCurrent(get, context)) return { status: "superseded" };
+        return result.ok
+          ? {
+              status: "accessed",
+              purpose: "download",
+              value: result.value,
+            }
+          : {
+              status: "access-failed",
+              purpose: "download",
+              error: result.error,
+            };
+      } catch (error) {
+        return isCurrent(get, context)
+          ? { status: "access-failed", purpose: "download", error }
+          : { status: "superseded" };
       }
+    }
+  }
+
+  function clearSelected(get: Getter, set: Setter, keys: readonly string[]) {
+    const current = get(selectedKeysAtom);
+    const next = new Set(current);
+    for (const key of keys) next.delete(key);
+    if (!setsEqual(current, next)) set(selectedKeysAtom, next);
+  }
+
+  function remapSelected(
+    get: Getter,
+    set: Setter,
+    oldKey: string,
+    newKey: string,
+  ) {
+    const current = get(selectedKeysAtom);
+    if (!current.has(oldKey)) return;
+    const next = new Set(current);
+    next.delete(oldKey);
+    next.add(newKey);
+    set(selectedKeysAtom, next);
+  }
+
+  const run = atom(
+    null,
+    (get, set, input: z.input<typeof catalogCommandSchema>) => {
+      set(ensureHydratedAtom);
+      const command = catalogCommandSchema.parse(input);
+
+      if (command.type === "refresh") return refresh(get, set, command);
+      if (command.type === "delete" || command.type === "rename") {
+        return mutate(get, set, command);
+      }
+      return access(get, set, command);
     },
   );
 
@@ -1332,7 +1302,9 @@ export function createImageCatalog({
     const itemAtom = atom((get) => {
       return {
         selected: get(selectedKeysAtom).has(key),
-        reserved: get(reservationsAtom).has(key),
+        reserved: [...get(activeMutationsAtom).values()].some((mutation) =>
+          mutation.keys.includes(key),
+        ),
         access: get(accessAtom),
       };
     });
