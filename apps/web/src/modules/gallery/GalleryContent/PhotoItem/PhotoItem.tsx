@@ -40,7 +40,7 @@ function PhotoDisplay({
   const item = useAtomValue(itemAtom);
   const [ref, hovering] = useHover();
 
-  const source = item.access?.source;
+  const source = item.source;
   const [load, setLoad] = useState({
     source,
     status: "loading" as "loading" | "loaded" | "error",
@@ -86,7 +86,7 @@ function PhotoDisplay({
           draggable="false"
         />
       )}
-      {loadingState === "loaded" && source && (
+      {loadingState === "loaded" && source && item.access && (
         <PhotoItemOverlay
           photo={photo}
           selected={item.selected}

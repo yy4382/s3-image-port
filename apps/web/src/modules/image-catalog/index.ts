@@ -1266,16 +1266,17 @@ export function createImageCatalog({
     const hasImageAtom = selectAtom(imagesAtom, (images) =>
       images.some((candidate) => candidate.key === key),
     );
+    const sourceAtom = atom((get) => {
+      const context = get(operationContextAtom);
+      if (!get(hasImageAtom) || context.status !== "valid") return undefined;
+      return s3Key2Url(key, context.settings);
+    });
     const accessAtom = atom((get) => {
       const context = get(operationContextAtom);
-      if (
-        !get(hasImageAtom) ||
-        !get(targetUsableAtom) ||
-        context.status !== "valid"
-      ) {
-        return undefined;
-      }
-      return { source: s3Key2Url(key, context.settings) };
+      const source = get(sourceAtom);
+      return source && context.status === "valid" && get(targetUsableAtom)
+        ? { source }
+        : undefined;
     });
     const itemAtom = atom((get) => {
       return {
@@ -1283,6 +1284,7 @@ export function createImageCatalog({
         reserved: [...get(activeMutationsAtom).values()].some((mutation) =>
           mutation.keys.includes(key),
         ),
+        source: get(sourceAtom),
         access: get(accessAtom),
       };
     });
@@ -1292,6 +1294,7 @@ export function createImageCatalog({
       (left, right) =>
         left.selected === right.selected &&
         left.reserved === right.reserved &&
+        left.source === right.source &&
         left.access === right.access,
     );
   }

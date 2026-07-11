@@ -98,10 +98,10 @@ function PhotoModalContent({
             </Button>
           </div>
         </div>
-      ) : item.access ? (
+      ) : item.source ? (
         <div className="absolute inset-0">
           <PhotoImg
-            url={item.access.source}
+            url={item.source}
             s3Key={path}
             setLoadingState={() => {}}
             className="size-full object-contain"

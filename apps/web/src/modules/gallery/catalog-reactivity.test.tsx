@@ -176,6 +176,35 @@ afterEach(() => {
 });
 
 describe("catalog React reactivity", () => {
+  it("renders a cached image while target-authorized actions wait for a refresh", async () => {
+    localStorage.setItem("s3ip:gallery:photos", JSON.stringify([alpha]));
+    const store = createStore();
+    store.set(settings.storage, { type: "update", value: firstTarget });
+    store.set(settings.gallery, { autoRefresh: false });
+
+    renderWithStore(
+      store,
+      <PhotoItem
+        photo={alpha}
+        size={{ width: 200, height: 100 }}
+        position={{ x: 0, y: 0 }}
+      />,
+    );
+
+    const image = await screen.findByAltText(alpha.key);
+    expect(image).toHaveAttribute(
+      "src",
+      "https://cdn.example.com/i/alpha.webp",
+    );
+    fireEvent.load(image);
+    expect(image).not.toHaveClass("invisible");
+    expect(
+      screen.queryByRole("button", { name: `Open: ${alpha.key}` }),
+    ).not.toBeInTheDocument();
+    expect(store.get(imageCatalog.item(alpha.key)).access).toBeUndefined();
+    expect(storage.create).not.toHaveBeenCalled();
+  });
+
   it("leaves native select-all alone in editable controls", async () => {
     const store = await catalogStore();
     renderWithStore(
@@ -303,10 +332,11 @@ describe("catalog React reactivity", () => {
         value: { ...firstTarget, bucket: "other-images" },
       });
     });
-    expect(screen.queryByAltText(alpha.key)).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Refresh" }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByAltText(alpha.key)).toHaveAttribute(
+      "src",
+      "https://cdn.example.com/i/alpha.webp",
+    );
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeDisabled();
 
     mounted.unmount();
     await settle();
@@ -376,7 +406,10 @@ describe("catalog React reactivity", () => {
         value: { ...firstTarget, bucket: "other-images" },
       });
     });
-    expect(screen.queryByAltText(alpha.key)).not.toBeInTheDocument();
+    expect(screen.getByAltText(alpha.key)).toHaveAttribute(
+      "src",
+      "https://cdn.example.com/i/alpha.webp",
+    );
     expect(screen.getByRole("button", { name: "Copy URL" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "More actions" })).toBeDisabled();

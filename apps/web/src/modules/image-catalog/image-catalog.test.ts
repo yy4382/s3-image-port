@@ -69,6 +69,7 @@ describe("deep image catalog", () => {
     expect(Object.keys(store.get(catalog.item("i/example.webp")))).toEqual([
       "selected",
       "reserved",
+      "source",
       "access",
     ]);
   });
