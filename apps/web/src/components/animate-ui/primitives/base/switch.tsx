@@ -34,7 +34,7 @@ function Switch({
   defaultChecked,
   checked,
   onCheckedChange,
-  nativeButton,
+  nativeButton = true,
   disabled,
   readOnly,
   required,

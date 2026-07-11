@@ -40,3 +40,4 @@ out/
 next-env.d.ts
 
 .source
+.pnpm-store

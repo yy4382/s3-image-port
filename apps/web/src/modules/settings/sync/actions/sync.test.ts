@@ -4,7 +4,7 @@ import { sha256 } from "@/lib/utils/hash";
 import { deriveAuthToken, encrypt } from "@/lib/encryption/crypto";
 import { produce } from "immer";
 import { getDefaultProfiles } from "@/stores/schemas/settings";
-import { storedSettingsIntoSyncFormat } from "@/stores/atoms/settings";
+import { storedSettingsIntoSyncFormat } from "@/stores/schemas/settings/format";
 import { z } from "zod";
 import { settingsRecordEncryptedSchema } from "../types";
 import { profilesSchemaForLoad } from "@/stores/schemas/settings/v3";

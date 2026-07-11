@@ -32,6 +32,7 @@ export default defineConfig({
     expect: { poll: { timeout: 5000 } },
     browser: {
       enabled: true,
+      headless: true,
       provider: playwright(),
       instances: [{ browser: "chromium" }],
       commands: { grantPermissions },

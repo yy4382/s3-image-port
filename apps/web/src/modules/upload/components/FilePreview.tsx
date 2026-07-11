@@ -1,5 +1,6 @@
-import { startTransition, useEffect, useMemo, useState } from "react";
-import { useAtomValue } from "jotai";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { selectAtom } from "jotai/utils";
 import { useSelector } from "@xstate/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "use-intl";
@@ -27,22 +28,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
-import {
-  uploadSettingsAtom,
-  validS3SettingsAtom,
-} from "@/stores/atoms/settings";
-import { s3Key2Url } from "@/lib/s3/s3-key";
+import { settings } from "@/stores/atoms/settings";
+import { imageCatalog } from "@/modules/image-catalog";
 import { useCopy } from "@/lib/hooks/use-copy";
 import { toast } from "sonner";
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
 import { KeyTemplateConsumerInput } from "@/modules/settings/upload/key-template/consumer-input";
 
-import type { PendingUpload } from "../types";
 import {
   selectPendingUpload,
   type PendingUploadActorRef,
 } from "../machines/pending-upload-machine";
-import { usePendingUploadOperations } from "../hooks/use-pending-upload-operations";
+import type { CompressOption } from "@/lib/utils/imageCompress";
+
+const storageConfiguredAtom = selectAtom(
+  settings.storage,
+  ({ validation }) => validation.status === "valid",
+);
+const keyTemplatePresetsAtom = selectAtom(
+  settings.upload,
+  ({ keyTemplatePresets }) => keyTemplatePresets,
+);
 
 export function FilePreview({
   uploadActor,
@@ -52,10 +58,11 @@ export function FilePreview({
   remove: () => void;
 }) {
   const file = useSelector(uploadActor, selectPendingUpload);
-  const s3Settings = useAtomValue(validS3SettingsAtom);
+  const storageConfigured = useAtomValue(storageConfiguredAtom);
   const t = useTranslations("upload.fileList");
 
-  const [isEditing, setIsEditing] = useState(false);
+  const editingDisabled =
+    file.status === "processing" || file.status === "uploading";
 
   return (
     <Card className="overflow-hidden px-3 py-2.5 gap-0">
@@ -89,10 +96,9 @@ export function FilePreview({
               onClick={() =>
                 uploadActor.send({
                   type: "upload.requested",
-                  s3Settings: s3Settings!,
                 })
               }
-              disabled={!s3Settings}
+              disabled={!storageConfigured}
             >
               <span className="sr-only">{t("upload")}</span>
               <McUpload2 />
@@ -100,11 +106,12 @@ export function FilePreview({
           )}
 
           <Button
-            variant={isEditing ? "secondary" : "ghost"}
+            variant={file.editing ? "secondary" : "ghost"}
             size="icon"
             onClick={() => {
-              setIsEditing((prev) => !prev);
+              uploadActor.send({ type: "edit.toggled" });
             }}
+            disabled={editingDisabled}
           >
             <span className="sr-only">{t("edit")}</span>
             <McPencil />
@@ -123,7 +130,7 @@ export function FilePreview({
       </div>
       <AutoResizeHeight duration={0.1}>
         <AnimatePresence initial={false} mode="popLayout">
-          {isEditing && (
+          {file.editing && !editingDisabled && (
             <motion.div
               className="pt-4"
               initial={{ opacity: 0, filter: "blur(4px)" }}
@@ -135,7 +142,15 @@ export function FilePreview({
               }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
             >
-              <FilePreviewEdit uploadActor={uploadActor} />
+              <FilePreviewEdit
+                file={file}
+                updateProcessOption={(option) =>
+                  uploadActor.send({ type: "compression.updated", option })
+                }
+                updateTemplate={(template) =>
+                  uploadActor.send({ type: "template.updated", template })
+                }
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -145,14 +160,16 @@ export function FilePreview({
 }
 
 function FilePreviewEdit({
-  uploadActor,
+  file,
+  updateProcessOption,
+  updateTemplate,
 }: {
-  uploadActor: PendingUploadActorRef;
+  file: ReturnType<typeof selectPendingUpload>;
+  updateProcessOption: (option: CompressOption | null) => void;
+  updateTemplate: (template: string) => void;
 }) {
-  const { file, updateProcessOption, updateTemplate } =
-    usePendingUploadOperations(uploadActor);
   const t = useTranslations("upload.fileList");
-  const presets = useAtomValue(uploadSettingsAtom).keyTemplatePresets || [];
+  const presets = useAtomValue(keyTemplatePresetsAtom) || [];
   return (
     <div className="space-y-4 pb-2">
       <div>
@@ -217,7 +234,7 @@ function FilePreviewProcess({
   file,
   process,
 }: {
-  file: PendingUpload;
+  file: ReturnType<typeof selectPendingUpload>;
   process: () => void;
 }) {
   const t = useTranslations("upload.fileList");
@@ -275,31 +292,41 @@ function FilePreviewProcess({
   );
 }
 
-function CopyButton({ file }: { file: PendingUpload }) {
+function CopyButton({
+  file,
+}: {
+  file: ReturnType<typeof selectPendingUpload>;
+}) {
   const t = useTranslations("upload.fileList");
-  const s3Settings = useAtomValue(validS3SettingsAtom);
+  const tCopy = useTranslations("common.copy");
+  const runCatalog = useSetAtom(imageCatalog.run);
   const { copy } = useCopy();
-
-  if (!s3Settings) {
-    return (
-      <Button variant="outline" aria-label="Open menu" size="icon">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            toast.error("Copy failed: S3 settings are not valid");
-          }}
-        >
-          <span className="sr-only">{t("copy")}</span>
-          <McCopy />
-        </Button>
-      </Button>
-    );
-  }
-
   const key = file.key.toString();
-  const url = s3Key2Url(key, s3Settings);
-  const markdown = `![${key}](${url})`;
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const copyStoredImage = async (
+    purpose: "url" | "markdown",
+    description: string,
+  ) => {
+    const outcome = await runCatalog({ type: "access", key, purpose });
+    if (!mounted.current) return;
+    if (
+      outcome.status === "accessed" &&
+      outcome.purpose === purpose &&
+      typeof outcome.value === "string"
+    ) {
+      copy(outcome.value, description);
+      return;
+    }
+    toast.error(tCopy("copyFailed", { desc: description }));
+  };
 
   return (
     <DropdownMenu>
@@ -312,10 +339,12 @@ function CopyButton({ file }: { file: PendingUpload }) {
         }
       />
       <DropdownMenuContent className="w-40" align="end">
-        <DropdownMenuItem onClick={() => copy(url, "URL")}>
+        <DropdownMenuItem onClick={() => copyStoredImage("url", t("copyUrl"))}>
           {t("copyUrl")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => copy(markdown, "Markdown")}>
+        <DropdownMenuItem
+          onClick={() => copyStoredImage("markdown", t("copyMarkdown"))}
+        >
           {t("copyMarkdown")}
         </DropdownMenuItem>
       </DropdownMenuContent>

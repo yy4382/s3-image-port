@@ -1,46 +1,40 @@
 "use client";
 
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { selectAtom } from "jotai/utils";
 import { ClientOnly } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { validS3SettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 
-import {
-  selectHasUploaded,
-  selectUploadActors,
-  type UploadQueueEffects,
-} from "./machines/upload-queue-machine";
-import {
-  UploadQueueProvider,
-  useUploadQueueActor,
-  useUploadQueueSelector,
-} from "./upload-queue-context";
+import { uploadQueue } from "./upload-queue";
 import { useHandlePaste } from "./hooks/use-handle-paste";
 import { DropZone } from "./components/DropZone";
 import { FilePreview } from "./components/FilePreview";
 
-export function Upload({
-  effects,
-}: {
-  effects?: Partial<UploadQueueEffects>;
-} = {}) {
-  return (
-    <UploadQueueProvider effects={effects}>
-      <UploadContent />
-    </UploadQueueProvider>
-  );
+const storageConfiguredAtom = selectAtom(
+  settings.storage,
+  ({ validation }) => validation.status === "valid",
+);
+const queueViewAtom = selectAtom(
+  uploadQueue,
+  ({ uploads, hasUploaded }) => ({ uploads, hasUploaded }),
+  (left, right) =>
+    left.uploads === right.uploads && left.hasUploaded === right.hasUploaded,
+);
+
+export function Upload() {
+  return <UploadContent />;
 }
 
 export function UploadContent() {
-  const uploadActors = useUploadQueueSelector(selectUploadActors);
-  const hasUploaded = useUploadQueueSelector(selectHasUploaded);
-  const uploadQueue = useUploadQueueActor();
-  const s3Settings = useAtomValue(validS3SettingsAtom);
+  const { uploads: uploadActors, hasUploaded } = useAtomValue(queueViewAtom);
+  const send = useSetAtom(uploadQueue);
+  const storageConfigured = useAtomValue(storageConfiguredAtom);
   const t = useTranslations("upload");
 
   useHandlePaste();
@@ -53,7 +47,7 @@ export function UploadContent() {
         </CardContent>
       </Card>
 
-      <ClientOnly>{!s3Settings && <InvalidS3Dialog />}</ClientOnly>
+      <ClientOnly>{!storageConfigured && <InvalidS3Dialog />}</ClientOnly>
 
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">
@@ -63,7 +57,7 @@ export function UploadContent() {
           {hasUploaded && (
             <Button
               variant="outline"
-              onClick={() => uploadQueue.send({ type: "uploaded.cleared" })}
+              onClick={() => send({ type: "uploaded.cleared" })}
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               {t("fileList.clearUploaded")}
@@ -72,17 +66,16 @@ export function UploadContent() {
           {uploadActors.length > 0 && (
             <Button
               onClick={() => {
-                if (!s3Settings) {
+                if (!storageConfigured) {
                   toast.error(t("alerts.s3NotConfigured"));
                   return;
                 }
-                uploadQueue.send({
+                send({
                   type: "all.uploadRequested",
-                  s3Settings,
                 });
               }}
               size="lg"
-              disabled={!s3Settings}
+              disabled={!storageConfigured}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {t("fileList.uploadAll")}
@@ -97,7 +90,7 @@ export function UploadContent() {
             uploadActor={uploadActor}
             key={uploadActor.id}
             remove={() =>
-              uploadQueue.send({
+              send({
                 type: "upload.removed",
                 actorRef: uploadActor,
               })

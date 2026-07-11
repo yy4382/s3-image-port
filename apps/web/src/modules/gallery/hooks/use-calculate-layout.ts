@@ -1,11 +1,16 @@
 import { atom } from "jotai";
-import { showingPhotosAtom } from "./use-photo-list";
+import { selectAtom } from "jotai/utils";
+import { imageCatalog } from "@/modules/image-catalog";
 import { naturalSizesAtom } from "@/stores/atoms/photo-size";
 export { setNaturalSizesAtom } from "@/stores/atoms/photo-size";
 
 export const containerWidthAtom = atom(600);
 export const DEFAULT_IMAGE_SIZE: [number, number] = [384, 208];
 const GAP_PX = 8;
+const showingPhotosAtom = selectAtom(
+  imageCatalog.state,
+  ({ gallery }) => gallery.currentPageImages,
+);
 
 const scaleCurGroup = (
   curGroup: [number, number][],

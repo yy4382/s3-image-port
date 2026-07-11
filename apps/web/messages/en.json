@@ -324,6 +324,7 @@
     "item": {
       "options": {
         "open": "Open",
+        "selectPhoto": "Select {key}",
         "info": "Info",
         "more": "More actions",
         "backToGallery": "Back to gallery",

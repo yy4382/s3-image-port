@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Profiles } from "./profiles";
-import { optionsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { getDefaultOptions, optionsSchema } from "@/stores/schemas/settings";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { produce } from "immer";
 import { renderHook } from "vitest-browser-react";
 import { render } from "@/../test/utils/render-browser";
 import { commands } from "vitest/browser";
-import { profilesAtom } from "@/stores/atoms/settings";
 import { z } from "zod";
 
 type Options = z.infer<typeof optionsSchema>;
@@ -22,20 +21,30 @@ vi.mock(
 );
 
 async function prepareProfiles() {
-  const { result } = await renderHook(() => useAtom(profilesAtom));
-  result.current[1]({
-    list: [
-      ["Default", getDefaultOptions()],
-      [
-        "Default (copy)",
-        produce(getDefaultOptions(), (draft) => {
-          draft.s3.endpoint = "https://copy.com";
-          return draft;
-        }),
+  const { result } = await renderHook(() =>
+    useSetAtom(settings.replaceProfile),
+  );
+  result.current({
+    type: "apply-imported",
+    value: {
+      list: [
+        ["Default", getDefaultOptions()],
+        [
+          "Default (copy)",
+          produce(getDefaultOptions(), (draft) => {
+            draft.s3.endpoint = "https://copy.com";
+            return draft;
+          }),
+        ],
       ],
-    ],
-    current: 0,
+      current: 0,
+    },
   });
+}
+
+function useCurrentOptions() {
+  const profiles = useAtomValue(settings.profiles).profiles;
+  return profiles.list[profiles.current][1];
 }
 
 beforeEach(async () => {
@@ -45,7 +54,7 @@ beforeEach(async () => {
 describe("Profiles loading", () => {
   it("should initialize with empty local storage", async () => {
     const screen = await render(<Profiles />);
-    const { result } = await renderHook(() => useAtomValue(optionsAtom));
+    const { result } = await renderHook(useCurrentOptions);
     expect(result.current).toEqual(getDefaultOptions());
     const item = screen.getByTestId("profile-item-Default");
     await expect.element(item).toBeInTheDocument();
@@ -157,7 +166,9 @@ describe("Profiles operations", { retry: 5 }, () => {
       await expect
         .element(screen.getByTestId("profile-item-Default-(copy)-(copy)"))
         .toBeInTheDocument();
-      const { result } = await renderHook(() => useAtomValue(profilesAtom));
+      const { result } = await renderHook(
+        () => useAtomValue(settings.profiles).profiles,
+      );
       expect((result.current.list[2][1] as Options).s3.endpoint).toBe(
         "https://copy.com",
       );
@@ -202,7 +213,7 @@ describe("Profiles operations", { retry: 5 }, () => {
       await expect
         .element(screen.getByTestId("profile-item-Default-(copy)"))
         .toHaveAttribute("data-is-current", "true");
-      const { result } = await renderHook(() => useAtomValue(optionsAtom));
+      const { result } = await renderHook(useCurrentOptions);
       expect(result.current.s3.endpoint).toBe("https://copy.com");
     });
   });

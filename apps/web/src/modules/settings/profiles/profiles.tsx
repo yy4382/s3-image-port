@@ -1,6 +1,6 @@
 "use client";
 
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,46 +32,71 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  parseProfile,
-  useDeleteProfile,
-  useDuplicateProfile,
-  useHandleV1ClipboardImport,
-  useImportProfile,
-  useLoadProfile,
-  useRenameProfile,
-} from "./profiles-utils";
-import { profilesAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
+import { replaceSettingsProfileAtom } from "../replace-profile";
 import { SyncSettings } from "../sync/components/sync-settings";
 import { useCopy } from "@/lib/hooks/use-copy";
-import { z } from "zod";
-import { optionsSchema } from "@/stores/schemas/settings";
 
 type ProfileItemProps = {
   name: string;
-  profile: z.infer<typeof optionsSchema>;
   isCurrent: boolean;
-  onRename: (oldName: string, newName: string) => void;
-  onDuplicate: (name: string, newName: string) => void;
-  onLoad: (name: string) => void;
-  onDelete: (name: string) => void;
 };
 
-function ProfileItem({
-  name,
-  profile,
-  isCurrent,
-  onRename,
-  onDuplicate,
-  onLoad,
-  onDelete,
-}: ProfileItemProps) {
+function ProfileItem({ name, isCurrent }: ProfileItemProps) {
   const t = useTranslations("settings.profiles");
+  const errors = useTranslations("settings.profiles.errors");
   const { copy } = useCopy();
+  const runProfile = useSetAtom(settings.profiles);
+  const replaceProfile = useSetAtom(replaceSettingsProfileAtom);
   const handleExport = () => {
-    const profileData = profile;
-    const profileJson = JSON.stringify({ name, data: profileData }, null, 2);
-    copy(profileJson, `Profile "${name}"`);
+    const outcome = runProfile({ type: "export", name });
+    if (outcome.status === "exported") {
+      copy(outcome.value, `Profile "${name}"`);
+    } else {
+      toast.error(errors("profileNotFound"));
+    }
+  };
+
+  const rename = (newName: string) => {
+    const outcome = runProfile({ type: "rename", oldName: name, newName });
+    if (outcome.status === "same-name") toast.error(errors("sameNameError"));
+    if (outcome.status === "name-exists") toast.error(errors("nameExists"));
+    if (outcome.status === "not-found") toast.error(errors("profileNotFound"));
+  };
+
+  const duplicate = () => {
+    const outcome = runProfile({
+      type: "duplicate",
+      name,
+      newName: `${name} (copy)`,
+    });
+    if (outcome.status === "duplicated") {
+      toast.success(
+        errors("duplicateSuccess", { name, newName: outcome.newName }),
+      );
+    } else {
+      toast.error(errors("duplicateFailed"));
+    }
+  };
+
+  const load = () => {
+    const outcome = replaceProfile({ type: "activate", name });
+    if (outcome.status === "applied") {
+      toast.success(errors("loadSuccess", { name }));
+    } else if (outcome.status === "not-found") {
+      toast.error(errors("loadFailed"));
+    }
+  };
+
+  const deleteProfile = () => {
+    const outcome = runProfile({ type: "delete", name });
+    if (outcome.status === "deleted") {
+      toast.success(errors("deleteSuccess", { nameToDelete: name }));
+    } else if (outcome.status === "active-profile") {
+      toast.error(errors("cannotDeleteCurrent"));
+    } else {
+      toast.error(errors("profileNotFound"));
+    }
   };
 
   return (
@@ -114,7 +139,7 @@ function ProfileItem({
                 const formData = new FormData(e.currentTarget);
                 const newName = formData.get("input") as string;
                 if (newName) {
-                  onRename(name, newName);
+                  rename(newName);
                 }
               }}
             >
@@ -134,9 +159,7 @@ function ProfileItem({
         <Button
           variant="outline"
           className="flex-1 min-w-[calc(50%-0.25rem)]"
-          onClick={() => {
-            onDuplicate(name, `${name} (copy)`);
-          }}
+          onClick={duplicate}
         >
           <McCopy className="h-5 w-5 mr-1" />
           {t("duplicate")}
@@ -153,13 +176,10 @@ function ProfileItem({
 
         {!isCurrent && (
           <>
-            <Button
-              onClick={() => onLoad(name)}
-              className="flex-1 min-w-[calc(50%-0.25rem)]"
-            >
+            <Button onClick={load} className="flex-1 min-w-[calc(50%-0.25rem)]">
               {t("load")}
             </Button>
-            <DeleteProfileConfirm deleteFn={() => onDelete(name)} />
+            <DeleteProfileConfirm deleteFn={deleteProfile} />
           </>
         )}
       </div>
@@ -205,8 +225,21 @@ function DeleteProfileConfirm({ deleteFn }: { deleteFn: () => void }) {
 
 function ProfileImporter() {
   const t = useTranslations("settings.profiles");
+  const errors = useTranslations("settings.profiles.errors");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const importProfile = useImportProfile();
+  const runProfile = useSetAtom(settings.profiles);
+
+  const importProfile = (value: unknown) => {
+    const outcome = runProfile({ type: "import", value });
+    if (outcome.status === "imported") {
+      toast.success(errors("importSuccess", { name: outcome.name }));
+    } else if (outcome.status === "name-exists") {
+      toast.error(errors("nameExistsImport", { name: outcome.name }));
+    } else {
+      toast.error(errors("invalidFormat"));
+      console.error("Failed to parse profile", outcome.error);
+    }
+  };
 
   const handleClipboardImport = async () => {
     try {
@@ -215,13 +248,7 @@ function ProfileImporter() {
         toast.error(t("clipboardEmpty"));
         return;
       }
-      const parsed = parseProfile(text.trim());
-      if (parsed instanceof Error) {
-        toast.error(t("errors.invalidFormat"));
-        console.error("Failed to parse profile", parsed);
-        return;
-      }
-      importProfile(parsed);
+      importProfile(text.trim());
     } catch (error) {
       toast.error(t("failedToReadClipboard"));
       console.error("Clipboard read error:", error);
@@ -237,13 +264,7 @@ function ProfileImporter() {
       try {
         const content = event.target?.result as string;
         if (content) {
-          const parsed = parseProfile(content);
-          if (parsed instanceof Error) {
-            toast.error(t("errors.invalidFormat"));
-            console.error("Failed to parse profile", parsed);
-            return;
-          }
-          importProfile(parsed);
+          importProfile(content);
         }
       } catch (error) {
         toast.error(t("failedToReadFile"));
@@ -260,7 +281,25 @@ function ProfileImporter() {
     reader.readAsText(file);
   };
 
-  const handleV1ClipboardImport = useHandleV1ClipboardImport();
+  const handleV1ClipboardImport = async () => {
+    try {
+      const value = await navigator.clipboard.readText();
+      if (!value) return;
+      const name = `Migrated ${new Date().toISOString()}`;
+      const outcome = runProfile({ type: "import-v1", value, name });
+      if (outcome.status === "imported") {
+        toast.success(errors("importSuccess", { name }));
+      } else if (outcome.status === "name-exists") {
+        toast.error(errors("nameExistsImport", { name }));
+      } else {
+        toast.error(errors("invalidFormat"));
+        console.error("Failed to parse profile", outcome.error);
+      }
+    } catch (error) {
+      toast.error(t("failedToReadClipboard"));
+      console.error("Clipboard read error:", error);
+    }
+  };
 
   return (
     <>
@@ -304,11 +343,7 @@ function ProfileImporter() {
 }
 
 function Profiles() {
-  const profiles = useAtomValue(profilesAtom);
-  const loadProfile = useLoadProfile();
-  const renameProfile = useRenameProfile();
-  const duplicateProfile = useDuplicateProfile();
-  const deleteProfile = useDeleteProfile();
+  const profiles = useAtomValue(settings.profiles).profiles;
   const t = useTranslations("settings.profiles");
 
   return (
@@ -327,20 +362,11 @@ function Profiles() {
             </>
           }
         >
-          {profiles.list.map(([name, profile], index) => (
+          {profiles.list.map(([name], index) => (
             <ProfileItem
               key={name}
               name={name}
-              profile={profile}
               isCurrent={index === profiles.current}
-              onRename={(oldName, newName) =>
-                renameProfile({ oldName, newName })
-              }
-              onDuplicate={(profileName, newName) =>
-                duplicateProfile({ name: profileName, newName })
-              }
-              onLoad={loadProfile}
-              onDelete={deleteProfile}
             />
           ))}
         </ClientOnly>

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CheckIcon, XIcon, ChevronsUpDownIcon } from "lucide-react";
-import { availablePrefixesAtom } from "../hooks/use-photo-list";
+import { imageCatalog } from "@/modules/image-catalog";
 import { GalleryFilterOptions as DisplayOptions } from "@/stores/schemas/gallery/filter";
 import { DateRangePickerPopover } from "./DateRangePickerPopover";
 import { useAtomValue } from "jotai";
@@ -20,6 +20,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useMemo } from "react";
+import { selectAtom } from "jotai/utils";
+
+const availablePrefixesAtom = selectAtom(
+  imageCatalog.state,
+  ({ gallery }) => gallery.availablePrefixes,
+);
 
 interface FilterPopoverContentProps {
   currentDisplayOptions: DisplayOptions;

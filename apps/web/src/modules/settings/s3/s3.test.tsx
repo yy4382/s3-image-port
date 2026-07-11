@@ -2,9 +2,12 @@ import { S3Settings } from "./s3";
 import { describe, expect, it, vi } from "vitest";
 import { render } from "@/../test/utils/render-with-providers";
 import { fireEvent, screen } from "@testing-library/react";
-import { useAtomValue } from "jotai";
-import { s3SettingsAtom } from "@/stores/atoms/settings";
+import { useAtomValue, useSetAtom } from "jotai";
+import { settings } from "@/stores/atoms/settings";
 import { ReactNode } from "react";
+import { replaceSettingsProfileAtom } from "../replace-profile";
+import { getDefaultOptions } from "@/stores/schemas/settings";
+import { produce } from "immer";
 
 vi.mock(import("@tanstack/react-router"), async (importOriginal) => {
   const original = await importOriginal();
@@ -23,7 +26,7 @@ vi.mock(import("@tanstack/react-router"), async (importOriginal) => {
 const TEST_ID = "s3-settings-test";
 
 function S3SettingsString() {
-  const value = useAtomValue(s3SettingsAtom);
+  const value = useAtomValue(settings.storage).raw;
   return <pre data-testid={TEST_ID}>{JSON.stringify(value, null, 2)}</pre>;
 }
 
@@ -31,9 +34,91 @@ function getConfigInAtom() {
   return JSON.parse(screen.getByTestId(TEST_ID).textContent ?? "{}");
 }
 
+function ProfileControls() {
+  const runProfile = useSetAtom(settings.profiles);
+  const replaceProfile = useSetAtom(replaceSettingsProfileAtom);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          runProfile({
+            type: "import",
+            value: {
+              name: "Work",
+              data: produce(getDefaultOptions(), (draft) => {
+                draft.s3.endpoint = "https://replacement.example.com";
+              }),
+            },
+          })
+        }
+      >
+        Add profile
+      </button>
+      <button
+        type="button"
+        onClick={() => replaceProfile({ type: "activate", name: "Work" })}
+      >
+        Replace profile
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          runProfile({
+            type: "rename",
+            oldName: "Default",
+            newName: "Renamed",
+          })
+        }
+      >
+        Rename profile
+      </button>
+      <button
+        type="button"
+        onClick={() => replaceProfile({ type: "activate", name: "Default" })}
+      >
+        Load active profile
+      </button>
+    </>
+  );
+}
+
 describe("S3Settings", () => {
   it("should render", () => {
     render(<S3Settings />);
+  });
+
+  it("rebases an invalid draft only for a genuine profile replacement", async () => {
+    render(
+      <>
+        <S3Settings />
+        <S3SettingsString />
+        <ProfileControls />
+      </>,
+    );
+    const endpoint = screen.getByLabelText("Endpoint");
+
+    fireEvent.change(endpoint, { target: { value: "invalid draft" } });
+    expect(endpoint.getAttribute("value")).toBe("invalid draft");
+    expect(getConfigInAtom().endpoint).toBe("invalid draft");
+
+    fireEvent.click(screen.getByRole("button", { name: "Rename profile" }));
+    expect(endpoint.getAttribute("value")).toBe("invalid draft");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Load active profile" }),
+    );
+    expect(endpoint.getAttribute("value")).toBe("invalid draft");
+
+    fireEvent.click(screen.getByRole("button", { name: "Add profile" }));
+    fireEvent.click(screen.getByRole("button", { name: "Replace profile" }));
+
+    expect(screen.getByLabelText("Endpoint").getAttribute("value")).toBe(
+      "https://replacement.example.com",
+    );
+    expect(getConfigInAtom().endpoint).toBe("https://replacement.example.com");
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(getConfigInAtom().endpoint).toBe("https://replacement.example.com");
   });
 
   describe("endpoint", () => {

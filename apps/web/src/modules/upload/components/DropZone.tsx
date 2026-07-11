@@ -1,15 +1,35 @@
 import { useDropzone } from "react-dropzone";
 import { useTranslations } from "use-intl";
 import McUpload from "~icons/mingcute/file-upload-line";
+import { useAtomValue, useSetAtom } from "jotai";
+import { selectAtom } from "jotai/utils";
 
-import { useAddFilesToUploadQueue } from "../upload-queue-context";
+import { settings } from "@/stores/atoms/settings";
+import { uploadQueue } from "../upload-queue";
+
+const queueDefaultsAtom = selectAtom(
+  settings.upload,
+  ({ keyTemplate, compressionOption }) => ({
+    keyTemplate,
+    compressionOption,
+  }),
+  (left, right) =>
+    left.keyTemplate === right.keyTemplate &&
+    left.compressionOption === right.compressionOption,
+);
 
 export function DropZone() {
-  const appendFiles = useAddFilesToUploadQueue();
+  const send = useSetAtom(uploadQueue);
+  const uploadSettings = useAtomValue(queueDefaultsAtom);
   const t = useTranslations("upload.dropzone");
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
-      appendFiles(acceptedFiles);
+      send({
+        type: "files.added",
+        files: acceptedFiles,
+        keyTemplate: uploadSettings?.keyTemplate,
+        compressOption: uploadSettings?.compressionOption,
+      });
     },
   });
 

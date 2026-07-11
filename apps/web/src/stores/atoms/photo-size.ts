@@ -38,9 +38,15 @@ naturalSizeDirtyNotificationAtom.onMount = () => {
     if (!dump) {
       return [];
     }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(dump) as unknown;
+    } catch {
+      return [];
+    }
     const validated = z
       .array(z.tuple([z.string(), z.tuple([z.number(), z.number()])]))
-      .safeParse(JSON.parse(dump));
+      .safeParse(parsed);
     if (!validated.success) {
       return [];
     }
@@ -97,6 +103,7 @@ export const setNaturalSizesAtom = atom(
 
 export const clearNaturalSizeCacheAtom = atom(null, (_, set) => {
   naturalSizeCache.clear();
+  localStorage.removeItem(localStorageKey);
   set(naturalSizeDirtyNotificationAtom, (prev) => !prev);
   dumpNaturalSizeCacheToLocalStorageDebounced();
 });

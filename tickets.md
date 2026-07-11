@@ -36,15 +36,15 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Establish the behavioral baseline and deterministic harness.
 
-- [ ] Expose exactly `profiles`, `storage`, `upload`, `gallery`, and `replaceProfile`; callers and tests use these atoms directly without a context, provider, selector family, hook family, or command facade.
-- [ ] Preserve the existing storage key, versioned envelope, migrations, defaults, ordering, active-index behavior, import/export behavior, sync payload, forms, and sync workflow.
-- [ ] Structurally equal writes preserve references and perform zero notification or persistence; unrelated edits preserve each unaffected projection's identity.
-- [ ] `storage` owns raw values, Zod validation/errors, parsed settings, broad revision, semantic target identity, and access-test status/command.
-- [ ] Invalid access testing constructs no adapter and performs no IO; valid testing makes exactly one adapter/access call; stale/disposed completion cannot publish after a storage revision change.
-- [ ] `replaceProfile` changes settings only and accurately reports genuine active-profile replacement versus ordinary/equal/inactive operations.
-- [ ] The external composition write is the sole replacement-capable caller and temporarily targets the currently authoritative base gallery reset exactly once.
-- [ ] All old public settings atoms/setters become private in the same cutover; no aliases or compatibility wrappers remain.
-- [ ] Paired render/subscription tests prove relevant controls update within their bounds and unrelated settings/access/catalog changes produce zero commits.
+- [x] Expose exactly `profiles`, `storage`, `upload`, `gallery`, and `replaceProfile`; callers and tests use these atoms directly without a context, provider, selector family, hook family, or command facade.
+- [x] Preserve the existing storage key, versioned envelope, migrations, defaults, ordering, active-index behavior, import/export behavior, sync payload, forms, and sync workflow.
+- [x] Structurally equal writes preserve references and perform zero notification or persistence; unrelated edits preserve each unaffected projection's identity.
+- [x] `storage` owns raw values, Zod validation/errors, parsed settings, broad revision, semantic target identity, and access-test status/command.
+- [x] Invalid access testing constructs no adapter and performs no IO; valid testing makes exactly one adapter/access call; stale/disposed completion cannot publish after a storage revision change.
+- [x] `replaceProfile` changes settings only and accurately reports genuine active-profile replacement versus ordinary/equal/inactive operations.
+- [x] The external composition write is the sole replacement-capable caller and temporarily targets the currently authoritative base gallery reset exactly once.
+- [x] All old public settings atoms/setters become private in the same cutover; no aliases or compatibility wrappers remain.
+- [x] Paired render/subscription tests prove relevant controls update within their bounds and unrelated settings/access/catalog changes produce zero commits.
 
 ## Extract the pure catalog kernel
 
@@ -52,12 +52,12 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Establish the behavioral baseline and deterministic harness.
 
-- [ ] Define core stored-image and confirmed-fact data through colocated Zod schemas and inferred types rather than a preliminary type inventory.
-- [ ] Cover absent, malformed, cached-empty, listed-empty, and ready cache classification while preserving the bare `StoredImage[]` payload.
-- [ ] Cover confirmed upload/delete/rename application, rename ordering, listing start revision, both completion orders, journal pruning, semantic no-ops, and generation reset.
-- [ ] Cache-write failure produces diagnostic facts without pretending the accepted in-memory projection rolled back.
-- [ ] Pure tests use worked examples and public kernel functions, not machine context/events copied from the rejected refactor.
-- [ ] The kernel exports no atom, provider, subscription, timer, browser write, adapter construction, or remote operation.
+- [x] Define core stored-image and confirmed-fact data through colocated Zod schemas and inferred types rather than a preliminary type inventory.
+- [x] Cover absent, malformed, cached-empty, listed-empty, and ready cache classification while preserving the bare `StoredImage[]` payload.
+- [x] Cover confirmed upload/delete/rename application, rename ordering, listing start revision, both completion orders, journal pruning, semantic no-ops, and generation reset.
+- [x] Cache-write failure produces diagnostic facts without pretending the accepted in-memory projection rolled back.
+- [x] Pure tests use worked examples and public kernel functions, not machine context/events copied from the rejected refactor.
+- [x] The kernel exports no atom, provider, subscription, timer, browser write, adapter construction, or remote operation.
 
 ## Cut over the deep image catalog authority
 
@@ -65,17 +65,17 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Deepen settings in place; Extract the pure catalog kernel.
 
-- [ ] Expose exactly `state`, `view`, `item(key)`, `run`, and `integrate`; no actor, provider, selector registry, command-hook family, lifecycle facade, or second projection exists.
-- [ ] Preserve the existing filter/search/sort/page/page-size/selection derivations and React URL ownership with the smallest possible reactive edits.
-- [ ] Deepen the sole projection to distinguish unloaded/known-empty/ready, retain last-good data, enforce semantic target mismatch, and keep the existing cache key/payload.
-- [ ] `run` owns joined foreground/background refresh, probe/download/link safety, delete/rename reservations, command joining/conflict, typed outcomes, cache writes, and stale completion rejection.
-- [ ] `integrate` accepts only confirmed upload and profile-replacement facts and reconciles both completion orders through the pure kernel.
-- [ ] `item(key)` is mount-local and collectible; key A updates only for A selection/reservation/access changes, never through an unbounded family/registry.
-- [ ] Invalid settings and target mismatch perform zero adapter/remote work; concurrent refresh/probe joins, disjoint mutations, overlapping rejection, and exact call counts match the contract.
-- [ ] Upload/delete/rename versus listing races, cache failures, profile replacement, stale settings/generation, and uncertain outcomes preserve projection/selection/cache semantics in both completion orders.
-- [ ] Manual/empty/background refresh, target mismatch/rebind, photo actions, modal behavior, selection, and feedback retain the accepted user-visible behavior.
-- [ ] Every old listing writer, writable image export, dirty/reset path, direct storage hook, and per-command orchestration path is deleted in this same atomic cutover; no dormant fallback or feature flag remains.
-- [ ] The profile-replacement composition write retargets from the base reset to `integrate("profile-replaced")` in the same diff, never invoking both.
+- [x] Expose exactly `state`, `view`, `item(key)`, `run`, and `integrate`; no actor, provider, selector registry, command-hook family, lifecycle facade, or second projection exists.
+- [x] Preserve the existing filter/search/sort/page/page-size/selection derivations and React URL ownership with the smallest possible reactive edits.
+- [x] Deepen the sole projection to distinguish unloaded/known-empty/ready, retain last-good data, enforce semantic target mismatch, and keep the existing cache key/payload.
+- [x] `run` owns joined foreground/background refresh, probe/download/link safety, delete/rename reservations, command joining/conflict, typed outcomes, cache writes, and stale completion rejection.
+- [x] `integrate` accepts only confirmed upload and profile-replacement facts and reconciles both completion orders through the pure kernel.
+- [x] `item(key)` is mount-local and collectible; key A updates only for A selection/reservation/access changes, never through an unbounded family/registry.
+- [x] Invalid settings and target mismatch perform zero adapter/remote work; concurrent refresh/probe joins, disjoint mutations, overlapping rejection, and exact call counts match the contract.
+- [x] Upload/delete/rename versus listing races, cache failures, profile replacement, stale settings/generation, and uncertain outcomes preserve projection/selection/cache semantics in both completion orders.
+- [x] Manual/empty/background refresh, target mismatch/rebind, photo actions, modal behavior, selection, and feedback retain the accepted user-visible behavior.
+- [x] Every old listing writer, writable image export, dirty/reset path, direct storage hook, and per-command orchestration path is deleted in this same atomic cutover; no dormant fallback or feature flag remains.
+- [x] The profile-replacement composition write retargets from the base reset to `integrate("profile-replaced")` in the same diff, never invoking both.
 
 ## Correct the React-owned gallery URL edge
 
@@ -83,13 +83,13 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Cut over the deep image catalog authority.
 
-- [ ] Keep URL parsing, normalization, serialization, history, and URL-backed-field choice in the existing React/router area; catalog/view atoms remain passive data.
-- [ ] Compare canonical semantic route values, not object identity or key order, and track user versus external origin without copying the rejected broad route hook.
-- [ ] Canonical direct load performs no navigation; invalid/default normalization performs one replace; one semantic user edit performs at most one push and no acknowledgement echo.
-- [ ] Back/forward, two rapid external commits, user-edit/external-navigation races, and stale acknowledgements converge to the latest external state once.
-- [ ] Selection and current page stay outside the URL; modal back/Escape/delete/rename return to the exact captured gallery search state.
-- [ ] Route cases perform zero storage/cache/actor IO and stop producing renders/navigation after settlement.
-- [ ] Superseded refs/effect code is deleted in the same focused slice; no route facade or second synchronization owner appears.
+- [x] Keep URL parsing, normalization, serialization, history, and URL-backed-field choice in the existing React/router area; catalog/view atoms remain passive data.
+- [x] Compare canonical semantic route values, not object identity or key order, and track user versus external origin without copying the rejected broad route hook.
+- [x] Canonical direct load performs no navigation; invalid/default normalization performs one replace; one semantic user edit performs at most one push and no acknowledgement echo.
+- [x] Back/forward, two rapid external commits, user-edit/external-navigation races, and stale acknowledgements converge to the latest external state once.
+- [x] Selection and current page stay outside the URL; modal back/Escape/delete/rename return to the exact captured gallery search state.
+- [x] Route cases perform zero storage/cache/actor IO and stop producing renders/navigation after settlement.
+- [x] Superseded refs/effect code is deleted in the same focused slice; no route facade or second synchronization owner appears.
 
 ## Move upload ownership above the route
 
@@ -97,14 +97,14 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Pin and codify the Jotai-XState lifecycle contract; Deepen settings in place; Cut over the deep image catalog authority.
 
-- [ ] One focused owner inside the existing root Jotai provider and above the route creates an inert queue actor, starts after commit, survives route unmount, and stops only its owned actor on true final disposal.
-- [ ] React uses one writable Jotai queue atom; the route-local provider and selector/command facade are deleted in this same atomic cutover.
-- [ ] Upload IO reads current validated settings, generation, and revision when put begins; React passes intent/files only.
-- [ ] Invalid settings perform zero adapter/put; current success returns a confirmed stored image and calls catalog `integrate` once; obsolete completion becomes superseded and never integrates.
-- [ ] Route unmount/remount preserves queue/child identity and in-flight work without duplicate processing/put; SSR/Suspense/StrictMode start/stop counts match the lifecycle contract.
-- [ ] Each preview subscribes once; entering processing/uploading closes and disables editing in the same settled transition, and impossible edit events are rejected by the machine.
-- [ ] Child A does not rerender for child B or unrelated catalog/settings changes; aggregate controls update only for real aggregate changes.
-- [ ] Successful integration appears immediately and schedules/joins exactly one reconciliation; duplicate notifications are idempotent and no automatic retry is introduced.
+- [x] One focused owner inside the existing root Jotai provider and above the route creates an inert queue actor, starts after commit, survives route unmount, and stops only its owned actor on true final disposal.
+- [x] React uses one writable Jotai queue atom; the route-local provider and selector/command facade are deleted in this same atomic cutover.
+- [x] Upload IO reads current validated settings, generation, and revision when put begins; React passes intent/files only.
+- [x] Invalid settings perform zero adapter/put; current success returns a confirmed stored image and calls catalog `integrate` once; obsolete completion becomes superseded and never integrates.
+- [x] Route unmount/remount preserves queue/child identity and in-flight work without duplicate processing/put; SSR/Suspense/StrictMode start/stop counts match the lifecycle contract.
+- [x] Each preview subscribes once; entering processing/uploading closes and disables editing in the same settled transition, and impossible edit events are rejected by the machine.
+- [x] Child A does not rerender for child B or unrelated catalog/settings changes; aggregate controls update only for real aggregate changes.
+- [x] Successful integration appears immediately and schedules/joins exactly one reconciliation; duplicate notifications are idempotent and no automatic retry is introduced.
 
 ## Close profile replacement, sync, form, and natural-size behavior
 
@@ -112,14 +112,14 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Deepen settings in place; Cut over the deep image catalog authority.
 
-- [ ] Every genuine active load/import/sync/remote-wins ingress uses the single composition write; ordinary, equal, inactive, metadata-only, and already-active operations do not.
-- [ ] One genuine replacement performs at most one settings write, one generation advance, one catalog integration/cache clear, one natural-size clear, and one eligible joined background list or zero when ineligible.
-- [ ] A mounted settings form with an invalid draft rebases to the replacement exactly once without its outward listener restoring the old draft or duplicating persistence/reset/list work.
-- [ ] Ordinary no-ops, access status, rename/duplicate/inactive changes, and equal sync/import do not rebase the form or erase its draft.
-- [ ] The current React Query/Jotai sync confirmation/conflict/token/config behavior and stable sync projection are preserved; sync gains no catalog/cache knowledge.
-- [ ] The natural-size cache retains its current key, payload, LRU, debounce, fallback, and ownership; it clears once only for genuine replacement.
-- [ ] Old access/list/mutation/upload/probe completions after replacement cannot repopulate state or publish stale UI feedback.
-- [ ] Repository search finds no direct replacement setter or reset outside the composition write.
+- [x] Every genuine active load/import/sync/remote-wins ingress uses the single composition write; ordinary, equal, inactive, metadata-only, and already-active operations do not.
+- [x] One genuine replacement performs at most one settings write, one generation advance, one catalog integration/cache clear, one natural-size clear, and one eligible joined background list or zero when ineligible.
+- [x] A mounted settings form with an invalid draft rebases to the replacement exactly once without its outward listener restoring the old draft or duplicating persistence/reset/list work.
+- [x] Ordinary no-ops, access status, rename/duplicate/inactive changes, and equal sync/import do not rebase the form or erase its draft.
+- [x] The current React Query/Jotai sync confirmation/conflict/token/config behavior and stable sync projection are preserved; sync gains no catalog/cache knowledge.
+- [x] The natural-size cache retains its current key, payload, LRU, debounce, fallback, and ownership; it clears once only for genuine replacement.
+- [x] Old access/list/mutation/upload/probe completions after replacement cannot repopulate state or publish stale UI feedback.
+- [x] Repository search finds no direct replacement setter or reset outside the composition write.
 
 ## Apply independent switch, measurement, and ignore fixes
 
@@ -127,11 +127,11 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Establish the behavioral baseline and deterministic harness.
 
-- [ ] The animated switch defaults to native-button behavior and mounts without the Base UI button-contract warning.
-- [ ] The existing atom-based gallery measurement path cancels its initial animation frame and disconnects its observer on unmount without changing layout output.
-- [ ] StrictMode and unmount-before/after-frame tests leave no live observer/frame or post-unmount write.
-- [ ] `.pnpm-store` is ignored by reproducing the independent one-line change without coupling to mixed refactor history.
-- [ ] The fixes introduce no new abstraction, type inventory, storage/remote behavior, or unrelated UI change.
+- [x] The animated switch defaults to native-button behavior and mounts without the Base UI button-contract warning.
+- [x] The existing atom-based gallery measurement path cancels its initial animation frame and disconnects its observer on unmount without changing layout output.
+- [x] StrictMode and unmount-before/after-frame tests leave no live observer/frame or post-unmount write.
+- [x] `.pnpm-store` is ignored by reproducing the independent one-line change without coupling to mixed refactor history.
+- [x] The fixes introduce no new abstraction, type inventory, storage/remote behavior, or unrelated UI change.
 
 ## Run deletion proofs and final reactivity review
 
@@ -139,11 +139,11 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 
 **Blocked by:** Correct the React-owned gallery URL edge; Move upload ownership above the route; Close profile replacement, sync, form, and natural-size behavior; Apply independent switch, measurement, and ignore fixes.
 
-- [ ] Repository searches prove there is no XState Store app state, app-state runtime/provider tree, catalog actor/machine, settings facade, selector registry, sync/natural-size actor, compatibility wrapper, shadow projection, dormant provider, or runtime flag.
-- [ ] Exactly one settings persistence/projection owner, catalog projection reducer, refresh execution edge, profile-replacement composition write, React/router synchronization owner, and upload actor owner remain.
-- [ ] Settings and catalog still expose exactly five interactions each, with no front-loaded standalone type inventory or family of thin wrappers/hooks/selectors.
-- [ ] All protected base/main suites, paired positive/negative subscriber tests, reference-identity checks, committed-render bounds, settling checks, lifecycle tests, exact IO/persistence counts, URL interleavings, form/probe behavior, route lifetime, cache failures, reservations, stale completions, and both race orders pass.
-- [ ] Full web test, build, lint, and repository-appropriate type gates pass after deletion.
-- [ ] Manual behavior checks cover profile forms/switching, sync confirmation, gallery URL/modal navigation, refresh feedback, target mismatch/rebind, selection locality, upload navigation/editing/retry, and cache reset.
-- [ ] No credentialed S3 smoke is claimed unless credentials are actually configured; deterministic counted adapters remain the required race/IO authority.
+- [x] Repository searches prove there is no XState Store app state, app-state runtime/provider tree, catalog actor/machine, settings facade, selector registry, sync/natural-size actor, compatibility wrapper, shadow projection, dormant provider, or runtime flag.
+- [x] Exactly one settings persistence/projection owner, catalog projection reducer, refresh execution edge, profile-replacement composition write, React/router synchronization owner, and upload actor owner remain.
+- [x] Settings and catalog still expose exactly five interactions each, with no front-loaded standalone type inventory or family of thin wrappers/hooks/selectors.
+- [x] All protected base/main suites, paired positive/negative subscriber tests, reference-identity checks, committed-render bounds, settling checks, lifecycle tests, exact IO/persistence counts, URL interleavings, form/probe behavior, route lifetime, cache failures, reservations, stale completions, and both race orders pass.
+- [x] Full web test, build, lint, and repository-appropriate type gates pass after deletion.
+- [x] Manual behavior checks cover profile forms/switching, sync confirmation, gallery URL/modal navigation, refresh feedback, target mismatch/rebind, selection locality, upload navigation/editing/retry, and cache reset.
+- [x] No credentialed S3 smoke is claimed unless credentials are actually configured; deterministic counted adapters remain the required race/IO authority.
 - [ ] Completed slices are reviewed against ADR-0003 and the resolved spec, with all actionable Standards and Spec findings fixed.

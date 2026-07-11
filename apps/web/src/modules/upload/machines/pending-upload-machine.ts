@@ -1,20 +1,12 @@
 import { assign, fromPromise, setup, type ActorRefFrom } from "xstate";
 
-import type {
-  CreateImageStorageFromSettings,
-  ImageStorageFailure,
-} from "@/modules/image-storage";
 import { S3KeyMetadata } from "@/lib/s3/s3-key";
 import type { CompressOption } from "@/lib/utils/imageCompress";
-import type { S3Options } from "@/stores/schemas/settings";
 
-import type {
-  PendingUpload,
-  PendingUploadResult,
-  PendingUploadStatus,
-} from "../types";
+import { pendingUploadResultSchema, type PendingUploadResult } from "../types";
+import type { createStorePendingUpload } from "../store-pending-upload";
 
-export type ProcessPendingUpload = (
+type ProcessPendingUpload = (
   file: File,
   option: CompressOption,
   onProgress: () => void,
@@ -22,13 +14,11 @@ export type ProcessPendingUpload = (
 
 export type PendingUploadEffects = {
   processFile: ProcessPendingUpload;
-  createStorage: CreateImageStorageFromSettings;
+  storePendingUpload: ReturnType<typeof createStorePendingUpload>;
   onProcessingFailed: (file: File, error: unknown) => void;
-  onUploadFailed: (file: File, error: unknown) => void;
-  onUploadSucceeded: (file: File) => void;
 };
 
-export type PendingUploadInput = PendingUploadEffects & {
+type PendingUploadInput = PendingUploadEffects & {
   file: File;
   key: S3KeyMetadata;
   compressOption: CompressOption | null;
@@ -36,19 +26,16 @@ export type PendingUploadInput = PendingUploadEffects & {
   supportProcess: boolean;
 };
 
-type UploadRequest = {
-  s3Settings: S3Options;
-};
-
 type PendingUploadContext = PendingUploadInput & {
   processedFile: File | null;
-  uploadRequest: UploadRequest | null;
+  editing: boolean;
   lastResult: PendingUploadResult | null;
 };
 
 type PendingUploadEvent =
   | { type: "process.requested" }
-  | { type: "upload.requested"; s3Settings: S3Options }
+  | { type: "upload.requested" }
+  | { type: "edit.toggled" }
   | { type: "compression.updated"; option: CompressOption | null }
   | { type: "template.updated"; template: string };
 
@@ -72,24 +59,7 @@ function isProcessedUpload(output: unknown): output is ProcessedUpload {
 }
 
 function isPendingUploadResult(output: unknown): output is PendingUploadResult {
-  return (
-    typeof output === "object" &&
-    output !== null &&
-    "success" in output &&
-    typeof output.success === "boolean"
-  );
-}
-
-function toFailureReason(error: unknown): ImageStorageFailure["reason"] {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "reason" in error &&
-    typeof error.reason === "string"
-  ) {
-    return error.reason as ImageStorageFailure["reason"];
-  }
-  return "unknown";
+  return pendingUploadResultSchema.safeParse(output).success;
 }
 
 export const pendingUploadMachine = setup({
@@ -117,28 +87,14 @@ export const pendingUploadMachine = setup({
       },
     ),
     uploadPendingUpload: fromPromise<PendingUploadResult, PendingUploadContext>(
-      async ({ input }) => {
-        if (!input.uploadRequest) {
-          return { success: false, error: "not-configured" };
-        }
+      ({ input }) => {
         const body = input.processedFile ?? input.file;
-        try {
-          const result = await input
-            .createStorage(input.uploadRequest.s3Settings)
-            .putStoredImage({
-              key: input.key.toString(),
-              body,
-              contentType: body.type || undefined,
-            });
-          if (result.ok) {
-            return { success: true };
-          }
-          input.onUploadFailed(input.file, result.error);
-          return { success: false, error: result.error.reason };
-        } catch (error) {
-          input.onUploadFailed(input.file, error);
-          return { success: false, error: "unknown" };
-        }
+        return input.storePendingUpload({
+          uploadId: input.id,
+          file: input.file,
+          body,
+          key: input.key.toString(),
+        });
       },
     ),
   },
@@ -149,20 +105,15 @@ export const pendingUploadMachine = setup({
     uploadSucceeded: ({ event }) =>
       "output" in event &&
       isPendingUploadResult(event.output) &&
-      event.output.success === true,
+      (event.output.status === "stored" ||
+        event.output.status === "stored-unreconciled"),
   },
   actions: {
-    rememberUploadRequest: assign(({ event }) => {
-      if (event.type !== "upload.requested") {
-        return {};
-      }
-      return {
-        uploadRequest: {
-          s3Settings: event.s3Settings,
-        },
-        lastResult: null,
-      };
+    closeEditing: assign({ editing: false }),
+    toggleEditing: assign({
+      editing: ({ context }) => !context.editing,
     }),
+    prepareUpload: assign({ lastResult: null }),
     applyProcessedFile: assign(({ event }) => {
       if (!("output" in event) || !isProcessedUpload(event.output)) {
         return {};
@@ -178,8 +129,12 @@ export const pendingUploadMachine = setup({
       context.onProcessingFailed(context.file, error);
       return {
         lastResult: {
-          success: false,
-          error: "unknown",
+          status: "failed",
+          error: {
+            reason: "unknown",
+            message: "Processing failed",
+            cause: error,
+          },
         } satisfies PendingUploadResult,
       };
     }),
@@ -191,9 +146,6 @@ export const pendingUploadMachine = setup({
         lastResult: event.output,
       };
     }),
-    notifyUploadSucceeded: ({ context }) => {
-      context.onUploadSucceeded(context.file);
-    },
     resetAfterUploadFailure: assign(({ event }) => {
       if ("output" in event && isPendingUploadResult(event.output)) {
         return {
@@ -203,8 +155,12 @@ export const pendingUploadMachine = setup({
       const error = "error" in event ? event.error : undefined;
       return {
         lastResult: {
-          success: false,
-          error: toFailureReason(error),
+          status: "failed",
+          error: {
+            reason: "unknown",
+            message: "Upload failed",
+            cause: error,
+          },
         } satisfies PendingUploadResult,
       };
     }),
@@ -232,7 +188,7 @@ export const pendingUploadMachine = setup({
   context: ({ input }) => ({
     ...input,
     processedFile: null,
-    uploadRequest: null,
+    editing: false,
     lastResult: null,
   }),
   initial: "pending",
@@ -242,21 +198,23 @@ export const pendingUploadMachine = setup({
         "process.requested": {
           guard: "canProcess",
           target: "processing",
+          actions: "closeEditing",
         },
         "upload.requested": [
           {
             guard: "shouldProcessBeforeUpload",
             target: "processingBeforeUpload",
-            actions: "rememberUploadRequest",
+            actions: ["prepareUpload", "closeEditing"],
           },
           {
             target: "uploading",
-            actions: "rememberUploadRequest",
+            actions: ["prepareUpload", "closeEditing"],
           },
         ],
         "compression.updated": {
           actions: "updateCompression",
         },
+        "edit.toggled": { actions: "toggleEditing" },
         "template.updated": {
           actions: "updateTemplate",
         },
@@ -267,15 +225,17 @@ export const pendingUploadMachine = setup({
         "process.requested": {
           guard: "canProcess",
           target: "processing",
+          actions: "closeEditing",
         },
         "upload.requested": {
           target: "uploading",
-          actions: "rememberUploadRequest",
+          actions: ["prepareUpload", "closeEditing"],
         },
         "compression.updated": {
           target: "pending",
           actions: "updateCompression",
         },
+        "edit.toggled": { actions: "toggleEditing" },
         "template.updated": {
           actions: "updateTemplate",
         },
@@ -317,7 +277,7 @@ export const pendingUploadMachine = setup({
           {
             guard: "uploadSucceeded",
             target: "uploaded",
-            actions: ["recordUploadResult", "notifyUploadSucceeded"],
+            actions: "recordUploadResult",
           },
           {
             target: "pending",
@@ -332,6 +292,7 @@ export const pendingUploadMachine = setup({
     },
     uploaded: {
       on: {
+        "edit.toggled": { actions: "toggleEditing" },
         "compression.updated": {
           target: "pending",
           actions: "updateCompression",
@@ -348,7 +309,7 @@ export type PendingUploadActorRef = ActorRefFrom<typeof pendingUploadMachine>;
 
 export function selectPendingUploadStatus(
   snapshot: ReturnType<PendingUploadActorRef["getSnapshot"]>,
-): PendingUploadStatus {
+) {
   if (
     snapshot.matches("processing") ||
     snapshot.matches("processingBeforeUpload")
@@ -369,7 +330,7 @@ export function selectPendingUploadStatus(
 
 export function selectPendingUpload(
   snapshot: ReturnType<PendingUploadActorRef["getSnapshot"]>,
-): PendingUpload {
+) {
   return {
     file: snapshot.context.file,
     processedFile: snapshot.context.processedFile,
@@ -378,5 +339,7 @@ export function selectPendingUpload(
     status: selectPendingUploadStatus(snapshot),
     id: snapshot.context.id,
     supportProcess: snapshot.context.supportProcess,
+    editing: snapshot.context.editing,
+    lastResult: snapshot.context.lastResult,
   };
 }

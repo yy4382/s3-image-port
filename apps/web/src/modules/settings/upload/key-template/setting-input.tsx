@@ -1,5 +1,5 @@
 import { focusAtom } from "jotai-optics";
-import { uploadSettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { splitAtom } from "jotai/utils";
 import {
   Field,
@@ -52,10 +52,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-const keyTemplateAtom = focusAtom(uploadSettingsAtom, (optic) =>
+const keyTemplateAtom = focusAtom(settings.upload, (optic) =>
   optic.prop("keyTemplate"),
 );
-const keyTemplatePresetsAtom0 = focusAtom(uploadSettingsAtom, (optic) => {
+const keyTemplatePresetsAtom0 = focusAtom(settings.upload, (optic) => {
   return optic.prop("keyTemplatePresets");
 });
 const keyTemplatePresetsAtom = atom(

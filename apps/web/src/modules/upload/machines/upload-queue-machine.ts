@@ -11,7 +11,6 @@ import { v4 as uuid } from "uuid";
 import { defaultKeyTemplate, S3KeyMetadata } from "@/lib/s3/s3-key";
 import { isSupportedFileType } from "@/lib/utils/imageCompress";
 import type { CompressOption } from "@/lib/utils/imageCompress";
-import type { S3Options } from "@/stores/schemas/settings";
 
 import {
   pendingUploadMachine,
@@ -20,15 +19,13 @@ import {
   type PendingUploadEffects,
 } from "./pending-upload-machine";
 
-export type UploadQueueEffects = PendingUploadEffects;
-
 type UploadQueueContext = {
   uploads: PendingUploadActorRef[];
-  effects: UploadQueueEffects;
+  effects: PendingUploadEffects;
 };
 
 type UploadQueueInput = {
-  effects: UploadQueueEffects;
+  effects: PendingUploadEffects;
 };
 
 export type UploadQueueEvent =
@@ -40,7 +37,7 @@ export type UploadQueueEvent =
     }
   | { type: "upload.removed"; actorRef: PendingUploadActorRef }
   | { type: "uploaded.cleared" }
-  | { type: "all.uploadRequested"; s3Settings: S3Options };
+  | { type: "all.uploadRequested" };
 
 export const uploadQueueMachine = setup({
   types: {} as {
@@ -110,7 +107,6 @@ export const uploadQueueMachine = setup({
         if (status !== "uploading" && status !== "uploaded") {
           upload.send({
             type: "upload.requested",
-            s3Settings: event.s3Settings,
           });
         }
       }
@@ -138,7 +134,7 @@ export const uploadQueueMachine = setup({
   },
 });
 
-export type UploadQueueActorRef = ActorRefFrom<typeof uploadQueueMachine>;
+type UploadQueueActorRef = ActorRefFrom<typeof uploadQueueMachine>;
 
 export function selectUploadActors(
   snapshot: ReturnType<UploadQueueActorRef["getSnapshot"]>,
