@@ -555,7 +555,11 @@ describe("deep image catalog", () => {
   });
 
   it("retains last-good images and blocks target IO until explicit rebind", async () => {
-    const storage = createCountedImageStorage();
+    const storage = createCountedImageStorage({
+      overrides: {
+        listStoredImages: async () => ({ ok: true, value: [alpha] }),
+      },
+    });
     const catalog = createImageCatalog({
       createStorage: storage.createStorage,
     });
@@ -566,11 +570,23 @@ describe("deep image catalog", () => {
       intent: "foreground",
       reason: "manual",
     });
+    const firstSource = store.get(catalog.item(alpha.key)).source;
+    expect(firstSource).toBe("https://cdn.example.com/i/alpha.webp");
+    store.set(settings.storage, {
+      type: "update",
+      value: { ...firstTarget, pubUrl: "https://latest-cdn.example.com" },
+    });
+    const lastGoodSource = store.get(catalog.item(alpha.key)).source;
+    expect(lastGoodSource).toBe("https://latest-cdn.example.com/i/alpha.webp");
     store.set(settings.storage, { type: "update", value: secondTarget });
 
     expect(store.get(catalog.state).projection).toMatchObject({
       usable: false,
       stale: false,
+    });
+    expect(store.get(catalog.item(alpha.key))).toMatchObject({
+      source: lastGoodSource,
+      access: undefined,
     });
     const callsBefore = storage.calls.createStorage.length;
     await expect(
@@ -619,6 +635,18 @@ describe("deep image catalog", () => {
       reason: "manual",
     });
     expect(store.get(catalog.state).projection.usable).toBe(true);
+    store.set(settings.storage, {
+      type: "update",
+      value: {
+        ...secondTarget,
+        bucket: "third-images",
+        pubUrl: "https://third-cdn.example.com",
+      },
+    });
+    expect(store.get(catalog.item(alpha.key))).toMatchObject({
+      source: "https://other-cdn.example.com/i/alpha.webp",
+      access: undefined,
+    });
   });
 
   it("derives links locally and performs one download through the current context", async () => {

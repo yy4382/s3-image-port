@@ -182,7 +182,7 @@ describe("catalog React reactivity", () => {
     store.set(settings.storage, { type: "update", value: firstTarget });
     store.set(settings.gallery, { autoRefresh: false });
 
-    renderWithStore(
+    const mounted = renderWithStore(
       store,
       <PhotoItem
         photo={alpha}
@@ -199,7 +199,13 @@ describe("catalog React reactivity", () => {
     fireEvent.load(image);
     expect(image).not.toHaveClass("invisible");
     expect(
+      mounted.container.querySelector('[data-slot="skeleton"]'),
+    ).toBeNull();
+    expect(
       screen.queryByRole("button", { name: `Open: ${alpha.key}` }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("checkbox", { name: `Select ${alpha.key}` }),
     ).not.toBeInTheDocument();
     expect(store.get(imageCatalog.item(alpha.key)).access).toBeUndefined();
     expect(storage.create).not.toHaveBeenCalled();

@@ -104,6 +104,7 @@ export function createImageCatalog({
   const hydratedAtom = atom(false);
   const projectionMetaAtom = atom({
     targetId: undefined as string | undefined,
+    sourceBase: undefined as string | undefined,
     stale: true,
   });
   const selectedKeysAtom = atom<Set<string>>(new Set<string>());
@@ -200,6 +201,35 @@ export function createImageCatalog({
             errors: validation.errors,
             revision,
           },
+    deepEqual,
+  );
+  const sourceBasisAtom = selectAtom(
+    atom((get) => ({
+      context: get(operationContextAtom),
+      projectionMeta: get(projectionMetaAtom),
+    })),
+    (
+      { context, projectionMeta },
+      previous?: { targetId: string | undefined; base: string },
+    ) => {
+      const retainedBase =
+        previous && previous.targetId === projectionMeta.targetId
+          ? previous.base
+          : projectionMeta.sourceBase || "";
+      if (context.status === "invalid") {
+        return { targetId: projectionMeta.targetId, base: retainedBase };
+      }
+      if (
+        projectionMeta.targetId === undefined ||
+        projectionMeta.targetId === context.targetId
+      ) {
+        return {
+          targetId: projectionMeta.targetId,
+          base: s3Key2Url("", context.settings),
+        };
+      }
+      return { targetId: projectionMeta.targetId, base: retainedBase };
+    },
     deepEqual,
   );
 
@@ -747,6 +777,7 @@ export function createImageCatalog({
           set(projectionAtom, projection);
           set(projectionMetaAtom, {
             targetId: started.targetId,
+            sourceBase: s3Key2Url("", started.settings),
             stale: requiresPostRefreshReconciliation,
           });
           set(persistProjectionAtom, "persist");
@@ -1213,7 +1244,11 @@ export function createImageCatalog({
             generation: get(profileGenerationAtom),
           }),
         );
-        set(projectionMetaAtom, { targetId: undefined, stale: true });
+        set(projectionMetaAtom, {
+          targetId: undefined,
+          sourceBase: undefined,
+          stale: true,
+        });
         set(selectedKeysAtom, new Set());
         set(filterAtom, galleryFilterDefault);
         set(pageAtom, 1);
@@ -1235,7 +1270,8 @@ export function createImageCatalog({
         return { status: "stale" as const };
       }
       const current = get(projectionAtom);
-      const targetId = get(projectionMetaAtom).targetId;
+      const projectionMeta = get(projectionMetaAtom);
+      const targetId = projectionMeta.targetId;
       if (targetId !== undefined && targetId !== context.targetId) {
         return { status: "target-unsafe" as const };
       }
@@ -1249,11 +1285,13 @@ export function createImageCatalog({
       // does not prove that the existing listing does. Retain that listing's
       // old/unknown binding until a list binds it while keeping the confirmed
       // fact immediately in the projection/journal.
+      const bindsUnloadedProjection =
+        targetId === undefined && projectionIsUnloaded;
       set(projectionMetaAtom, {
-        targetId:
-          targetId === undefined && projectionIsUnloaded
-            ? context.targetId
-            : targetId,
+        targetId: bindsUnloadedProjection ? context.targetId : targetId,
+        sourceBase: bindsUnloadedProjection
+          ? s3Key2Url("", context.settings)
+          : projectionMeta.sourceBase,
         stale: true,
       });
       set(persistProjectionAtom, "persist");
@@ -1269,7 +1307,8 @@ export function createImageCatalog({
     const sourceAtom = atom((get) => {
       const context = get(operationContextAtom);
       if (!get(hasImageAtom) || context.status !== "valid") return undefined;
-      return s3Key2Url(key, context.settings);
+      const { base } = get(sourceBasisAtom);
+      return base ? base + key : undefined;
     });
     const accessAtom = atom((get) => {
       const context = get(operationContextAtom);
