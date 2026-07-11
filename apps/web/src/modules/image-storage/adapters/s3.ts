@@ -1,6 +1,4 @@
-import ImageS3Client, {
-  type ListedS3ImageObject,
-} from "./image-s3-client";
+import ImageS3Client, { type ListedS3ImageObject } from "./image-s3-client";
 import type { S3Options } from "@/stores/schemas/settings";
 import type {
   ImageStorageFailure,
@@ -173,8 +171,7 @@ export function createS3ImageStorage(settings: S3Options): ImageStorage {
             corsRuleMatchesAccessCheck(rule, input.origin)
               ? (rule.AllowedMethods ?? [])
               : [],
-          ) ??
-            [],
+          ) ?? [],
         );
         const missingMethods = requiredStorageAccessMethods.filter(
           (method) => !allowedMethods.includes(method),
@@ -209,10 +206,7 @@ function toStoredImage(image: ListedS3ImageObject): StoredImage {
   };
 }
 
-function toStorageFailure(
-  error: unknown,
-  key?: string,
-): ImageStorageFailure {
+function toStorageFailure(error: unknown, key?: string): ImageStorageFailure {
   if (isNotFoundError(error) && key) {
     return { reason: "not-found", key };
   }

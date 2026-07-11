@@ -123,9 +123,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorage(s3Settings).deleteStoredImages([
-        "i/missing.webp",
-      ]),
+      createS3ImageStorage(s3Settings).deleteStoredImages(["i/missing.webp"]),
     ).resolves.toEqual({
       ok: false,
       error: { reason: "not-found", key: "i/missing.webp" },
@@ -141,9 +139,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorage(s3Settings).deleteStoredImages([
-        "i/forbidden.webp",
-      ]),
+      createS3ImageStorage(s3Settings).deleteStoredImages(["i/forbidden.webp"]),
     ).resolves.toEqual({
       ok: false,
       error: { reason: "access-denied" },
@@ -166,7 +162,9 @@ describe("S3 image storage adapter", () => {
     });
 
     mocks.renameFn.mockRejectedValueOnce(
-      new Error("Renamed to i/new.webp but failed to delete old key i/source.webp"),
+      new Error(
+        "Renamed to i/new.webp but failed to delete old key i/source.webp",
+      ),
     );
 
     await expect(
@@ -201,7 +199,8 @@ describe("S3 image storage adapter", () => {
   it("converts S3 download bodies to browser blobs", async () => {
     mocks.getFn.mockResolvedValueOnce({
       Body: {
-        transformToByteArray: async () => new TextEncoder().encode("image bytes"),
+        transformToByteArray: async () =>
+          new TextEncoder().encode("image bytes"),
       },
     });
 
@@ -226,9 +225,7 @@ describe("S3 image storage adapter", () => {
     );
 
     await expect(
-      createS3ImageStorage(s3Settings).downloadStoredImage(
-        "i/missing.webp",
-      ),
+      createS3ImageStorage(s3Settings).downloadStoredImage("i/missing.webp"),
     ).resolves.toEqual({
       ok: false,
       error: { reason: "not-found", key: "i/missing.webp" },

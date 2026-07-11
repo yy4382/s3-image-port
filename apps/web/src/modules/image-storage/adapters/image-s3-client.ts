@@ -194,7 +194,9 @@ class ImageS3Client {
       if (isMissingObjectError(error)) {
         return;
       }
-      throw new Error(`Failed to check if ${key} exists: ${errorMessage(error)}`);
+      throw new Error(
+        `Failed to check if ${key} exists: ${errorMessage(error)}`,
+      );
     }
 
     throw new Error(
