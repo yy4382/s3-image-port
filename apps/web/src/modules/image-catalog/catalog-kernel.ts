@@ -94,10 +94,7 @@ const catalogChangeSchema = z.discriminatedUnion("type", [
   uploadConfirmedSchema,
   deleteConfirmedSchema,
   renameConfirmedSchema,
-  z.object({
-    type: z.literal("prune-journal"),
-    oldestRequiredRevision: z.number().int().nonnegative().optional(),
-  }),
+  z.object({ type: z.literal("prune-journal") }),
   z.object({
     type: z.literal("generation-reset"),
     generation: z.number().int().nonnegative(),
@@ -234,16 +231,9 @@ export const catalogKernel = {
     }
 
     if (change.type === "prune-journal") {
-      const oldestRequiredRevision = change.oldestRequiredRevision;
-      const journal =
-        oldestRequiredRevision === undefined
-          ? []
-          : projection.journal.filter(
-              (confirmed) => confirmed.revision > oldestRequiredRevision,
-            );
-      return journal.length === projection.journal.length
+      return projection.journal.length === 0
         ? projection
-        : { ...projection, journal };
+        : { ...projection, journal: [] };
     }
 
     if (change.type === "generation-reset") {

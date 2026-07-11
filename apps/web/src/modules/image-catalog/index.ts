@@ -145,11 +145,12 @@ export function createImageCatalog({
         }
       | undefined,
   );
-  const queuedRefreshAtom = atom(
+  const pendingRefreshAtom = atom(
     undefined as
       | {
           promise: Promise<CatalogRunResult>;
           resolve: (value: CatalogRunResult) => void;
+          reconcile: boolean;
           command: Extract<
             z.infer<typeof catalogCommandSchema>,
             { type: "refresh" }
@@ -184,16 +185,6 @@ export function createImageCatalog({
       }
     >(),
   );
-  const scheduledReconciliationAtom = atom(
-    undefined as
-      | {
-          generation: number;
-          revision: number;
-          targetId: string;
-        }
-      | undefined,
-  );
-
   const operationContextAtom = selectAtom(
     settings.storage,
     ({ validation, revision, targetId }) =>
@@ -454,7 +445,7 @@ export function createImageCatalog({
       context.status === "valid" &&
       (meta.targetId === undefined || meta.targetId === context.targetId);
     const active = get(activeRefreshAtom);
-    const scheduledReconciliation = get(scheduledReconciliationAtom);
+    const pendingRefresh = get(pendingRefreshAtom);
 
     return {
       valid: context.status === "valid",
@@ -470,9 +461,10 @@ export function createImageCatalog({
       activeTargetId: active?.targetId,
       reconciliationPending:
         context.status === "valid" &&
-        scheduledReconciliation?.generation === get(profileGenerationAtom) &&
-        scheduledReconciliation.revision === context.revision &&
-        scheduledReconciliation.targetId === context.targetId,
+        pendingRefresh?.reconcile === true &&
+        pendingRefresh.generation === get(profileGenerationAtom) &&
+        pendingRefresh.revision === context.revision &&
+        pendingRefresh.targetId === context.targetId,
     };
   });
   const backgroundRefreshEligibilityAtom = selectAtom(
@@ -557,14 +549,13 @@ export function createImageCatalog({
 
   const stopOldActivityAtom = atom(null, (get, set) => {
     get(activeRefreshAtom)?.cancel();
-    get(queuedRefreshAtom)?.resolve({ status: "superseded" });
+    get(pendingRefreshAtom)?.resolve({ status: "superseded" });
     for (const mutation of get(activeMutationsAtom).values()) mutation.cancel();
     for (const probe of get(activeProbesAtom).values()) probe.cancel();
     set(activeRefreshAtom, undefined);
-    set(queuedRefreshAtom, undefined);
+    set(pendingRefreshAtom, undefined);
     set(activeMutationsAtom, new Map());
     set(activeProbesAtom, new Map());
-    set(scheduledReconciliationAtom, undefined);
     set(refreshAtom, () => ({
       status: "idle",
       lastOutcome: undefined,
@@ -658,34 +649,50 @@ export function createImageCatalog({
       return active.promise;
     }
     if (active) {
-      const queued = get(queuedRefreshAtom);
+      const pending = get(pendingRefreshAtom);
       if (
-        queued &&
-        queued.generation === current.generation &&
-        queued.revision === current.revision &&
-        queued.targetId === current.targetId
+        pending &&
+        pending.generation === current.generation &&
+        pending.revision === current.revision &&
+        pending.targetId === current.targetId
       ) {
         if (
           refreshCommand.intent === "foreground" &&
-          queued.command.intent === "background"
+          pending.command.intent === "background"
         ) {
-          set(queuedRefreshAtom, {
-            ...queued,
+          set(pendingRefreshAtom, {
+            ...pending,
             command: refreshCommand,
           });
         }
-        return queued.promise;
+        return pending.promise;
       }
-      queued?.resolve({ status: "superseded" });
+      pending?.resolve({ status: "superseded" });
       const deferred = createDeferred<CatalogRunResult>();
-      set(queuedRefreshAtom, {
+      set(pendingRefreshAtom, {
         ...current,
         promise: deferred.promise,
         resolve: deferred.resolve,
+        reconcile: false,
         command: refreshCommand,
       });
       return deferred.promise;
     }
+    const pending = get(pendingRefreshAtom);
+    const consumesPending =
+      pending?.generation === current.generation &&
+      pending.revision === current.revision &&
+      pending.targetId === current.targetId;
+    if (pending) {
+      set(pendingRefreshAtom, undefined);
+      if (!consumesPending) pending.resolve({ status: "superseded" });
+    }
+    const effectiveCommand =
+      consumesPending &&
+      pending.command.intent === "foreground" &&
+      refreshCommand.intent === "background"
+        ? pending.command
+        : refreshCommand;
     const started = {
       settings: context.settings,
       ...current,
@@ -700,22 +707,15 @@ export function createImageCatalog({
       cancel: () => deferred.resolve({ status: "superseded" }),
       resolve: deferred.resolve,
     };
-    const scheduledAtStart = get(scheduledReconciliationAtom);
-    if (
-      scheduledAtStart?.generation === started.generation &&
-      scheduledAtStart.revision === started.revision &&
-      scheduledAtStart.targetId === started.targetId
-    ) {
-      set(scheduledReconciliationAtom, undefined);
-    }
     set(refreshAttemptAtom, (attempt) => attempt + 1);
     set(activeRefreshAtom, record);
     set(refreshAtom, (current) => ({
       status: "refreshing",
-      intent: refreshCommand.intent,
-      reason: refreshCommand.reason,
+      intent: effectiveCommand.intent,
+      reason: effectiveCommand.reason,
       lastOutcome: current.lastOutcome,
     }));
+    if (consumesPending) void record.promise.then(pending.resolve);
 
     void execute();
     return record.promise;
@@ -738,11 +738,12 @@ export function createImageCatalog({
           projection = catalogKernel.reduce(projection, {
             type: "prune-journal",
           });
-          const scheduledReconciliation = get(scheduledReconciliationAtom);
+          const pendingRefresh = get(pendingRefreshAtom);
           const requiresPostRefreshReconciliation =
-            scheduledReconciliation?.generation === started.generation &&
-            scheduledReconciliation.revision === started.revision &&
-            scheduledReconciliation.targetId === started.targetId;
+            pendingRefresh?.reconcile === true &&
+            pendingRefresh.generation === started.generation &&
+            pendingRefresh.revision === started.revision &&
+            pendingRefresh.targetId === started.targetId;
           set(projectionAtom, projection);
           set(projectionMetaAtom, {
             targetId: started.targetId,
@@ -772,41 +773,8 @@ export function createImageCatalog({
       });
       record.cancel = () => {};
       record.resolve(catalogRunResultSchema.parse(outcome));
-      const queued = get(queuedRefreshAtom);
-      if (queued) {
-        queueMicrotask(() => {
-          if (get(queuedRefreshAtom) !== queued) return;
-          set(queuedRefreshAtom, undefined);
-          const latest = currentContext(get);
-          if (
-            latest.status !== "valid" ||
-            get(profileGenerationAtom) !== queued.generation ||
-            latest.revision !== queued.revision ||
-            latest.targetId !== queued.targetId
-          ) {
-            queued.resolve({ status: "superseded" });
-            return;
-          }
-          if (
-            get(scheduledReconciliationAtom)?.generation ===
-              queued.generation &&
-            get(scheduledReconciliationAtom)?.revision === queued.revision &&
-            get(scheduledReconciliationAtom)?.targetId === queued.targetId
-          ) {
-            set(scheduledReconciliationAtom, undefined);
-          }
-          void refresh(get, set, queued.command).then(queued.resolve);
-        });
-      }
-      const scheduledReconciliation = get(scheduledReconciliationAtom);
-      if (
-        scheduledReconciliation &&
-        get(profileGenerationAtom) === scheduledReconciliation.generation
-      ) {
-        queueMicrotask(() =>
-          set(flushReconciliationAtom, scheduledReconciliation),
-        );
-      }
+      const pending = get(pendingRefreshAtom);
+      if (pending) queueMicrotask(() => set(flushPendingRefreshAtom));
     }
   }
 
@@ -1154,36 +1122,23 @@ export function createImageCatalog({
     },
   );
 
-  const flushReconciliationAtom = atom(
-    null,
-    (
-      get,
-      set,
-      scheduled: { generation: number; revision: number; targetId: string },
-    ) => {
-      if (
-        get(scheduledReconciliationAtom) !== scheduled ||
-        get(profileGenerationAtom) !== scheduled.generation
-      ) {
-        return;
-      }
-      const context = get(operationContextAtom);
-      if (context.status === "invalid") return;
-      if (
-        context.revision !== scheduled.revision ||
-        context.targetId !== scheduled.targetId
-      ) {
-        set(scheduledReconciliationAtom, undefined);
-        return;
-      }
-      set(scheduledReconciliationAtom, undefined);
-      void set(run, {
-        type: "refresh",
-        intent: "background",
-        reason: "reconciliation",
-      });
-    },
-  );
+  const flushPendingRefreshAtom = atom(null, (get, set) => {
+    const pending = get(pendingRefreshAtom);
+    if (!pending || get(activeRefreshAtom)) return;
+    const context = get(operationContextAtom);
+    if (
+      context.status === "invalid" ||
+      get(profileGenerationAtom) !== pending.generation ||
+      context.revision !== pending.revision ||
+      context.targetId !== pending.targetId
+    ) {
+      set(pendingRefreshAtom, undefined);
+      pending.resolve({ status: "superseded" });
+      return;
+    }
+    set(pendingRefreshAtom, undefined);
+    void refresh(get, set, pending.command).then(pending.resolve);
+  });
 
   const scheduleReconciliationAtom = atom(
     null,
@@ -1191,7 +1146,7 @@ export function createImageCatalog({
       const generation = get(profileGenerationAtom);
       const context = get(operationContextAtom);
       if (context.status === "invalid") return false;
-      const scheduled = {
+      const requested = {
         generation,
         revision: context.revision,
         targetId: context.targetId,
@@ -1203,21 +1158,44 @@ export function createImageCatalog({
           active.revision === context.revision &&
           active.targetId === context.targetId;
         if (requirement === "after-active-refresh" || !activeIsSuitable) {
-          set(scheduledReconciliationAtom, scheduled);
+          queuePendingRefresh();
         }
         return false;
       }
-      const existing = get(scheduledReconciliationAtom);
-      if (
-        existing?.generation === generation &&
-        existing.revision === context.revision &&
-        existing.targetId === context.targetId
-      ) {
+      return queuePendingRefresh();
+
+      function queuePendingRefresh() {
+        const existing = get(pendingRefreshAtom);
+        if (
+          existing?.generation === generation &&
+          existing.revision === context.revision &&
+          existing.targetId === context.targetId
+        ) {
+          if (!existing.reconcile) {
+            set(pendingRefreshAtom, { ...existing, reconcile: true });
+          }
+          return false;
+        }
+        existing?.resolve({ status: "superseded" });
+        const deferred = createDeferred<CatalogRunResult>();
+        const pending = {
+          ...requested,
+          promise: deferred.promise,
+          resolve: deferred.resolve,
+          reconcile: true,
+          command: {
+            type: "refresh" as const,
+            intent: "background" as const,
+            reason: "reconciliation" as const,
+          },
+        };
+        set(pendingRefreshAtom, pending);
+        if (!get(activeRefreshAtom)) {
+          queueMicrotask(() => set(flushPendingRefreshAtom));
+          return true;
+        }
         return false;
       }
-      set(scheduledReconciliationAtom, scheduled);
-      queueMicrotask(() => set(flushReconciliationAtom, scheduled));
-      return true;
     },
   );
 

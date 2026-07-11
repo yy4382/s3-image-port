@@ -359,38 +359,35 @@ describe("catalog projection", () => {
     ]);
   });
 
-  it("prunes confirmed facts only after no active listing needs them", () => {
+  it("clears facts incorporated by an accepted listing without changing published images or upload idempotency", () => {
     let projection = catalogKernel.create(parseCatalogCache(null));
-    projection = catalogKernel.reduce(projection, {
-      type: "upload-confirmed",
-      uploadId: "upload-1",
-      image: { key: "i/one.webp" },
-    });
-
-    const stillNeeded = catalogKernel.reduce(projection, {
-      type: "prune-journal",
-      oldestRequiredRevision: 0,
-    });
-    const noLongerNeeded = catalogKernel.reduce(stillNeeded, {
-      type: "prune-journal",
-    });
-
-    expect(stillNeeded.journal).toHaveLength(1);
-    expect(noLongerNeeded.journal).toEqual([]);
-    expect(noLongerNeeded.images).toBe(projection.images);
-  });
-
-  it("remembers a confirmed upload after its replay fact is pruned", () => {
-    let projection = catalogKernel.create(parseCatalogCache(null));
+    const listing = catalogKernel.beginListing(projection);
     const upload = {
       type: "upload-confirmed" as const,
-      uploadId: "upload-survives-prune",
+      uploadId: "upload-incorporated",
       image: { key: "i/uploaded.webp" },
     };
+
     projection = catalogKernel.reduce(projection, upload);
-    projection = catalogKernel.reduce(projection, { type: "prune-journal" });
+    projection = catalogKernel.reduce(projection, {
+      type: "listing-received",
+      listing,
+      images: [{ key: "i/listed.webp" }],
+    });
+    const publishedImages = projection.images;
+    const recentUploadIds = projection.recentUploadIds;
+
+    projection = catalogKernel.reduce(projection, {
+      type: "prune-journal",
+    });
 
     expect(projection.journal).toEqual([]);
+    expect(projection.images).toBe(publishedImages);
+    expect(projection.images).toEqual([
+      { key: "i/listed.webp" },
+      { key: "i/uploaded.webp" },
+    ]);
+    expect(projection.recentUploadIds).toBe(recentUploadIds);
     expect(catalogKernel.reduce(projection, upload)).toBe(projection);
   });
 
