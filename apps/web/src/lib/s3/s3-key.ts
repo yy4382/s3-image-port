@@ -91,7 +91,10 @@ export class S3KeyMetadata {
    * so the two objects share the same base and can be paired again on listing.
    */
   static withExt(prev: S3KeyMetadata, ext: string) {
-    return new S3KeyMetadata(prev.template, { ...prev.data, ext });
+    const template = prev.template.includes("{{ext}}")
+      ? prev.template
+      : `${prev.template}.{{ext}}`;
+    return new S3KeyMetadata(template, { ...prev.data, ext });
   }
   toString() {
     return this.template.replace(

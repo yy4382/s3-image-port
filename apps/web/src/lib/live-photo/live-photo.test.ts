@@ -2,14 +2,12 @@ import { describe, it, expect } from "vitest";
 import {
   splitKeyExt,
   isLivePhotoVideoKey,
-  pairLivePhotos,
+  pairStoredLiveImages,
   planLivePhotoUpload,
   uploadBaseName,
 } from "./live-photo";
-import type { Photo } from "@/stores/schemas/photo";
-
-function photo(key: string): Photo {
-  return { Key: key, LastModified: "2026-05-31T00:00:00.000Z", url: key };
+function storedImage(key: string) {
+  return { key, lastModified: "2026-05-31T00:00:00.000Z" };
 }
 
 describe("splitKeyExt", () => {
@@ -43,38 +41,57 @@ describe("isLivePhotoVideoKey", () => {
   });
 });
 
-describe("pairLivePhotos", () => {
+describe("pairStoredLiveImages", () => {
   it("pairs a still with its sibling motion and hides the video", () => {
-    const photos = [photo("i/a.jpg"), photo("i/a.mov"), photo("i/b.png")];
-    const { displayPhotos, videoByImageKey } = pairLivePhotos(photos);
+    const images = [
+      storedImage("i/a.jpg"),
+      storedImage("i/a.mov"),
+      storedImage("i/b.png"),
+    ];
+    const { displayImages, videoByImageKey } = pairStoredLiveImages(
+      images,
+      (image) => image.key,
+    );
 
-    expect(displayPhotos.map((p) => p.Key)).toEqual(["i/a.jpg", "i/b.png"]);
-    expect(videoByImageKey.get("i/a.jpg")?.Key).toBe("i/a.mov");
+    expect(displayImages.map((image) => image.key)).toEqual([
+      "i/a.jpg",
+      "i/b.png",
+    ]);
+    expect(videoByImageKey.get("i/a.jpg")?.key).toBe("i/a.mov");
     expect(videoByImageKey.has("i/b.png")).toBe(false);
   });
 
   it("keeps standalone videos that have no matching still", () => {
-    const photos = [photo("i/clip.mov"), photo("i/photo.jpg")];
-    const { displayPhotos, videoByImageKey } = pairLivePhotos(photos);
+    const images = [storedImage("i/clip.mov"), storedImage("i/image.jpg")];
+    const { displayImages, videoByImageKey } = pairStoredLiveImages(
+      images,
+      (image) => image.key,
+    );
 
-    expect(displayPhotos.map((p) => p.Key)).toEqual([
+    expect(displayImages.map((image) => image.key)).toEqual([
       "i/clip.mov",
-      "i/photo.jpg",
+      "i/image.jpg",
     ]);
     expect(videoByImageKey.size).toBe(0);
   });
 
   it("does not pair across different directories", () => {
-    const photos = [photo("a/x.jpg"), photo("b/x.mov")];
-    const { displayPhotos, videoByImageKey } = pairLivePhotos(photos);
+    const images = [storedImage("a/x.jpg"), storedImage("b/x.mov")];
+    const { displayImages, videoByImageKey } = pairStoredLiveImages(
+      images,
+      (image) => image.key,
+    );
 
-    expect(displayPhotos).toHaveLength(2);
+    expect(displayImages).toHaveLength(2);
     expect(videoByImageKey.size).toBe(0);
   });
 
   it("returns an empty pairing for an empty list", () => {
-    const { displayPhotos, videoByImageKey } = pairLivePhotos([]);
-    expect(displayPhotos).toEqual([]);
+    const { displayImages, videoByImageKey } = pairStoredLiveImages(
+      [],
+      (image: { key: string }) => image.key,
+    );
+    expect(displayImages).toEqual([]);
     expect(videoByImageKey.size).toBe(0);
   });
 });

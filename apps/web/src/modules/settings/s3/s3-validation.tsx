@@ -1,8 +1,7 @@
 "use client";
 
-import { getAllowedMethods, testS3Settings } from "@/lib/s3/test-s3-settings";
-import { useAtomValue } from "jotai";
-import { useState } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import type { ExtractAtomValue } from "jotai/vanilla/typeUtils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,8 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { s3SettingsAtom } from "@/stores/atoms/settings";
-import { optionsSchema } from "@/stores/schemas/settings";
+import { settings } from "@/stores/atoms/settings";
 import {
   Loader2,
   CheckCircle,
@@ -24,16 +22,9 @@ import {
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 
-export type ValidationStatus =
-  | { status: "idle" }
-  | { status: "testing" }
-  | { status: "success"; allowedMethods: string[] }
-  | { status: "failed" }
-  | {
-      status: "cors-incomplete";
-      allowedMethods: string[];
-      missingMethods: string[];
-    };
+export type ValidationStatus = ExtractAtomValue<
+  typeof settings.storage
+>["access"];
 
 interface StatusIconProps {
   status: ValidationStatus["status"];
@@ -100,7 +91,7 @@ function DialogContent({
   validationStatus: ValidationStatus;
 }) {
   const t = useTranslations("settings.s3Validation");
-  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"];
+  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"] as const;
 
   if (validationStatus.status === "failed") {
     return (
@@ -212,49 +203,13 @@ function TestButton({
 // S3验证主组件
 export function S3Validation() {
   const t = useTranslations("settings.s3Validation");
-  const s3Settings = useAtomValue(s3SettingsAtom);
-  const [validationStatus, setValidationStatus] = useState<ValidationStatus>({
-    status: "idle",
-  });
-
-  const requiredMethods = ["GET", "HEAD", "PUT", "POST", "DELETE"];
-
-  // 检查schema是否有效
-  const isSchemaValid = optionsSchema.shape.s3.safeParse(s3Settings).success;
+  const storage = useAtomValue(settings.storage);
+  const testAccess = useSetAtom(settings.storage);
+  const validationStatus = storage.access;
+  const isSchemaValid = storage.validation.status === "valid";
 
   async function validate() {
-    setValidationStatus({ status: "testing" });
-
-    try {
-      const result = await testS3Settings(s3Settings, window.location.origin);
-
-      if (result.valid === false) {
-        if (result.type === "no-result") {
-          setValidationStatus({ status: "failed" });
-        } else if (result.type === "no-allowed-methods") {
-          const allowedMethods = result.allowedMethods || [];
-          const missingMethods = requiredMethods.filter(
-            (method) => !allowedMethods.includes(method),
-          );
-          setValidationStatus({
-            status: "cors-incomplete",
-            allowedMethods,
-            missingMethods,
-          });
-        }
-      } else {
-        const allowedMethods = await getAllowedMethods(
-          s3Settings,
-          window.location.origin,
-        );
-        setValidationStatus({
-          status: "success",
-          allowedMethods: allowedMethods || requiredMethods,
-        });
-      }
-    } catch {
-      setValidationStatus({ status: "failed" });
-    }
+    await testAccess({ type: "test-access" });
   }
 
   const showDetails =

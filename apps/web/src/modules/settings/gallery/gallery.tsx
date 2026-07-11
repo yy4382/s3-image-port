@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from "use-intl";
 import { ExternalLink } from "lucide-react";
-import { gallerySettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { focusAtom } from "jotai-optics";
 import {
   Field,
@@ -14,7 +14,7 @@ import { Switch } from "@/components/animate-ui/components/base/switch";
 import { useAtom } from "jotai";
 import { Link } from "@tanstack/react-router";
 
-const autoRefreshAtom = focusAtom(gallerySettingsAtom, (optic) =>
+const autoRefreshAtom = focusAtom(settings.gallery, (optic) =>
   optic.prop("autoRefresh"),
 );
 export function GallerySettings() {
@@ -42,7 +42,7 @@ export function GallerySettings() {
         {/* <FormEntrySwitchAtom
           title={t("autoRefresh")}
           description={t("autoRefreshDesc")}
-          atom={focusAtom(gallerySettingsAtom, (optic) =>
+          atom={focusAtom(settings.gallery, (optic) =>
             optic.prop("autoRefresh"),
           )}
         /> */}

@@ -51,4 +51,11 @@ export const galleryFilterSchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc").catch("desc"),
 });
 
+export const galleryPageSizes = [20, 50, 100] as const;
+export const galleryPageSizeSchema = z.union(
+  galleryPageSizes.map((size) => z.literal(size)),
+);
+export const galleryPageSizeDefault = galleryPageSizes[0];
+
 export type GalleryFilterOptions = z.infer<typeof galleryFilterSchema>;
+export type GalleryPageSize = z.infer<typeof galleryPageSizeSchema>;

@@ -1,5 +1,3 @@
-import type { Photo } from "@/stores/schemas/photo";
-
 /**
  * Apple Live Photos are stored as two objects that share a basename: a still
  * image (`IMG_0001.jpg`/`.heic`) and a motion video (`IMG_0001.mov`). This
@@ -89,20 +87,15 @@ function keyComponentKind(key: string): ComponentKind {
   return "other";
 }
 
-export type LivePhotoPairing = {
+export type StoredLiveImagePairing<T> = {
   /**
    * Photos to actually render in the grid. The motion `.mov` of a paired Live
    * Photo is removed (it's surfaced through its still instead); everything else
    * — including standalone videos that have no matching still — is kept as-is.
    */
-  displayPhotos: Photo[];
+  displayImages: T[];
   /** Map from a still image key to its paired motion video. */
-  videoByImageKey: Map<string, Photo>;
-};
-
-const EMPTY_PAIRING: LivePhotoPairing = {
-  displayPhotos: [],
-  videoByImageKey: new Map(),
+  videoByImageKey: Map<string, T>;
 };
 
 /**
@@ -112,32 +105,38 @@ const EMPTY_PAIRING: LivePhotoPairing = {
  * motion video. When several stills share a base (unusual), each is paired with
  * the same video; when several videos share a base, the first is used.
  */
-export function pairLivePhotos(photos: Photo[]): LivePhotoPairing {
-  if (photos.length === 0) return EMPTY_PAIRING;
+/** Pair catalog/storage records without coupling this module to either model. */
+export function pairStoredLiveImages<T>(
+  items: T[],
+  keyOf: (item: T) => string,
+): StoredLiveImagePairing<T> {
+  if (items.length === 0) {
+    return { displayImages: [], videoByImageKey: new Map() };
+  }
 
   const byBase = groupComponentsByBase(
-    photos,
-    (photo) => splitKeyExt(photo.Key).base,
-    (photo) => keyComponentKind(photo.Key),
+    items,
+    (item) => splitKeyExt(keyOf(item)).base,
+    (item) => keyComponentKind(keyOf(item)),
   );
 
-  const videoByImageKey = new Map<string, Photo>();
+  const videoByImageKey = new Map<string, T>();
   const pairedVideoKeys = new Set<string>();
   for (const { images, videos } of byBase.values()) {
     if (images.length === 0 || videos.length === 0) continue;
     const video = videos[0];
     for (const image of images) {
-      videoByImageKey.set(image.Key, video);
+      videoByImageKey.set(keyOf(image), video);
     }
-    pairedVideoKeys.add(video.Key);
+    pairedVideoKeys.add(keyOf(video));
   }
 
   if (pairedVideoKeys.size === 0) {
-    return { displayPhotos: photos, videoByImageKey };
+    return { displayImages: items, videoByImageKey };
   }
 
   return {
-    displayPhotos: photos.filter((photo) => !pairedVideoKeys.has(photo.Key)),
+    displayImages: items.filter((item) => !pairedVideoKeys.has(keyOf(item))),
     videoByImageKey,
   };
 }

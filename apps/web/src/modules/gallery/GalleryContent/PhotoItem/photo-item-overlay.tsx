@@ -5,30 +5,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/stores/schemas/photo";
+import type { StoredImage } from "@/modules/image-storage";
 import { getRouteApi } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "use-intl";
 import { useTranslations } from "use-intl";
 import McCheckFill from "~icons/mingcute/checkbox-fill";
 import McCopy from "~icons/mingcute/copy-2-line.jsx";
 import { PhotoOptions } from "./photo-options";
-import { usePhotoOperations } from "../../hooks/photo";
+import { imageCatalog } from "@/modules/image-catalog";
+import { useSetAtom } from "jotai";
+import { useCopy } from "@/lib/hooks/use-copy";
 
 type PhotoItemOverlayProps = {
-  photo: Photo;
+  photo: StoredImage;
   selected: boolean;
   hovering: boolean;
+  reserved: boolean;
 };
 
 export function PhotoItemOverlay({
   photo,
   selected,
   hovering,
+  reserved,
 }: PhotoItemOverlayProps) {
-  const { toggleSelected } = usePhotoOperations(photo);
-  const onOpenModal = useOpenModal(photo.Key);
+  const t = useTranslations("gallery.item.options");
+  const updateSelection = useSetAtom(imageCatalog.view.selection);
+  const onOpenModal = useOpenModal(photo.key);
   const [infoDropdownOpened, setInfoDropdownOpened] = useState(false);
 
   const showOverlay = useMemo(() => {
@@ -38,6 +43,7 @@ export function PhotoItemOverlay({
   return (
     <motion.div
       className="absolute inset-0 z-20"
+      aria-busy={reserved}
       animate={{
         visibility: showOverlay ? "visible" : "hidden",
         opacity: showOverlay ? 1 : 0,
@@ -45,32 +51,56 @@ export function PhotoItemOverlay({
       transition={{ ease: "easeInOut", duration: 0.15 }}
     >
       {/* The gray background */}
-      <div
-        className="absolute top-0 bottom-0 left-0 right-0"
+      <button
+        type="button"
+        aria-label={`${t("open")}: ${photo.key}`}
+        className="absolute inset-0 border-0 bg-transparent p-0 text-left"
         onClick={(e) => {
-          toggleSelected("toggle", e.shiftKey);
+          updateSelection({
+            type: "toggle",
+            key: photo.key,
+            checked: "toggle",
+            shift: e.shiftKey,
+          });
         }}
         onDoubleClick={onOpenModal}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onOpenModal();
+          }
+        }}
       >
         <div className="absolute top-0 h-14 left-0 right-0 bg-gradient-to-bottom" />
-      </div>
+      </button>
 
       <ImageCheckbox
+        label={t("selectPhoto", { key: photo.key })}
         checked={selected}
         onCheckedChange={(c, e) => {
-          toggleSelected(!!c, (e.nativeEvent as PointerEvent).shiftKey);
+          updateSelection({
+            type: "toggle",
+            key: photo.key,
+            checked: !!c,
+            shift: (e.nativeEvent as PointerEvent).shiftKey,
+          });
         }}
         className={cn("absolute top-2 left-2", {
           "opacity-100! pointer-events-auto!": selected,
         })}
       />
-      <div className="absolute right-4 top-4 flex items-center gap-2">
-        <PhotoActionCopyLink photo={photo} />
+      <div
+        className={cn("absolute right-4 top-4 flex items-center gap-2", {
+          "opacity-50": reserved,
+        })}
+      >
+        <PhotoActionCopyLink photo={photo} disabled={reserved} />
         <PhotoOptions
           photo={photo}
           opened={infoDropdownOpened}
           setOpened={setInfoDropdownOpened}
           onOpen={onOpenModal}
+          disabled={reserved}
         />
       </div>
     </motion.div>
@@ -80,12 +110,24 @@ export function PhotoItemOverlay({
 function PhotoActionCopyLink({
   className,
   photo,
+  disabled,
 }: {
   className?: string;
-  photo: Photo;
+  photo: StoredImage;
+  disabled: boolean;
 }) {
-  const operations = usePhotoOperations(photo);
+  const runCatalog = useSetAtom(imageCatalog.run);
+  const { copy } = useCopy();
   const t = useTranslations("gallery.item.options");
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -95,9 +137,22 @@ function PhotoActionCopyLink({
             variant="secondary"
             size="icon-sm"
             className={className}
+            disabled={disabled}
             onClick={(e) => {
               e.stopPropagation();
-              operations.copyUrl();
+              void runCatalog({
+                type: "access",
+                key: photo.key,
+                purpose: "url",
+              }).then((outcome) => {
+                if (
+                  mounted.current &&
+                  outcome.status === "accessed" &&
+                  outcome.purpose === "url"
+                ) {
+                  copy(outcome.value, "URL");
+                }
+              });
             }}
           >
             <McCopy />
@@ -112,11 +167,13 @@ function PhotoActionCopyLink({
 function ImageCheckbox({
   className,
   checked,
+  label,
   onCheckedChange,
 }: {
   defaultChecked?: boolean;
   className?: string;
   checked?: boolean;
+  label: string;
   onCheckedChange: (
     checked: boolean,
     event: React.MouseEvent<HTMLButtonElement>,
@@ -126,6 +183,7 @@ function ImageCheckbox({
     <button
       type="button"
       role="checkbox"
+      aria-label={label}
       aria-checked={checked}
       data-state={checked ? "checked" : "unchecked"}
       className={cn(

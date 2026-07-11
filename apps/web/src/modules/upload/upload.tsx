@@ -1,29 +1,40 @@
 "use client";
 
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { selectAtom } from "jotai/utils";
 import { ClientOnly } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { validS3SettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { InvalidS3Dialog } from "@/modules/settings/InvalidS3Dialog";
 
-import {
-  fileAtomAtoms,
-  uploadAllFilesAtom,
-  clearUploadedFilesAtom,
-} from "./atoms/upload-atoms";
+import { uploadQueue } from "./upload-queue";
 import { useHandlePaste } from "./hooks/use-handle-paste";
 import { DropZone } from "./components/DropZone";
 import { FilePreview } from "./components/FilePreview";
 
+const storageConfiguredAtom = selectAtom(
+  settings.storage,
+  ({ validation }) => validation.status === "valid",
+);
+const queueViewAtom = selectAtom(
+  uploadQueue,
+  ({ uploads, hasUploaded }) => ({ uploads, hasUploaded }),
+  (left, right) =>
+    left.uploads === right.uploads && left.hasUploaded === right.hasUploaded,
+);
+
 export function Upload() {
-  const [fileAtoms, dispatch] = useAtom(fileAtomAtoms);
-  const triggerUpload = useSetAtom(uploadAllFilesAtom);
-  const [hasUploaded, removeUploaded] = useAtom(clearUploadedFilesAtom);
-  const s3Settings = useAtomValue(validS3SettingsAtom);
+  return <UploadContent />;
+}
+
+export function UploadContent() {
+  const { uploads: uploadActors, hasUploaded } = useAtomValue(queueViewAtom);
+  const send = useSetAtom(uploadQueue);
+  const storageConfigured = useAtomValue(storageConfiguredAtom);
   const t = useTranslations("upload");
 
   useHandlePaste();
@@ -36,33 +47,35 @@ export function Upload() {
         </CardContent>
       </Card>
 
-      <ClientOnly>{!s3Settings && <InvalidS3Dialog />}</ClientOnly>
+      <ClientOnly>{!storageConfigured && <InvalidS3Dialog />}</ClientOnly>
 
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">
-          {t("fileList.title")} ({fileAtoms.length})
+          {t("fileList.title")} ({uploadActors.length})
         </h2>
         <div className="flex items-center space-x-2">
           {hasUploaded && (
             <Button
               variant="outline"
-              onClick={removeUploaded}
+              onClick={() => send({ type: "uploaded.cleared" })}
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               {t("fileList.clearUploaded")}
             </Button>
           )}
-          {fileAtoms.length > 0 && (
+          {uploadActors.length > 0 && (
             <Button
               onClick={() => {
-                if (!s3Settings) {
+                if (!storageConfigured) {
                   toast.error(t("alerts.s3NotConfigured"));
                   return;
                 }
-                triggerUpload(s3Settings);
+                send({
+                  type: "all.uploadRequested",
+                });
               }}
               size="lg"
-              disabled={!s3Settings}
+              disabled={!storageConfigured}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {t("fileList.uploadAll")}
@@ -72,11 +85,16 @@ export function Upload() {
       </div>
 
       <div className="grid gap-2">
-        {fileAtoms.map((fileAtom) => (
+        {uploadActors.map((uploadActor) => (
           <FilePreview
-            fileAtom={fileAtom}
-            key={`${fileAtom}`}
-            remove={() => dispatch({ type: "remove", atom: fileAtom })}
+            uploadActor={uploadActor}
+            key={uploadActor.id}
+            remove={() =>
+              send({
+                type: "upload.removed",
+                actorRef: uploadActor,
+              })
+            }
           />
         ))}
       </div>

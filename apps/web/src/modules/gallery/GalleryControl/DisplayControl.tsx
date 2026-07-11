@@ -1,17 +1,23 @@
 "use client";
 
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   galleryFilterOptionsToSearchParams,
   galleryFilterOptionsFromSearchParams,
 } from "../hooks/use-display-control";
+import { imageCatalog } from "@/modules/image-catalog";
 import {
-  DEFAULT_PAGE_SIZE,
-  currentPageAtom,
-  displayOptionsAtom,
-  pageSizeAtom,
-} from "@/stores/atoms/gallery";
+  galleryPageSizeDefault,
+  galleryPageSizeSchema,
+} from "@/stores/schemas/gallery/filter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,58 +36,229 @@ import { FilterPopoverContent } from "./FilterPopoverContent";
 import { SortPopoverContent } from "./SortPopoverContent";
 import { NotificationBadge } from "@/components/ui/notification-badge";
 import { useTranslations } from "use-intl";
-import { getRouteApi } from "@tanstack/react-router";
-import equal from "fast-deep-equal";
+import { getRouteApi, useRouterState } from "@tanstack/react-router";
+import deepEqual from "fast-deep-equal";
 
 const route = getRouteApi("/$locale/_root-layout/gallery");
 
-function useSyncDisplayAtomToSearchParams() {
-  const navigate = route.useNavigate();
-  const setCurrentPage = useSetAtom(currentPageAtom);
-
-  const displayOptions = useAtomValue(displayOptionsAtom);
-  const pageSize = useAtomValue(pageSizeAtom);
-  const lastDisplayOptionsRef = useRef<typeof displayOptions>(displayOptions);
-  useEffect(() => {
-    const lastDisplayOptions = lastDisplayOptionsRef.current;
-    if (!equal(lastDisplayOptions, displayOptions)) {
-      const search = galleryFilterOptionsToSearchParams(
-        displayOptions,
-        pageSize,
-      );
-      startTransition(() => {
-        setCurrentPage(1);
-        navigate({ to: ".", search: search });
-      });
-    }
-    lastDisplayOptionsRef.current = displayOptions;
-  }, [displayOptions, navigate, pageSize, setCurrentPage]);
-}
-
-function useSyncSearchParamsToDisplayAtom() {
-  const searchParams = route.useSearch();
-  const setDisplayOptions = useSetAtom(displayOptionsAtom);
-  const setCurrentPage = useSetAtom(currentPageAtom);
-  const setPageSize = useSetAtom(pageSizeAtom);
-  const lastSearchParamsRef = useRef<typeof searchParams | null>(null);
-  useEffect(() => {
-    const lastSearchParams = lastSearchParamsRef.current;
-    if (!equal(lastSearchParams, searchParams)) {
-      setCurrentPage(1);
-      setDisplayOptions(galleryFilterOptionsFromSearchParams(searchParams));
-      setPageSize(searchParams.pageSize ?? DEFAULT_PAGE_SIZE);
-    }
-    lastSearchParamsRef.current = searchParams;
-  }, [searchParams, setDisplayOptions, setCurrentPage, setPageSize]);
-}
-
 function useSyncDisplayAtomAndSearch() {
-  useSyncSearchParamsToDisplayAtom();
-  useSyncDisplayAtomToSearchParams();
+  const searchParams = route.useSearch();
+  const routeNavigationId = useRouterState({
+    select: ({ location }) =>
+      (
+        location.state as typeof location.state & {
+          galleryDisplayNavigationId?: number;
+        }
+      ).galleryDisplayNavigationId,
+  });
+  const routeLocationKey = useRouterState({
+    select: ({ location }) => location.state.__TSR_key,
+  });
+  const navigate = route.useNavigate();
+  const setDisplayOptions = useSetAtom(imageCatalog.view.filter);
+  const setCurrentPage = useSetAtom(imageCatalog.view.page);
+  const setPageSize = useSetAtom(imageCatalog.view.pageSize);
+
+  const displayOptions = useAtomValue(imageCatalog.view.filter);
+  const pageSize = useAtomValue(imageCatalog.view.pageSize);
+  const normalizedRoute = useMemo(() => {
+    const filter = galleryFilterOptionsFromSearchParams(searchParams);
+    const size = galleryPageSizeSchema
+      .catch(galleryPageSizeDefault)
+      .parse(searchParams.pageSize);
+    return {
+      filter,
+      pageSize: size,
+      search: galleryFilterOptionsToSearchParams(filter, size),
+    };
+  }, [searchParams]);
+  const catalogSearch = useMemo(
+    () => galleryFilterOptionsToSearchParams(displayOptions, pageSize),
+    [displayOptions, pageSize],
+  );
+  const routeKey = JSON.stringify(normalizedRoute.search);
+  const routeIsCanonical = deepEqual(searchParams, normalizedRoute.search);
+  const catalogKey = JSON.stringify(catalogSearch);
+  const coordination = useRef({
+    observedRouteKey: undefined as string | undefined,
+    observedLocationKey: undefined as string | undefined,
+    suppressedLocationKey: undefined as string | undefined,
+    hydratingRouteKey: undefined as string | undefined,
+    nextNavigationId: 0,
+    pending: undefined as { id: number; key: string } | undefined,
+    desired: undefined as
+      | { search: typeof catalogSearch; key: string }
+      | undefined,
+    invalidated: new Map<
+      number,
+      {
+        id: number;
+        key: string;
+        staleLocationKey?: string;
+        eligibleAfterLocationKey?: string;
+      }
+    >(),
+  });
+
+  const navigateOutbound = useCallback(
+    (search: typeof catalogSearch, key: string, replace = false) => {
+      const sync = coordination.current;
+      const id = ++sync.nextNavigationId;
+      sync.pending = { id, key };
+      sync.desired = undefined;
+      startTransition(() => {
+        void navigate({
+          to: ".",
+          search,
+          ...(replace ? { replace: true } : {}),
+          state: (previous) => ({
+            ...previous,
+            galleryDisplayNavigationId: id,
+          }),
+        });
+      });
+    },
+    [navigate],
+  );
+
+  // The committed route is authoritative. Hydration is marked in the shared
+  // record so the outbound effect does not echo these atom writes back.
+  useEffect(() => {
+    const sync = coordination.current;
+    if (
+      sync.observedRouteKey === routeKey &&
+      sync.observedLocationKey === routeLocationKey
+    ) {
+      return;
+    }
+
+    sync.observedRouteKey = routeKey;
+    sync.observedLocationKey = routeLocationKey;
+    sync.suppressedLocationKey = undefined;
+
+    if (
+      sync.pending !== undefined &&
+      sync.pending.id === routeNavigationId &&
+      sync.pending.key === routeKey
+    ) {
+      sync.pending = undefined;
+      sync.hydratingRouteKey = undefined;
+      const desired = sync.desired;
+      sync.desired = undefined;
+      if (desired !== undefined && desired.key !== routeKey) {
+        navigateOutbound(desired.search, desired.key);
+      }
+      return;
+    }
+
+    const invalidated =
+      routeNavigationId === undefined
+        ? undefined
+        : sync.invalidated.get(routeNavigationId);
+    if (
+      routeNavigationId !== undefined &&
+      invalidated?.id === routeNavigationId &&
+      invalidated.key === routeKey
+    ) {
+      if (
+        invalidated.eligibleAfterLocationKey !== undefined &&
+        invalidated.staleLocationKey === routeLocationKey
+      ) {
+        sync.invalidated.delete(routeNavigationId);
+      } else {
+        invalidated.staleLocationKey ??= routeLocationKey;
+        sync.suppressedLocationKey = routeLocationKey;
+        return;
+      }
+    }
+
+    if (sync.pending !== undefined) {
+      sync.invalidated.set(sync.pending.id, { ...sync.pending });
+      while (sync.invalidated.size > 16) {
+        sync.invalidated.delete(sync.invalidated.keys().next().value!);
+      }
+      sync.pending = undefined;
+      sync.desired = undefined;
+    }
+
+    for (const stale of sync.invalidated.values()) {
+      if (stale.staleLocationKey !== undefined) {
+        stale.eligibleAfterLocationKey = routeLocationKey;
+      }
+    }
+
+    sync.hydratingRouteKey = routeKey;
+    if (catalogKey !== routeKey) {
+      setCurrentPage(1);
+      setDisplayOptions(normalizedRoute.filter);
+      setPageSize(normalizedRoute.pageSize);
+      return;
+    }
+
+    sync.hydratingRouteKey = undefined;
+    if (!routeIsCanonical) {
+      navigateOutbound(normalizedRoute.search, routeKey, true);
+    }
+  }, [
+    catalogKey,
+    normalizedRoute.filter,
+    normalizedRoute.pageSize,
+    normalizedRoute.search,
+    navigateOutbound,
+    routeIsCanonical,
+    routeKey,
+    routeLocationKey,
+    routeNavigationId,
+    setCurrentPage,
+    setDisplayOptions,
+    setPageSize,
+  ]);
+
+  // Atom writes remain the caller interface. While one navigation is pending,
+  // further writes coalesce into the latest desired search.
+  useEffect(() => {
+    const sync = coordination.current;
+    if (sync.suppressedLocationKey === routeLocationKey) return;
+
+    if (sync.hydratingRouteKey === routeKey) {
+      if (catalogKey !== routeKey) return;
+      sync.hydratingRouteKey = undefined;
+      if (!routeIsCanonical && sync.pending === undefined) {
+        navigateOutbound(normalizedRoute.search, routeKey, true);
+      }
+      return;
+    }
+
+    if (sync.pending !== undefined) {
+      if (sync.pending.key !== catalogKey) {
+        sync.desired = { search: catalogSearch, key: catalogKey };
+      } else {
+        sync.desired = undefined;
+      }
+      return;
+    }
+
+    if (catalogKey === routeKey) {
+      sync.desired = undefined;
+      return;
+    }
+
+    setCurrentPage(1);
+    navigateOutbound(catalogSearch, catalogKey);
+  }, [
+    catalogKey,
+    catalogSearch,
+    navigateOutbound,
+    normalizedRoute.search,
+    routeIsCanonical,
+    routeKey,
+    routeLocationKey,
+    setCurrentPage,
+  ]);
 }
 
 export function DisplayControl() {
-  const [search, handleUpdate] = useAtom(displayOptionsAtom);
+  const [search, handleUpdate] = useAtom(imageCatalog.view.filter);
   useSyncDisplayAtomAndSearch();
   const tFilter = useTranslations("gallery.filter");
   const tSort = useTranslations("gallery.sort");

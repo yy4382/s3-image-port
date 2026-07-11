@@ -1,11 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "use-intl";
-import { s3SettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { optionsSchema } from "@/stores/schemas/settings";
 import { S3Validation } from "./s3-validation";
 import { ExternalLink } from "lucide-react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { selectAtom } from "jotai/utils";
 import {
   Field,
   FieldContent,
@@ -18,13 +19,14 @@ import { ClientOnly, Link } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppForm } from "@/components/misc/field/field-context";
 import { startTransition } from "react";
-import { setGalleryDirtyAtom } from "@/stores/atoms/gallery";
+import { profileGenerationAtom } from "../profile-generation";
 
-function S3SettingsTsForm() {
+const rawStorageAtom = selectAtom(settings.storage, ({ raw }) => raw);
+
+function S3SettingsForm() {
   const t = useTranslations("settings.s3Settings");
-  const defaultValues = useAtomValue(s3SettingsAtom);
-  const setValues = useSetAtom(s3SettingsAtom);
-  const setGalleryDirty = useSetAtom(setGalleryDirtyAtom);
+  const defaultValues = useAtomValue(rawStorageAtom);
+  const setStorage = useSetAtom(settings.storage);
   const form = useAppForm({
     defaultValues,
     validators: {
@@ -33,8 +35,7 @@ function S3SettingsTsForm() {
     listeners: {
       onChange: ({ formApi }) => {
         startTransition(() => {
-          setValues(formApi.state.values);
-          setGalleryDirty(); // All changes to s3 settings should trigger a gallery refresh
+          setStorage({ type: "update", value: formApi.state.values });
         });
       },
     },
@@ -165,6 +166,11 @@ function S3SettingsTsForm() {
   );
 }
 
+function ProfileBoundS3SettingsForm() {
+  const profileGeneration = useAtomValue(profileGenerationAtom);
+  return <S3SettingsForm key={profileGeneration} />;
+}
+
 function S3Settings() {
   const t = useTranslations("settings.s3Settings");
   const locale = useLocale();
@@ -187,7 +193,7 @@ function S3Settings() {
           </Link>
         </div>
         <ClientOnly fallback={<Skeleton className="w-full h-[580px]" />}>
-          <S3SettingsTsForm />
+          <ProfileBoundS3SettingsForm />
         </ClientOnly>
         <S3Validation />
       </div>

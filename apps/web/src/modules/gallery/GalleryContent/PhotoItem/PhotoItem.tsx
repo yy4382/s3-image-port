@@ -1,13 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { Photo } from "@/stores/schemas/photo";
-import ImageS3Client from "@/lib/s3/image-s3-client";
-import { s3Key2Url } from "@/lib/s3/s3-key";
-import { useAtomValue } from "jotai";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { validS3SettingsAtom } from "@/stores/atoms/settings";
-import { selectedPhotosAtom } from "@/stores/atoms/gallery";
+import type { StoredImage } from "@/modules/image-storage";
+import { imageCatalog } from "@/modules/image-catalog";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useHover } from "@uidotdev/usehooks";
 import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";
@@ -16,14 +13,13 @@ import { useLocale, useTranslations } from "use-intl";
 import { CircleDotDashed } from "lucide-react";
 import { PhotoItemOverlay } from "./photo-item-overlay";
 import { PhotoImg } from "./photo-img";
-import { useLivePhotoVideo } from "../../hooks/use-photo-list";
 
 export function PhotoItem({
   photo,
   size,
   position,
 }: {
-  photo: Photo;
+  photo: StoredImage;
   size: { width: number; height: number };
   position: { x: number; y: number };
 }) {
@@ -36,24 +32,29 @@ function PhotoDisplay({
   size,
   position,
 }: {
-  photo: Photo;
+  photo: StoredImage;
   size: { width: number; height: number };
   position: { x: number; y: number };
 }) {
-  const s3Key = photo.Key;
-  const s3Settings = useAtomValue(validS3SettingsAtom);
+  const s3Key = photo.key;
+  const itemAtom = useMemo(() => imageCatalog.item(s3Key), [s3Key]);
+  const item = useAtomValue(itemAtom);
   const [ref, hovering] = useHover();
 
-  const [loadingState, setLoadingState] = useState<
-    "loading" | "loaded" | "error"
-  >("loading");
+  const source = item.source;
+  const [load, setLoad] = useState({
+    source,
+    status: "loading" as "loading" | "loaded" | "error",
+  });
+  const loadingState = load.source === source ? load.status : "loading";
+  const setLoadingState = useCallback(
+    (status: "loading" | "loaded" | "error") => {
+      setLoad({ source, status });
+    },
+    [source],
+  );
 
-  const allSelected = useAtomValue(selectedPhotosAtom);
-  const selected = useMemo(() => {
-    return allSelected.has(photo.Key);
-  }, [allSelected, photo.Key]);
-
-  const isLivePhoto = useLivePhotoVideo(s3Key) !== undefined;
+  const isLivePhoto = item.motionSource !== undefined;
 
   usePrefetchPhotoPage(photo, hovering);
 
@@ -71,15 +72,17 @@ function PhotoDisplay({
       transition={{ ease: "easeInOut", duration: 0.2 }}
     >
       {loadingState === "loading" && <Skeleton className="w-full h-full" />}
-      {loadingState === "error" && <PhotoDisplayError s3Key={s3Key} />}
-      {s3Settings && (
+      {loadingState === "error" && (
+        <PhotoDisplayError s3Key={s3Key} access={item.access} />
+      )}
+      {source && (
         <PhotoImg
           className={cn("transition-[scale] duration-75", {
             invisible: loadingState !== "loaded",
-            "scale-90 rounded-lg": selected,
+            "scale-90 rounded-lg": item.selected,
           })}
           s3Key={s3Key}
-          url={s3Key2Url(s3Key, s3Settings)}
+          url={source}
           setLoadingState={setLoadingState}
           width={size.width}
           height={size.height}
@@ -87,11 +90,12 @@ function PhotoDisplay({
         />
       )}
       {loadingState === "loaded" && isLivePhoto && <LivePhotoBadge />}
-      {loadingState === "loaded" && (
+      {loadingState === "loaded" && source && item.access && (
         <PhotoItemOverlay
           photo={photo}
-          selected={selected}
+          selected={item.selected}
           hovering={hovering}
+          reserved={item.reserved}
         />
       )}
     </motion.div>
@@ -113,7 +117,7 @@ function LivePhotoBadge() {
  * @param photo - The photo to prefetch.
  * @param hovering - Whether the photo is hovered.
  */
-function usePrefetchPhotoPage(photo: Photo, hovering: boolean) {
+function usePrefetchPhotoPage(photo: StoredImage, hovering: boolean) {
   const router = useRouter();
   const locale = useLocale();
   const galleryState = JSON.stringify(route.useSearch());
@@ -122,27 +126,51 @@ function usePrefetchPhotoPage(photo: Photo, hovering: boolean) {
     router.preloadRoute({
       to: "/$locale/photo",
       params: { locale },
-      search: { imagePath: photo.Key, galleryState },
+      search: { imagePath: photo.key, galleryState },
     });
-  }, [router, photo.Key, galleryState, locale]);
+  }, [router, photo.key, galleryState, locale]);
 
   useDelayedHover(hovering, 200, delayedHoverCb);
 }
 
-function PhotoDisplayError({ s3Key }: { s3Key: string }) {
+function PhotoDisplayError({
+  s3Key,
+  access,
+}: {
+  s3Key: string;
+  access: { source: string } | undefined;
+}) {
   const [mime, setMime] = useState<string | undefined>(undefined);
-  const s3Settings = useAtomValue(validS3SettingsAtom);
-
-  const handleRefresh = useCallback(() => {
-    if (!s3Settings) return;
-    const resp = new ImageS3Client(s3Settings).head(s3Key);
-    resp.then((res) => {
-      setMime(res.ContentType ?? undefined);
-    });
-  }, [s3Key, s3Settings]);
+  const runCatalog = useSetAtom(imageCatalog.run);
+  const mounted = useRef(false);
 
   useEffect(() => {
-    handleRefresh();
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
+    if (!access) return undefined;
+    const outcome = await runCatalog({
+      type: "access",
+      key: s3Key,
+      purpose: "probe",
+    });
+    return outcome.status === "accessed" && outcome.purpose === "probe"
+      ? outcome.value.contentType
+      : undefined;
+  }, [access, runCatalog, s3Key]);
+
+  useEffect(() => {
+    let current = true;
+    void handleRefresh().then((contentType) => {
+      if (current) setMime(contentType);
+    });
+    return () => {
+      current = false;
+    };
   }, [handleRefresh]);
 
   return (
@@ -152,7 +180,14 @@ function PhotoDisplayError({ s3Key }: { s3Key: string }) {
         <p className="text-xs">Key: {s3Key}</p>
         <p className="text-xs">Mime: {mime ?? "loading..."}</p>
         <div className="flex gap-2">
-          <Button onClick={handleRefresh} size="sm">
+          <Button
+            onClick={async () => {
+              const contentType = await handleRefresh();
+              if (mounted.current) setMime(contentType);
+            }}
+            size="sm"
+            disabled={!access}
+          >
             Refresh
           </Button>
         </div>

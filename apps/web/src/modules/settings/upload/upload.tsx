@@ -2,7 +2,7 @@
 
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
 import { useAtom } from "jotai";
-import { uploadSettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 import { focusAtom } from "jotai-optics";
 import { useTranslations } from "use-intl";
 import { ExternalLink } from "lucide-react";
@@ -37,7 +37,7 @@ function UploadSettings() {
   );
 }
 
-const CompressOptionAtom = focusAtom(uploadSettingsAtom, (optic) =>
+const CompressOptionAtom = focusAtom(settings.upload, (optic) =>
   optic.prop("compressionOption"),
 );
 

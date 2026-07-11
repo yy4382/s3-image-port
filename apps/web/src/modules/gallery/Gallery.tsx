@@ -1,41 +1,31 @@
 "use client";
 
-import { useFetchPhotoList } from "./hooks/use-photo-list";
 import { PhotoGrid } from "./GalleryContent/PhotoGrid";
 import { GalleryControl } from "./GalleryControl/GalleryControl";
 import { ClientOnly } from "@tanstack/react-router";
 import { useEffect } from "react";
-import {
-  gallerySettingsAtom,
-  validS3SettingsAtom,
-} from "@/stores/atoms/settings";
-import { atom, useAtomValue } from "jotai";
-import { galleryDirtyStatusAtom } from "@/stores/atoms/gallery";
+import { useAtomValue, useSetAtom } from "jotai";
+import { selectAtom } from "jotai/utils";
+import { imageCatalog } from "@/modules/image-catalog";
 
-const shouldRunAutoRefreshAtom = atom((get) => {
-  if (get(galleryDirtyStatusAtom)) {
-    return true;
-  }
-  const gallerySettings = get(gallerySettingsAtom);
-  if (!gallerySettings.autoRefresh) {
-    return false;
-  }
-  const s3Settings = get(validS3SettingsAtom);
-  if (!s3Settings) {
-    return false;
-  }
-  return true;
-});
+const shouldRunAutoRefreshAtom = selectAtom(
+  imageCatalog.state,
+  ({ backgroundRefreshEligible }) => backgroundRefreshEligible,
+);
 
 export function Gallery() {
-  const { fetchPhotoList } = useFetchPhotoList();
+  const runCatalog = useSetAtom(imageCatalog.run);
   const shouldRunAutoRefresh = useAtomValue(shouldRunAutoRefreshAtom);
 
   useEffect(() => {
     if (shouldRunAutoRefresh) {
-      fetchPhotoList({ toastLevel: "silent" });
+      void runCatalog({
+        type: "refresh",
+        intent: "background",
+        reason: "startup",
+      });
     }
-  }, [shouldRunAutoRefresh, fetchPhotoList]);
+  }, [runCatalog, shouldRunAutoRefresh]);
 
   return (
     <div className="flex flex-col gap-6 w-full">

@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { defaultKeyTemplate } from "@/lib/s3/s3-key";
 import { renderHook } from "vitest-browser-react";
 import { useAtom } from "jotai";
-import { uploadSettingsAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
 
 vi.mock(import("@tanstack/react-router"), async (importOriginal) => {
   const original = await importOriginal();
@@ -29,7 +29,7 @@ test("should render", async () => {
 });
 
 async function getUploadSettings() {
-  return await renderHook(() => useAtom(uploadSettingsAtom));
+  return await renderHook(() => useAtom(settings.upload));
 }
 
 describe("Default Key template input", () => {

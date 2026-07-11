@@ -40,6 +40,16 @@ export default defineConfig([
         {
           paths: [
             {
+              name: "@/lib/s3/image-s3-client",
+              message:
+                "Use the image storage module instead. Provider clients must stay behind modules/image-storage/adapters.",
+            },
+            {
+              name: "@/modules/image-storage/adapters/image-s3-client",
+              message:
+                "Use the image storage module instead. The S3 client is internal to the storage adapter.",
+            },
+            {
               name: "zod",
               importNames: ["default"],
               message:

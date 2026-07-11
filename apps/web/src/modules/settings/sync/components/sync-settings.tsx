@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { isValidSyncToken } from "@/lib/encryption/sync-token";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   Key,
   Trash2,
@@ -32,6 +32,7 @@ import { syncStateAtom, syncTokenAtom } from "../sync-store";
 import { TokenSetupDialog } from "./token-management/token-setup-dialog";
 import { TokenViewerDialog } from "./token-management/token-viewer-dialog";
 import { focusAtom } from "jotai-optics";
+import { selectAtom } from "jotai/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { UploadProfileError } from "../sync-api-client";
 import { forceUpload } from "../actions/force-upload";
@@ -39,7 +40,8 @@ import { forcePull } from "../actions/force-pull";
 import { deleteRemoteSync } from "../actions/delete";
 import { format } from "date-fns";
 import { ConfirmDeleteDialog } from "./confirm-dialogs/confirm-delete-dialog";
-import { settingsForSyncAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
+import { replaceSettingsProfileAtom } from "../../replace-profile";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -50,6 +52,8 @@ import {
   useSyncMutationStatus,
 } from "../use-sync";
 import { SyncProvider } from "./global/sync-provider";
+
+const syncSettingsAtom = selectAtom(settings.profiles, ({ sync }) => sync);
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 function useConfirmation<TData extends {}, TResult>() {
@@ -172,7 +176,8 @@ function SyncActions() {
     remoteMetadataQuery({ token: syncToken, enabled: syncConfig.enabled }),
   );
   const queryClient = useQueryClient();
-  const [local, setLocal] = useAtom(settingsForSyncAtom);
+  const local = useAtomValue(syncSettingsAtom);
+  const replaceProfile = useSetAtom(replaceSettingsProfileAtom);
   const [showTokenViewer, setShowTokenViewer] = useState(false);
 
   const confirmDelete = useConfirmation<"", boolean>();
@@ -202,7 +207,7 @@ function SyncActions() {
     try {
       const result = await forcePull(syncToken);
       if (result.local) {
-        setLocal(result.local);
+        replaceProfile({ type: "apply-sync", value: result.local });
       }
       if (result.config) {
         setSyncConfig(result.config);

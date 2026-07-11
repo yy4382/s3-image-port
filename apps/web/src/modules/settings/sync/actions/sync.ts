@@ -1,4 +1,5 @@
-import { settingsForSyncAtom } from "@/stores/atoms/settings";
+import { settings } from "@/stores/atoms/settings";
+import { replaceSettingsProfileAtom } from "../../replace-profile";
 import { settingsForSyncSchema } from "@/stores/schemas/settings";
 import { z } from "zod";
 import { atom, SetStateAction } from "jotai";
@@ -95,14 +96,17 @@ export const syncServiceAtom = atom(
     }
 
     const config = get(syncStateAtom);
-    const local = get(settingsForSyncAtom);
+    const local = get(settings.profiles).sync;
     const token = get(syncTokenAtom);
     const result = await sync({ local, config, token }, userConfirmations);
     if (result.config) {
       set(syncStateAtom, result.config);
     }
     if (result.local) {
-      set(settingsForSyncAtom, result.local);
+      set(replaceSettingsProfileAtom, {
+        type: "apply-sync",
+        value: result.local,
+      });
     }
     return result.actionType;
   },

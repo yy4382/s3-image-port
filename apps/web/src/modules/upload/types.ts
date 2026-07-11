@@ -1,14 +1,23 @@
-import type { S3KeyMetadata } from "@/lib/s3/s3-key";
-import type { CompressOption } from "@/lib/utils/imageCompress";
+import {
+  imageStorageFailureSchema,
+  storedImageSchema,
+} from "@/modules/image-storage";
+import { z } from "zod";
 
-export type PendingUpload = {
-  file: File;
-  processedFile: File | null;
-  key: S3KeyMetadata;
-  compressOption: CompressOption | null;
-  status: "pending" | "processing" | "processed" | "uploading" | "uploaded";
-  id: string;
-  supportProcess: boolean;
-  livePhotoStillUploadId?: string;
-  livePhotoMotionUploadId?: string;
-};
+export const pendingUploadResultSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("stored"), image: storedImageSchema }),
+  z.object({
+    status: z.literal("stored-unreconciled"),
+    image: storedImageSchema,
+  }),
+  z.object({
+    status: z.literal("failed"),
+    error: z.union([
+      imageStorageFailureSchema,
+      z.object({ reason: z.literal("target-mismatch") }),
+      z.object({ reason: z.literal("superseded") }),
+    ]),
+  }),
+]);
+
+export type PendingUploadResult = z.infer<typeof pendingUploadResultSchema>;

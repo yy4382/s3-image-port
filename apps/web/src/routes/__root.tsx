@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import { Provider as JotaiProvider } from "jotai";
+import { createStore, Provider as JotaiProvider } from "jotai";
 import { createHeadTags } from "../lib/seo";
 import globalsCss from "@/styles/globals.css?url";
 import { produce } from "immer";
@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { createUploadQueue } from "@/modules/upload/upload-queue";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -45,6 +46,10 @@ function RootComponent() {
         },
       }),
   );
+  const [rootState] = React.useState(() => {
+    const store = createStore();
+    return { store, uploadQueue: createUploadQueue(store) };
+  });
 
   return (
     <html suppressHydrationWarning {...(locale && { lang: locale })}>
@@ -54,7 +59,8 @@ function RootComponent() {
       <body>
         {/* base-ui requires an isolate root. https://base-ui.com/react/overview/quick-start#portals */}
         <div id="app-root" className="isolate">
-          <JotaiProvider>
+          <JotaiProvider store={rootState.store}>
+            <UploadQueueOwner mount={rootState.uploadQueue.mount} />
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
@@ -78,6 +84,11 @@ function RootComponent() {
       </body>
     </html>
   );
+}
+
+function UploadQueueOwner({ mount }: { mount: () => () => void }) {
+  React.useLayoutEffect(mount, [mount]);
+  return null;
 }
 
 function RootErrorComponent() {

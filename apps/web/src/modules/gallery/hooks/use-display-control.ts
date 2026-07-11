@@ -8,14 +8,14 @@ import {
   timeRangesGetter,
 } from "@/stores/schemas/gallery/filter";
 import {
-  DEFAULT_PAGE_SIZE,
-  PAGE_SIZE_OPTIONS,
+  galleryPageSizeDefault,
+  galleryPageSizeSchema,
   type GalleryPageSize,
-} from "@/stores/atoms/gallery";
+} from "@/stores/schemas/gallery/filter";
 
 const pageSizeSchema = z.coerce
   .number()
-  .pipe(z.literal(PAGE_SIZE_OPTIONS))
+  .pipe(galleryPageSizeSchema)
   .optional()
   .catch(undefined);
 
@@ -30,7 +30,7 @@ export const galleryFilterSearchParamsSchema = z.object({
 
 export function galleryFilterOptionsToSearchParams(
   options: GalleryFilterOptions,
-  pageSize: GalleryPageSize = DEFAULT_PAGE_SIZE,
+  pageSize: GalleryPageSize = galleryPageSizeDefault,
 ): z.infer<typeof galleryFilterSearchParamsSchema> {
   const params: z.infer<typeof galleryFilterSearchParamsSchema> = {};
   const { searchTerm, prefix, dateRangeType, sortBy, sortOrder } = options;
@@ -56,7 +56,7 @@ export function galleryFilterOptionsToSearchParams(
   if (sortOrder !== galleryFilterDefault.sortOrder) {
     params.sortOrder = sortOrder;
   }
-  if (pageSize !== DEFAULT_PAGE_SIZE) {
+  if (pageSize !== galleryPageSizeDefault) {
     params.pageSize = pageSize;
   }
   return params;

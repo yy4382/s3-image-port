@@ -1,20 +1,32 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { optionsAtom, profilesAtom, settingsForSyncAtom } from "./settings";
 import { renderHook } from "vitest-browser-react";
-import { Provider, useAtom } from "jotai";
-import * as v3Schema from "../schemas/settings/v3";
+import { Provider, useAtomValue, useSetAtom } from "jotai";
 import { produce } from "immer";
+
+import * as v3Schema from "../schemas/settings/v3";
 import { migrateFromV1 } from "../schemas/settings/migrations/v1-v3";
 import { getDefaultOptions } from "../schemas/settings";
+import { settings } from "./settings";
 
-beforeEach(() => {
-  localStorage.clear();
-});
+beforeEach(() => localStorage.clear());
 
-const TestProvider = Provider;
+function useSettingsTestSeam() {
+  const projection = useAtomValue(settings.profiles);
+  return {
+    ...projection,
+    replace: useSetAtom(settings.replaceProfile),
+    updateStorage: useSetAtom(settings.storage),
+  };
+}
 
-describe("settings-store", () => {
-  it("should load from local storage", async () => {
+function currentOptions(
+  profiles: ReturnType<typeof useSettingsTestSeam>["profiles"],
+) {
+  return profiles.list[profiles.current][1];
+}
+
+describe("persisted settings profiles", () => {
+  it("loads the existing versioned envelope without rewriting its shape", async () => {
     localStorage.setItem(
       "s3ip:profiles-list",
       JSON.stringify({
@@ -23,21 +35,10 @@ describe("settings-store", () => {
             [
               "Default",
               {
-                s3: {
-                  endpoint: "",
-                  bucket: "aaa",
-                  region: "",
-                  accKeyId: "",
-                  secretAccKey: "",
-                  forcePathStyle: false,
-                  pubUrl: "",
-                },
+                ...getDefaultOptions(),
                 upload: {
+                  ...getDefaultOptions().upload,
                   keyTemplate: "A_TEST/{{ulid-dayslice}}/{{ext}}",
-                  compressionOption: null,
-                },
-                gallery: {
-                  autoRefresh: true,
                 },
               },
             ],
@@ -47,56 +48,49 @@ describe("settings-store", () => {
         version: 3,
       }),
     );
-    const { result } = await renderHook(() => useAtom(optionsAtom), {
-      wrapper: TestProvider,
-    });
 
-    expect(result.current[0].upload.keyTemplate).toMatch(/A_TEST/);
+    const { result } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
+    });
+    expect(currentOptions(result.current.profiles).upload.keyTemplate).toMatch(
+      /A_TEST/,
+    );
   });
 
-  it("should work if empty", async () => {
-    const { result } = await renderHook(() => useAtom(optionsAtom), {
-      wrapper: TestProvider,
+  it.each([
+    ["empty", undefined],
+    ["corrupted", { random: "thing" }],
+    ["unknown version", { version: 999, data: "random" }],
+  ])("uses defaults for %s storage", async (_name, stored) => {
+    if (stored !== undefined) {
+      localStorage.setItem("s3ip:profiles-list", JSON.stringify(stored));
+    }
+    const { result } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-    expect(result.current[0]).toEqual(getDefaultOptions());
-  });
-  it("should work with corrupted data", async () => {
-    localStorage.setItem(
-      "s3ip:profiles-list",
-      JSON.stringify({ random: "thing" }),
+    expect(currentOptions(result.current.profiles)).toEqual(
+      getDefaultOptions(),
     );
-    const { result } = await renderHook(() => useAtom(optionsAtom), {
-      wrapper: TestProvider,
-    });
-    expect(result.current[0]).toEqual(getDefaultOptions());
-  });
-  it("should work with unknown version", async () => {
-    localStorage.setItem(
-      "s3ip:profiles-list",
-      JSON.stringify({ version: 999, data: "random" }),
-    );
-    const { result } = await renderHook(() => useAtom(optionsAtom), {
-      wrapper: TestProvider,
-    });
-    expect(result.current[0]).toEqual(getDefaultOptions());
   });
 });
 
 describe("v2 to v3 migration", () => {
-  it("should migrate", async () => {
-    localStorage.clear();
+  function seedLegacy(options: unknown, profiles?: unknown) {
     localStorage.setItem(
       "s3ip:options",
-      JSON.stringify({
-        version: 2,
-        data: produce(v3Schema.getDefaultOptions(), (draft) => {
-          draft.s3.endpoint = "https://options.test";
-        }),
-      }),
+      JSON.stringify({ version: 2, data: options }),
     );
-    localStorage.setItem(
-      "s3ip:profile:profiles",
-      JSON.stringify([
+    if (profiles !== undefined) {
+      localStorage.setItem("s3ip:profile:profiles", JSON.stringify(profiles));
+    }
+  }
+
+  it("preserves legacy profile ordering and current options", async () => {
+    seedLegacy(
+      produce(v3Schema.getDefaultOptions(), (draft) => {
+        draft.s3.endpoint = "https://options.test";
+      }),
+      [
         [
           "Default",
           produce(v3Schema.getDefaultOptions(), (draft) => {
@@ -104,107 +98,76 @@ describe("v2 to v3 migration", () => {
           }),
         ],
         ["Default1", "CURRENT"],
-      ]),
+      ],
     );
-    const { result } = await renderHook(() => useAtom(profilesAtom), {
-      wrapper: TestProvider,
+    const { result } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-    expect(result.current[0].list[0][1].s3.endpoint).toEqual(
+    expect(result.current.profiles.list[0][1].s3.endpoint).toBe(
       "https://profile0.test",
     );
-    expect(result.current[0].list[1][1].s3.endpoint).toEqual(
+    expect(result.current.profiles.list[1][1].s3.endpoint).toBe(
       "https://options.test",
     );
   });
 
-  it("should delete old items when unmount", async () => {
-    localStorage.setItem(
-      "s3ip:options",
-      JSON.stringify({
-        version: 2,
-        data: produce(v3Schema.getDefaultOptions(), (draft) => {
-          draft.s3.endpoint = "https://options.test";
-        }),
+  it("deletes legacy keys after the mounted atom is disposed", async () => {
+    seedLegacy(v3Schema.getDefaultOptions(), [
+      ["Default", v3Schema.getDefaultOptions()],
+    ]);
+    const { result, act, unmount } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
+    });
+    await act(() =>
+      result.current.updateStorage({
+        type: "update",
+        value: (raw) => ({ ...raw, endpoint: "https://profile.test" }),
       }),
     );
-    localStorage.setItem(
-      "s3ip:profile:profiles",
-      JSON.stringify([
-        [
-          "Default",
-          produce(v3Schema.getDefaultOptions(), (draft) => {
-            draft.s3.endpoint = "https://profile0.test";
-          }),
-        ],
-        ["Default1", "CURRENT"],
-      ]),
-    );
-    const { result, act, unmount } = await renderHook(
-      () => useAtom(profilesAtom),
-      {
-        wrapper: TestProvider,
-      },
-    );
-    await act(() => {
-      result.current[1]((prev) =>
-        produce(prev, (draft) => {
-          draft.list[0][1].s3.endpoint = "https://profile0.test2";
-        }),
-      );
-    });
     await unmount();
     expect(localStorage.getItem("s3ip:profiles-list")).not.toBeNull();
     expect(localStorage.getItem("s3ip:options")).toBeNull();
     expect(localStorage.getItem("s3ip:profile:profiles")).toBeNull();
   });
-  it("should migrate with corrupted options", async () => {
+
+  it("falls back for corrupted legacy options", async () => {
     localStorage.setItem("s3ip:options", JSON.stringify({ random: "thing" }));
-    const { result } = await renderHook(() => useAtom(profilesAtom), {
-      wrapper: TestProvider,
+    const { result } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-    expect(result.current[0].list[0][1]).toEqual(v3Schema.getDefaultOptions());
+    expect(result.current.profiles.list[0][1]).toEqual(
+      v3Schema.getDefaultOptions(),
+    );
   });
-  it("should migrate with only options", async () => {
-    localStorage.setItem(
-      "s3ip:options",
-      JSON.stringify({
-        version: 2,
-        data: produce(v3Schema.getDefaultOptions(), (draft) => {
-          draft.s3.endpoint = "https://options.test";
-        }),
+
+  it("migrates options when no profile list exists", async () => {
+    seedLegacy(
+      produce(v3Schema.getDefaultOptions(), (draft) => {
+        draft.s3.endpoint = "https://options.test";
       }),
     );
-    const { result } = await renderHook(() => useAtom(profilesAtom), {
-      wrapper: TestProvider,
+    const { result } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-    expect(result.current[0].list[0][1].s3.endpoint).toEqual(
+    expect(result.current.profiles.list).toHaveLength(1);
+    expect(result.current.profiles.list[0][1].s3.endpoint).toBe(
       "https://options.test",
     );
-    expect(result.current[0].list.length).toEqual(1);
   });
-  it("should migrate with corrupted profiles", async () => {
-    const newOptions = produce(v3Schema.getDefaultOptions(), (draft) => {
+
+  it("ignores a corrupted legacy profile list", async () => {
+    const options = produce(v3Schema.getDefaultOptions(), (draft) => {
       draft.s3.endpoint = "https://options.test";
     });
-    localStorage.setItem(
-      "s3ip:options",
-      JSON.stringify({
-        version: 2,
-        data: newOptions,
-      }),
-    );
-    localStorage.setItem(
-      "s3ip:profile:profiles",
-      JSON.stringify({ random: "thing" }),
-    );
-    const { result } = await renderHook(() => useAtom(profilesAtom), {
-      wrapper: TestProvider,
+    seedLegacy(options, { random: "thing" });
+    const { result } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-    expect(result.current[0].list[0][1]).toEqual(newOptions);
+    expect(result.current.profiles.list[0][1]).toEqual(options);
   });
 });
 
-describe("migrateFromV1", () => {
+describe("v1 profile parsing", () => {
   const validV1Config = {
     s3: {
       endpoint: "https://example.com",
@@ -226,295 +189,158 @@ describe("migrateFromV1", () => {
       fuzzySearchThreshold: 0.6,
     },
   };
-  it("should work with valid v1 string", () => {
-    const result = migrateFromV1(JSON.stringify(validV1Config));
-    expect(result).not.toBeInstanceOf(Error);
-    if (result instanceof Error) {
-      throw result;
+
+  it("migrates valid string and object inputs", () => {
+    for (const input of [
+      JSON.stringify(validV1Config),
+      structuredClone(validV1Config),
+    ]) {
+      const result = migrateFromV1(input);
+      expect(result).not.toBeInstanceOf(Error);
+      if (result instanceof Error) throw result;
+      expect(result.s3.endpoint).toBe(validV1Config.s3.endpoint);
+      expect(result.upload.keyTemplate).toBe(validV1Config.app.keyTemplate);
     }
-    expect(result.s3.endpoint).toEqual(validV1Config.s3.endpoint);
-    expect(result.upload.keyTemplate).toEqual(validV1Config.app.keyTemplate);
   });
-  it("should set default key template if not set", () => {
-    const newV1 = structuredClone(validV1Config);
-    newV1.app.keyTemplate = "";
-    const result = migrateFromV1(JSON.stringify(newV1));
+
+  it("uses the default key template for an empty legacy template", () => {
+    const input = structuredClone(validV1Config);
+    input.app.keyTemplate = "";
+    const result = migrateFromV1(input);
     expect(result).not.toBeInstanceOf(Error);
-    if (result instanceof Error) {
-      throw result;
-    }
-    expect(result.upload.keyTemplate).toEqual(
+    if (result instanceof Error) throw result;
+    expect(result.upload.keyTemplate).toBe(
       getDefaultOptions().upload.keyTemplate,
     );
   });
-  it("should handle invalid v1 string", () => {
-    const result = migrateFromV1("invalid");
-    expect(result).toBeInstanceOf(Error);
-  });
-  it("should handle random types", () => {
-    const result = migrateFromV1(1);
-    expect(result).toBeInstanceOf(Error);
-  });
-  it("should also work with object", () => {
-    const result = migrateFromV1(structuredClone(validV1Config));
-    expect(result).not.toBeInstanceOf(Error);
+
+  it.each(["invalid", 1])("rejects invalid input %j", (input) => {
+    expect(migrateFromV1(input)).toBeInstanceOf(Error);
   });
 });
 
-describe("settingsForSyncAtom", () => {
-  it("should remove current field when reading", async () => {
-    const { result } = await renderHook(() => useAtom(settingsForSyncAtom), {
-      wrapper: TestProvider,
+describe("sync-format projection and replacement", () => {
+  it("omits current and preserves active profile by name", async () => {
+    const { result, act } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-
-    const syncData = result.current[0];
-    expect(syncData.data).not.toHaveProperty("current");
-    expect(syncData.data).toHaveProperty("list");
-    expect(syncData).toHaveProperty("version");
-  });
-
-  it("should restore current field when setting with same profile name", async () => {
-    const { result, act } = await renderHook(
-      () => ({
-        profiles: useAtom(profilesAtom),
-        sync: useAtom(settingsForSyncAtom),
-      }),
-      { wrapper: TestProvider },
-    );
-
-    // Set up initial profiles with a specific current selection
-    await act(() => {
-      result.current.profiles[1]({
-        current: 2,
-        list: [
-          ["Profile A", getDefaultOptions()],
-          [
-            "Profile B",
-            produce(getDefaultOptions(), (draft) => {
-              draft.s3.bucket = "bucket-b";
-            }),
-          ],
-          [
-            "Profile C",
-            produce(getDefaultOptions(), (draft) => {
-              draft.s3.bucket = "bucket-c";
-            }),
-          ],
-        ],
-      });
-    });
-
-    // Update sync data with reordered profiles but same names
-    await act(() => {
-      result.current.sync[1]({
-        version: 3,
-        data: {
+    await act(() =>
+      result.current.replace({
+        type: "apply-imported",
+        value: {
+          current: 2,
           list: [
-            [
-              "Profile C",
-              produce(getDefaultOptions(), (draft) => {
-                draft.s3.bucket = "bucket-c-updated";
-              }),
-            ],
-            [
-              "Profile B",
-              produce(getDefaultOptions(), (draft) => {
-                draft.s3.bucket = "bucket-b-updated";
-              }),
-            ],
             ["Profile A", getDefaultOptions()],
+            ["Profile B", getDefaultOptions()],
+            ["Profile C", getDefaultOptions()],
           ],
         },
-      });
-    });
-
-    // Current profile was "Profile B" at index 1, should now be at index 1 (new position)
-    expect(result.current.profiles[0].current).toBe(0);
-    expect(result.current.profiles[0].list[0][0]).toBe("Profile C");
-    expect(result.current.profiles[0].list[0][1].s3.bucket).toBe(
-      "bucket-c-updated",
-    );
-  });
-
-  it("should use current index when profile name is not found", async () => {
-    const { result, act } = await renderHook(
-      () => ({
-        profiles: useAtom(profilesAtom),
-        sync: useAtom(settingsForSyncAtom),
       }),
-      { wrapper: TestProvider },
     );
+    expect(result.current.sync.data).not.toHaveProperty("current");
 
-    // Set up initial profiles
-    await act(() => {
-      result.current.profiles[1]({
-        current: 1,
-        list: [
-          ["Profile A", getDefaultOptions()],
-          ["Profile B", getDefaultOptions()],
-          ["Profile C", getDefaultOptions()],
-        ] as [
-          string,
-          typeof getDefaultOptions extends () => infer T ? T : never,
-        ][],
-      });
-    });
-
-    // Update with completely different profile names
-    await act(() => {
-      result.current.sync[1]({
-        version: 3,
-        data: {
-          list: [
-            ["Profile X", getDefaultOptions()],
-            [
-              "Profile Y",
-              produce(getDefaultOptions(), (draft) => {
-                draft.s3.bucket = "bucket-y";
-              }),
+    await act(() =>
+      result.current.replace({
+        type: "apply-sync",
+        value: {
+          version: 3,
+          data: {
+            list: [
+              ["Profile C", getDefaultOptions()],
+              ["Profile B", getDefaultOptions()],
+              ["Profile A", getDefaultOptions()],
             ],
-            ["Profile Z", getDefaultOptions()],
-          ] as [
-            string,
-            typeof getDefaultOptions extends () => infer T ? T : never,
-          ][],
+          },
         },
-      });
-    });
-
-    // Should fallback to using index 1 since "Profile B" doesn't exist
-    expect(result.current.profiles[0].current).toBe(1);
-    expect(result.current.profiles[0].list[1][0]).toBe("Profile Y");
+      }),
+    );
+    expect(result.current.profiles.current).toBe(0);
+    expect(result.current.profiles.list[0][0]).toBe("Profile C");
   });
 
-  it("should default to index 0 when current index is out of bounds", async () => {
-    const { result, act } = await renderHook(
-      () => ({
-        profiles: useAtom(profilesAtom),
-        sync: useAtom(settingsForSyncAtom),
-      }),
-      { wrapper: TestProvider },
-    );
-
-    // Set up with 3 profiles, current at index 2
-    await act(() => {
-      result.current.profiles[1]({
-        current: 2,
-        list: [
-          ["Profile A", getDefaultOptions()],
-          ["Profile B", getDefaultOptions()],
-          ["Profile C", getDefaultOptions()],
-        ],
-      });
+  it("uses the old index when the active name disappears", async () => {
+    const { result, act } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
-
-    // Update with only 2 profiles (different names)
-    await act(() => {
-      result.current.sync[1]({
-        version: 3,
-        data: {
+    await act(() =>
+      result.current.replace({
+        type: "apply-imported",
+        value: {
+          current: 1,
           list: [
-            ["Profile X", getDefaultOptions()],
-            ["Profile Y", getDefaultOptions()],
+            ["A", getDefaultOptions()],
+            ["B", getDefaultOptions()],
+            ["C", getDefaultOptions()],
           ],
         },
-      });
-    });
-
-    // Should default to 0 since index 2 is out of bounds
-    expect(result.current.profiles[0].current).toBe(0);
-    expect(result.current.profiles[0].list.length).toBe(2);
-  });
-
-  it("should handle function updates correctly", async () => {
-    const { result, act } = await renderHook(
-      () => ({
-        profiles: useAtom(profilesAtom),
-        sync: useAtom(settingsForSyncAtom),
       }),
-      { wrapper: TestProvider },
     );
-
-    await act(() => {
-      result.current.profiles[1]({
-        current: 0,
-        list: [
-          [
-            "Profile A",
-            produce(getDefaultOptions(), (draft) => {
-              draft.s3.bucket = "original-bucket";
-            }),
-          ],
-        ] as [
-          string,
-          typeof getDefaultOptions extends () => infer T ? T : never,
-        ][],
-      });
-    });
-
-    // Update using function
-    await act(() => {
-      result.current.sync[1]((prev) => ({
-        ...prev,
-        data: {
-          list: [
-            [
-              "Profile A",
-              produce(getDefaultOptions(), (draft) => {
-                draft.s3.bucket = "updated-bucket";
-              }),
+    await act(() =>
+      result.current.replace({
+        type: "apply-sync",
+        value: {
+          version: 3,
+          data: {
+            list: [
+              ["X", getDefaultOptions()],
+              ["Y", getDefaultOptions()],
             ],
-          ] as [
-            string,
-            typeof getDefaultOptions extends () => infer T ? T : never,
-          ][],
+          },
         },
-      }));
-    });
-
-    expect(result.current.profiles[0].current).toBe(0);
-    expect(result.current.profiles[0].list[0][1].s3.bucket).toBe(
-      "updated-bucket",
+      }),
     );
+    expect(result.current.profiles.current).toBe(1);
+    expect(result.current.profiles.list[1][0]).toBe("Y");
   });
 
-  it("should preserve current profile through round-trip transformation", async () => {
-    const { result, act } = await renderHook(
-      () => ({
-        profiles: useAtom(profilesAtom),
-        sync: useAtom(settingsForSyncAtom),
-      }),
-      { wrapper: TestProvider },
-    );
-
-    await act(() => {
-      result.current.profiles[1]({
-        current: 2,
-        list: [
-          ["Profile A", getDefaultOptions()],
-          ["Profile B", getDefaultOptions()],
-          [
-            "Profile C",
-            produce(getDefaultOptions(), (draft) => {
-              draft.s3.bucket = "bucket-c";
-            }),
+  it("falls back to zero when the old index is out of bounds", async () => {
+    const { result, act } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
+    });
+    await act(() =>
+      result.current.replace({
+        type: "apply-imported",
+        value: {
+          current: 2,
+          list: [
+            ["A", getDefaultOptions()],
+            ["B", getDefaultOptions()],
+            ["C", getDefaultOptions()],
           ],
-        ] as [
-          string,
-          typeof getDefaultOptions extends () => infer T ? T : never,
-        ][],
-      });
-    });
+        },
+      }),
+    );
+    await act(() =>
+      result.current.replace({
+        type: "apply-sync",
+        value: {
+          version: 3,
+          data: { list: [["Only", getDefaultOptions()]] },
+        },
+      }),
+    );
+    expect(result.current.profiles.current).toBe(0);
+  });
 
-    // Read, then write back the same data
-    const syncData = result.current.sync[0];
-    await act(() => {
-      result.current.sync[1](syncData);
+  it("supports function updates and equal round trips", async () => {
+    const { result, act } = await renderHook(useSettingsTestSeam, {
+      wrapper: Provider,
     });
+    const before = result.current.sync;
+    await act(() =>
+      result.current.replace({ type: "apply-sync", value: before }),
+    );
+    expect(result.current.sync).toBe(before);
 
-    // Should maintain current index and profile
-    expect(result.current.profiles[0].current).toBe(2);
-    expect(result.current.profiles[0].list[2][0]).toBe("Profile C");
-    expect(result.current.profiles[0].list[2][1].s3.bucket).toBe("bucket-c");
+    await act(() =>
+      result.current.replace({
+        type: "apply-sync",
+        value: (current) =>
+          produce(current, (draft) => {
+            draft.data.list[0][1].s3.bucket = "updated-bucket";
+          }),
+      }),
+    );
+    expect(result.current.profiles.list[0][1].s3.bucket).toBe("updated-bucket");
   });
 });

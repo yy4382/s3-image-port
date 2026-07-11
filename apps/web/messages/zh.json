@@ -322,6 +322,7 @@
       "livePhoto": "实况",
       "options": {
         "open": "打开",
+        "selectPhoto": "选择 {key}",
         "info": "信息",
         "download": "下载",
         "rename": "重命名",

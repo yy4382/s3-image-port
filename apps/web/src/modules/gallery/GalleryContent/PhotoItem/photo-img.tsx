@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { useSetAtom } from "jotai";
+import { profileGenerationAtom } from "@/modules/settings/profile-generation";
+import { useAtomValue, useSetAtom, useStore } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
 import {
   DEFAULT_IMAGE_SIZE,
@@ -26,11 +27,14 @@ export function PhotoImg({
   setLoadingState: (state: "loading" | "loaded" | "error") => void;
 } & React.ComponentProps<"img">) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const store = useStore();
+  const profileGeneration = useAtomValue(profileGenerationAtom);
   const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
   // Resolve HEIC to a JPEG object URL where the browser can't paint it natively.
   const { src, status: convertStatus } = useDisplayableImage(url);
 
   const handleLoad = useCallback(() => {
+    if (store.get(profileGenerationAtom) !== profileGeneration) return;
     if (!imgRef.current) return;
     const { naturalWidth, naturalHeight } = imgRef.current;
     if (naturalWidth === 0 || naturalHeight === 0) {
@@ -39,12 +43,13 @@ export function PhotoImg({
 
     setNaturalSizes([s3Key, [naturalWidth, naturalHeight]]);
     setLoadingState("loaded");
-  }, [s3Key, setNaturalSizes, setLoadingState]);
+  }, [profileGeneration, s3Key, setNaturalSizes, setLoadingState, store]);
 
   const handleError = useCallback(() => {
+    if (store.get(profileGenerationAtom) !== profileGeneration) return;
     setNaturalSizes([s3Key, DEFAULT_IMAGE_SIZE]);
     setLoadingState("error");
-  }, [s3Key, setNaturalSizes, setLoadingState]);
+  }, [profileGeneration, s3Key, setNaturalSizes, setLoadingState, store]);
 
   // Mirror the conversion lifecycle onto the loading state: "converting" keeps
   // the skeleton up, a failed conversion surfaces the error state. A successful
