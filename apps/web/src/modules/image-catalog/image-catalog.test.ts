@@ -70,8 +70,41 @@ describe("deep image catalog", () => {
       "selected",
       "reserved",
       "source",
+      "motionSource",
       "access",
     ]);
+  });
+
+  it("presents a Live Photo as one catalog item and deletes both components", async () => {
+    const still = { key: "i/IMG_0001.heic" };
+    const motion = { key: "i/IMG_0001.mov" };
+    const storage = createCountedImageStorage({
+      overrides: {
+        listStoredImages: async () => ({ ok: true, value: [still, motion] }),
+        deleteStoredImages: async (keys) => ({
+          ok: true,
+          value: { deletedKeys: [...keys] },
+        }),
+      },
+    });
+    const catalog = createImageCatalog({
+      createStorage: storage.createStorage,
+    });
+    const store = configuredStore();
+
+    await store.set(catalog.run, {
+      type: "refresh",
+      intent: "foreground",
+      reason: "manual",
+    });
+
+    expect(store.get(catalog.state).gallery.currentPageImages).toEqual([still]);
+    expect(store.get(catalog.item(still.key)).motionSource).toBe(
+      "https://cdn.example.com/i/IMG_0001.mov",
+    );
+
+    await store.set(catalog.run, { type: "delete", keys: [still.key] });
+    expect(storage.calls.deleteStoredImages).toEqual([[still.key, motion.key]]);
   });
 
   it("classifies the bare cache and records malformed cache without IO", () => {

@@ -6,6 +6,7 @@ import { selectAtom } from "jotai/utils";
 import { z } from "zod";
 
 import { s3Key2Url } from "@/lib/s3/s3-key";
+import { pairStoredLiveImages } from "@/lib/live-photo/live-photo";
 import {
   createS3ImageStorage,
   storedImageDownloadSchema,
@@ -266,7 +267,11 @@ export function createImageCatalog({
     initialize();
   };
 
-  const imagesAtom = selectAtom(catalogRootAtom, ({ images }) => images);
+  const rawImagesAtom = selectAtom(catalogRootAtom, ({ images }) => images);
+  const livePhotoPairingAtom = atom((get) =>
+    pairStoredLiveImages(get(rawImagesAtom), (image) => image.key),
+  );
+  const imagesAtom = atom((get) => get(livePhotoPairingAtom).displayImages);
 
   const availablePrefixesAtom = atom((get) => {
     const prefixes = new Set(
@@ -1143,7 +1148,17 @@ export function createImageCatalog({
     null,
     (get, set, input: z.input<typeof catalogCommandSchema>) => {
       set(ensureHydratedAtom);
-      const command = catalogCommandSchema.parse(input);
+      let command = catalogCommandSchema.parse(input);
+
+      if (command.type === "delete") {
+        const pairing = get(livePhotoPairingAtom);
+        const keys = new Set(command.keys);
+        for (const key of command.keys) {
+          const motion = pairing.videoByImageKey.get(key);
+          if (motion) keys.add(motion.key);
+        }
+        command = { ...command, keys: [...keys] };
+      }
 
       if (command.type === "refresh") return refresh(get, set, command);
       if (command.type === "delete" || command.type === "rename") {
@@ -1310,6 +1325,13 @@ export function createImageCatalog({
       const { base } = get(sourceBasisAtom);
       return base ? base + key : undefined;
     });
+    const motionSourceAtom = atom((get) => {
+      const context = get(operationContextAtom);
+      const motion = get(livePhotoPairingAtom).videoByImageKey.get(key);
+      if (!motion || context.status !== "valid") return undefined;
+      const { base } = get(sourceBasisAtom);
+      return base ? base + motion.key : undefined;
+    });
     const accessAtom = atom((get) => {
       const context = get(operationContextAtom);
       const source = get(sourceAtom);
@@ -1324,6 +1346,7 @@ export function createImageCatalog({
           mutation.keys.includes(key),
         ),
         source: get(sourceAtom),
+        motionSource: get(motionSourceAtom),
         access: get(accessAtom),
       };
     });
@@ -1334,6 +1357,7 @@ export function createImageCatalog({
         left.selected === right.selected &&
         left.reserved === right.reserved &&
         left.source === right.source &&
+        left.motionSource === right.motionSource &&
         left.access === right.access,
     );
   }

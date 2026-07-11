@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/tooltip";
 import McArrowLeft from "~icons/mingcute/arrow-left-line";
 import { CircleEllipsisIcon, CopyIcon, Trash2Icon } from "lucide-react";
+import { useDisplayableImage } from "@/lib/heic/use-displayable-image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LivePhotoPlayer } from "./live-photo-player";
 import { PhotoOptions } from "../gallery/GalleryContent/PhotoItem/photo-options";
 import { DeleteSecondConfirm } from "@/components/misc/delete-second-confirm";
 import { getRouteApi } from "@tanstack/react-router";
@@ -67,6 +70,11 @@ function PhotoModalContent({
     [path],
   );
   const photo = useAtomValue(photoAtom);
+  // LivePhotosKit needs a still the browser can decode, so convert a HEIC still
+  // to JPEG first. Only resolved for Live Photos; plain photos use PhotoImg,
+  // which does its own conversion.
+  const { src: livePhotoStillSrc, status: livePhotoStillStatus } =
+    useDisplayableImage(item.motionSource ? item.source : undefined);
   const navigate = route.useNavigate();
   const navigateBack = () => {
     navigate({
@@ -100,12 +108,26 @@ function PhotoModalContent({
         </div>
       ) : item.source ? (
         <div className="absolute inset-0">
-          <PhotoImg
-            url={item.source}
-            s3Key={path}
-            setLoadingState={() => {}}
-            className="size-full object-contain"
-          />
+          {item.motionSource && livePhotoStillStatus !== "error" ? (
+            livePhotoStillSrc ? (
+              <LivePhotoPlayer
+                key={livePhotoStillSrc}
+                photoSrc={livePhotoStillSrc}
+                videoSrc={item.motionSource}
+                alt={path}
+                className="size-full"
+              />
+            ) : (
+              <Skeleton className="size-full" />
+            )
+          ) : (
+            <PhotoImg
+              url={item.source}
+              s3Key={path}
+              setLoadingState={() => {}}
+              className="size-full object-contain"
+            />
+          )}
         </div>
       ) : null}
     </div>

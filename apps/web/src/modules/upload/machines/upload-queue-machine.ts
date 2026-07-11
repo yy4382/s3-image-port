@@ -9,6 +9,7 @@ import { monotonicFactory } from "ulid";
 import { v4 as uuid } from "uuid";
 
 import { defaultKeyTemplate, S3KeyMetadata } from "@/lib/s3/s3-key";
+import { planLivePhotoUpload, splitKeyExt } from "@/lib/live-photo/live-photo";
 import { isSupportedFileType } from "@/lib/utils/imageCompress";
 import type { CompressOption } from "@/lib/utils/imageCompress";
 
@@ -57,18 +58,41 @@ export const uploadQueueMachine = setup({
         const nextKeyId = monotonicFactory();
         const keyTemplate = event.keyTemplate ?? defaultKeyTemplate;
         const compressOption = event.compressOption ?? null;
-        const newUploads = event.files.map((file) => {
-          const id = uuid();
+        const roles = planLivePhotoUpload(event.files);
+        const ids = event.files.map(() => uuid());
+        const keys = new Array<S3KeyMetadata>(event.files.length);
+        event.files.forEach((file, index) => {
+          if (roles[index].type === "motion") return;
+          const key = S3KeyMetadata.create(file, keyTemplate, nextKeyId);
+          keys[index] =
+            roles[index].type === "still"
+              ? S3KeyMetadata.withExt(
+                  key,
+                  splitKeyExt(file.name).ext || key.data.ext,
+                )
+              : key;
+        });
+        event.files.forEach((file, index) => {
+          const role = roles[index];
+          if (role.type !== "motion") return;
+          keys[index] = S3KeyMetadata.withExt(
+            keys[role.stillIndex],
+            splitKeyExt(file.name).ext || "mov",
+          );
+        });
+        const newUploads = event.files.map((file, index) => {
+          const id = ids[index];
           return spawn("pendingUpload", {
             id,
             syncSnapshot: true,
             input: {
               ...context.effects,
               file,
-              key: S3KeyMetadata.create(file, keyTemplate, nextKeyId),
+              key: keys[index],
               compressOption,
               id,
               supportProcess: isSupportedFileType(file),
+              preserveKeyBaseOnProcess: roles[index].type !== "single",
             },
           });
         });

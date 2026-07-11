@@ -1,0 +1,112 @@
+---
+title: Live Photos
+description: Upload Apple Live Photos so they play back with motion in the gallery
+---
+
+S3 Image Port can display Apple **Live Photos** with their motion playback,
+just like the Photos app on your iPhone or Mac. This page explains what a Live
+Photo actually is, how to upload one so the panel recognizes it, and how the
+pairing works behind the scenes.
+
+## What is a Live Photo?
+
+A Live Photo is **not a single file**. When your iPhone captures one, it saves
+two separate files that belong together:
+
+1. A **still image** — the frame you see, usually `IMG_0001.HEIC` (or `.JPG`).
+2. A **motion video** — the short clip of movement and sound, `IMG_0001.MOV`.
+
+The only thing linking them is their shared **basename**: `IMG_0001`. The Photos
+app keeps that relationship internally, but once you export the files to your
+computer or directly to S3, they become two ordinary files. S3 Image Port pairs
+them back together based on that shared name.
+
+## How to upload a Live Photo
+
+<Callout type="warning">
+  Upload **both files in the same batch**. The still and the motion video must
+  be added to the upload list together for the panel to pair them.
+</Callout>
+
+### 1. Export both files from your device
+
+When exporting from the Photos app or iCloud, make sure you get the **unmodified
+originals** so you receive both the image and the `.MOV` file. AirDrop and
+"Export Unmodified Original" both preserve the pair.
+
+### 2. Keep the matching names
+
+The two files must share the same basename. The extension is ignored and the
+match is **case-insensitive**, so all of these pair correctly:
+
+- `IMG_0001.HEIC` + `IMG_0001.MOV`
+- `IMG_0001.JPG` + `img_0001.mov`
+- `vacation.png` + `vacation.mp4`
+
+If you rename one of them, rename the other to match.
+
+### 3. Drop both files into the uploader at once
+
+Select or drag **both files together** into the upload area. When they are in
+the same batch and their names match, the panel automatically links them — the
+motion video is stored alongside the still under the same key base, so they stay
+paired the next time the gallery loads.
+
+After uploading, the gallery shows a single item with a **LIVE** badge. Open it
+and press-and-hold (or click) to play the motion.
+
+## Supported file types
+
+A pair is only formed when the batch contains **one still image and one motion
+video** that share a basename.
+
+| Role         | Accepted extensions                                         |
+| ------------ | ----------------------------------------------------------- |
+| Still image  | `jpg`, `jpeg`, `png`, `webp`, `avif`, `gif`, `heic`, `heif` |
+| Motion video | `mov`, `mp4`, `m4v`                                         |
+
+<Callout>
+  HEIC/HEIF stills are converted to a browser-paintable format automatically
+  when your browser can't decode them natively, so the still and its Live Photo
+  playback both render even on browsers without HEIC support.
+</Callout>
+
+## How the system identifies a Live Photo
+
+There are two moments where pairing happens, and both rely on the shared
+basename.
+
+**On upload.** When a batch is added, each file is classified as an image or a
+video (by its MIME type, falling back to its extension). Files that share a
+basename and contain exactly one image and one video are treated as a pair. The
+motion video is then saved under the **same key as its still, with only the
+extension changed** (for example `…/abc.jpg` and `…/abc.mov`). This guarantees
+they share a key base in your bucket. If the still is compressed or converted
+during upload, the motion video's key follows the still's final name, so the
+pair is preserved.
+
+<Callout type="warning">
+  If a basename has more than one image or more than one video, only the first
+  of each is paired; any extras are uploaded as standalone files.
+</Callout>
+
+**On listing.** When the gallery loads your bucket, objects are grouped by their
+key base (the path without its extension). A base counts as a Live Photo only
+when it has **both** a still image and a motion video. When it does:
+
+- The bare `.mov` is **hidden** from the grid — it would otherwise show up as a
+  broken/unviewable item.
+- The still is rendered with the **LIVE** badge, and its paired video is loaded
+  on demand for press-and-hold playback.
+
+A video with no matching still is left untouched and listed as a normal file.
+
+## Troubleshooting
+
+- **No LIVE badge appears.** Confirm both files share the exact same basename
+  and that the video uses a supported extension (`mov`, `mp4`, `m4v`). If you
+  uploaded them in separate batches with different generated names, they won't
+  share a key base — re-upload them together.
+- **The motion doesn't play.** The browser must be able to decode the video.
+  `.mov` from an iPhone (HEVC) plays in Safari and most modern browsers; if it
+  fails, the panel falls back to showing the still image only.

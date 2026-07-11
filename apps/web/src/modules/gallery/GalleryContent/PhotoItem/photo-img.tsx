@@ -6,11 +6,13 @@ import {
   DEFAULT_IMAGE_SIZE,
   setNaturalSizesAtom,
 } from "../../hooks/use-calculate-layout";
+import { useDisplayableImage } from "@/lib/heic/use-displayable-image";
 
 /**
  * <img> wrapper for displaying the photo image.
  *
  * It does:
+ * - Convert HEIC/HEIF to a paintable URL on browsers that can't render it.
  * - Handle the loading state ("loading", "loaded", "error").
  * - Cache the natural size.
  */
@@ -28,6 +30,8 @@ export function PhotoImg({
   const store = useStore();
   const profileGeneration = useAtomValue(profileGenerationAtom);
   const setNaturalSizes = useSetAtom(setNaturalSizesAtom);
+  // Resolve HEIC to a JPEG object URL where the browser can't paint it natively.
+  const { src, status: convertStatus } = useDisplayableImage(url);
 
   const handleLoad = useCallback(() => {
     if (store.get(profileGenerationAtom) !== profileGeneration) return;
@@ -47,18 +51,33 @@ export function PhotoImg({
     setLoadingState("error");
   }, [profileGeneration, s3Key, setNaturalSizes, setLoadingState, store]);
 
+  // Mirror the conversion lifecycle onto the loading state: "converting" keeps
+  // the skeleton up, a failed conversion surfaces the error state. A successful
+  // conversion ("ready") hands off to the <img> onLoad/onError below.
+  useEffect(() => {
+    if (convertStatus === "converting") {
+      setLoadingState("loading");
+    } else if (convertStatus === "error") {
+      handleError();
+    }
+  }, [convertStatus, setLoadingState, handleError]);
+
   useEffect(() => {
     if (imgRef.current?.complete) {
       handleLoad();
     }
-  }, [handleLoad]);
+  }, [handleLoad, src]);
+
+  // Nothing paintable yet (converting or failed): let the parent show its
+  // skeleton/error UI via the loading state set above.
+  if (!src) return null;
 
   return (
     <img
       {...props}
       className={cn("select-none", props.className)}
       ref={imgRef}
-      src={url}
+      src={src}
       alt={s3Key}
       onLoad={handleLoad}
       onError={handleError}

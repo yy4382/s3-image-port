@@ -9,7 +9,8 @@ import { motion } from "motion/react";
 import { useHover } from "@uidotdev/usehooks";
 import { useDelayedHover } from "@/lib/hooks/use-delayed-hover";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
-import { useLocale } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
+import { CircleDotDashed } from "lucide-react";
 import { PhotoItemOverlay } from "./photo-item-overlay";
 import { PhotoImg } from "./photo-img";
 
@@ -53,6 +54,8 @@ function PhotoDisplay({
     [source],
   );
 
+  const isLivePhoto = item.motionSource !== undefined;
+
   usePrefetchPhotoPage(photo, hovering);
 
   return (
@@ -86,6 +89,7 @@ function PhotoDisplay({
           draggable="false"
         />
       )}
+      {loadingState === "loaded" && isLivePhoto && <LivePhotoBadge />}
       {loadingState === "loaded" && source && item.access && (
         <PhotoItemOverlay
           photo={photo}
@@ -95,6 +99,16 @@ function PhotoDisplay({
         />
       )}
     </motion.div>
+  );
+}
+
+function LivePhotoBadge() {
+  const t = useTranslations("gallery.item");
+  return (
+    <div className="pointer-events-none absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-md bg-black/45 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white backdrop-blur-sm">
+      <CircleDotDashed className="size-3" />
+      {t("livePhoto")}
+    </div>
   );
 }
 

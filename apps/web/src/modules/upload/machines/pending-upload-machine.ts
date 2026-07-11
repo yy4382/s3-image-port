@@ -24,6 +24,7 @@ type PendingUploadInput = PendingUploadEffects & {
   compressOption: CompressOption | null;
   id: string;
   supportProcess: boolean;
+  preserveKeyBaseOnProcess?: boolean;
 };
 
 type PendingUploadContext = PendingUploadInput & {
@@ -82,7 +83,13 @@ export const pendingUploadMachine = setup({
         );
         return {
           processedFile,
-          key: S3KeyMetadata.updateFile(processedFile, input.key),
+          key: input.preserveKeyBaseOnProcess
+            ? S3KeyMetadata.withExt(
+                input.key,
+                processedFile.name.split(".").pop()?.toLowerCase() ||
+                  input.key.data.ext,
+              )
+            : S3KeyMetadata.updateFile(processedFile, input.key),
         };
       },
     ),

@@ -61,6 +61,73 @@ describe("uploadQueueMachine", () => {
     ).toContain("jpg");
   });
 
+  test("gives a Live Photo still and motion file the same generated key base", () => {
+    const actor = createUploadQueueActor();
+
+    actor.send({
+      type: "files.added",
+      files: [
+        createTestFile("IMG_0001.HEIC", "image/heic"),
+        createTestFile("IMG_0001.MOV", "video/quicktime"),
+      ],
+      keyTemplate: "uploads/{{ulid}}.{{ext}}",
+      compressOption: null,
+    });
+
+    const [still, motion] = selectUploadActors(actor.getSnapshot()).map(
+      (upload) => selectPendingUpload(upload.getSnapshot()).key.toString(),
+    );
+    expect(still.replace(/\.[^.]+$/, "")).toBe(motion.replace(/\.[^.]+$/, ""));
+    expect(still.endsWith(".heic")).toBe(true);
+    expect(motion.endsWith(".mov")).toBe(true);
+  });
+
+  test("preserves a Live Photo pair's key base when processing its still", async () => {
+    const actor = createUploadQueueActor();
+    actor.send({
+      type: "files.added",
+      files: [
+        createTestFile("IMG_0001.jpg", "image/jpeg"),
+        createTestFile("IMG_0001.mov", "video/quicktime"),
+      ],
+      keyTemplate: "uploads/{{filename}}.{{ext}}",
+      compressOption: { type: "jpeg", quality: 80 },
+    });
+    const [still, motion] = selectUploadActors(actor.getSnapshot());
+
+    still.send({ type: "process.requested" });
+    await waitFor(still, (snapshot) => snapshot.matches("processed"));
+
+    expect(
+      selectPendingUpload(still.getSnapshot())
+        .key.toString()
+        .replace(/\.[^.]+$/, ""),
+    ).toBe(
+      selectPendingUpload(motion.getSnapshot())
+        .key.toString()
+        .replace(/\.[^.]+$/, ""),
+    );
+  });
+
+  test("keeps Live Photo component keys distinct when the template omits ext", () => {
+    const actor = createUploadQueueActor();
+    actor.send({
+      type: "files.added",
+      files: [
+        createTestFile("IMG_0001.jpg", "image/jpeg"),
+        createTestFile("IMG_0001.mov", "video/quicktime"),
+      ],
+      keyTemplate: "uploads/{{ulid}}",
+      compressOption: null,
+    });
+
+    const [still, motion] = selectUploadActors(actor.getSnapshot()).map(
+      (upload) => selectPendingUpload(upload.getSnapshot()).key.toString(),
+    );
+    expect(still).not.toBe(motion);
+    expect(still.replace(/\.[^.]+$/, "")).toBe(motion.replace(/\.[^.]+$/, ""));
+  });
+
   test("processes a pending upload", async () => {
     const actor = createUploadQueueActor();
     actor.send({
