@@ -146,4 +146,4 @@ Work the **frontier**: any ticket whose blockers are all complete. Keep each acc
 - [x] Full web test, build, lint, and repository-appropriate type gates pass after deletion.
 - [x] Manual behavior checks cover profile forms/switching, sync confirmation, gallery URL/modal navigation, refresh feedback, target mismatch/rebind, selection locality, upload navigation/editing/retry, and cache reset.
 - [x] No credentialed S3 smoke is claimed unless credentials are actually configured; deterministic counted adapters remain the required race/IO authority.
-- [ ] Completed slices are reviewed against ADR-0003 and the resolved spec, with all actionable Standards and Spec findings fixed.
+- [x] Completed slices are reviewed against ADR-0003 and the resolved spec, with all actionable Standards and Spec findings fixed.
