@@ -294,7 +294,11 @@ export function createImageCatalog({
     const images = get(imagesAtom);
     const filter = get(filterAtom);
     const searched = filter.searchTerm
-      ? new Fuse(images, { keys: ["key"], threshold: 0.3 })
+      ? new Fuse(images, {
+          keys: ["key"],
+          threshold: 0.3,
+          ignoreLocation: true,
+        })
           .search(filter.searchTerm)
           .map(({ item }) => item)
       : images;

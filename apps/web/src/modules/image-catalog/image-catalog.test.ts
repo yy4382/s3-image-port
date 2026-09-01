@@ -209,6 +209,33 @@ describe("deep image catalog", () => {
     unsubscribe();
   });
 
+  it("finds an exact filename fragment behind a long storage prefix", () => {
+    const deeplyNestedImage = {
+      key: "archive/2024/events/long-directory-name/photo_123456.jpg",
+      lastModified: "2024-11-10T00:00:00.000Z",
+    };
+    const catalog = createImageCatalog({
+      cacheStorage: new ControllableStorage({
+        "s3ip:gallery:photos": JSON.stringify([deeplyNestedImage, alpha]),
+      }),
+    });
+    const store = configuredStore();
+    const unsubscribe = store.sub(catalog.state, () => {});
+
+    store.set(catalog.view.filter, {
+      searchTerm: "123456",
+      prefix: undefined,
+      dateRangeType: [null, null],
+      sortBy: "key",
+      sortOrder: "desc",
+    });
+
+    expect(
+      store.get(catalog.state).gallery.filteredImages.map((image) => image.key),
+    ).toEqual([deeplyNestedImage.key]);
+    unsubscribe();
+  });
+
   it.each([
     { name: "cached-empty", images: [] },
     { name: "ready", images: [alpha] },
