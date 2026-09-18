@@ -5,6 +5,7 @@ import { createS3ImageStorage } from "./s3";
 
 const mocks = vi.hoisted(() => ({
   listFn: vi.fn(),
+  checkListFn: vi.fn(),
   uploadFn: vi.fn(),
   deleteFn: vi.fn(),
   renameFn: vi.fn(),
@@ -16,6 +17,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("./image-s3-client", () => ({
   default: class MockImageS3Client {
     list = mocks.listFn;
+    checkList = mocks.checkListFn;
     upload = mocks.uploadFn;
     delete = mocks.deleteFn;
     rename = mocks.renameFn;
@@ -252,134 +254,136 @@ describe("S3 image storage adapter", () => {
     });
   });
 
-  it("reports valid access when CORS allows required methods for the current origin and wildcard headers", async () => {
-    mocks.getCorsFn.mockResolvedValueOnce({
-      CORSRules: [
-        {
-          AllowedOrigins: ["https://app.example.com"],
-          AllowedHeaders: ["*"],
-          AllowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
-        },
-      ],
+  it("tests a list read without listing images or reading CORS", async () => {
+    mocks.checkListFn.mockResolvedValueOnce({
+      $metadata: { httpStatusCode: 200 },
     });
-
+    const signal = new AbortController().signal;
     await expect(
       createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
+        signal,
       }),
-    ).resolves.toEqual({
-      ok: true,
-      value: {
-        allowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
-      },
-    });
+    ).resolves.toEqual({ ok: true, value: { httpStatus: 200 } });
+    expect(mocks.checkListFn).toHaveBeenCalledExactlyOnceWith(signal);
+    expect(mocks.listFn).not.toHaveBeenCalled();
+    expect(mocks.getCorsFn).not.toHaveBeenCalled();
+    expect(mocks.uploadFn).not.toHaveBeenCalled();
   });
 
-  it("reports incomplete CORS when no CORS rules are returned", async () => {
-    mocks.getCorsFn.mockResolvedValueOnce({});
-
+  it.each([
+    "AccessDenied",
+    "InvalidAccessKeyId",
+    "NoSuchBucket",
+    "SignatureDoesNotMatch",
+    "CustomServiceError",
+  ])("preserves readable %s instead of folding it into 403", async (code) => {
+    mocks.checkListFn.mockRejectedValueOnce({
+      name: code,
+      message: "secret must not escape",
+      $metadata: { httpStatusCode: 403 },
+    });
     await expect(
       createS3ImageStorage(s3Settings).checkAccess({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
       ok: false,
-      error: {
-        reason: "cors-incomplete",
-        allowedMethods: [],
-        missingMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
-      },
+      error: { reason: "server", code, httpStatus: 403 },
     });
   });
 
-  it("preserves allowed and missing methods for incomplete CORS permissions", async () => {
+  it.each([["*"], ["https://*.example.com"], ["https://app.example.com"]])(
+    "accepts origin %s without requiring POST or wildcard headers",
+    async (origin) => {
+      mocks.getCorsFn.mockResolvedValueOnce({
+        $metadata: {},
+        CORSRules: [
+          {
+            AllowedOrigins: [origin],
+            AllowedMethods: ["GET", "HEAD", "PUT", "DELETE"],
+            AllowedHeaders: ["Content-Type", "x-amz-*"],
+          },
+        ],
+      });
+      await expect(
+        createS3ImageStorage(s3Settings).checkCors({
+          origin: "https://app.example.com",
+        }),
+      ).resolves.toEqual({
+        ok: true,
+        value: { originMatched: true, missingMethods: [] },
+      });
+    },
+  );
+
+  it("reports missing methods only for rules matching the current origin", async () => {
     mocks.getCorsFn.mockResolvedValueOnce({
+      $metadata: {},
       CORSRules: [
         {
           AllowedOrigins: ["https://app.example.com"],
-          AllowedHeaders: ["*"],
           AllowedMethods: ["GET", "HEAD"],
         },
-      ],
-    });
-
-    await expect(
-      createS3ImageStorage(s3Settings).checkAccess({
-        origin: "https://app.example.com",
-      }),
-    ).resolves.toEqual({
-      ok: false,
-      error: {
-        reason: "cors-incomplete",
-        allowedMethods: ["GET", "HEAD"],
-        missingMethods: ["PUT", "POST", "DELETE"],
-      },
-    });
-  });
-
-  it("accepts wildcard CORS origins", async () => {
-    mocks.getCorsFn.mockResolvedValueOnce({
-      CORSRules: [
         {
-          AllowedOrigins: ["*"],
-          AllowedHeaders: ["*"],
-          AllowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+          AllowedOrigins: ["https://other.example.com"],
+          AllowedMethods: ["PUT", "DELETE"],
         },
       ],
     });
-
     await expect(
-      createS3ImageStorage(s3Settings).checkAccess({
+      createS3ImageStorage(s3Settings).checkCors({
         origin: "https://app.example.com",
       }),
     ).resolves.toEqual({
       ok: true,
-      value: {
-        allowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
-      },
+      value: { originMatched: true, missingMethods: ["PUT", "DELETE"] },
     });
   });
 
-  it("requires wildcard CORS headers before accepting allowed methods", async () => {
-    mocks.getCorsFn.mockResolvedValueOnce({
+  it.each([
+    { CORSRules: [] },
+    {
       CORSRules: [
         {
-          AllowedOrigins: ["https://app.example.com"],
-          AllowedHeaders: ["Content-Type"],
-          AllowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
+          AllowedOrigins: ["https://*.example.com"],
+          AllowedMethods: ["GET", "HEAD", "PUT", "DELETE"],
         },
       ],
-    });
+    },
+  ])(
+    "reports a missing origin without inventing permission evidence",
+    async ({ CORSRules }) => {
+      mocks.getCorsFn.mockResolvedValueOnce({ $metadata: {}, CORSRules });
+      await expect(
+        createS3ImageStorage(s3Settings).checkCors({
+          origin: "https://appXexample.com",
+        }),
+      ).resolves.toEqual({
+        ok: true,
+        value: {
+          originMatched: false,
+          missingMethods: ["GET", "HEAD", "PUT", "DELETE"],
+        },
+      });
+    },
+  );
 
-    await expect(
-      createS3ImageStorage(s3Settings).checkAccess({
-        origin: "https://app.example.com",
-      }),
-    ).resolves.toEqual({
-      ok: false,
-      error: {
-        reason: "cors-incomplete",
-        allowedMethods: [],
-        missingMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
-      },
-    });
-  });
-
-  it("maps failed access validation to typed access failures", async () => {
-    mocks.getCorsFn.mockRejectedValueOnce(
-      Object.assign(new Error("forbidden"), {
-        name: "AccessDenied",
+  it.each(["AccessDenied", "NoSuchCORSConfiguration", "NotImplemented"])(
+    "preserves CORS API %s",
+    async (code) => {
+      mocks.getCorsFn.mockRejectedValueOnce({
+        name: code,
         $metadata: { httpStatusCode: 403 },
-      }),
-    );
-
-    await expect(
-      createS3ImageStorage(s3Settings).checkAccess({
-        origin: "https://app.example.com",
-      }),
-    ).resolves.toEqual({
-      ok: false,
-      error: { reason: "access-denied" },
-    });
-  });
+      });
+      await expect(
+        createS3ImageStorage(s3Settings).checkCors({
+          origin: "https://app.example.com",
+        }),
+      ).resolves.toEqual({
+        ok: false,
+        error: { reason: "server", code, httpStatus: 403 },
+      });
+    },
+  );
 });

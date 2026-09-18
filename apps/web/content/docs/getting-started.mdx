@@ -23,7 +23,7 @@ If you don't have an S3 bucket yet, please create one according to the guide bel
 The above three points are essential steps to use the S3 Image Port.
 
 <Callout type="warning">
-Since we are a web-based project, configuring CORS is necessary. Most of the "connection issues" reported by users are due to not configuring CORS.
+Browser requests across origins need CORS to allow the current site. A network error can also come from the endpoint, DNS, TLS, a proxy, or browser restrictions; it does not identify CORS as the cause.
 
 For details on how to configure CORS, please continue reading.
 
@@ -53,6 +53,8 @@ For example, if an image's path in the storage bucket is `i/2024/05/29/name.jpg`
 
 If you are directly using the "public storage bucket" function of certain S3-compatible services, the same logic applies. For example, for Cloudflare R2, it should look like `https://pub-<a bunch of characters>.r2.dev`. For Tencent Cloud COS, it should look like `https://<BucketName-APPID>.cos.<Region>.myqcloud.com`.
 
+<a id="cors" />
+
 #### CORS Configuration
 
 <Callout title="What is CORS?">
@@ -64,15 +66,25 @@ In simple terms, if the site `A.com` wants to access resources on the site `B.co
 
 To use it properly, you need to
 
-1. Include `https://imageport.app` in the allowed Origins,
-2. Allow `GET`, `HEAD`, `POST`, `PUT`, and `DELETE` methods,
-3. And allow `*` headers.
+1. Allow your panel’s exact Origin, including protocol and port. The official instance uses `https://imageport.app`; self-hosted panels use their own address, shown in test details.
+2. Allow the methods the app currently uses: `GET`, `HEAD`, `PUT`, and `DELETE`. `POST` is not required.
+3. Allow the headers used by actual requests. `AllowedHeaders: ["*"]` is one example; valid explicit header lists and wildcards such as `x-amz-*` can also work.
+
+CORS supports Origin wildcards, but does not replace IAM or bucket access policies. The optional check in test details only identifies missing Origins and methods. It does not fully validate request headers or prove upload access.
 
 If confused, you can check the detailed guide in the [platform step-by-step tutorial](#step-by-step-guide-for-platforms) above for the platform you are using, or refer to the platform documentation yourself.
 
 ## Start Using S3 Image Port
 
-1. If you have configured the S3 bucket as described above, you should now have all the information needed to fill in the S3 settings! After entering the information, you can click the test button to check if the configuration is correct.
+1. If you have configured the S3 bucket as described above, you should now have all the information needed to fill in the S3 settings! Click Test after entering the information. The app makes one list request with the current prefix and a maximum of 1 key, stopping it after 10 seconds if it times out. It does not write test objects or update the gallery cache. An empty list is also a success.
    Go to [S3 Settings](/en/settings/s3) to fill in.
 2. Other settings can remain at their default values for now.
 3. Go to [Gallery](/en/gallery), click the "Load Images" button to start using.
+
+### View test details
+
+“List read succeeded” only confirms that the current browser can read the list for the current bucket and prefix. It does not test uploads, deletion, or public URLs. Denied list access does not mean uploads are denied. Failures show a reason beside the test button; View details shows a safe error code, readable HTTP status, and request context, which you can copy.
+
+Only Check CORS in the details calls `GetBucketCors`, which needs separate `s3:GetBucketCORS` permission. Failure of this optional check does not change the list result. You do not need to broaden credential permissions just for the test. The app only reports missing CORS configuration when the service explicitly returns `NoSuchCORSConfiguration`.
+
+When the browser provides no readable response, the app cannot distinguish CORS from network issues or read an HTTP status hidden by CORS. Open developer tools, look in Console / Network, then retry.

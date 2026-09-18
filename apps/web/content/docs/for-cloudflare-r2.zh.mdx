@@ -32,6 +32,10 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 - 点击 `设置`，在 `公开访问` 板块的 `R2.dev 子域` 右侧，点击 `允许访问`，键入 `allow` 以确认允许；
 - 现在 `公共 R2.dev 存储桶 URL` 即为您的 `Public URL`。
 
+示例中的 Origin 适用于官方实例。自托管时请替换为当前面板的完整 Origin（包含协议和端口），可从测试详情中复制。`AllowedHeaders: ["*"]` 不是唯一合法配置，显式 header 列表和 `x-amz-*` 等通配符也可以使用。CORS 不替代存储桶权限。
+
+「测试」仅执行一次列表读取；成功不代表上传、删除或公共 URL 已验证。详情中的「检查 CORS」按需读取配置；若权限不足或请求失败，列表成功的结果仍然保留。无需为此辅助检查扩大凭证权限。参见[测试详情与 CORS 帮助](/zh/docs/getting-started#cors)。
+
 更多信息，请查看 [Public buckets · Cloudflare R2 docs](https://developers.cloudflare.com/r2/buckets/public-buckets/)
 
 ### 以自定义域名的形式公开
@@ -56,7 +60,7 @@ Cloudflare R2 Storage 的免费计划包含每月 10 GB 的存储空间、每月
 [
   {
     "AllowedOrigins": ["https://imageport.app"],
-    "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD", "POST"],
+    "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD"],
     "AllowedHeaders": ["*"]
   }
 ]

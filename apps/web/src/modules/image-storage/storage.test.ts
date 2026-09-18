@@ -135,14 +135,10 @@ describe("image storage", () => {
     });
 
     await expect(
-      storage.checkAccess({ origin: "https://app.example.com" }),
+      storage.checkCors({ origin: "https://app.example.com" }),
     ).resolves.toEqual({
-      ok: false,
-      error: {
-        reason: "cors-incomplete",
-        allowedMethods: ["GET", "HEAD"],
-        missingMethods: ["PUT", "POST", "DELETE"],
-      },
+      ok: true,
+      value: { originMatched: true, missingMethods: ["PUT", "DELETE"] },
     });
   });
 });

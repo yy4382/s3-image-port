@@ -24,6 +24,7 @@ export function createCountedImageStorage({
     downloadStoredImage: [] as string[],
     probeStoredImage: [] as string[],
     checkAccess: [] as CheckStorageAccessInput[],
+    checkCors: [] as CheckStorageAccessInput[],
   };
 
   const countedStorage: ImageStorage = {
@@ -62,6 +63,12 @@ export function createCountedImageStorage({
       return overrides.probeStoredImage
         ? overrides.probeStoredImage(key)
         : storage.probeStoredImage(key);
+    },
+    async checkCors(input) {
+      calls.checkCors.push(input);
+      return overrides.checkCors
+        ? overrides.checkCors(input)
+        : storage.checkCors(input);
     },
     async checkAccess(input) {
       calls.checkAccess.push(input);

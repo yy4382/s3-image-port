@@ -9,9 +9,15 @@ import { z } from "zod";
 import {
   createS3ImageStorage,
   type CreateImageStorageFromSettings,
-  type ImageStorageFailure,
-  type StorageAccessMethod,
+  type ImageStorageCorsResult,
 } from "@/modules/image-storage";
+import {
+  diagnosticContext,
+  safeDiagnosticFailure,
+  toDiagnosticFailure,
+  type StorageDiagnosticContext,
+  type StorageDiagnosticFailure,
+} from "@/modules/image-storage/diagnostics";
 import {
   migrateV2ToV3,
   migrateV2ToV3OnUnmount,
@@ -64,6 +70,14 @@ export type SettingsProfileReplacement =
 
 const idleAccess = { status: "idle" as const };
 const testingAccess = { status: "testing" as const };
+type DiagnosticStatus<T> =
+  | typeof idleAccess
+  | typeof testingAccess
+  | ({ context: StorageDiagnosticContext } & (
+      | { status: "success"; value: T }
+      | { status: "failed"; error: StorageDiagnosticFailure }
+    ));
+type CorsValue = Extract<ImageStorageCorsResult, { ok: true }>["value"];
 
 function activeOptions(value: z.infer<typeof profilesSchemaForLoad>) {
   return value.list.at(value.current)?.[1] ?? value.list[0][1];
@@ -227,16 +241,11 @@ export function createSettings({
   persistedProfiles.onMount = () => () => migrateV2ToV3OnUnmount();
 
   const accessState = atom({
-    status: idleAccess as
-      | typeof idleAccess
-      | typeof testingAccess
-      | { status: "success"; allowedMethods: readonly StorageAccessMethod[] }
-      | { status: "failed"; error: ImageStorageFailure }
-      | {
-          status: "cors-incomplete";
-          allowedMethods: readonly StorageAccessMethod[];
-          missingMethods: readonly StorageAccessMethod[];
-        },
+    status: idleAccess as DiagnosticStatus<{ httpStatus?: number }>,
+    cors: idleAccess as DiagnosticStatus<CorsValue>,
+    controller: undefined as AbortController | undefined,
+    corsController: undefined as AbortController | undefined,
+    corsRequest: 0,
     lifecycle: "never" as "never" | "mounted" | "disposed",
     lifetime: 0,
     request: 0,
@@ -249,13 +258,20 @@ export function createSettings({
       lifetime: current.lifetime + 1,
     }));
     return () => {
-      update((current) => ({
-        ...current,
-        status: idleAccess,
-        lifecycle: "disposed",
-        lifetime: current.lifetime + 1,
-        request: current.request + 1,
-      }));
+      update((current) => {
+        current.controller?.abort();
+        current.corsController?.abort();
+        return {
+          ...current,
+          status: idleAccess,
+          cors: idleAccess,
+          controller: undefined,
+          corsController: undefined,
+          lifecycle: "disposed",
+          lifetime: current.lifetime + 1,
+          request: current.request + 1,
+        };
+      });
     };
   };
   const normalizedProfiles = selectAtom(
@@ -299,6 +315,23 @@ export function createSettings({
     const state = get(accessState);
     return state.revision === get(revision) ? state.status : idleAccess;
   });
+  const cors = atom((get) => {
+    const state = get(accessState);
+    return state.revision === get(revision) ? state.cors : idleAccess;
+  });
+  const invalidateAccess = atom(null, (get, set) => {
+    const current = get(accessState);
+    current.controller?.abort();
+    current.corsController?.abort();
+    set(accessState, {
+      ...current,
+      status: idleAccess,
+      cors: idleAccess,
+      controller: undefined,
+      corsController: undefined,
+      request: current.request + 1,
+    });
+  });
   const root = atom(
     (get) => get(normalizedProfiles),
     (
@@ -310,11 +343,7 @@ export function createSettings({
       const next = typeof update === "function" ? update(previous) : update;
       if (deepEqual(previous, next)) return false;
       if (storageSemanticsChanged(previous, next)) {
-        set(accessState, (current) => ({
-          ...current,
-          status: idleAccess,
-          request: current.request + 1,
-        }));
+        set(invalidateAccess);
       }
       set(persistedProfiles, next);
       return true;
@@ -338,7 +367,11 @@ export function createSettings({
   const upload = focusAtom(options, (optic) => optic.prop("upload"));
   const gallery = focusAtom(options, (optic) => optic.prop("gallery"));
   const storageAtom = atom(
-    (get) => ({ ...get(storageProjection), access: get(access) }),
+    (get) => ({
+      ...get(storageProjection),
+      access: get(access),
+      cors: get(cors),
+    }),
     (
       get,
       set,
@@ -347,10 +380,11 @@ export function createSettings({
             type: "update";
             value: SetStateAction<z.infer<typeof optionsSchema.shape.s3>>;
           }
-        | { type: "test-access" },
+        | { type: "test-access" }
+        | { type: "check-cors" },
     ) => {
-      if (action.type === "test-access") {
-        return testStorageAccess();
+      if (action.type === "test-access" || action.type === "check-cors") {
+        return testStorageAccess(action.type === "check-cors");
       }
       const previous = get(rawStorage);
       const next =
@@ -361,7 +395,7 @@ export function createSettings({
       set(rawStorage, next);
       return { status: "updated" as const };
 
-      async function testStorageAccess() {
+      async function testStorageAccess(isCors: boolean) {
         const lifecycle = get(accessState);
         if (lifecycle.lifecycle === "disposed") {
           return { status: "disposed" as const };
@@ -374,53 +408,66 @@ export function createSettings({
           };
         }
 
-        const request = lifecycle.request + 1;
+        if (
+          isCors &&
+          get(access).status !== "success" &&
+          get(access).status !== "failed"
+        ) {
+          return { status: "not-tested" as const };
+        }
+        if (!isCors) {
+          lifecycle.controller?.abort();
+          lifecycle.corsController?.abort();
+        } else lifecycle.corsController?.abort();
+        const controller = new AbortController();
+        const request = lifecycle.request + (isCors ? 0 : 1);
+        const corsRequest = lifecycle.corsRequest + 1;
         const startedRevision = get(revision);
         const startedLifetime = lifecycle.lifetime;
+        const context = diagnosticContext(
+          current.value,
+          getOrigin(),
+          isCors ? "GetBucketCors" : "ListObjectsV2",
+        );
         set(accessState, {
           ...lifecycle,
-          status: testingAccess,
+          ...(isCors
+            ? { cors: testingAccess, corsController: controller }
+            : {
+                status: testingAccess,
+                cors: idleAccess,
+                controller,
+                corsController: undefined,
+              }),
           request,
+          corsRequest,
           revision: startedRevision,
         });
 
-        let outcome:
-          | {
-              status: "success";
-              allowedMethods: readonly StorageAccessMethod[];
-            }
-          | { status: "failed"; error: ImageStorageFailure }
-          | {
-              status: "cors-incomplete";
-              allowedMethods: readonly StorageAccessMethod[];
-              missingMethods: readonly StorageAccessMethod[];
-            };
+        let outcome: DiagnosticStatus<
+          { httpStatus?: number } & Partial<CorsValue>
+        >;
         try {
-          const result = await createStorage(current.value).checkAccess({
-            origin: getOrigin(),
-          });
-          if (result.ok) {
-            outcome = {
-              status: "success",
-              allowedMethods: result.value.allowedMethods,
-            };
-          } else if (result.error.reason === "cors-incomplete") {
-            outcome = {
-              status: "cors-incomplete",
-              allowedMethods: result.error.allowedMethods,
-              missingMethods: result.error.missingMethods,
-            };
-          } else {
-            outcome = { status: "failed", error: result.error };
-          }
+          const storage = createStorage(current.value);
+          const input = { origin: getOrigin(), signal: controller.signal };
+          const result = isCors
+            ? await storage.checkCors(input)
+            : await storage.checkAccess(input);
+          outcome = result.ok
+            ? { status: "success", context, value: result.value }
+            : {
+                status: "failed",
+                context,
+                error: safeDiagnosticFailure(result.error, current.value),
+              };
         } catch (cause) {
           outcome = {
             status: "failed",
-            error: {
-              reason: "unknown",
-              message: cause instanceof Error ? cause.message : "Unknown error",
-              cause,
-            },
+            context,
+            error: safeDiagnosticFailure(
+              toDiagnosticFailure(cause),
+              current.value,
+            ),
           };
         }
 
@@ -429,9 +476,19 @@ export function createSettings({
           latest.lifecycle !== "disposed" &&
           latest.lifetime === startedLifetime &&
           latest.request === request &&
+          (!isCors || latest.corsRequest === corsRequest) &&
           get(revision) === startedRevision
         ) {
-          set(accessState, { ...latest, status: outcome });
+          set(
+            accessState,
+            isCors
+              ? {
+                  ...latest,
+                  cors: outcome as DiagnosticStatus<CorsValue>,
+                  corsController: undefined,
+                }
+              : { ...latest, status: outcome, controller: undefined },
+          );
         }
         return outcome;
       }
@@ -601,6 +658,7 @@ export function createSettings({
           }),
         );
         const outcome = replacementOutcome(previous, next, true);
+        set(invalidateAccess);
         set(root, next);
         return outcome;
       }
@@ -654,6 +712,7 @@ export function createSettings({
       }
       const next = preserveEqualActiveBranches(previous, parsed.data);
       const outcome = replacementOutcome(previous, next);
+      if (outcome.profileReplaced) set(invalidateAccess);
       if (outcome.changed) set(root, next);
       return outcome;
     },

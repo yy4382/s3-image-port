@@ -27,7 +27,7 @@ describe("settings React reactivity", () => {
   it("updates only the relevant profile, storage, upload, gallery, access, and catalog readers", async () => {
     const access = createDeferred<{
       ok: true;
-      value: { allowedMethods: ["GET"] };
+      value: { httpStatus: 200 };
     }>();
     const imageStorage = createCountedImageStorage({
       overrides: { checkAccess: () => access.promise },
@@ -177,17 +177,17 @@ describe("settings React reactivity", () => {
     expect(persistence.setCalls).toHaveLength(4);
     expect(imageStorage.calls.createStorage).toHaveLength(1);
     expect(imageStorage.calls.checkAccess).toEqual([
-      { origin: "https://app.example.com" },
+      { origin: "https://app.example.com", signal: expect.any(AbortSignal) },
     ]);
 
     before = counts();
-    access.resolve({ ok: true, value: { allowedMethods: ["GET"] } });
+    access.resolve({ ok: true, value: { httpStatus: 200 } });
     await readers.access.hook.act(async () => {
       await accessResult;
     });
-    expect(readers.access.hook.result.current).toEqual({
+    expect(readers.access.hook.result.current).toMatchObject({
       status: "success",
-      allowedMethods: ["GET"],
+      value: { httpStatus: 200 },
     });
     expect(delta(before)).toEqual({
       profiles: 0,

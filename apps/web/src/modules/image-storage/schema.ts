@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { storageDiagnosticFailureSchema } from "./diagnostics";
 
 export const storageKeySchema = z.string().min(1);
 
@@ -10,7 +11,12 @@ export const storageAccessMethodSchema = z.enum([
   "DELETE",
 ]);
 
-export const requiredStorageAccessMethods = storageAccessMethodSchema.options;
+export const requiredStorageAccessMethods = [
+  "GET",
+  "HEAD",
+  "PUT",
+  "DELETE",
+] as const;
 
 export const storedImageSchema = z.object({
   key: storageKeySchema,
@@ -95,15 +101,31 @@ export const storedImageMetadataResultSchema = z.union([
   imageStorageFailureResultSchema,
 ]);
 
+const diagnosticFailureResultSchema = z.object({
+  ok: z.literal(false),
+  error: storageDiagnosticFailureSchema,
+});
 export const imageStorageAccessResultSchema = z.union([
   z.object({
     ok: z.literal(true),
+    value: z.object({ httpStatus: z.number().optional() }),
+  }),
+  diagnosticFailureResultSchema,
+]);
+export const imageStorageCorsResultSchema = z.union([
+  z.object({
+    ok: z.literal(true),
     value: z.object({
-      allowedMethods: z.array(storageAccessMethodSchema),
+      httpStatus: z.number().optional(),
+      originMatched: z.boolean(),
+      missingMethods: z.array(storageAccessMethodSchema),
     }),
   }),
-  imageStorageFailureResultSchema,
+  diagnosticFailureResultSchema,
 ]);
+export type ImageStorageCorsResult = z.infer<
+  typeof imageStorageCorsResultSchema
+>;
 
 export type StorageKey = z.infer<typeof storageKeySchema>;
 export type StorageAccessMethod = z.infer<typeof storageAccessMethodSchema>;

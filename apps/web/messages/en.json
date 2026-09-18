@@ -62,31 +62,72 @@
       "includePathDesc": "Optional path prefix to filter objects (e.g., \"i/\" to only list objects starting with \"i/\"). Leave empty to list all objects."
     },
     "s3Validation": {
-      "status": {
-        "valid": "Valid",
-        "checkConfig": "Check config",
-        "corsNeeded": "CORS needed",
-        "testing": "Testing"
+      "testButton": "Test",
+      "retry": "Retry",
+      "testing": "Testing…",
+      "success": "List read succeeded",
+      "failed": "Test failed",
+      "details": "View details",
+      "detailsTitle": "S3 test details",
+      "close": "Close",
+      "scope": "This test only reads the list. It does not test uploads, deletion, or public URLs.",
+      "listRequest": "Read the list",
+      "corsRequest": "Read CORS configuration",
+      "emptyPrefix": "(empty)",
+      "fields": {
+        "request": "Request",
+        "code": "Service error code",
+        "httpStatus": "HTTP status",
+        "origin": "Site Origin",
+        "endpoint": "Endpoint",
+        "bucket": "Bucket",
+        "prefix": "List prefix"
       },
-      "dialog": {
-        "configurationIssue": "Configuration Issue",
-        "corsSetupRequired": "CORS Setup Required",
-        "details": "Details"
+      "reasons": {
+        "accessDenied": "List access was denied.",
+        "invalidKey": "The Access Key is invalid.",
+        "noBucket": "The bucket does not exist.",
+        "signature": "The request signature does not match.",
+        "network": "Unable to connect to the bucket.",
+        "timeout": "The request timed out. Try again.",
+        "invalid-response": "Unable to read the storage service response.",
+        "unknown": "The request could not be completed.",
+        "server": "The storage service rejected the request.",
+        "corsDenied": "The current credentials cannot read the CORS configuration.",
+        "noCors": "The service reports that no CORS configuration exists.",
+        "unsupported": "The service does not support this request."
       },
-      "messages": {
-        "connectionFailed": "Unable to connect to your S3 bucket. Please check:",
-        "settingsCorrect": "Your S3 settings are <strong>correct</strong> and working!",
-        "corsPermissionsNeeded": "You just need to add CORS permissions for these methods:",
-        "statusLabel": "Status:"
+      "hints": {
+        "accessDenied": "Check list access for this bucket and prefix. This result does not determine whether you can upload.",
+        "invalidKey": "Check the Access Key for the current storage service.",
+        "noBucket": "Check the bucket name and endpoint.",
+        "signature": "Check the credentials, region, and endpoint.",
+        "network": "The browser did not provide a specific cause. Check the endpoint and CORS settings; network, DNS, TLS, proxy, or browser restrictions can also cause this.",
+        "timeout": "The request was stopped after 10 seconds. Check the connection and retry.",
+        "invalid-response": "Check that the endpoint is an S3 API endpoint. It may have returned HTML or invalid XML.",
+        "unknown": "Check the endpoint and try again. If it fails again, use the request details below to investigate.",
+        "server": "Use the service error code and HTTP status below to check your storage service documentation.",
+        "corsDenied": "This optional check needs separate permission. Its failure does not change the list result or prevent you from using the app.",
+        "noCors": "Check the CORS settings in your storage service. A proxy may supply different rules for the actual request.",
+        "unsupported": "Check CORS in your storage service. This optional check does not change the list result."
       },
-      "checklist": {
-        "allFieldsFilled": "All required fields are filled",
-        "endpointCorrect": "Endpoint URL is correct",
-        "credentialsValid": "Credentials have proper permissions",
-        "bucketValid": "Bucket name and region are valid",
-        "corsConfigured": "CORS is configured for your origin"
-      },
-      "testButton": "Test"
+      "browserHelp": "Open your browser developer tools, look in Console / Network, then click Test again. The browser may show details that this app cannot read.",
+      "corsTitle": "CORS",
+      "checkCors": "Check CORS",
+      "checkingCors": "Checking…",
+      "corsRead": "CORS configuration read",
+      "corsFailed": "Unable to read CORS configuration",
+      "corsScope": "Optional: read the rules reported by the service. This check does not change the list result.",
+      "originMissing": "The returned rules do not include this Origin: {origin}",
+      "methodsMissing": "The rules matching this Origin do not include: {methods}",
+      "noMissingRules": "No missing Origin or methods found in the returned rules.",
+      "rulesScope": "Rules are guidance only. Request headers have not been fully checked. IAM permissions, uploads, deletion, and public URLs have not been verified.",
+      "corsHelp": "CORS setup help",
+      "corsExample": "Show CORS example",
+      "exampleScope": "Use your panel’s exact Origin, including protocol and port. This is an example: explicit allowed headers and header wildcards such as x-amz-* can also be valid. Rules are not changed automatically.",
+      "copyDetails": "Copy details",
+      "copied": "Details copied",
+      "copyFailed": "Unable to copy. Select and copy the details manually."
     },
     "profiles": {
       "title": "Profiles",

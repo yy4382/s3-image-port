@@ -66,6 +66,7 @@ vi.mock(import("@/modules/image-storage"), async (importOriginal) => {
         renameStoredImage: (input: unknown) => storage.rename(input),
         downloadStoredImage: (key: string) => storage.download(key),
         putStoredImage: (input: unknown) => storage.put(input),
+        checkCors: vi.fn(),
         checkAccess: (input: unknown) => storage.checkAccess(input),
       };
     },

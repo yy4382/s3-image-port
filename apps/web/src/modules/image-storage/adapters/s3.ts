@@ -10,6 +10,7 @@ import {
   storageAccessMethodSchema,
 } from "../schema";
 import type { ImageStorage } from "../storage";
+import { toDiagnosticFailure } from "../diagnostics";
 
 export type CreateImageStorageFromSettings = (
   settings: S3Options,
@@ -165,35 +166,38 @@ export function createS3ImageStorage(settings: S3Options): ImageStorage {
     },
     async checkAccess(input) {
       try {
-        const response = await client.getCors();
-        const allowedMethods = toAllowedStorageMethods(
-          response.CORSRules?.flatMap((rule) =>
-            corsRuleMatchesAccessCheck(rule, input.origin)
-              ? (rule.AllowedMethods ?? [])
-              : [],
-          ) ?? [],
-        );
-        const missingMethods = requiredStorageAccessMethods.filter(
-          (method) => !allowedMethods.includes(method),
-        );
-
-        if (missingMethods.length > 0) {
-          return {
-            ok: false,
-            error: {
-              reason: "cors-incomplete",
-              allowedMethods,
-              missingMethods,
-            },
-          };
-        }
-
-        return { ok: true, value: { allowedMethods } };
-      } catch (error) {
+        const response = await client.checkList(input.signal);
         return {
-          ok: false,
-          error: toStorageFailure(error),
+          ok: true,
+          value: { httpStatus: response.$metadata.httpStatusCode },
         };
+      } catch (error) {
+        return { ok: false, error: toDiagnosticFailure(error) };
+      }
+    },
+    async checkCors(input) {
+      try {
+        const response = await client.getCors(input.signal);
+        const matching = (response.CORSRules ?? []).filter((rule) =>
+          rule.AllowedOrigins?.some((origin) =>
+            originMatches(origin, input.origin),
+          ),
+        );
+        const allowedMethods = toAllowedStorageMethods(
+          matching.flatMap((rule) => rule.AllowedMethods ?? []),
+        );
+        return {
+          ok: true,
+          value: {
+            httpStatus: response.$metadata.httpStatusCode,
+            originMatched: matching.length > 0,
+            missingMethods: requiredStorageAccessMethods.filter(
+              (method) => !allowedMethods.includes(method),
+            ),
+          },
+        };
+      } catch (error) {
+        return { ok: false, error: toDiagnosticFailure(error) };
       }
     },
   };
@@ -273,18 +277,11 @@ function toAllowedStorageMethods(methods: readonly string[]) {
   return [...allowedMethods];
 }
 
-function corsRuleMatchesAccessCheck(
-  rule: {
-    AllowedOrigins?: readonly string[];
-    AllowedHeaders?: readonly string[];
-  },
-  origin: string,
-) {
-  return (
-    (rule.AllowedOrigins?.includes(origin) ||
-      rule.AllowedOrigins?.includes("*")) &&
-    rule.AllowedHeaders?.includes("*")
-  );
+function originMatches(pattern: string, origin: string) {
+  const escaped = pattern
+    .split("*")
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return new RegExp(`^${escaped.join(".*")}$`).test(origin);
 }
 
 async function toBlob(body: unknown): Promise<Blob> {

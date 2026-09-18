@@ -58,11 +58,15 @@ Below is an example of a CORS policy that makes the [official instance](https://
 [
   {
     "AllowedOrigins": ["https://imageport.app"],
-    "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD", "POST"],
+    "AllowedMethods": ["GET", "PUT", "DELETE", "HEAD"],
     "AllowedHeaders": ["*"]
   }
 ]
 ```
+
+The example Origin is for the official instance. For self-hosting, replace it with your panel’s exact Origin (including protocol and port), available in test details. `AllowedHeaders: ["*"]` is not the only valid configuration: explicit header lists and wildcards such as `x-amz-*` can also work. CORS does not replace bucket permissions.
+
+Test makes only one list request; success does not verify uploads, deletion, or public URLs. Check CORS in the details reads the configuration on demand. A denied or failed auxiliary request keeps the successful list result. You do not need to broaden credential permissions for this optional check. See [test details and CORS help](/en/docs/getting-started#cors).
 
 For more information, see [Configure CORS - Cloudflare R2 docs](https://developers.cloudflare.com/r2/buckets/cors/)
 

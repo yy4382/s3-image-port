@@ -23,7 +23,14 @@ class ImageS3Client {
 
   constructor(settings: S3Options) {
     this.settings = settings;
-    this.client = new S3Client({
+    this.client = this.createClient();
+    this.bucket = settings.bucket;
+  }
+
+  private createClient(maxAttempts?: number) {
+    const settings = this.settings;
+    return new S3Client({
+      ...(maxAttempts !== undefined && { maxAttempts }),
       region: settings.region,
       forcePathStyle: settings.forcePathStyle,
       credentials: {
@@ -34,7 +41,6 @@ class ImageS3Client {
       // TODO: Remove workaround once https://github.com/aws/aws-sdk-js-v3/issues/6834 is fixed.
       requestChecksumCalculation: "WHEN_REQUIRED",
     });
-    this.bucket = settings.bucket;
   }
 
   async upload(file: File | Blob | string, key: string) {
@@ -133,14 +139,88 @@ class ImageS3Client {
     return copyResponse;
   }
 
-  async getCors() {
-    const response = await this.client.send(
-      new GetBucketCorsCommand({
-        Bucket: this.bucket,
+  async checkList(signal?: AbortSignal) {
+    return this.diagnostic("ListBucketResult", signal, (client, abortSignal) =>
+      client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          MaxKeys: 1,
+          ...(this.settings.includePath && {
+            Prefix: this.settings.includePath,
+          }),
+        }),
+        { abortSignal },
+      ),
+    );
+  }
+
+  async getCors(signal?: AbortSignal) {
+    return this.diagnostic("CORSConfiguration", signal, (client, abortSignal) =>
+      client.send(new GetBucketCorsCommand({ Bucket: this.bucket }), {
+        abortSignal,
       }),
     );
-    assertSuccessfulResponse("GetCors", response.$metadata.httpStatusCode);
-    return response;
+  }
+
+  private async diagnostic<T>(
+    root: string,
+    signal: AbortSignal | undefined,
+    send: (client: S3Client, signal: AbortSignal) => Promise<T>,
+  ) {
+    const client = this.createClient(1);
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) abort();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 10_000);
+    // The SDK XML parser is permissive (e.g. HTML with HTTP 200). Validate the
+    // actual document before deserialization, without retaining its contents.
+    client.middlewareStack.add(
+      (next) => async (args) => {
+        const result = await next(args);
+        const response = result.response as {
+          statusCode: number;
+          body: BodyInit;
+        };
+        const body = await new Response(response.body).text();
+        response.body = new TextEncoder().encode(body);
+        // A status-only error still provides useful HTTP evidence.
+        if (response.statusCode >= 300 && !body.trim()) return result;
+        const document = new DOMParser().parseFromString(
+          body,
+          "application/xml",
+        );
+        if (
+          document.querySelector("parsererror") ||
+          document.documentElement.localName !==
+            (response.statusCode < 300 ? root : "Error")
+        ) {
+          throw Object.assign(new Error("Invalid S3 response"), {
+            name: "InvalidS3Response",
+            $metadata: { httpStatusCode: response.statusCode },
+          });
+        }
+        return result;
+      },
+      { step: "deserialize", priority: "low", name: "validateDiagnosticXml" },
+    );
+    try {
+      return await send(client, controller.signal);
+    } catch (error) {
+      if (timedOut)
+        throw Object.assign(new Error("Request timed out"), {
+          name: "TimeoutError",
+        });
+      throw error;
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      client.destroy();
+    }
   }
 
   private async listPage(nextContinuationToken?: string): Promise<{
