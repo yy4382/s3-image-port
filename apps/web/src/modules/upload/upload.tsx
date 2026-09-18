@@ -3,7 +3,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { selectAtom } from "jotai/utils";
 import { ClientOnly } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 
 import { Button } from "@/components/ui/button";
@@ -20,11 +19,15 @@ const storageConfiguredAtom = selectAtom(
   settings.storage,
   ({ validation }) => validation.status === "valid",
 );
-const queueViewAtom = selectAtom(
+const uploadActorsAtom = selectAtom(uploadQueue, ({ uploads }) => uploads);
+const queueCountsAtom = selectAtom(
   uploadQueue,
-  ({ uploads, hasUploaded }) => ({ uploads, hasUploaded }),
+  ({ counts }) => counts,
   (left, right) =>
-    left.uploads === right.uploads && left.hasUploaded === right.hasUploaded,
+    Object.keys(left).every(
+      (key) =>
+        left[key as keyof typeof left] === right[key as keyof typeof right],
+    ),
 );
 
 export function Upload() {
@@ -32,10 +35,9 @@ export function Upload() {
 }
 
 export function UploadContent() {
-  const { uploads: uploadActors, hasUploaded } = useAtomValue(queueViewAtom);
+  const uploadActors = useAtomValue(uploadActorsAtom);
   const send = useSetAtom(uploadQueue);
   const storageConfigured = useAtomValue(storageConfiguredAtom);
-  const t = useTranslations("upload");
 
   useHandlePaste();
 
@@ -49,40 +51,7 @@ export function UploadContent() {
 
       <ClientOnly>{!storageConfigured && <InvalidS3Dialog />}</ClientOnly>
 
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">
-          {t("fileList.title")} ({uploadActors.length})
-        </h2>
-        <div className="flex items-center space-x-2">
-          {hasUploaded && (
-            <Button
-              variant="outline"
-              onClick={() => send({ type: "uploaded.cleared" })}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              {t("fileList.clearUploaded")}
-            </Button>
-          )}
-          {uploadActors.length > 0 && (
-            <Button
-              onClick={() => {
-                if (!storageConfigured) {
-                  toast.error(t("alerts.s3NotConfigured"));
-                  return;
-                }
-                send({
-                  type: "all.uploadRequested",
-                });
-              }}
-              size="lg"
-              disabled={!storageConfigured}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {t("fileList.uploadAll")}
-            </Button>
-          )}
-        </div>
-      </div>
+      <UploadQueueControls total={uploadActors.length} />
 
       <div className="grid gap-2">
         {uploadActors.map((uploadActor) => (
@@ -97,6 +66,67 @@ export function UploadContent() {
             }
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function UploadQueueControls({ total }: { total: number }) {
+  const counts = useAtomValue(queueCountsAtom);
+  const send = useSetAtom(uploadQueue);
+  const configured = useAtomValue(storageConfiguredAtom);
+  const t = useTranslations("upload.fileList");
+  return (
+    <div className="mb-4 space-y-3">
+      <h2 className="text-xl font-semibold">
+        {t("title")} ({total})
+      </h2>
+      <p
+        role="status"
+        className="text-sm text-muted-foreground flex flex-wrap gap-x-3 gap-y-1"
+      >
+        {(
+          [
+            "uploaded",
+            "failed",
+            "unconfirmed",
+            "processing",
+            "uploading",
+          ] as const
+        ).map((status) =>
+          counts[status] > 0 ? (
+            <span key={status}>
+              {t(`counts.${status}`, { count: counts[status] })}
+            </span>
+          ) : null,
+        )}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        {counts.uploaded > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => send({ type: "uploaded.cleared" })}
+          >
+            {t("clearUploaded")}
+          </Button>
+        )}
+        {counts.failed > 0 && (
+          <Button
+            variant="outline"
+            disabled={!configured}
+            onClick={() => send({ type: "failed.retryRequested" })}
+          >
+            {t("retryFailed", { count: counts.failed })}
+          </Button>
+        )}
+        {counts.pending > 0 && (
+          <Button
+            disabled={!configured}
+            onClick={() => send({ type: "all.uploadRequested" })}
+          >
+            {t("uploadAll", { count: counts.pending })}
+          </Button>
+        )}
       </div>
     </div>
   );

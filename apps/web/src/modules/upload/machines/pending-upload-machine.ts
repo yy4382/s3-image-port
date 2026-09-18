@@ -3,7 +3,11 @@ import { assign, fromPromise, setup, type ActorRefFrom } from "xstate";
 import { S3KeyMetadata } from "@/lib/s3/s3-key";
 import type { CompressOption } from "@/lib/utils/imageCompress";
 
-import { pendingUploadResultSchema, type PendingUploadResult } from "../types";
+import {
+  isStoredUpload,
+  pendingUploadResultSchema,
+  type PendingUploadResult,
+} from "../types";
 import type { createStorePendingUpload } from "../store-pending-upload";
 
 type ProcessPendingUpload = (
@@ -36,6 +40,7 @@ type PendingUploadContext = PendingUploadInput & {
 type PendingUploadEvent =
   | { type: "process.requested" }
   | { type: "upload.requested" }
+  | { type: "retry.requested" }
   | { type: "edit.toggled" }
   | { type: "compression.updated"; option: CompressOption | null }
   | { type: "template.updated"; template: string };
@@ -107,13 +112,16 @@ export const pendingUploadMachine = setup({
   },
   guards: {
     canProcess: ({ context }) => shouldProcess(context),
+    retryProcessingOnly: ({ context }) =>
+      context.lastResult?.status === "processing-failed" &&
+      !context.lastResult.uploadAfterProcessing,
+    isNewUpload: ({ context }) => context.lastResult === null,
     shouldProcessBeforeUpload: ({ context }) =>
       shouldProcess(context) && context.processedFile === null,
     uploadSucceeded: ({ event }) =>
       "output" in event &&
       isPendingUploadResult(event.output) &&
-      (event.output.status === "stored" ||
-        event.output.status === "stored-unreconciled"),
+      isStoredUpload(event.output),
   },
   actions: {
     closeEditing: assign({ editing: false }),
@@ -131,20 +139,20 @@ export const pendingUploadMachine = setup({
         lastResult: null,
       };
     }),
-    resetAfterProcessingFailure: assign(({ context, event }) => {
-      const error = "error" in event ? event.error : undefined;
-      context.onProcessingFailed(context.file, error);
-      return {
-        lastResult: {
-          status: "failed",
-          error: {
-            reason: "unknown",
-            message: "Processing failed",
-            cause: error,
-          },
-        } satisfies PendingUploadResult,
-      };
-    }),
+    resetAfterProcessingFailure: assign(
+      ({ context, event }, params: { uploadAfterProcessing: boolean }) => {
+        context.onProcessingFailed(
+          context.file,
+          "error" in event ? event.error : undefined,
+        );
+        return {
+          lastResult: {
+            status: "processing-failed",
+            ...params,
+          } satisfies PendingUploadResult,
+        };
+      },
+    ),
     recordUploadResult: assign(({ event }) => {
       if (!("output" in event) || !isPendingUploadResult(event.output)) {
         return {};
@@ -159,15 +167,10 @@ export const pendingUploadMachine = setup({
           lastResult: event.output,
         };
       }
-      const error = "error" in event ? event.error : undefined;
       return {
         lastResult: {
-          status: "failed",
-          error: {
-            reason: "unknown",
-            message: "Upload failed",
-            cause: error,
-          },
+          status: "unconfirmed",
+          error: { reason: "unknown", message: "Upload response unavailable" },
         } satisfies PendingUploadResult,
       };
     }),
@@ -187,6 +190,9 @@ export const pendingUploadMachine = setup({
       }
       return {
         key: S3KeyMetadata.updateTemplate(event.template, context.key),
+        lastResult: isStoredUpload(context.lastResult)
+          ? context.lastResult
+          : null,
       };
     }),
   },
@@ -205,9 +211,14 @@ export const pendingUploadMachine = setup({
         "process.requested": {
           guard: "canProcess",
           target: "processing",
-          actions: "closeEditing",
+          actions: ["prepareUpload", "closeEditing"],
         },
-        "upload.requested": [
+        "retry.requested": [
+          {
+            guard: "retryProcessingOnly",
+            target: "processing",
+            actions: ["prepareUpload", "closeEditing"],
+          },
           {
             guard: "shouldProcessBeforeUpload",
             target: "processingBeforeUpload",
@@ -218,6 +229,11 @@ export const pendingUploadMachine = setup({
             actions: ["prepareUpload", "closeEditing"],
           },
         ],
+        "upload.requested": {
+          guard: "isNewUpload",
+          target: "startingUpload",
+          actions: ["prepareUpload", "closeEditing"],
+        },
         "compression.updated": {
           actions: "updateCompression",
         },
@@ -227,12 +243,21 @@ export const pendingUploadMachine = setup({
         },
       },
     },
+    startingUpload: {
+      always: [
+        {
+          guard: "shouldProcessBeforeUpload",
+          target: "processingBeforeUpload",
+        },
+        { target: "uploading" },
+      ],
+    },
     processed: {
       on: {
         "process.requested": {
           guard: "canProcess",
           target: "processing",
-          actions: "closeEditing",
+          actions: ["prepareUpload", "closeEditing"],
         },
         "upload.requested": {
           target: "uploading",
@@ -258,7 +283,10 @@ export const pendingUploadMachine = setup({
         },
         onError: {
           target: "pending",
-          actions: "resetAfterProcessingFailure",
+          actions: {
+            type: "resetAfterProcessingFailure",
+            params: { uploadAfterProcessing: false },
+          },
         },
       },
     },
@@ -272,7 +300,10 @@ export const pendingUploadMachine = setup({
         },
         onError: {
           target: "pending",
-          actions: "resetAfterProcessingFailure",
+          actions: {
+            type: "resetAfterProcessingFailure",
+            params: { uploadAfterProcessing: true },
+          },
         },
       },
     },
@@ -300,10 +331,6 @@ export const pendingUploadMachine = setup({
     uploaded: {
       on: {
         "edit.toggled": { actions: "toggleEditing" },
-        "compression.updated": {
-          target: "pending",
-          actions: "updateCompression",
-        },
         "template.updated": {
           actions: "updateTemplate",
         },
@@ -332,6 +359,11 @@ export function selectPendingUploadStatus(
   if (snapshot.matches("uploaded")) {
     return "uploaded";
   }
+  if (snapshot.context.lastResult?.status === "processing-failed")
+    return "processing-failed";
+  if (snapshot.context.lastResult?.status === "failed") return "failed";
+  if (snapshot.context.lastResult?.status === "unconfirmed")
+    return "unconfirmed";
   return "pending";
 }
 

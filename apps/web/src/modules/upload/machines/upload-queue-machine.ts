@@ -38,7 +38,8 @@ export type UploadQueueEvent =
     }
   | { type: "upload.removed"; actorRef: PendingUploadActorRef }
   | { type: "uploaded.cleared" }
-  | { type: "all.uploadRequested" };
+  | { type: "all.uploadRequested" }
+  | { type: "failed.retryRequested" };
 
 export const uploadQueueMachine = setup({
   types: {} as {
@@ -122,13 +123,21 @@ export const uploadQueueMachine = setup({
         }
       }
     }),
+    retryFailedUploads: ({ context }) => {
+      for (const upload of context.uploads) {
+        const status = selectPendingUploadStatus(upload.getSnapshot());
+        if (status === "failed" || status === "processing-failed") {
+          upload.send({ type: "retry.requested" });
+        }
+      }
+    },
     requestAllUploads: ({ context, event }) => {
       if (event.type !== "all.uploadRequested") {
         return;
       }
       for (const upload of context.uploads) {
         const status = selectPendingUploadStatus(upload.getSnapshot());
-        if (status !== "uploading" && status !== "uploaded") {
+        if (status === "pending" || status === "processed") {
           upload.send({
             type: "upload.requested",
           });
@@ -143,6 +152,8 @@ export const uploadQueueMachine = setup({
     effects: input.effects,
   }),
   on: {
+    // Child snapshots must reach the aggregate subscription as well as previews.
+    "xstate.snapshot.*": { actions: assign({}) },
     "files.added": {
       actions: "addFiles",
     },
@@ -152,6 +163,7 @@ export const uploadQueueMachine = setup({
     "uploaded.cleared": {
       actions: ["stopUploadedChildren", "clearUploaded"],
     },
+    "failed.retryRequested": { actions: "retryFailedUploads" },
     "all.uploadRequested": {
       actions: "requestAllUploads",
     },
@@ -172,4 +184,28 @@ export function selectHasUploaded(
   return snapshot.context.uploads.some(
     (upload) => selectPendingUploadStatus(upload.getSnapshot()) === "uploaded",
   );
+}
+
+export function selectUploadCounts(
+  snapshot: ReturnType<UploadQueueActorRef["getSnapshot"]>,
+) {
+  const counts = {
+    pending: 0,
+    failed: 0,
+    uploaded: 0,
+    uploading: 0,
+    processing: 0,
+    unconfirmed: 0,
+  };
+  for (const upload of snapshot.context.uploads) {
+    const status = selectPendingUploadStatus(upload.getSnapshot());
+    counts[
+      status === "processed"
+        ? "pending"
+        : status === "processing-failed"
+          ? "failed"
+          : status
+    ]++;
+  }
+  return counts;
 }

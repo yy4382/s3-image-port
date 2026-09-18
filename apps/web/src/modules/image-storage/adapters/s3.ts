@@ -10,6 +10,7 @@ import {
   storageAccessMethodSchema,
 } from "../schema";
 import type { ImageStorage } from "../storage";
+import { storageFailureDetails } from "../failure-details";
 
 export type CreateImageStorageFromSettings = (
   settings: S3Options,
@@ -43,9 +44,16 @@ export function createS3ImageStorage(settings: S3Options): ImageStorage {
           },
         };
       } catch (error) {
+        const failure = toStorageFailure(error, input.key);
         return {
           ok: false,
-          error: toStorageFailure(error, input.key),
+          error: {
+            ...failure,
+            ...(failure.reason === "unknown"
+              ? { message: "Storage request failed" }
+              : {}),
+            details: storageFailureDetails(error),
+          },
         };
       }
     },

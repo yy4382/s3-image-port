@@ -110,7 +110,10 @@ describe("S3 image storage adapter", () => {
       }),
     ).resolves.toEqual({
       ok: false,
-      error: { reason: "access-denied" },
+      error: {
+        reason: "access-denied",
+        details: { code: "AccessDenied", httpStatus: 403 },
+      },
     });
   });
 

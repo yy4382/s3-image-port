@@ -374,9 +374,9 @@
       "title": "拖放文件到这里"
     },
     "fileList": {
-      "title": "待上传文件",
+      "title": "上传队列",
       "clearUploaded": "清除已上传条目",
-      "uploadAll": "全部上传",
+      "uploadAll": "上传待上传项（{count}）",
       "process": "开始压缩",
       "edit": "编辑",
       "remove": "移除",
@@ -387,7 +387,39 @@
       "recompress": "重新压缩",
       "compressing": "压缩中...",
       "keyWillBe": "名称将会是：",
-      "upload": "上传"
+      "upload": "上传",
+      "retry": "重试",
+      "retryFailed": "重试失败项（{count}）",
+      "details": "查看详情",
+      "s3Settings": "S3 设置",
+      "processingFailed": "处理失败",
+      "uploadFailed": "上传失败",
+      "unconfirmed": "未收到上传结果",
+      "uploaded": "已上传",
+      "uploadedPrevious": "已上传到原配置",
+      "uploading": "上传中",
+      "destination": "上传目标",
+      "errorCode": "错误码",
+      "noErrorDetails": "没有更多可用的错误信息。",
+      "unconfirmedDetails": "请求中断，文件可能已经上传。重试将使用相同的 key。",
+      "catalogPending": "文件已上传，但图库尚未更新。仍可复制链接。",
+      "reasons": {
+        "processing": "无法处理这张图片。可以重试，或编辑处理选项。",
+        "unconfirmed": "存储服务未确认上传结果。重试前请查看详情。",
+        "notConfigured": "请先完成 S3 设置，再上传。",
+        "targetMismatch": "图库属于另一个 S3 目标。请先按当前配置刷新图库，再重试。",
+        "noSuchBucket": "找不到存储桶。请检查 S3 设置中的存储桶名称。",
+        "credentials": "存储服务拒绝了凭证或签名。请检查 S3 设置。",
+        "accessDenied": "存储桶拒绝了上传请求。请检查写入权限和 S3 设置。",
+        "rejected": "存储服务拒绝了上传请求。请查看详情并检查 S3 设置。"
+      },
+      "counts": {
+        "uploaded": "已上传 {count} 项",
+        "failed": "失败 {count} 项",
+        "unconfirmed": "未收到结果 {count} 项",
+        "processing": "处理中 {count} 项",
+        "uploading": "上传中 {count} 项"
+      }
     },
     "alerts": {
       "s3NotConfigured": "S3 设置未配置"

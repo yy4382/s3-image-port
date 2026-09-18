@@ -1,3 +1,4 @@
+import { uploadReceipt } from "@/test/helpers/upload";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { createActor, waitFor } from "xstate";
 
@@ -25,6 +26,7 @@ beforeEach(() => {
   mocks.storePendingUpload.mockImplementation(async ({ key }) => ({
     status: "stored",
     image: { key },
+    receipt: uploadReceipt,
   }));
   mocks.processFile.mockImplementation((file: File) => {
     return Promise.resolve(
@@ -195,7 +197,11 @@ describe("uploadQueueMachine", () => {
     const processed = createDeferred<File>();
     const storePendingUpload = vi.fn<
       PendingUploadEffects["storePendingUpload"]
-    >(async ({ key }) => ({ status: "stored", image: { key } }));
+    >(async ({ key }) => ({
+      status: "stored",
+      image: { key },
+      receipt: uploadReceipt,
+    }));
     const actor = createUploadQueueActor({
       processFile: () => processed.promise,
       storePendingUpload,
@@ -235,6 +241,7 @@ describe("uploadQueueMachine", () => {
       const storing = createDeferred<{
         status: "stored";
         image: { key: string };
+        receipt: typeof uploadReceipt;
       }>();
       const actor = createUploadQueueActor({
         processFile: () => processing.promise,
@@ -271,13 +278,14 @@ describe("uploadQueueMachine", () => {
         storing.resolve({
           status: "stored",
           image: { key: before.key.toString() },
+          receipt: uploadReceipt,
         });
         await waitFor(upload, (snapshot) => snapshot.matches("uploaded"));
       }
     },
   );
 
-  test("returns to pending when upload fails", async () => {
+  test("retains explicit failure when upload fails", async () => {
     const actor = createUploadQueueActor({
       storePendingUpload: async () => ({
         status: "failed",
@@ -295,13 +303,14 @@ describe("uploadQueueMachine", () => {
     upload.send({ type: "upload.requested" });
 
     await waitFor(upload, (snapshot) => snapshot.matches("pending"));
-    expect(selectPendingUploadStatus(upload.getSnapshot())).toBe("pending");
+    expect(selectPendingUploadStatus(upload.getSnapshot())).toBe("failed");
   });
 
-  test("does not mark an upload complete when catalog acceptance is superseded", async () => {
+  test("retains success at the previous destination when catalog acceptance is superseded", async () => {
     const storedImage = createDeferred<{
-      status: "failed";
-      error: { reason: "superseded" };
+      status: "stored-previous-target";
+      image: { key: string };
+      receipt: typeof uploadReceipt;
     }>();
     const storePendingUpload = vi.fn(() => storedImage.promise);
     const actor = createUploadQueueActor({
@@ -318,20 +327,22 @@ describe("uploadQueueMachine", () => {
     upload.send({ type: "upload.requested" });
     await waitFor(upload, (snapshot) => snapshot.matches("uploading"));
     storedImage.resolve({
-      status: "failed",
-      error: { reason: "superseded" },
+      status: "stored-previous-target",
+      image: { key: "obsolete.jpg" },
+      receipt: uploadReceipt,
     });
     await waitFor(upload, (snapshot) => !snapshot.matches("uploading"));
 
     expect(storePendingUpload).toHaveBeenCalledTimes(1);
-    expect(selectPendingUploadStatus(upload.getSnapshot())).toBe("pending");
-    expect(selectHasUploaded(actor.getSnapshot())).toBe(false);
+    expect(selectPendingUploadStatus(upload.getSnapshot())).toBe("uploaded");
+    expect(selectHasUploaded(actor.getSnapshot())).toBe(true);
   });
 
   test("keeps a current remote success uploaded while catalog reconciliation is pending", async () => {
     const storePendingUpload = vi.fn(async () => ({
       status: "stored-unreconciled" as const,
       image: { key: "stored.jpg" },
+      receipt: uploadReceipt,
     }));
     const actor = createUploadQueueActor({ storePendingUpload });
     actor.send({
@@ -349,6 +360,7 @@ describe("uploadQueueMachine", () => {
     expect(selectPendingUpload(upload.getSnapshot()).lastResult).toEqual({
       status: "stored-unreconciled",
       image: { key: "stored.jpg" },
+      receipt: uploadReceipt,
     });
   });
 

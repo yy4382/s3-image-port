@@ -1,10 +1,17 @@
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { startTransition, useEffect, useMemo, useState } from "react";
+import { useAtomValue } from "jotai";
 import { selectAtom } from "jotai/utils";
 import { useSelector } from "@xstate/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useTranslations } from "use-intl";
+import { useTranslations, useLocale } from "use-intl";
 import { RefreshCw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import {
+  isStoredUpload,
+  type PendingUploadResult,
+  type StoredUploadResult,
+} from "../types";
+import { storageFailureDetailsSchema } from "@/modules/image-storage/failure-details";
 import McCheck from "~icons/mingcute/check-line";
 import McTrash from "~icons/mingcute/delete-2-line";
 import McPencil from "~icons/mingcute/edit-2-line";
@@ -29,9 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AutoResizeHeight } from "@/components/misc/auto-resize-height";
 import { settings } from "@/stores/atoms/settings";
-import { imageCatalog } from "@/modules/image-catalog";
 import { useCopy } from "@/lib/hooks/use-copy";
-import { toast } from "sonner";
 import ImageCompressOptions from "@/modules/settings/upload/ImageCompressOptions";
 import { KeyTemplateConsumerInput } from "@/modules/settings/upload/key-template/consumer-input";
 
@@ -61,6 +66,10 @@ export function FilePreview({
   const storageConfigured = useAtomValue(storageConfiguredAtom);
   const t = useTranslations("upload.fileList");
 
+  const retryable =
+    file.status === "failed" ||
+    file.status === "processing-failed" ||
+    file.status === "unconfirmed";
   const editingDisabled =
     file.status === "processing" || file.status === "uploading";
 
@@ -80,28 +89,49 @@ export function FilePreview({
         </div>
 
         <div className="flex items-center space-x-1 self-end-safe sm:self-center">
-          {file.status === "uploaded" && <CopyButton file={file} />}
+          {isStoredUpload(file.lastResult) && (
+            <CopyButton result={file.lastResult} />
+          )}
           {file.status === "uploading" ? (
-            <Button variant="outline" size="icon" disabled>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled
+              aria-label={t("uploading")}
+            >
               <McLoading className="animate-spin" />
             </Button>
           ) : file.status === "uploaded" ? (
-            <Button variant="outline" size="icon" disabled>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled
+              aria-label={t("uploaded")}
+            >
               <McCheck className="text-green-500" />
             </Button>
           ) : (
             <Button
               variant="outline"
-              size="icon"
+              size={retryable ? "sm" : "icon"}
               onClick={() =>
                 uploadActor.send({
-                  type: "upload.requested",
+                  type: retryable ? "retry.requested" : "upload.requested",
                 })
               }
-              disabled={!storageConfigured}
+              disabled={
+                editingDisabled ||
+                (!storageConfigured && file.status !== "processing-failed")
+              }
             >
-              <span className="sr-only">{t("upload")}</span>
-              <McUpload2 />
+              {retryable ? (
+                t("retry")
+              ) : (
+                <>
+                  <span className="sr-only">{t("upload")}</span>
+                  <McUpload2 />
+                </>
+              )}
             </Button>
           )}
 
@@ -128,6 +158,7 @@ export function FilePreview({
           </Button>
         </div>
       </div>
+      {file.lastResult && <UploadResult result={file.lastResult} />}
       <AutoResizeHeight duration={0.1}>
         <AnimatePresence initial={false} mode="popLayout">
           {file.editing && !editingDisabled && (
@@ -183,7 +214,7 @@ function FilePreviewEdit({
         </p>
       </div>
       <Separator />
-      {file.supportProcess && (
+      {file.supportProcess && file.status !== "uploaded" && (
         <ImageCompressOptions
           value={file.compressOption}
           onChange={updateProcessOption}
@@ -292,58 +323,146 @@ function FilePreviewProcess({
   );
 }
 
-function CopyButton({
-  file,
-}: {
-  file: ReturnType<typeof selectPendingUpload>;
-}) {
+function UploadResult({ result }: { result: PendingUploadResult }) {
   const t = useTranslations("upload.fileList");
-  const tCopy = useTranslations("common.copy");
-  const runCatalog = useSetAtom(imageCatalog.run);
-  const { copy } = useCopy();
-  const key = file.key.toString();
-  const mounted = useRef(false);
+  const locale = useLocale();
+  const stored = isStoredUpload(result);
+  const error = "error" in result ? result.error : undefined;
+  const details = storageFailureDetailsSchema.safeParse(
+    error && "details" in error ? error.details : {},
+  );
+  const code = details.data?.code;
+  const status = {
+    "processing-failed": "processingFailed",
+    unconfirmed: "unconfirmed",
+    "stored-previous-target": "uploadedPrevious",
+    stored: "uploaded",
+    "stored-unreconciled": "uploaded",
+    failed: "uploadFailed",
+  } as const;
+  const reason = uploadFailureReason(result, code);
+  const showSettings =
+    !stored &&
+    result.status !== "processing-failed" &&
+    result.status !== "unconfirmed";
+  return (
+    <div className="mt-2 space-y-1 text-sm min-w-0 break-words">
+      <div role="status">
+        <p className="font-medium">{t(status[result.status])}</p>
+        {!stored && (
+          <p className="text-muted-foreground">{t(`reasons.${reason}`)}</p>
+        )}
+      </div>
+      {result.status !== "processing-failed" && (
+        <details>
+          <summary className="cursor-pointer w-fit underline underline-offset-4 py-1">
+            {t("details")}
+          </summary>
+          <div className="text-muted-foreground space-y-1 py-1 [overflow-wrap:anywhere]">
+            {result.status === "unconfirmed" && (
+              <p>{t("unconfirmedDetails")}</p>
+            )}
+            {result.status === "stored-unreconciled" && (
+              <p>{t("catalogPending")}</p>
+            )}
+            {stored ? (
+              <>
+                <p>
+                  {t("destination")}: {safeEndpoint(result.receipt.endpoint)} ·{" "}
+                  {result.receipt.bucket} · {result.receipt.region}
+                </p>
+                <p>key: {result.image.key}</p>
+              </>
+            ) : (
+              <>
+                {code && (
+                  <p>
+                    {t("errorCode")}: {code}
+                  </p>
+                )}
+                {details.data?.httpStatus && (
+                  <p>HTTP {details.data.httpStatus}</p>
+                )}
+                {!code && !details.data?.httpStatus && (
+                  <p>{t("noErrorDetails")}</p>
+                )}
+              </>
+            )}
+          </div>
+        </details>
+      )}
+      {showSettings && (
+        <Link
+          to="/$locale/settings/s3"
+          params={{ locale }}
+          className="inline-block underline underline-offset-4 py-1"
+        >
+          {t("s3Settings")}
+        </Link>
+      )}
+    </div>
+  );
+}
 
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const copyStoredImage = async (
-    purpose: "url" | "markdown",
-    description: string,
-  ) => {
-    const outcome = await runCatalog({ type: "access", key, purpose });
-    if (!mounted.current) return;
+function uploadFailureReason(
+  result: PendingUploadResult,
+  code: string | undefined,
+) {
+  if (result.status === "processing-failed") return "processing";
+  if (result.status === "unconfirmed") return "unconfirmed";
+  if ("error" in result) {
+    if (result.error.reason === "not-configured") return "notConfigured";
+    if (result.error.reason === "target-mismatch") return "targetMismatch";
+    if (code === "NoSuchBucket") return "noSuchBucket";
     if (
-      outcome.status === "accessed" &&
-      outcome.purpose === purpose &&
-      typeof outcome.value === "string"
-    ) {
-      copy(outcome.value, description);
-      return;
-    }
-    toast.error(tCopy("copyFailed", { desc: description }));
-  };
+      code &&
+      [
+        "InvalidAccessKeyId",
+        "SignatureDoesNotMatch",
+        "ExpiredToken",
+        "InvalidToken",
+      ].includes(code)
+    )
+      return "credentials";
+    if (result.error.reason === "access-denied") return "accessDenied";
+  }
+  return "rejected";
+}
 
+function safeEndpoint(endpoint: string) {
+  try {
+    const url = new URL(endpoint);
+    return url.origin + url.pathname;
+  } catch {
+    return "";
+  }
+}
+
+function CopyButton({ result }: { result: StoredUploadResult }) {
+  const t = useTranslations("upload.fileList");
+  const { copy } = useCopy();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="outline" aria-label="Open menu" size="icon">
-            <span className="sr-only">{t("copy")}</span>
+          <Button variant="outline" aria-label={t("copy")} size="icon">
             <McCopy />
           </Button>
         }
       />
       <DropdownMenuContent className="w-40" align="end">
-        <DropdownMenuItem onClick={() => copyStoredImage("url", t("copyUrl"))}>
+        <DropdownMenuItem
+          onClick={() => copy(result.receipt.url, t("copyUrl"))}
+        >
           {t("copyUrl")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => copyStoredImage("markdown", t("copyMarkdown"))}
+          onClick={() =>
+            copy(
+              `![${result.image.key}](${result.receipt.url})`,
+              t("copyMarkdown"),
+            )
+          }
         >
           {t("copyMarkdown")}
         </DropdownMenuItem>

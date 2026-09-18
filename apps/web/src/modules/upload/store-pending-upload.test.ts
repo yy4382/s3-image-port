@@ -1,3 +1,4 @@
+import { profileGenerationAtom } from "@/modules/settings/profile-generation";
 import { createStore } from "jotai";
 import { describe, expect, it, vi } from "vitest";
 
@@ -58,9 +59,15 @@ describe("store pending upload", () => {
     });
 
     put.resolve({ ok: true, value: uploaded });
-    await expect(result).resolves.toEqual({
-      status: "failed",
-      error: { reason: "superseded" },
+    await expect(result).resolves.toMatchObject({
+      status: "stored-previous-target",
+      image: uploaded,
+      receipt: {
+        endpoint: firstTarget.endpoint,
+        bucket: firstTarget.bucket,
+        region: firstTarget.region,
+        url: "https://cdn.example.com/gallery/new.webp",
+      },
     });
     expect(store.get(catalog.state).projection.images).not.toContainEqual(
       uploaded,
@@ -102,7 +109,7 @@ describe("store pending upload", () => {
         body: file,
         key: uploaded.key,
       }),
-    ).resolves.toEqual({ status: "stored", image: uploaded });
+    ).resolves.toMatchObject({ status: "stored", image: uploaded });
     expect(uploadStorage.calls.createStorage).toEqual([currentTarget]);
     expect(uploadStorage.calls.putStoredImage).toHaveLength(1);
     expect(
@@ -146,7 +153,7 @@ describe("store pending upload", () => {
         body: file,
         key: uploaded.key,
       }),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       status: "failed",
       error: { reason: "not-configured" },
     });
@@ -190,7 +197,7 @@ describe("store pending upload", () => {
         body: file,
         key: "gallery/new.webp",
       }),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       status: "failed",
       error: { reason: "target-mismatch" },
     });
@@ -256,13 +263,13 @@ describe("store pending upload", () => {
         listing.resolve({ ok: true, value: [alpha] });
         await refresh;
         put.resolve({ ok: true, value: uploaded });
-        await expect(result).resolves.toEqual({
+        await expect(result).resolves.toMatchObject({
           status: "stored",
           image: uploaded,
         });
       } else {
         put.resolve({ ok: true, value: uploaded });
-        await expect(result).resolves.toEqual({
+        await expect(result).resolves.toMatchObject({
           status: "stored",
           image: uploaded,
         });
@@ -343,7 +350,7 @@ describe("store pending upload", () => {
       intent: "foreground",
       reason: "manual",
     });
-    await expect(upload("while-refreshing")).resolves.toEqual({
+    await expect(upload("while-refreshing")).resolves.toMatchObject({
       status: "failed",
       error: { reason: "target-mismatch" },
     });
@@ -355,7 +362,7 @@ describe("store pending upload", () => {
       error: { reason: "unknown", message: "offline" },
     });
     await failedRefresh;
-    await expect(upload("after-failure")).resolves.toEqual({
+    await expect(upload("after-failure")).resolves.toMatchObject({
       status: "failed",
       error: { reason: "target-mismatch" },
     });
@@ -367,7 +374,7 @@ describe("store pending upload", () => {
       intent: "foreground",
       reason: "manual",
     });
-    await expect(upload("before-success")).resolves.toEqual({
+    await expect(upload("before-success")).resolves.toMatchObject({
       status: "failed",
       error: { reason: "target-mismatch" },
     });
@@ -375,7 +382,7 @@ describe("store pending upload", () => {
     secondListing.resolve({ ok: true, value: [alpha] });
     await successfulRefresh;
 
-    await expect(upload("explicit-retry")).resolves.toEqual({
+    await expect(upload("explicit-retry")).resolves.toMatchObject({
       status: "stored",
       image: uploaded,
     });
@@ -430,7 +437,7 @@ describe("store pending upload", () => {
       key: uploaded.key,
     });
 
-    await expect(result).resolves.toEqual({
+    await expect(result).resolves.toMatchObject({
       status: "stored",
       image: uploaded,
     });
@@ -449,3 +456,130 @@ describe("store pending upload", () => {
     unsubscribe();
   });
 });
+
+it.each(["target", "profile"] as const)(
+  "keeps a receipt for the actual destination after changing %s during PUT",
+  async (change) => {
+    const catalog = createImageCatalog();
+    const store = createStore();
+    store.set(settings.storage, { type: "update", value: firstTarget });
+    const put = createDeferred<{ ok: true; value: typeof uploaded }>();
+    const adapter = createCountedImageStorage({
+      overrides: { putStoredImage: () => put.promise },
+    });
+    const upload = createStorePendingUpload({
+      store,
+      catalog,
+      createStorage: adapter.createStorage,
+      onUploadFailed: vi.fn(),
+    });
+    const file = new File(["image"], "new.webp", { type: "image/webp" });
+    const request = upload({
+      uploadId: "switched",
+      file,
+      body: file,
+      key: uploaded.key,
+    });
+    if (change === "target") {
+      store.set(settings.storage, {
+        type: "update",
+        value: {
+          ...firstTarget,
+          bucket: "other",
+          pubUrl: "https://other.example.com",
+        },
+      });
+    } else {
+      store.set(profileGenerationAtom, store.get(profileGenerationAtom) + 1);
+    }
+    put.resolve({ ok: true, value: uploaded });
+    expect(await request).toEqual({
+      status: "stored-previous-target",
+      image: uploaded,
+      receipt: {
+        endpoint: firstTarget.endpoint,
+        bucket: firstTarget.bucket,
+        region: firstTarget.region,
+        url: "https://cdn.example.com/gallery/new.webp",
+      },
+    });
+    expect(store.get(catalog.state).projection.images).not.toContainEqual(
+      uploaded,
+    );
+    expect(adapter.calls.createStorage).toEqual([firstTarget]);
+    expect(adapter.calls.putStoredImage).toHaveLength(1);
+    expect(adapter.calls.probeStoredImage).toHaveLength(0);
+  },
+);
+
+it("keeps confirmed success if catalog integration throws", async () => {
+  const store = createStore();
+  store.set(settings.storage, { type: "update", value: firstTarget });
+  const catalog = createImageCatalog();
+  vi.spyOn(catalog.integrate, "write").mockImplementation(() => {
+    throw new Error("Local storage unavailable");
+  });
+  const adapter = createCountedImageStorage({
+    overrides: { putStoredImage: async () => ({ ok: true, value: uploaded }) },
+  });
+  const onUploadFailed = vi.fn();
+  const upload = createStorePendingUpload({
+    store,
+    catalog,
+    createStorage: adapter.createStorage,
+    onUploadFailed,
+  });
+  const file = new File(["image"], "new.webp");
+  expect(
+    await upload({
+      uploadId: "local-error",
+      file,
+      body: file,
+      key: uploaded.key,
+    }),
+  ).toMatchObject({
+    status: "stored-unreconciled",
+    image: uploaded,
+    receipt: { url: "https://cdn.example.com/gallery/new.webp" },
+  });
+  expect(onUploadFailed).not.toHaveBeenCalled();
+  expect(adapter.calls.putStoredImage).toHaveLength(1);
+  expect(adapter.calls.probeStoredImage).toHaveLength(0);
+});
+
+it.each(["returned", "thrown"] as const)(
+  "keeps %s network errors unconfirmed without issuing HEAD or a second PUT",
+  async (kind) => {
+    const store = createStore();
+    store.set(settings.storage, { type: "update", value: firstTarget });
+    const adapter = createCountedImageStorage({
+      overrides: {
+        putStoredImage: async () => {
+          if (kind === "thrown")
+            throw new TypeError("Failed to fetch: secret-token");
+          return {
+            ok: false,
+            error: { reason: "unknown", message: "Failed to fetch" },
+          };
+        },
+      },
+    });
+    const upload = createStorePendingUpload({
+      store,
+      catalog: createImageCatalog(),
+      createStorage: adapter.createStorage,
+      onUploadFailed: vi.fn(),
+    });
+    const file = new File(["image"], "new.webp");
+    const result = await upload({
+      uploadId: "lost-response",
+      file,
+      body: file,
+      key: uploaded.key,
+    });
+    expect(result.status).toBe("unconfirmed");
+    expect(JSON.stringify(result)).not.toContain("secret-token");
+    expect(adapter.calls.putStoredImage).toHaveLength(1);
+    expect(adapter.calls.probeStoredImage).toHaveLength(0);
+  },
+);

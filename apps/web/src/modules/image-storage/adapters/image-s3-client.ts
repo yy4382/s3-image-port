@@ -210,7 +210,12 @@ function assertSuccessfulResponse(
   httpStatusCode: number | undefined,
 ) {
   if (httpStatusCode !== undefined && httpStatusCode >= 300) {
-    throw new Error(`${operation} operation returned HTTP ${httpStatusCode}`);
+    throw Object.assign(
+      new Error(`${operation} operation returned HTTP ${httpStatusCode}`),
+      {
+        $metadata: { httpStatusCode },
+      },
+    );
   }
 }
 
