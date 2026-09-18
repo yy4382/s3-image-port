@@ -343,22 +343,19 @@ describe("settings interface", () => {
 
     await expect(
       store.set(settings.storage, { type: "test-access" }),
-    ).resolves.toEqual({
-      status: "success",
-      allowedMethods: ["GET", "HEAD", "PUT", "POST", "DELETE"],
-    });
+    ).resolves.toMatchObject({ status: "success", value: {} });
     expect(imageStorage.calls.createStorage).toEqual([
       expect.objectContaining({ bucket: "current-images" }),
     ]);
     expect(imageStorage.calls.checkAccess).toEqual([
-      { origin: "https://app.example.com" },
+      { origin: "https://app.example.com", signal: expect.any(AbortSignal) },
     ]);
   });
 
   it("rejects stale and disposed access completion from visible state", async () => {
     const deferred = createDeferred<{
       ok: true;
-      value: { allowedMethods: ["GET"] };
+      value: { httpStatus: 200 };
     }>();
     const imageStorage = createCountedImageStorage({
       overrides: { checkAccess: () => deferred.promise },
@@ -385,10 +382,10 @@ describe("settings interface", () => {
     expect(store.get(settings.storage).access).toEqual({ status: "idle" });
     unsubscribe();
 
-    deferred.resolve({ ok: true, value: { allowedMethods: ["GET"] } });
-    await expect(result).resolves.toEqual({
+    deferred.resolve({ ok: true, value: { httpStatus: 200 } });
+    await expect(result).resolves.toMatchObject({
       status: "success",
-      allowedMethods: ["GET"],
+      value: { httpStatus: 200 },
     });
     expect(store.get(settings.storage).access).toEqual({ status: "idle" });
     await expect(
@@ -398,24 +395,13 @@ describe("settings interface", () => {
     expect(imageStorage.calls.checkAccess).toHaveLength(1);
   });
 
-  it("preserves CORS detail and structured access failures", async () => {
-    const outcomes = [
-      {
-        ok: false as const,
-        error: {
-          reason: "cors-incomplete" as const,
-          allowedMethods: ["GET" as const, "HEAD" as const],
-          missingMethods: ["PUT" as const, "POST" as const, "DELETE" as const],
-        },
-      },
-      {
-        ok: false as const,
-        error: { reason: "access-denied" as const },
-      },
-    ];
+  it("keeps list success when the separate CORS request is denied", async () => {
     const imageStorage = createCountedImageStorage({
       overrides: {
-        checkAccess: async () => outcomes.shift()!,
+        checkCors: async () => ({
+          ok: false,
+          error: { reason: "server", code: "AccessDenied", httpStatus: 403 },
+        }),
       },
     });
     const settings = createSettings({
@@ -427,26 +413,20 @@ describe("settings interface", () => {
       type: "update",
       value: validStorageSettings(),
     });
-
-    await expect(
-      store.set(settings.storage, { type: "test-access" }),
-    ).resolves.toEqual({
-      status: "cors-incomplete",
-      allowedMethods: ["GET", "HEAD"],
-      missingMethods: ["PUT", "POST", "DELETE"],
-    });
-    await expect(
-      store.set(settings.storage, { type: "test-access" }),
-    ).resolves.toEqual({
+    await store.set(settings.storage, { type: "test-access" });
+    const access = store.get(settings.storage).access;
+    expect(imageStorage.calls.checkCors).toHaveLength(0);
+    await store.set(settings.storage, { type: "check-cors" });
+    expect(store.get(settings.storage).access).toBe(access);
+    expect(store.get(settings.storage).cors).toMatchObject({
       status: "failed",
-      error: { reason: "access-denied" },
+      context: { operation: "GetBucketCors" },
+      error: { code: "AccessDenied" },
     });
-    expect(store.get(settings.storage).access).toEqual({
-      status: "failed",
-      error: { reason: "access-denied" },
-    });
-    expect(imageStorage.calls.createStorage).toHaveLength(2);
-    expect(imageStorage.calls.checkAccess).toHaveLength(2);
+    expect(imageStorage.calls.checkAccess).toHaveLength(1);
+    expect(imageStorage.calls.checkCors).toHaveLength(1);
+    expect(imageStorage.calls.listStoredImages).toBe(0);
+    expect(imageStorage.calls.putStoredImage).toEqual([]);
   });
 
   it("classifies only genuine active settings-profile replacement", () => {

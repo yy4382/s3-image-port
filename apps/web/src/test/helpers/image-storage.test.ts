@@ -56,6 +56,7 @@ describe("counted image storage", () => {
       ],
       downloadStoredImage: ["i/uploaded.webp"],
       probeStoredImage: ["i/uploaded.webp"],
+      checkCors: [],
       checkAccess: [{ origin: "https://app.example.com" }],
     });
 

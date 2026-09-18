@@ -29,6 +29,7 @@ vi.mock(import("@/modules/image-storage"), async (importOriginal) => ({
       downloadStoredImage: vi.fn(),
       probeStoredImage: vi.fn(),
       checkAccess: vi.fn(),
+      checkCors: vi.fn(),
     };
   },
 }));

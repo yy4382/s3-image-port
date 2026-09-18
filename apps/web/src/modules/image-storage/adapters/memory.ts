@@ -110,29 +110,30 @@ export function createMemoryImageStorageAdapter(
       };
     },
     async checkAccess() {
-      if (options.accessDenied) {
-        return { ok: false, error: { reason: "access-denied" } };
-      }
-
-      const allowedMethods = [
-        ...(options.allowedMethods ?? requiredStorageAccessMethods),
-      ];
-      const missingMethods = requiredStorageAccessMethods.filter(
-        (method) => !allowedMethods.includes(method),
-      );
-
-      if (missingMethods.length > 0) {
+      return options.accessDenied
+        ? {
+            ok: false,
+            error: { reason: "server", code: "AccessDenied", httpStatus: 403 },
+          }
+        : { ok: true, value: {} };
+    },
+    async checkCors() {
+      if (options.accessDenied)
         return {
           ok: false,
-          error: {
-            reason: "cors-incomplete",
-            allowedMethods,
-            missingMethods,
-          },
+          error: { reason: "server", code: "AccessDenied", httpStatus: 403 },
         };
-      }
-
-      return { ok: true, value: { allowedMethods } };
+      const allowedMethods =
+        options.allowedMethods ?? requiredStorageAccessMethods;
+      return {
+        ok: true,
+        value: {
+          originMatched: true,
+          missingMethods: requiredStorageAccessMethods.filter(
+            (method) => !allowedMethods.includes(method),
+          ),
+        },
+      };
     },
   };
 }

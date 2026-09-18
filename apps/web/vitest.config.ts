@@ -25,6 +25,7 @@ export default defineConfig({
     react(),
   ],
   test: {
+    globalSetup: ["./test/fixtures/s3-diagnostics-server.ts"],
     setupFiles: ["./test/setup/cleanup.ts"],
     coverage: {
       include: ["src/**/*"],

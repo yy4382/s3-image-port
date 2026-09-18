@@ -62,31 +62,72 @@
       "includePathDesc": "可选的路径前缀，用于过滤对象（例如 \"i/\" 仅列出以 \"i/\" 开头的对象）。留空以列出所有对象。"
     },
     "s3Validation": {
-      "status": {
-        "valid": "有效",
-        "checkConfig": "检查配置",
-        "corsNeeded": "需要 CORS",
-        "testing": "测试中"
+      "testButton": "测试",
+      "retry": "重试",
+      "testing": "测试中…",
+      "success": "列表读取成功",
+      "failed": "测试失败",
+      "details": "查看详情",
+      "detailsTitle": "S3 测试详情",
+      "close": "关闭",
+      "scope": "本次只测试了列表读取，未测试上传、删除和公共 URL。",
+      "listRequest": "读取列表",
+      "corsRequest": "读取 CORS 配置",
+      "emptyPrefix": "（空）",
+      "fields": {
+        "request": "本次请求",
+        "code": "服务端错误码",
+        "httpStatus": "HTTP 状态",
+        "origin": "站点 Origin",
+        "endpoint": "端点",
+        "bucket": "存储桶",
+        "prefix": "列表前缀"
       },
-      "dialog": {
-        "configurationIssue": "配置问题",
-        "corsSetupRequired": "需要设置 CORS",
-        "details": "详细信息"
+      "reasons": {
+        "accessDenied": "读取列表被拒绝。",
+        "invalidKey": "Access Key 无效。",
+        "noBucket": "存储桶不存在。",
+        "signature": "请求签名不匹配。",
+        "network": "无法连接到存储桶。",
+        "timeout": "请求超时，请重试。",
+        "invalid-response": "无法读取存储服务的响应。",
+        "unknown": "未能完成请求。",
+        "server": "存储服务拒绝了请求。",
+        "corsDenied": "当前凭证无法读取 CORS 配置。",
+        "noCors": "存储服务报告未配置 CORS。",
+        "unsupported": "存储服务不支持此请求。"
       },
-      "messages": {
-        "connectionFailed": "无法连接到您的 S3 存储桶。请检查：",
-        "settingsCorrect": "您的 S3 设置是<strong>正确的</strong>并且可以使用！",
-        "corsPermissionsNeeded": "您只需要为这些方法添加 CORS 权限：",
-        "statusLabel": "状态："
+      "hints": {
+        "accessDenied": "检查当前存储桶和前缀的列表读取权限。此结果不代表无法上传。",
+        "invalidKey": "检查当前存储服务的 Access Key。",
+        "noBucket": "检查存储桶名称和端点。",
+        "signature": "检查凭证、区域和端点。",
+        "network": "浏览器未提供具体原因。请检查端点和 CORS 设置；网络、DNS、TLS、代理或浏览器拦截也可能导致此问题。",
+        "timeout": "请求已在 10 秒后中止。检查连接后重试。",
+        "invalid-response": "检查端点是否为 S3 API 地址。服务可能返回了 HTML 或无效 XML。",
+        "unknown": "检查端点后重试。若仍失败，可根据下方请求详情排查。",
+        "server": "根据下方服务端错误码和 HTTP 状态查阅存储服务文档。",
+        "corsDenied": "此辅助检查需要单独的权限。检查失败不改变列表结果，也不妨碍继续使用应用。",
+        "noCors": "在存储服务中检查 CORS 设置。代理可能为实际请求提供不同的规则。",
+        "unsupported": "在存储服务中检查 CORS。此辅助检查不改变列表结果。"
       },
-      "checklist": {
-        "allFieldsFilled": "所有必填字段已填写",
-        "endpointCorrect": "端点 URL 正确",
-        "credentialsValid": "凭证具有适当权限",
-        "bucketValid": "存储桶名称和区域有效",
-        "corsConfigured": "为您的源配置了 CORS"
-      },
-      "testButton": "测试"
+      "browserHelp": "打开浏览器开发者工具，在 Console / Network 中查看本次请求，再点击测试。浏览器可能显示应用无法读取的详情。",
+      "corsTitle": "CORS",
+      "checkCors": "检查 CORS",
+      "checkingCors": "检查中…",
+      "corsRead": "已读取 CORS 配置",
+      "corsFailed": "无法读取 CORS 配置",
+      "corsScope": "按需读取存储服务返回的规则，此检查不改变列表结果。",
+      "originMissing": "返回的规则未包含当前 Origin：{origin}",
+      "methodsMissing": "匹配当前 Origin 的规则缺少：{methods}",
+      "noMissingRules": "返回的规则中未发现 Origin 或方法缺项。",
+      "rulesScope": "规则仅供排查参考，尚未完整检查请求头，也未验证 IAM 权限、上传、删除和公共 URL。",
+      "corsHelp": "CORS 设置帮助",
+      "corsExample": "查看 CORS 示例",
+      "exampleScope": "使用当前面板的完整 Origin，包括协议和端口。以下仅为示例，显式请求头列表和 x-amz-* 等通配符也可以是合法配置。应用不会自动修改规则。",
+      "copyDetails": "复制详情",
+      "copied": "已复制详情",
+      "copyFailed": "复制失败，请手动选择并复制详情。"
     },
     "profiles": {
       "title": "配置",

@@ -1,5 +1,6 @@
 import type {
   ImageStorageAccessResult,
+  ImageStorageCorsResult,
   StoredImageDeleteResult,
   StoredImageDownloadResult,
   StoredImageListResult,
@@ -24,6 +25,7 @@ export type RenameStoredImageInput = {
 
 export type CheckStorageAccessInput = {
   origin: string;
+  signal?: AbortSignal;
 };
 
 export type ImageStorage = {
@@ -35,6 +37,7 @@ export type ImageStorage = {
   ): Promise<StoredImageRenameResult>;
   downloadStoredImage(key: string): Promise<StoredImageDownloadResult>;
   probeStoredImage(key: string): Promise<StoredImageMetadataResult>;
+  checkCors(input: CheckStorageAccessInput): Promise<ImageStorageCorsResult>;
   checkAccess(
     input: CheckStorageAccessInput,
   ): Promise<ImageStorageAccessResult>;
