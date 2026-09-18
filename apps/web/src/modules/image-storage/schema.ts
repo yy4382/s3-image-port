@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { storageFailureDetailsSchema } from "./failure-details";
 
 export const storageKeySchema = z.string().min(1);
 
@@ -29,27 +30,29 @@ export const storedImageDownloadSchema = z.object({
   body: z.instanceof(Blob),
 });
 
-export const imageStorageFailureSchema = z.discriminatedUnion("reason", [
-  z.object({ reason: z.literal("not-configured") }),
-  z.object({ reason: z.literal("not-found"), key: storageKeySchema }),
-  z.object({ reason: z.literal("already-exists"), key: storageKeySchema }),
-  z.object({ reason: z.literal("access-denied") }),
-  z.object({
-    reason: z.literal("cors-incomplete"),
-    allowedMethods: z.array(storageAccessMethodSchema),
-    missingMethods: z.array(storageAccessMethodSchema),
-  }),
-  z.object({
-    reason: z.literal("partial-rename"),
-    copiedKey: storageKeySchema,
-    failedDeleteKey: storageKeySchema,
-  }),
-  z.object({
-    reason: z.literal("unknown"),
-    message: z.string(),
-    cause: z.unknown().optional(),
-  }),
-]);
+export const imageStorageFailureSchema = z
+  .discriminatedUnion("reason", [
+    z.object({ reason: z.literal("not-configured") }),
+    z.object({ reason: z.literal("not-found"), key: storageKeySchema }),
+    z.object({ reason: z.literal("already-exists"), key: storageKeySchema }),
+    z.object({ reason: z.literal("access-denied") }),
+    z.object({
+      reason: z.literal("cors-incomplete"),
+      allowedMethods: z.array(storageAccessMethodSchema),
+      missingMethods: z.array(storageAccessMethodSchema),
+    }),
+    z.object({
+      reason: z.literal("partial-rename"),
+      copiedKey: storageKeySchema,
+      failedDeleteKey: storageKeySchema,
+    }),
+    z.object({
+      reason: z.literal("unknown"),
+      message: z.string(),
+      cause: z.unknown().optional(),
+    }),
+  ])
+  .and(z.object({ details: storageFailureDetailsSchema.optional() }));
 
 export const imageStorageFailureResultSchema = z.object({
   ok: z.literal(false),

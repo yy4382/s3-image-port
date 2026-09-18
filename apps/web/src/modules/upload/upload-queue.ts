@@ -1,12 +1,13 @@
 import { atom, type createStore } from "jotai";
+import { selectAtom } from "jotai/utils";
 import { atomWithActorSnapshot } from "jotai-xstate";
 import { createActor } from "xstate";
-import { toast } from "sonner";
 
 import { processFile } from "@/lib/utils/imageCompress";
 
 import {
   selectHasUploaded,
+  selectUploadCounts,
   selectUploadActors,
   uploadQueueMachine,
   type UploadQueueEvent,
@@ -22,18 +23,13 @@ function makeUploadQueueActor(
     input: {
       effects: {
         processFile,
-        onProcessingFailed(file, error) {
-          toast.error(`Processing failed for ${file.name}`);
-          console.error("Processing failed", error);
-        },
+        onProcessingFailed() {},
         ...effects,
         storePendingUpload:
           effects.storePendingUpload ??
           createStorePendingUpload({
             store,
-            onUploadFailed(_file, error) {
-              console.error("Upload failed", error);
-            },
+            onUploadFailed() {},
           }),
       },
     },
@@ -45,15 +41,39 @@ const snapshotAtom = atomWithActorSnapshot(
   (get) => get(actorAtom) ?? undefined,
 );
 
+const queueViewAtom = selectAtom(
+  snapshotAtom,
+  (snapshot) => ({
+    uploads: selectUploadActors(snapshot),
+    hasUploaded: selectHasUploaded(snapshot),
+    counts: selectUploadCounts(snapshot),
+  }),
+  (left, right) =>
+    left.uploads === right.uploads &&
+    Object.keys(left.counts).every(
+      (key) =>
+        left.counts[key as keyof typeof left.counts] ===
+        right.counts[key as keyof typeof right.counts],
+    ),
+);
+
 export const uploadQueue = atom(
   (get) => {
     const actor = get(actorAtom);
-    if (!actor) return { uploads: [], hasUploaded: false };
-    const snapshot = get(snapshotAtom);
-    return {
-      uploads: selectUploadActors(snapshot),
-      hasUploaded: selectHasUploaded(snapshot),
-    };
+    if (!actor)
+      return {
+        uploads: [],
+        hasUploaded: false,
+        counts: {
+          pending: 0,
+          failed: 0,
+          uploaded: 0,
+          uploading: 0,
+          processing: 0,
+          unconfirmed: 0,
+        },
+      };
+    return get(queueViewAtom);
   },
   (get, _set, event: UploadQueueEvent) => {
     get(actorAtom)?.send(event);

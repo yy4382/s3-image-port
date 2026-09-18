@@ -374,9 +374,9 @@
       "title": "Drag & Drop files here"
     },
     "fileList": {
-      "title": "Files to upload",
-      "clearUploaded": "Clear Uploaded Entry",
-      "uploadAll": "Upload All",
+      "title": "Upload queue",
+      "clearUploaded": "Clear uploaded",
+      "uploadAll": "Upload pending ({count})",
       "process": "Start compressing",
       "edit": "Edit",
       "remove": "Remove",
@@ -387,7 +387,39 @@
       "recompress": "Recompress",
       "compressing": "Compressing...",
       "keyWillBe": "Key will be:",
-      "upload": "Upload"
+      "upload": "Upload",
+      "retry": "Retry",
+      "retryFailed": "Retry failed ({count})",
+      "details": "View details",
+      "s3Settings": "S3 settings",
+      "processingFailed": "Processing failed",
+      "uploadFailed": "Upload failed",
+      "unconfirmed": "No upload result received",
+      "uploaded": "Uploaded",
+      "uploadedPrevious": "Uploaded to previous configuration",
+      "uploading": "Uploading",
+      "destination": "Destination",
+      "errorCode": "Error code",
+      "noErrorDetails": "No further error details are available.",
+      "unconfirmedDetails": "The request was interrupted. The file may already have been uploaded. Retrying uses the same key.",
+      "catalogPending": "The file was uploaded, but the gallery has not updated yet. You can still copy its link.",
+      "reasons": {
+        "processing": "The image could not be processed. Retry or edit the processing options.",
+        "unconfirmed": "The storage service did not confirm the result. Check the details before retrying.",
+        "notConfigured": "Complete the S3 settings before uploading.",
+        "targetMismatch": "The gallery belongs to another S3 destination. Refresh the gallery for the current configuration before retrying.",
+        "noSuchBucket": "The storage bucket was not found. Check the bucket name in S3 settings.",
+        "credentials": "The storage service rejected the credentials or signature. Check the S3 settings.",
+        "accessDenied": "The storage bucket denied the upload. Check write permissions and S3 settings.",
+        "rejected": "The storage service rejected the upload request. Check the details and S3 settings."
+      },
+      "counts": {
+        "uploaded": "Uploaded: {count}",
+        "failed": "Failed: {count}",
+        "unconfirmed": "No result: {count}",
+        "processing": "Processing: {count}",
+        "uploading": "Uploading: {count}"
+      }
     },
     "alerts": {
       "s3NotConfigured": "S3 settings are not configured"

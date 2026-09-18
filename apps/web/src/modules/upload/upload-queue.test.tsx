@@ -1,3 +1,4 @@
+import { uploadReceipt } from "@/test/helpers/upload";
 // @vitest-environment jsdom
 
 import { cleanup, render } from "@testing-library/react";
@@ -41,6 +42,7 @@ function makeActor(effects: Partial<PendingUploadEffects> = {}) {
         storePendingUpload: async ({ key }) => ({
           status: "stored",
           image: { key },
+          receipt: uploadReceipt,
         }),
         onProcessingFailed: vi.fn(),
         ...effects,
@@ -189,6 +191,7 @@ describe("root upload queue ownership", () => {
     const stored = createDeferred<{
       status: "stored";
       image: { key: string };
+      receipt: typeof uploadReceipt;
     }>();
     const processFile = vi.fn(() => processed.promise);
     const storePendingUpload = vi.fn(() => stored.promise);
@@ -228,7 +231,11 @@ describe("root upload queue ownership", () => {
     await settle();
     expect(storePendingUpload).toHaveBeenCalledTimes(1);
     view.rerender(<App route />);
-    stored.resolve({ status: "stored", image: { key: "kept.jpg" } });
+    stored.resolve({
+      status: "stored",
+      image: { key: "kept.jpg" },
+      receipt: uploadReceipt,
+    });
     await settle();
 
     expect(store.get(uploadQueue).uploads[0]).toBe(child);

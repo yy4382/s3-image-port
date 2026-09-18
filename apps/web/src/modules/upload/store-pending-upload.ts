@@ -1,4 +1,10 @@
 import type { createStore } from "jotai";
+import { s3Key2Url } from "@/lib/s3/s3-key";
+import {
+  isExplicitStorageRejection,
+  storageFailureDetails,
+} from "@/modules/image-storage/failure-details";
+import type { PendingUploadResult, StoredUploadResult } from "./types";
 
 import {
   createS3ImageStorage,
@@ -29,7 +35,7 @@ export function createStorePendingUpload({
     file: File;
     body: File;
     key: string;
-  }) {
+  }): Promise<PendingUploadResult> {
     const storage = store.get(settings.storage);
     if (storage.validation.status !== "valid") {
       return {
@@ -61,6 +67,7 @@ export function createStorePendingUpload({
       );
     };
 
+    let confirmed: StoredUploadResult;
     try {
       const result = await createStorage(request.settings).putStoredImage({
         key,
@@ -69,51 +76,65 @@ export function createStorePendingUpload({
       });
       if (!result.ok) {
         onUploadFailed(file, result.error);
-        return { status: "failed", error: result.error } as const;
-      }
-      if (!requestIsCurrent()) {
         return {
-          status: "failed",
-          error: { reason: "superseded" },
-        } as const;
+          status: isExplicitStorageRejection(result.error)
+            ? "failed"
+            : "unconfirmed",
+          error: result.error,
+        };
       }
-
-      const fact = {
-        type: "upload-confirmed" as const,
-        uploadId,
+      confirmed = {
+        status: "stored-unreconciled",
         image: result.value,
+        receipt: {
+          endpoint: request.settings.endpoint,
+          bucket: request.settings.bucket,
+          region: request.settings.region,
+          url: s3Key2Url(result.value.key, request.settings),
+        },
+      };
+    } catch (error) {
+      onUploadFailed(file, error);
+      return {
+        status: "unconfirmed",
+        error: {
+          reason: "unknown",
+          message: "Upload response unavailable",
+          details: storageFailureDetails(error),
+        },
+      };
+    }
+
+    // Once PUT succeeds, local catalog work must never turn it into a failure.
+    if (!requestIsCurrent())
+      return { ...confirmed, status: "stored-previous-target" };
+    try {
+      const integration = store.set(catalog.integrate, {
+        type: "upload-confirmed",
+        uploadId,
+        image: confirmed.image,
         generation: request.generation,
         storageRevision: request.storageRevision,
-      };
-      const integration = store.set(catalog.integrate, fact);
+      });
       if (
         integration.status === "accepted" ||
         integration.status === "duplicate"
       ) {
-        return { status: "stored", image: result.value } as const;
+        return { ...confirmed, status: "stored" };
       }
       if (integration.status === "stale") {
-        return {
-          status: "failed",
-          error: { reason: "superseded" },
-        } as const;
+        return { ...confirmed, status: "stored-previous-target" };
       }
-
-      void store.set(catalog.run, {
-        type: "refresh",
-        intent: "background",
-        reason: "reconciliation",
-      });
-      return {
-        status: "stored-unreconciled",
-        image: result.value,
-      } as const;
-    } catch (error) {
-      onUploadFailed(file, error);
-      return {
-        status: "failed",
-        error: { reason: "unknown", message: "Upload failed", cause: error },
-      } as const;
+      void store
+        .set(catalog.run, {
+          type: "refresh",
+          intent: "background",
+          reason: "reconciliation",
+        })
+        .catch(() => {});
+    } catch {
+      // The receipt remains usable even if the local projection cannot update.
     }
+    return confirmed;
   };
 }
